@@ -11,12 +11,11 @@
 button{padding:30px;text-align:center;border:1px solid #b7c4d2;border-radius:20px;background:#ffffffed;color:#142b47;box-shadow:0 12px 30px #142b4710;font-family:inherit;cursor:pointer}
 button:last-child{background:#142b47;color:#fff}button small{display:block;font-size:15px;letter-spacing:2px;opacity:.7}button strong{display:block;font-size:32px;margin:15px 0}button span{display:block;font-size:19px;line-height:1.7}
 button:hover{box-shadow:0 12px 30px #142b4726}button:focus-visible{outline:4px solid #799fc9;outline-offset:5px}
-#entry .ver{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));font-size:13px;font-weight:600;color:#8a96a6;letter-spacing:.5px}
 iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:white} [hidden]{display:none!important}
 @media(max-width:900px){.choices{gap:12px}button{padding:20px}button strong{font-size:26px}button span{font-size:17px}}
 @media(max-width:600px){.content{padding:20px}h1{font-size:32px}.intro{font-size:18px}button{padding:20px 10px}button strong{font-size:22px}button small{font-size:12px;letter-spacing:1px}button span{font-size:14px}}
 </style></head><body>
-<main id="entry"><div class="content"><h1>PTP 라인 시뮬레이터</h1><p class="intro">실제 장비를 기반으로 한 장비교육 시뮬레이터</p><div class="choices"><button type="button" data-course="filler"><small>01 · PTP FILLING</small><strong>PTP 충전기</strong><span>PTP 충전·포장 공정 학습</span></button><button type="button" data-course="line"><small>02 · PACKAGING LINE</small><strong>PTP 포장라인</strong><span>카톤 포장부터 팔렛트 적재까지</span></button></div></div><div class="ver" aria-label="버전">v6</div></main>
+<main id="entry"><div class="content"><h1>PTP 라인 시뮬레이터</h1><p class="intro">실제 장비를 기반으로 한 장비교육 시뮬레이터</p><div class="choices"><button type="button" data-course="filler"><small>01 · PTP FILLING</small><strong>PTP 충전기</strong><span>PTP 충전·포장 공정 학습</span></button><button type="button" data-course="line"><small>02 · PACKAGING LINE</small><strong>PTP 포장라인</strong><span>카톤 포장부터 팔렛트 적재까지</span></button></div></div></main>
 <script id="simulators" type="application/json">__SIMULATORS__</script>
 <script>
 const sources=JSON.parse(document.getElementById('simulators').textContent);

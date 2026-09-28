@@ -4082,39 +4082,170 @@ tgt:{yaw:-0.60, pitch:0.27, dist:2000, tx:30, ty:56, tz:0},
 drag:null, faces:[], labels:[], slots:[], hover:null, hoverSlot:null, guard:true, q:1, qms:24, qn:0, qcd:0, _rs:0, qLock:1, _pt:0, edgeMin:70, cut:0, exp:0, expC:0, fps:0, _ft:0, _fn:0
 };
 
+/* ═══ 픽셀 조명 · 톤매핑 · 그림자 맵 (충전기 · 포장라인 공용) ═══════════════
+   · 조명은 프래그먼트 셰이더에서 픽셀마다 계산 (선형 공간 → 하이라이트 숄더 톤매핑 → sRGB 감마)
+   · 주광은 좌상단 : 그림자가 물체 오른쪽 뒤로 떨어져 기본 시점에서 보인다. 정면은 보조광이 받친다
+   · 주광(uL1) 방향 직교 그림자 맵 : RGBA8 깊이 패킹(확장 불필요) + 4×4 PCF
+   · 장면 범위와 광원이 고정이므로 광원 행렬은 한 번만 만든다(그림자 떨림 없음) */
+const PX_HEAD='#ifdef GL_FRAGMENT_PRECISION_HIGH\nprecision highp float;\n#else\nprecision mediump float;\n#endif\n';
+const PX_LIGHT=`
+uniform vec3 uEye,uL1,uL2,uL3,uAO;uniform mat4 uLMat;uniform sampler2D uSM;uniform vec4 uSMI;uniform float uExpo;
+float unpackD(vec4 v){return dot(v,vec4(1.0,1.0/255.0,1.0/65025.0,1.0/16581375.0));}
+float shadowAt(vec3 P,vec3 N){
+ if(uSMI.y<0.5)return 1.0;
+ vec4 q=uLMat*vec4(P+N*uSMI.z,1.0);vec3 s=q.xyz/q.w*0.5+0.5;
+ if(s.x<=0.0||s.x>=1.0||s.y<=0.0||s.y>=1.0||s.z>=1.0)return 1.0;
+ float lit=0.0;
+ for(int i=0;i<4;i++)for(int j=0;j<4;j++)
+  lit+=step(s.z-uSMI.w,unpackD(texture2D(uSM,s.xy+(vec2(float(i),float(j))-1.5)*uSMI.x)));
+ return lit/16.0;}
+vec3 lin(vec3 c){return pow(max(c,0.0),vec3(2.2));}
+vec3 envAt(float t){vec3 h=vec3(0.73,0.737,0.741);return t>=0.0?mix(h,vec3(1.0),t):mix(h,vec3(0.475,0.482,0.486),-t);}
+/* 금속 반사 환경 : 천장 조명(위) ↔ 바닥(아래) 변화가 수평선 부근에서 가파르다 → 면 위쪽은 밝고 아래쪽은 어두운 광택 */
+vec3 envRefl(float t){return mix(vec3(0.40,0.41,0.42),vec3(1.0),smoothstep(-0.42,0.10,t));}
+vec3 pxShade(vec3 alb,float met,vec3 P,vec3 N,float br){
+ vec3 Vv=uEye-P;float vl=length(Vv);vec3 V=Vv/max(vl,1e-4);
+ float sh=shadowAt(P,N);
+ float d=max(dot(N,uL1),0.0)*sh,d2=max(dot(N,uL2),0.0),d3=max(dot(N,uL3),0.0);
+ float nv=max(dot(N,V),0.0);float q=1.0-nv;q*=q;float fr=q*q;
+ float nh=max(dot(N,normalize(uL1+V)),0.0);
+ float sp=pow(nh,met>0.5?48.0:20.0)*(0.30+0.70*met)*sh;
+ float ao=0.66+0.34*clamp((P.y-uAO.x)/uAO.y,0.0,1.0);ao*=1.0-0.13*max(0.0,1.0-abs(P.z)*uAO.z);
+ float diff=(mix(0.12,0.27,N.y*0.5+0.5)+1.18*d+0.17*d2+0.25*d3)*ao;
+ float kEnv=(0.08+0.55*met+0.40*fr*met)*(0.58+0.42*ao);
+ vec3 env=mix(envAt(N.y),envRefl(reflect(-V,N).y),met);
+ vec3 c=lin(alb)*diff*(1.0-kEnv*0.55)+lin(env)*kEnv+sp;
+ float w=(d-0.42)*0.05;c*=vec3(1.0+w,1.0,1.0-w*0.7);
+ c=(c+fr*fr*(0.03+0.10*met))*br*uExpo;
+ float m=max(max(c.r,c.g),c.b);if(m>0.75)c*=(1.0-0.25*exp((0.75-m)*4.0))/m;
+ c=pow(c,vec3(1.0/2.2));
+ float fg=vl>1100.0?min(0.10,(vl-1100.0)*0.00016):0.0;
+ return mix(c,vec3(0.965,0.976,0.996),fg);}
+`;
+const PX_SM_VS='attribute vec3 p;uniform mat4 uLMat;void main(){gl_Position=uLMat*vec4(p,1.0);}';
+const PX_SM_FS=PX_HEAD+'void main(){vec4 e=fract(min(gl_FragCoord.z,0.99999)*vec4(1.0,255.0,65025.0,16581375.0));'+
+ 'gl_FragColor=e-e.yzww*vec4(1.0/255.0,1.0/255.0,1.0/255.0,0.0);}';
+/* 바닥(2D 캔버스)에 그림자만 얹는 투명 받이면 : 그림자 부분만 어둡게, 경계는 서서히 */
+const PX_CATCH_FS=PX_HEAD+PX_LIGHT+'varying vec3 vW;uniform vec4 uTint,uRect;void main(){'+
+ 'vec2 e=min(vW.xz-uRect.xy,uRect.zw-vW.xz);float a=uTint.a*(1.0-shadowAt(vW,vec3(0.0,1.0,0.0)))*clamp(min(e.x,e.y)/160.0,0.0,1.0);'+
+ 'gl_FragColor=vec4(uTint.rgb*a,a);}';
+const PX_EXPO=0.86;
+function pxNorm(v){const l=Math.hypot(v[0],v[1],v[2])||1;return [v[0]/l,v[1]/l,v[2]/l];}
+const PX_L1=pxNorm([-0.50,0.80,0.33]), PX_L2=pxNorm([0.62,0.22,-0.55]), PX_L3=pxNorm([0.30,0.45,0.84]);
+function pxMul(a,b){const o=new Float32Array(16);
+ for(let i=0;i<4;i++)for(let j=0;j<4;j++){let s=0;for(let k=0;k<4;k++)s+=a[k*4+j]*b[i*4+k];o[i*4+j]=s;}return o;}
+function pxLightMatrix(lo,hi,size){
+ const c=[(lo[0]+hi[0])/2,(lo[1]+hi[1])/2,(lo[2]+hi[2])/2];
+ const z=PX_L1, x=pxNorm([z[2],0,-z[0]]), y=[z[1]*x[2]-z[2]*x[1],z[2]*x[0]-z[0]*x[2],z[0]*x[1]-z[1]*x[0]];
+ const V=new Float32Array([x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0,
+  -(x[0]*c[0]+x[1]*c[1]+x[2]*c[2]),-(y[0]*c[0]+y[1]*c[1]+y[2]*c[2]),-(z[0]*c[0]+z[1]*c[1]+z[2]*c[2]),1]);
+ const mn=[1e9,1e9,1e9],mx=[-1e9,-1e9,-1e9];
+ for(let i=0;i<8;i++){const p=[i&1?hi[0]:lo[0],i&2?hi[1]:lo[1],i&4?hi[2]:lo[2]];
+  for(let k=0;k<3;k++){const v=V[k]*p[0]+V[4+k]*p[1]+V[8+k]*p[2]+V[12+k];mn[k]=Math.min(mn[k],v);mx[k]=Math.max(mx[k],v);}}
+ const n=-mx[2]-10,f=-mn[2]+10;
+ const O=new Float32Array([2/(mx[0]-mn[0]),0,0,0, 0,2/(mx[1]-mn[1]),0,0, 0,0,-2/(f-n),0,
+  -(mx[0]+mn[0])/(mx[0]-mn[0]),-(mx[1]+mn[1])/(mx[1]-mn[1]),-(f+n)/(f-n),1]);
+ const texel=Math.max(mx[0]-mn[0],mx[1]-mn[1])/size;
+ return {m:pxMul(O,V),info:[1/size,1,texel*1.5,1.5/(f-n)]};
+}
+function pxProgram(gl,vs,fs,attrs){
+ const sh=(t,s)=>{const o=gl.createShader(t);gl.shaderSource(o,s);gl.compileShader(o);
+  if(!gl.getShaderParameter(o,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(o));return o;};
+ const p=gl.createProgram();gl.attachShader(p,sh(gl.VERTEX_SHADER,vs));gl.attachShader(p,sh(gl.FRAGMENT_SHADER,fs));
+ attrs.forEach((a,i)=>gl.bindAttribLocation(p,i,a));gl.linkProgram(p);
+ if(!gl.getProgramParameter(p,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(p));
+ const u={};return {p,u:n=>n in u?u[n]:(u[n]=gl.getUniformLocation(p,n))};
+}
+function pxShadowTarget(gl,size){
+ const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+ gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,size,size,0,gl.RGBA,gl.UNSIGNED_BYTE,null);
+ for(const [k,v] of [[gl.TEXTURE_MIN_FILTER,gl.NEAREST],[gl.TEXTURE_MAG_FILTER,gl.NEAREST],[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE]])gl.texParameteri(gl.TEXTURE_2D,k,v);
+ const rb=gl.createRenderbuffer();gl.bindRenderbuffer(gl.RENDERBUFFER,rb);gl.renderbufferStorage(gl.RENDERBUFFER,gl.DEPTH_COMPONENT16,size,size);
+ const fb=gl.createFramebuffer();gl.bindFramebuffer(gl.FRAMEBUFFER,fb);
+ gl.framebufferTexture2D(gl.FRAMEBUFFER,gl.COLOR_ATTACHMENT0,gl.TEXTURE_2D,tex,0);
+ gl.framebufferRenderbuffer(gl.FRAMEBUFFER,gl.DEPTH_ATTACHMENT,gl.RENDERBUFFER,rb);
+ const ok=gl.checkFramebufferStatus(gl.FRAMEBUFFER)===gl.FRAMEBUFFER_COMPLETE;
+ gl.bindFramebuffer(gl.FRAMEBUFFER,null);return {tex,fb,size,ok};
+}
+/* 그림자 맵 갱신 : 불투명 삼각형 위치(attrib 0)를 광원 시점에서 깊이만 기록 */
+function pxShadowPass(gl,prog,sm,lm,bind,count){
+ gl.bindFramebuffer(gl.FRAMEBUFFER,sm.fb);gl.viewport(0,0,sm.size,sm.size);
+ gl.clearColor(1,1,1,1);gl.clearDepth(1);gl.depthMask(true);gl.disable(gl.BLEND);
+ gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+ if(count){gl.useProgram(prog.p);gl.uniformMatrix4fv(prog.u('uLMat'),false,lm.m);bind();gl.drawArrays(gl.TRIANGLES,0,count);}
+ gl.bindFramebuffer(gl.FRAMEBUFFER,null);
+}
+function pxLightUniforms(gl,prog,eye,ao,lm,sm){
+ gl.useProgram(prog.p);
+ gl.uniform3fv(prog.u('uEye'),eye);gl.uniform3fv(prog.u('uL1'),PX_L1);gl.uniform3fv(prog.u('uL2'),PX_L2);gl.uniform3fv(prog.u('uL3'),PX_L3);
+ gl.uniform3fv(prog.u('uAO'),ao);gl.uniformMatrix4fv(prog.u('uLMat'),false,lm.m);
+ gl.uniform4fv(prog.u('uSMI'),[lm.info[0],sm.ok?1:0,lm.info[2],lm.info[3]]);gl.uniform1f(prog.u('uExpo'),PX_EXPO);
+ gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,sm.tex);gl.uniform1i(prog.u('uSM'),0);
+}
+/* 둥근 모서리 박스 위상(한 번만 생성) : 6면(안쪽으로 r 만큼 줄임) + 12 모서리 띠 + 8 꼭짓점 삼각형.
+   정점은 축마다 코드 0=lo 1=lo+r 2=hi−r 3=hi 로 정의 → 박스마다 좌표 4개씩만 대입한다.
+   정점 법선 = 코드 0/3 축의 ∓1 성분 정규화 → 픽셀 조명에서 모서리가 둥글게 보인다.
+   한 면 안에서 축마다 코드는 최대 2개뿐이라 양의 축별 스케일로 변환되므로, 정점 순서(바깥 향함)가 유지된다. */
+const PX_RB=(function(){
+ const P=(k,a,i,b,j,c)=>{const p=[0,0,0];p[k]=a;p[i]=b;p[j]=c;return p;}, polys=[];
+ for(let k=0;k<3;k++){const i=(k+1)%3,j=(k+2)%3;
+  for(const c of [0,3])polys.push([P(k,c,i,1,j,1),P(k,c,i,2,j,1),P(k,c,i,2,j,2),P(k,c,i,1,j,2)]);
+  for(const si of [0,1])for(const sj of [0,1]){const ci=si?3:0,cj=sj?3:0,ii=si?2:1,ij=sj?2:1;
+   polys.push([P(k,1,i,ci,j,ij),P(k,2,i,ci,j,ij),P(k,2,i,ii,j,cj),P(k,1,i,ii,j,cj)]);}}
+ for(let s=0;s<8;s++){const o=[s&1?3:0,s&2?3:0,s&4?3:0],n=[s&1?2:1,s&2?2:1,s&4?2:1];
+  polys.push([[o[0],n[1],n[2]],[n[0],o[1],n[2]],[n[0],n[1],o[2]]]);}
+ const out=polys.map(q=>{
+  const u=[0,1,2].map(a=>q[1][a]-q[0][a]),v=[0,1,2].map(a=>q[2][a]-q[0][a]);
+  const fn=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+  const c=[0,1,2].map(a=>q.reduce((s,p)=>s+p[a],0)/q.length-1.5);
+  if(fn[0]*c[0]+fn[1]*c[1]+fn[2]*c[2]<0)q.reverse();
+  return q.map(p=>{const n=pxNorm(p.map(v=>v===0?-1:v===3?1:0));return {c:p,n:{x:n[0],y:n[1],z:n[2]}};});
+ });
+ const tri=[],nrm=[];
+ for(const q of out)for(let i=1;i<q.length-1;i++)for(const v of [q[0],q[i],q[i+1]]){tri.push(...v.c);nrm.push(v.n.x,v.n.y,v.n.z);}
+ return {polys:out,tri:new Int8Array(tri),nrm:new Float32Array(nrm)};
+})();
+const PX_ROUND_MAX=5;
+/* 최소 변 10 미만의 작은 박스는 라운딩이 화면에 드러나지 않으므로 면 수를 늘리지 않는다 */
+function pxRoundR(x0,x1,y0,y1,z0,z1){const m=Math.min(Math.abs(x1-x0),Math.abs(y1-y0),Math.abs(z1-z0));return m>=10?Math.min(PX_ROUND_MAX,0.16*m):0;}
 /* v3: dependency-free GPU depth pass. Canvas2D remains the UI/background layer.
 * Model units are illustrative, not validated HM400P dimensions.
 * Opaque: depthTest=true, depthWrite=true, opacity=1.
 * Optical PVC/guard: depthTest=true, depthWrite=false, back-to-front blending.
 * No screen-order override is permitted for physical parts.
+* Lighting: per-pixel in the fragment shader (pxShade) with a directional shadow map.
 */
 function clipWorld(poly,distance){
 const out=[]; if(!poly.length)return out;
+const lerpN=(a,b,t)=>nrm({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t});
 let a=poly[poly.length-1],da=distance(a);
 for(const b of poly){const db=distance(b);
-if((da>=0)!==(db>=0)){const t=da/(da-db);out.push({x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t});}
-if(db>=0)out.push({x:b.x,y:b.y,z:b.z}); a=b;da=db;
+if((da>=0)!==(db>=0)){const t=da/(da-db),q={x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,z:a.z+(b.z-a.z)*t};if(a.n&&b.n)q.n=lerpN(a.n,b.n,t);out.push(q);}
+if(db>=0){const q={x:b.x,y:b.y,z:b.z};if(b.n)q.n=b.n;out.push(q);} a=b;da=db;
 } return out;
 }
 let DEPTH_GPU=null;
+/* 그림자 맵이 덮는 월드 범위 : 기계 · 작업자 + 분해도 확장 + 그림자가 떨어지는 +X/−Z 여유 (바닥 y=−282) */
+const SCENE_LO=[-900,-282,-560], SCENE_HI=[1150,480,420], SM_SIZE=2048, VSTRIDE=19;
+const VS_PROJ='float n=60.0;float f=20000.0;float z=a_pos.z;gl_Position=vec4(a_pos.xy*z,((f+n)/(f-n))*z-2.0*f*n/(f-n),z);';
 function createDepthGPU(){
 const canvas=document.createElement('canvas');
 const gl=canvas.getContext('webgl',{alpha:true,antialias:true,depth:true,premultipliedAlpha:true,preserveDrawingBuffer:false});
 if(!gl)throw Error('WebGL을 사용할 수 없습니다. 브라우저의 그래픽 가속 설정을 확인하세요.');
-const shader=(type,src)=>{const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw Error(gl.getShaderInfoLog(s));return s;};
-const vs=shader(gl.VERTEX_SHADER,`attribute vec3 a_pos;attribute vec4 a_col;attribute vec3 a_pat;varying vec4 v_col;varying vec3 v_pat;
-void main(){float n=60.0;float f=20000.0;float z=a_pos.z;
-gl_Position=vec4(a_pos.xy*z,((f+n)/(f-n))*z-2.0*f*n/(f-n),z);v_col=a_col;v_pat=a_pat;}`);
-const fs=shader(gl.FRAGMENT_SHADER,`precision mediump float;varying vec4 v_col;varying vec3 v_pat;uniform vec3 u_ink;
-void main(){vec3 c=v_col.rgb;if(v_pat.z>0.5){float p=fract((v_pat.x+v_pat.y)/18.0);float stripe=smoothstep(0.02,0.06,p)*(1.0-smoothstep(0.48,0.52,p));c*=mix(vec3(1.0),u_ink,stripe);}gl_FragColor=vec4(c*v_col.a,v_col.a);}`);
-const program=gl.createProgram();gl.attachShader(program,vs);gl.attachShader(program,fs);gl.linkProgram(program);
-if(!gl.getProgramParameter(program,gl.LINK_STATUS))throw Error(gl.getProgramInfoLog(program));
-gl.deleteShader(vs);gl.deleteShader(fs);
-const buffer=gl.createBuffer();
-const pos=gl.getAttribLocation(program,'a_pos'),col=gl.getAttribLocation(program,'a_col');
+const main=pxProgram(gl,
+'attribute vec3 a_pos;attribute vec3 a_w;attribute vec3 a_n;attribute vec4 a_col;attribute vec4 a_mat;attribute vec2 a_uv;'+
+'varying vec3 vW;varying vec3 vN;varying vec4 vC;varying vec4 vM;varying vec2 vUV;void main(){'+VS_PROJ+'vW=a_w;vN=a_n;vC=a_col;vM=a_mat;vUV=a_uv;}',
+PX_HEAD+PX_LIGHT+'varying vec3 vW;varying vec3 vN;varying vec4 vC;varying vec4 vM;varying vec2 vUV;uniform vec3 u_ink;void main(){vec3 c=vC.rgb;'+
+'if(vM.w>0.5){float p=fract((vUV.x+vUV.y)/18.0);float stripe=smoothstep(0.02,0.06,p)*(1.0-smoothstep(0.48,0.52,p));c*=mix(vec3(1.0),u_ink,stripe);}'+
+'if(vM.z<0.5)c=pxShade(c,vM.x,vW,normalize(vN),pow(vM.y,2.2));gl_FragColor=vec4(c*vC.a,vC.a);}',
+['a_pos','a_w','a_n','a_col','a_mat','a_uv']);
+const catcher=pxProgram(gl,'attribute vec3 a_pos;attribute vec3 a_w;varying vec3 vW;void main(){'+VS_PROJ+'vW=a_w;}',PX_CATCH_FS,['a_pos','a_w']);
+const shadow=pxProgram(gl,PX_SM_VS,PX_SM_FS,['p']);
 canvas.addEventListener('webglcontextlost',e=>{e.preventDefault();M3.gpuError='그래픽 컨텍스트가 중단되었습니다. 복구 대기 중입니다.';});
 canvas.addEventListener('webglcontextrestored',()=>{DEPTH_GPU=null;M3.gpuError=null;});
-return {canvas,gl,program,buffer,pos,col,pat:gl.getAttribLocation(program,'a_pat'),ink:gl.getUniformLocation(program,'u_ink'),data:new Float32Array(10*65536),capacity:0,depthBits:gl.getParameter(gl.DEPTH_BITS)};
+return {canvas,gl,main,catcher,shadow,buffer:gl.createBuffer(),quad:gl.createBuffer(),
+sm:pxShadowTarget(gl,SM_SIZE),lm:pxLightMatrix(SCENE_LO,SCENE_HI,SM_SIZE),
+data:new Float32Array(VSTRIDE*65536),capacity:0,depthBits:gl.getParameter(gl.DEPTH_BITS)};
 }
 function depthPaint(ctx,opaque,transparent,W,H){
 try{
@@ -4122,46 +4253,56 @@ const gpu=DEPTH_GPU||(DEPTH_GPU=createDepthGPU());const {gl,canvas}=gpu;
 if(gl.isContextLost())throw Error(M3.gpuError||'그래픽 컨텍스트 복구 대기 중');
 const width=Math.round(W*M3.dpr),height=Math.round(H*M3.dpr);
 if(canvas.width!==width||canvas.height!==height){canvas.width=width;canvas.height=height;}
-gl.viewport(0,0,width,height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.depthMask(true);
-gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);gl.useProgram(gpu.program);gl.uniform3fv(gpu.ink,hx(foilInk()).map((x,i)=>x/hx(foilCol())[i]));
 gl.enable(gl.DEPTH_TEST);gl.depthFunc(gl.LEQUAL);gl.disable(gl.CULL_FACE);
-gl.bindBuffer(gl.ARRAY_BUFFER,gpu.buffer);
-let needed=0;for(const arr of [opaque,transparent])for(const f of arr)needed+=Math.max(0,f.p.length-2)*30;
+let needed=0;for(const arr of [opaque,transparent])for(const f of arr)needed+=Math.max(0,f.p.length-2)*3*VSTRIDE;
 if(gpu.data.length<needed)gpu.data=new Float32Array(2**Math.ceil(Math.log2(needed)));
 let offset=0;
-// Pack each polygon vertex once; triangle order and Float32 values are unchanged.
+// Pack each polygon vertex once, then fan-triangulate: screen pos · world pos · normal · albedo · material · pattern uv.
 const append=arr=>{for(const f of arr){
-const size=f.p.length*10;
-if(!gpu.faceData||gpu.faceData.length<size)gpu.faceData=new Float32Array(2**Math.ceil(Math.log2(Math.max(10,size))));
-const a=gpu.faceData,c=f.c;
-// V4: decode colors and gradient direction once per polygon, not per vertex.
-const gradient=!!c.grad;
-const ca=hx(gradient?c.c1:c),cb=gradient?hx(c.c2):ca,cm=gradient&&c.cm?hx(c.cm):null;
-const dx=gradient?c.B.x-c.A.x:0,dy=gradient?c.B.y-c.A.y:0;
-const denom=dx*dx+dy*dy||1;
-for(let idx=0;idx<f.p.length;idx++){const p=f.p[idx],base=idx*10;let j=base;
-let r=ca[0],g=ca[1],b=ca[2];
-if(gradient){
-let t=clamp(((p.x-c.A.x)*dx+(p.y-c.A.y)*dy)/denom,0,1),a0=ca,b0=cb;
-if(cm){if(t<.52){b0=cm;t/=.52;}else{a0=cm;t=(t-.52)/.48;}}
-r=a0[0]+(b0[0]-a0[0])*t;g=a0[1]+(b0[1]-a0[1])*t;b=a0[2]+(b0[2]-a0[2])*t;
+const size=f.p.length*VSTRIDE;
+if(!gpu.faceData||gpu.faceData.length<size)gpu.faceData=new Float32Array(2**Math.ceil(Math.log2(Math.max(VSTRIDE,size))));
+const a=gpu.faceData,c=hx(f.h),pat=f.uv?1:0;
+for(let idx=0;idx<f.p.length;idx++){const p=f.p[idx],w=f.w[idx],n=f.n[idx],uv=f.uv?f.uv[idx]:null;let j=idx*VSTRIDE;
+a[j++]=p.x/W*2-1;a[j++]=1-p.y/H*2;a[j++]=p.z;a[j++]=w.x;a[j++]=w.y;a[j++]=w.z;a[j++]=n.x;a[j++]=n.y;a[j++]=n.z;
+a[j++]=c[0]/255;a[j++]=c[1]/255;a[j++]=c[2]/255;a[j++]=f.a;a[j++]=f.m;a[j++]=f.br;a[j++]=f.fl;a[j++]=pat;a[j++]=uv?uv[0]:0;a[j++]=uv?uv[1]:0;
 }
-a[j++]=p.x/W*2-1;a[j++]=1-p.y/H*2;a[j++]=p.z;
-a[j++]=r/255;a[j++]=g/255;a[j++]=b/255;a[j++]=f.a;const uv=f.uv?f.uv[idx]:null;a[j++]=uv?uv[0]:0;a[j++]=uv?uv[1]:0;a[j++]=uv?1:0;
-}
-for(let i=1;i<f.p.length-1;i++)for(let corner=0;corner<3;corner++){const idx=corner===0?0:i+corner-1;for(let j=0;j<10;j++)gpu.data[offset++]=a[idx*10+j];}
+for(let i=1;i<f.p.length-1;i++)for(let corner=0;corner<3;corner++){const idx=corner===0?0:i+corner-1;for(let j=0;j<VSTRIDE;j++)gpu.data[offset++]=a[idx*VSTRIDE+j];}
 }};
-append(opaque);const opaqueCount=offset/10;append(transparent);
+append(opaque);const opaqueCount=offset/VSTRIDE;append(transparent);const total=offset/VSTRIDE;
+gl.bindBuffer(gl.ARRAY_BUFFER,gpu.buffer);
 if(gpu.capacity<gpu.data.byteLength){gl.bufferData(gl.ARRAY_BUFFER,gpu.data.byteLength,gl.DYNAMIC_DRAW);gpu.capacity=gpu.data.byteLength;}
 gl.bufferSubData(gl.ARRAY_BUFFER,0,gpu.data.subarray(0,offset));
-gl.enableVertexAttribArray(gpu.pos);gl.vertexAttribPointer(gpu.pos,3,gl.FLOAT,false,40,0);
-gl.enableVertexAttribArray(gpu.col);gl.vertexAttribPointer(gpu.col,4,gl.FLOAT,false,40,12);gl.enableVertexAttribArray(gpu.pat);gl.vertexAttribPointer(gpu.pat,3,gl.FLOAT,false,40,28);
+const S=VSTRIDE*4, ptr=(i,k,off)=>{gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,k,gl.FLOAT,false,S,off*4);};
+/* ① 그림자 맵 : 불투명 형상의 월드 좌표만 광원 시점으로 기록 */
+if(gpu.sm.ok)pxShadowPass(gl,gpu.shadow,gpu.sm,gpu.lm,()=>{for(let i=1;i<6;i++)gl.disableVertexAttribArray(i);gl.bindBuffer(gl.ARRAY_BUFFER,gpu.buffer);ptr(0,3,3);},opaqueCount);
+gl.viewport(0,0,width,height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.depthMask(true);
+gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
+const eye=[CAMP.x,CAMP.y,CAMP.z],ao=[AO_B,AO_H,0.006452];
+gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+/* ② 바닥 그림자 받이 : 2D 바닥 위에 그림자만 얹는다 (깊이 기록 없음 → 이후 형상이 덮어쓴다) */
+if(gpu.sm.ok){
+const y=FLOORY+0.5,x0=SCENE_LO[0],x1=SCENE_HI[0],z0=SCENE_LO[2],z1=SCENE_HI[2];
+const quad=clipWorld([P3(x0,y,z0),P3(x1,y,z0),P3(x1,y,z1),P3(x0,y,z1)],p=>prj(p).z-60);
+if(quad.length>=3){
+const v=quad.map(q=>{const s=prj(q);return [s.x/W*2-1,1-s.y/H*2,s.z,q.x,q.y,q.z];}),tri=[];
+for(let i=1;i<v.length-1;i++)tri.push(...v[0],...v[i],...v[i+1]);
+pxLightUniforms(gl,gpu.catcher,eye,ao,gpu.lm,gpu.sm);
+gl.uniform4fv(gpu.catcher.u('uTint'),[0.22,0.27,0.33,0.30]);gl.uniform4fv(gpu.catcher.u('uRect'),[x0,z0,x1,z1]);
+for(let i=2;i<6;i++)gl.disableVertexAttribArray(i);
+gl.bindBuffer(gl.ARRAY_BUFFER,gpu.quad);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(tri),gl.DYNAMIC_DRAW);
+gl.enableVertexAttribArray(0);gl.vertexAttribPointer(0,3,gl.FLOAT,false,24,0);gl.enableVertexAttribArray(1);gl.vertexAttribPointer(1,3,gl.FLOAT,false,24,12);
+gl.depthMask(false);gl.drawArrays(gl.TRIANGLES,0,tri.length/6);gl.depthMask(true);
+}}
+/* ③ 불투명 → ④ 광학 PVC · 가드 (뒤→앞, 깊이 기록 없음) */
+pxLightUniforms(gl,gpu.main,eye,ao,gpu.lm,gpu.sm);
+gl.uniform3fv(gpu.main.u('u_ink'),hx(foilInk()).map((x,i)=>x/hx(foilCol())[i]));
+gl.bindBuffer(gl.ARRAY_BUFFER,gpu.buffer);ptr(0,3,0);ptr(1,3,3);ptr(2,3,6);ptr(3,4,9);ptr(4,4,13);ptr(5,2,17);
 gl.disable(gl.BLEND);gl.depthMask(true);if(opaqueCount)gl.drawArrays(gl.TRIANGLES,0,opaqueCount);
 gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);gl.depthMask(false);
-if(offset/10>opaqueCount)gl.drawArrays(gl.TRIANGLES,opaqueCount,offset/10-opaqueCount);
+if(total>opaqueCount)gl.drawArrays(gl.TRIANGLES,opaqueCount,total-opaqueCount);
 gl.depthMask(true);gl.disable(gl.BLEND);
 ctx.drawImage(canvas,0,0,W,H);
-M3.stats={renderer:'WebGL depth',drawCalls:(opaqueCount?1:0)+(offset/10>opaqueCount?1:0),triangles:offset/30,opaqueFaces:opaque.length,transparentFaces:transparent.length,depthBits:gpu.depthBits};
+M3.stats={renderer:'WebGL depth · per-pixel',drawCalls:(opaqueCount?2:0)+(total>opaqueCount?1:0)+(gpu.sm.ok?1:0),triangles:total/3,opaqueFaces:opaque.length,transparentFaces:transparent.length,depthBits:gpu.depthBits,shadowMap:gpu.sm.ok};
 M3.gpuError=null;
 }catch(e){
 M3.gpuError=e.message;ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);ctx.fillStyle='#a32216';ctx.font='16px Malgun Gothic';
@@ -4169,11 +4310,8 @@ ctx.fillText('3D 표시 중단: '+e.message,20,H/2);ctx.fillText('상단 2D 보�
 }
 }
 
-/* ── 벡터 · 조명 · 재질 ────────────────────────────────────── */
+/* ── 벡터 · 재질 ────────────────────────────────────────────── */
 function nrm(v){const l=Math.hypot(v.x,v.y,v.z)||1;return{x:v.x/l,y:v.y/l,z:v.z/l};}
-const LIT =nrm({x:-0.40,y:0.82,z:0.42});      /* 주광 (좌상 전방) */
-const LIT3=nrm({x: 0.30,y:0.45,z: 0.84});     /* 림라이트 (정면 상단) */
-const LIT2=nrm({x: 0.62,y:0.22,z:-0.55});     /* 보조광 (우후방) */
 const _hx={};
 function hx(h){ if(_hx[h])return _hx[h]; if(h.startsWith("rgb")){return _hx[h]=h.match(/[\d.]+/g).slice(0,3).map(Number);} const n=parseInt(h.slice(1),16);
 return _hx[h]=[n>>16&255,n>>8&255,n&255]; }
@@ -4183,22 +4321,27 @@ const ux=p[1].x-p[0].x, uy=p[1].y-p[0].y, uz=p[1].z-p[0].z;
 const vx=p[2].x-p[0].x, vy=p[2].y-p[0].y, vz=p[2].z-p[0].z;
 return nrm({x:uy*vz-uz*vy, y:uz*vx-ux*vz, z:ux*vy-uy*vx});
 }
-/* 면 등록 : 법선 자동 계산 → 조명 적용 */
+/* 면 등록 : 법선 자동 계산 (조명은 GPU 에서 픽셀 단위로 적용) */
 /* 절개(단면) · 분해도 : 면 단위로 적용 */
 let cutZ=1e9, expK=0;
 const EXPB=[300,520,700,960,1100];        /* 스테이션 경계 (기계 좌표 x) */
 function expDx(cxw){ let b=0; while(b<EXPB.length&&cxw>=EXPB[b]) b++;
 return (b-2.5)*112*expK; }
-/* 큰 면은 잘게 나눈다 — 화가 알고리즘의 정렬 오차는 면 크기에 비례한다 */
+/* 큰 면은 잘게 나눈다 — 분해도에서 스테이션 경계를 넘는 면이 부품별로 벌어지도록 */
+/* 정점 법선(v.n) : 곡면(o.g)과 둥근 박스는 정점마다 법선을 가져 픽셀 조명에서 매끄럽게 보인다 */
 function FA(p,hex,o){
 o=o||{};
-p=p.map(v=>P3(v.x,v.y,v.z)); // Never mutate shared primitive vertices.
+p=p.map(v=>{const q=P3(v.x,v.y,v.z);if(v.n)q.n=v.n;return q;}); // Never mutate shared primitive vertices.
+if(o.g&&p.length===4&&!p[0].n){p[0].n=p[3].n=o.g.a;p[1].n=p[2].n=o.g.b;}
+if(p[0].n){ const fn=faceN(p); let d=0; for(const v of p) if(v.n) d+=v.n.x*fn.x+v.n.y*fn.y+v.n.z*fn.z;
+if(d<0) for(const v of p) if(v.n) v.n={x:-v.n.x,y:-v.n.y,z:-v.n.z}; }   /* 정점 법선은 면의 앞쪽(감김 방향)에 맞춘다 */
 if(expK>0.002 && p.length===4 && !o.nosub){
 const d=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y,a.z-b.z);
 const nu=Math.min(5,Math.ceil(Math.max(d(p[0],p[1]),d(p[3],p[2]))/290));
 const nv=Math.min(5,Math.ceil(Math.max(d(p[1],p[2]),d(p[0],p[3]))/290));
 if(nu*nv>1){
-const L=(a,b,t)=>P3(a.x+(b.x-a.x)*t, a.y+(b.y-a.y)*t, a.z+(b.z-a.z)*t);
+const L=(a,b,t)=>{const q=P3(a.x+(b.x-a.x)*t, a.y+(b.y-a.y)*t, a.z+(b.z-a.z)*t);
+if(a.n&&b.n)q.n=nrm({x:a.n.x+(b.n.x-a.n.x)*t,y:a.n.y+(b.n.y-a.n.y)*t,z:a.n.z+(b.n.z-a.n.z)*t});return q;};
 const oo=Object.assign({},o,{nosub:1});
 for(let i=0;i<nu;i++) for(let j=0;j<nv;j++){
 const u0=i/nu,u1=(i+1)/nu, v0=j/nv,v1=(j+1)/nv;
@@ -4223,75 +4366,6 @@ a:o.a===undefined?1:o.a, fl:o.fl?1:0, g:o.g||null, cl:o.cl?1:0,
 zb:o.zb||0, br:o.br||0, ne:o.ne?1:0,
 cx:cx, cy:cy, cz:cz,pat:o.pat?(patternShift?p=>o.pat({x:p.x-patternShift,y:p.y,z:p.z}):o.pat):null});
 }
-/* 환경(하늘/바닥) 반사 · Blinn-Phong 스페큘러를 포함한 금속 셰이딩 */
-const SKY=[255,255,255], HORIZ=[186,188,189], GND=[121,123,124];
-// V4: bounded cache indexed by lighting call; exact inputs only, no rounding.
-// Restore shade() side effects on a cache hit so highlights remain identical.
-const v4LightCache=[];let v4LightIndex=0;
-function litColor(hex,n,met,c0){
-const i=v4LightIndex++,v=v4LightCache[i];
-if(v&&v.hex===hex&&v.nx===n.x&&v.ny===n.y&&v.nz===n.z&&v.met===met&&v.x===c0.x&&v.y===c0.y&&v.z===c0.z&&v.cx===CAMP.x&&v.cy===CAMP.y&&v.cz===CAMP.z&&v.br===_BR){
-_LR=v.r;_LG=v.g;_LB=v.b;_lastLum=v.lum;return v.color;
-}
-const color=v4LitColorUncached(hex,n,met,c0);
-// Reuse cache records on misses; preserve the exact lighting inputs and outputs.
-const entry=v||(v4LightCache[i]={});
-entry.hex=hex;entry.nx=n.x;entry.ny=n.y;entry.nz=n.z;entry.met=met;
-entry.x=c0.x;entry.y=c0.y;entry.z=c0.z;
-entry.cx=CAMP.x;entry.cy=CAMP.y;entry.cz=CAMP.z;entry.br=_BR;
-entry.r=_LR;entry.g=_LG;entry.b=_LB;entry.lum=_lastLum;entry.color=color;
-return color;
-}
-function v4LitColorUncached(hex,n,met,c0){
-const c=hx(hex);
-const d =Math.max(0,n.x*LIT.x +n.y*LIT.y +n.z*LIT.z);
-const d2=Math.max(0,n.x*LIT2.x+n.y*LIT2.y+n.z*LIT2.z);
-const d3=Math.max(0,n.x*LIT3.x+n.y*LIT3.y+n.z*LIT3.z);
-let vx=CAMP.x-c0.x, vy=CAMP.y-c0.y, vz=CAMP.z-c0.z;
-const vl=Math.sqrt(vx*vx+vy*vy+vz*vz)||1, iv=1/vl; vx*=iv; vy*=iv; vz*=iv;
-/* 환경 반사 */
-const t=n.y; let er,eg,eb;
-if(t>=0){ er=HORIZ[0]+(SKY[0]-HORIZ[0])*t; eg=HORIZ[1]+(SKY[1]-HORIZ[1])*t; eb=HORIZ[2]+(SKY[2]-HORIZ[2])*t; }
-else    { const u=-t; er=HORIZ[0]+(GND[0]-HORIZ[0])*u; eg=HORIZ[1]+(GND[1]-HORIZ[1])*u; eb=HORIZ[2]+(GND[2]-HORIZ[2])*u; }
-/* 프레넬 (x^4) */
-const nv=Math.max(0,n.x*vx+n.y*vy+n.z*vz);
-let q=1-nv; q*=q; const fr=q*q;
-/* 스페큘러 (half-vector, x^16 / x^32) */
-let hx1=LIT.x+vx, hy1=LIT.y+vy, hz1=LIT.z+vz;
-const hl=Math.sqrt(hx1*hx1+hy1*hy1+hz1*hz1)||1, ih=1/hl; hx1*=ih; hy1*=ih; hz1*=ih;
-let nh=Math.max(0,n.x*hx1+n.y*hy1+n.z*hz1);
-nh*=nh; nh*=nh; nh*=nh; nh*=nh;              /* ^16 */
-if(met>0.5) nh*=nh;                          /* ^32 */
-const sp=nh*(90+160*met);
-/* AO */
-let ao=0.66+0.34*Math.min(1,Math.max(0,(c0.y-AO_B)/AO_H));
-const inn=1-Math.abs(c0.z)*0.006452; ao*= 1-0.13*(inn>0?inn:0);
-const diff=(0.24+0.78*d+0.13*d2+0.09*d3*d3)*ao;
-const kEnv=(0.10+0.62*met+0.40*fr*met)*(0.58+0.42*ao);
-const km=1-kEnv*0.55;
-let r=c[0]*diff*km+er*kEnv+sp, g=c[1]*diff*km+eg*kEnv+sp, b=c[2]*diff*km+eb*kEnv+sp;
-/* 색온도 : 하이라이트는 따뜻하게, 그늘은 서늘하게 */
-const wt=(d-0.42);
-r+=wt*6; b-=wt*4;
-/* 대기 원근 */
-const fg=vl>1100?Math.min(.10,(vl-1100)*0.00016):0;
-r+=(246-r)*fg; g+=(249-g)*fg; b+=(254-b)*fg;
-/* 프레넬 림 : 스치는 각도에서 금속 모서리가 밝게 선다 */
-const rim=fr*fr*(10+34*met);
-r+=rim; g+=rim; b+=rim*1.04;
-if(_BR!==1){ r*=_BR; g*=_BR; b*=_BR; }
-r=r<0?0:r>255?255:r; g=g<0?0:g>255?255:g; b=b<0?0:b>255?255:b;
-_lastLum = r*0.299+g*0.587+b*0.114;
-_LR=r; _LG=g; _LB=b;
-return 'rgb('+(r|0)+','+(g|0)+','+(b|0)+')';
-}
-let _lastLum=0, _LR=0,_LG=0,_LB=0, _BR=1;
-/* 밝기 배율을 적용한 rgb 문자열 (환경 반사 그라디언트용) */
-function shade(k){
-let r=_LR*k, g=_LG*k, b=_LB*k;
-r=r<0?0:r>255?255:r; g=g<0?0:g>255?255:g; b=b<0?0:b>255?255:b;
-return 'rgb('+(r|0)+','+(g|0)+','+(b|0)+')';
-}
 const P3=(x,y,z)=>({x:x,y:y,z:z});
 const X3=x=>x-620, Y3=y=>380-y;
 const AO_B=380-612, AO_H=(380-88)-(380-612);
@@ -4305,6 +4379,10 @@ function boxW(x0,y0,z0,x1,y1,z1,hex,o0){
 [y0,y1]=[Math.min(y0,y1),Math.max(y0,y1)];
 [z0,z1]=[Math.min(z0,z1),Math.max(z0,z1)];
 const o=Object.assign({cl:1},o0||{});
+/* 불투명 박스는 모서리를 둥글게 : 정점 법선이 모서리 띠를 따라 돌아간다 */
+const r=(o.a===undefined||o.a>=1)&&!o.fl&&!o.pat?pxRoundR(x0,x1,y0,y1,z0,z1):0;
+if(r){ const X=[x0,x0+r,x1-r,x1],Y=[y0,y0+r,y1-r,y1],Z=[z0,z0+r,z1-r,z1];
+for(const q of PX_RB.polys)FA(q.map(v=>({x:X[v.c[0]],y:Y[v.c[1]],z:Z[v.c[2]],n:v.n})),hex,o); return; }
 const a=P3(x0,y0,z0),b=P3(x1,y0,z0),c=P3(x1,y1,z0),d=P3(x0,y1,z0);
 const e=P3(x0,y0,z1),f=P3(x1,y0,z1),g=P3(x1,y1,z1),h=P3(x0,y1,z1);
 FA([h,g,c,d],hex,o); FA([a,b,f,e],hex,o);
@@ -4545,7 +4623,10 @@ const A=[],B=[];
 for(let i=0;i<seg;i++){ const t=(i+0.5)/seg*6.283185307, c=Math.cos(t), s2=Math.sin(t);
 A.push(P3(a.x+(vx*c+wx*s2)*r0, a.y+(vy*c+wy*s2)*r0, a.z+(vz*c+wz*s2)*r0));
 B.push(P3(b.x+(vx*c+wx*s2)*r1, b.y+(vy*c+wy*s2)*r1, b.z+(vz*c+wz*s2)*r1)); }
-for(let i=0;i<seg;i++){ const j=(i+1)%seg; FA([A[i],A[j],B[j],B[i]],hex,o); }
+/* 옆면 : 방사 방향 정점 법선 → 매끄러운 원통 음영 */
+const R=A.map((q,i)=>nrm({x:q.x-a.x+(B[i].x-b.x),y:q.y-a.y+(B[i].y-b.y),z:q.z-a.z+(B[i].z-b.z)}));
+const sv=(q,n)=>({x:q.x,y:q.y,z:q.z,n:n});
+for(let i=0;i<seg;i++){ const j=(i+1)%seg; FA([sv(A[i],R[i]),sv(A[j],R[j]),sv(B[j],R[j]),sv(B[i],R[i])],hex,o); }
 FA(A.slice().reverse(),hex,o); FA(B.slice(),hex,o);
 }
 /* 회전체 : [반경, y] 프로파일 — 머리·두건처럼 둥근 부위 */
@@ -4555,8 +4636,14 @@ const R=prof.map(q=>{ const a=[];
 for(let i=0;i<seg;i++){ const t=(i+0.5)/seg*6.283185307;
 a.push(P3(cx+Math.cos(t)*q[0], q[1], cz+Math.sin(t)*q[0]*0.86)); }
 return a; });
+/* 정점 법선 = (둘레 접선) × (프로파일 접선) — 방향은 FA 가 면 법선에 맞춘다 */
+const Nn=R.map((ring,k)=>ring.map((q,i)=>{
+const a=ring[(i+1)%seg], b=ring[(i+seg-1)%seg], u=R[Math.min(k+1,R.length-1)][i], d=R[Math.max(k-1,0)][i];
+const t1={x:a.x-b.x,y:a.y-b.y,z:a.z-b.z}, t2={x:u.x-d.x,y:u.y-d.y,z:u.z-d.z};
+return nrm({x:t1.y*t2.z-t1.z*t2.y,y:t1.z*t2.x-t1.x*t2.z,z:t1.x*t2.y-t1.y*t2.x}); }));
+const sv=(k,i)=>({x:R[k][i].x,y:R[k][i].y,z:R[k][i].z,n:Nn[k][i]});
 for(let k=0;k<R.length-1;k++) for(let i=0;i<seg;i++){ const j=(i+1)%seg;
-FA([R[k][i],R[k][j],R[k+1][j],R[k+1][i]],hex,o); }
+FA([sv(k,i),sv(k,j),sv(k+1,j),sv(k+1,i)],hex,o); }
 }
 /* 실측 스케일 : 모델 1u ≈ 4 mm → 신장 1700 mm ≈ 425 u, 바닥 y=646 */
 let armT=0;                                  /* 조작 직후 팔을 뻗는 시간 */
@@ -5347,7 +5434,6 @@ const M3LBL=[[1,1050,470],[3,580,470],[4,427,470],[5,300,516],[6,150,380],[7,790
 [8,652,320],[10,844,320],[11,905,382],[12,PX,317],[13,PX,251],[16,PX,124],[17,1120,251],
 [18,1178,352],[19,1155,470],[23,245,110],[25,351,262],[28,521,243],[27,674,211],[20,400,151],[21,520,-10],['P',196,398]];
 function m3Draw(){
-v4LightIndex=0;
 if(M3._rs){ M3._rs=0; m3Resize(); }        /* 대기 중인 해상도 변경을 프레임 시작에 적용 */
 const cv=M3.cv, g=M3.cx; if(!cv) return;
 const _t0=performance.now();
@@ -5369,7 +5455,6 @@ expK=0;
 const savedCut=cutZ; cutZ=1e9; drawTrainingWorker(); cutZ=savedCut;
 /* ── 투영 + 컬링 + 정렬 ── */
 const opq=[], trs=[], W2=W, H2=H;
-const SHEEN_MIN = 300;
 const NEARZ = 24;
 const AMIN = 0.00001;   /* 화면상 2.6px² 미만은 그리지 않는다(크기 기반 = 팝핑 없음) */
 const FL=FLOORY;
@@ -5388,36 +5473,10 @@ const area=(ps[1].x-ps[0].x)*(ps[2].y-ps[0].y)-(ps[2].x-ps[0].x)*(ps[1].y-ps[0].
 if(Math.abs(area)<AMIN) continue;
 const flip=area>0;
 if(f.cl && flip) continue;      /* 닫힌 입체의 뒷면은 그리지 않는다 */
-let nn=f.n; if(flip) nn={x:-nn.x,y:-nn.y,z:-nn.z};
-const c0={x:f.cx,y:f.cy,z:f.cz};
-_BR = f.br||1;
-let col;
-if(f.fl) col=f.h;
-else if(f.g && n===4 && Math.abs(area)>150){          /* 큰 곡면만 그라디언트 */
-let ga=f.g.a, gb=f.g.b;
-if(flip){ ga={x:-ga.x,y:-ga.y,z:-ga.z}; gb={x:-gb.x,y:-gb.y,z:-gb.z}; }
-col={grad:1, A:{x:(ps[0].x+ps[3].x)/2,y:(ps[0].y+ps[3].y)/2},
-B:{x:(ps[1].x+ps[2].x)/2,y:(ps[1].y+ps[2].y)/2},
-c1:litColor(f.h,ga,f.m,c0), c2:litColor(f.h,gb,f.m,c0)};
-}
-else if(f.g){
-let ga=f.g.a, gb=f.g.b;
-let mx=(ga.x+gb.x)/2, my=(ga.y+gb.y)/2, mz=(ga.z+gb.z)/2;
-const ml=Math.sqrt(mx*mx+my*my+mz*mz)||1; mx/=ml; my/=ml; mz/=ml;
-if(flip){ mx=-mx; my=-my; mz=-mz; }
-col=litColor(f.h,{x:mx,y:my,z:mz},f.m,c0);
-}
-else {
-const base=litColor(f.h,nn,f.m,c0);
-/* 금속 : 위쪽은 천장(밝음) · 아래쪽은 바닥(어두움)을 비춘다 → 화면 수직 반사 그라디언트 */
-if(Math.abs(area)>SHEEN_MIN && (y1-y0)>4){
-const k=0.055+0.33*f.m;
-col={grad:1, A:{x:(x0+x1)*0.5,y:y0}, B:{x:(x0+x1)*0.5,y:y1},
-c1:shade(1+k), cm:shade(1+k*0.18), c2:shade(1-k*0.86)};
-} else col=base;
-}
-const rec={p:ps,c:col,e:f.e,uv:f.pat?v.map(p=>f.pat(p)):null,
-ch:(f.e&&!f.fl&&Math.abs(area)>M3.edgeMin)?shade(1.20):null, ne:f.ne,
+const nn=flip?{x:-f.n.x,y:-f.n.y,z:-f.n.z}:f.n;
+/* 조명은 GPU 에서 픽셀 단위로 : 월드 좌표 · 정점 법선(뒷면이면 뒤집음) · 재질만 넘긴다 */
+const rec={p:ps,w:v,n:v.map(q=>q.n?(flip?{x:-q.n.x,y:-q.n.y,z:-q.n.z}:q.n):nn),
+h:f.h,m:f.m,br:f.br||1,fl:f.fl,uv:f.pat?v.map(p=>f.pat(p)):null,
 a:f.a,z:zs/n,s:Math.abs(area)};
 (f.a<1?trs:opq).push(rec);
 /* 바닥 반사 : 큰 면만, 드래그 중에는 생략 */
@@ -5428,7 +5487,7 @@ if(q.z<=61){rok=false;break;} rp[j]=q; rz+=q.z; }
 if(rok){
 const h=(f.cy-FL);
 const al=0.24*Math.max(0,1-h/210);
-if(al>0.015) refl.push({p:rp,c:typeof col==='string'?col:col.c1,a:al,z:rz/n});
+if(al>0.015) refl.push({p:rp,c:f.h,a:al,z:rz/n});
 }
 }
 }
@@ -5620,7 +5679,6 @@ g.fillStyle='#526171'; g.font='10px Malgun Gothic';
 g.fillText(M3.cut?'절개면은 개방 표시 · 내부 관찰용':M3.exp?'분해 간격은 설명용 · 실제 이송 불가':!M3.guard?'가드 숨김은 화면 표시 기능입니다.':'드래그: 회전 · 휠: 확대 · 번호: 설명',20,78);
 }
 if((M3._colorFrame=(M3._colorFrame||0)+1)%240===0)for(const k of Object.keys(_hx))if(k.startsWith("rgb"))delete _hx[k];
-v4LightCache.length=v4LightIndex;
 M3.frameMs=performance.now()-_t0;
 {const F=foilSpec(),x=W-206,y=H-47;g.fillStyle='rgba(255,255,255,.94)';rrect(g,x,y,196,36,7);g.fill();
 g.save();g.beginPath();g.rect(x+9,y+9,28,18);g.clip();g.fillStyle=F.base;g.fillRect(x+9,y+9,28,18);g.strokeStyle=F.ink;g.lineWidth=5;
