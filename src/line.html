@@ -10703,5 +10703,203 @@ function cuteEllPoints(c,r,nu,nv){const rows=[];
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
 })();
 </script>
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   2026-09-29 영상 자동재생 — 게시판 홍보 영상 촬영용 (기본모드 · 체험 전용)
+   · 화면 커서가 다음에 누를 곳으로 먼저 이동한 뒤, 기존 자동재생이 그 단계를 진행한다
+     (절차 · 판정은 기존 자동재생과 동일 — 커서가 도착할 때까지만 기다린다)
+   · 가동모드 : 운전 중 HMI [이상사례] · [알람] 메뉴에서 직접 발생시키고 조치까지 보여준다
+   · 배속 ×5 로 빠르게 진행
+   ════════════════════════════════════════════════════════════════════ */
+(function(){
+ const LINE=typeof M3==='undefined', $1=s=>document.querySelector(s);
+ const apOn=()=>LINE?autoOn:autoPlay;
+ function apSet(on){
+  if(apOn()===on)return;
+  if(LINE){autoOn=on;autoT=0;}else{autoPlay=on;apT=99;apEl=null;apKey='';apStep=-1;apStall=0;}
+  const b=$1('#apBtn');if(b){b.textContent=on?(LINE?'⏸ 자동재생 중지':'⏸ 자동재생 중'):'▶ 자동재생';b.classList.toggle(LINE?'on':'act',on);}
+ }
+ const css=document.createElement('style');css.textContent=`
+#vmCursor{position:fixed;left:0;top:0;width:30px;height:30px;z-index:2147483646;pointer-events:none;display:none;
+ filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));transform:translate(-3px,-2px)}
+#vmCursor svg{width:30px;height:30px;display:block;transition:transform .12s}
+#vmCursor.press svg{transform:scale(.82)}
+.vmRipple{position:fixed;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;z-index:2147483645;pointer-events:none;
+ border:3px solid rgba(26,115,232,.9);background:rgba(26,115,232,.18);animation:vmRip .55s ease-out forwards}
+@keyframes vmRip{to{transform:scale(4.2);opacity:0}}
+#vmBtn.on{background:#c62828;color:#fff;border-color:#c62828}
+body.vmOn #autoStatus{visibility:hidden!important}`;
+ document.head.appendChild(css);
+ const cur=document.createElement('div');cur.id='vmCursor';
+ cur.innerHTML='<svg viewBox="0 0 24 24"><path d="M3 2l15 11.2-6.6.9 3.8 7.4-2.9 1.4-3.7-7.5L3 20z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+ document.body.appendChild(cur);
+
+ const vm={on:false,x:innerWidth*.5,y:innerHeight*.5,fx:0,fy:0,t0:0,dur:0,key:null,settle:0,lastTap:0,inc:'off',incT:0,runT:0,busy:false};
+ window.__videoMode=vm;
+
+ /* ── 커서 이동 : 목표가 바뀌면 거리 비례 시간(0.28~0.6초)으로 부드럽게 이동 ── */
+ function vis(e){
+  if(!e||!e.getBoundingClientRect)return null;
+  const r=e.getBoundingClientRect();
+  if(r.width<2||r.height<2||r.bottom<0||r.right<0||r.top>innerHeight||r.left>innerWidth)return null;
+  const cs=getComputedStyle(e);if(cs.visibility==='hidden'||cs.display==='none'||+cs.opacity===0)return null;
+  return r;
+ }
+ function first(sel){
+  if(!sel)return null;
+  for(const s of String(sel).split(',')){const t=s.trim();if(!t)continue;
+   let list=[];try{list=document.querySelectorAll(t);}catch(e){}
+   for(const e of list)if(vis(e))return e;}
+  return null;
+ }
+ function hintTarget(){
+  if(LINE){
+   const g=$1('#dragPartGhost');if(g&&g.style.display==='block')return g;
+   const ad=$1('#adjustDialog');if(ad&&!ad.hidden)return first('#adjustLock')||ad;
+   return [...document.querySelectorAll('.hintNow')].find(vis)||null;
+  }
+  const f=[...document.querySelectorAll('.apflash')].find(vis);if(f)return f;
+  const hs=[...document.querySelectorAll('.hint')].filter(vis);if(!hs.length)return null;
+  const at=hs.findIndex(x=>apK(x)===apKey);return hs[(at+1)%hs.length];
+ }
+ function autoTarget(){
+  const pop=window.__v4&&window.__v4.pop;
+  if(pop&&!pop.hidden)return [...pop.querySelectorAll('button')].find(vis)||pop;
+  try{if(S.recovery&&S.activeTrouble){const h=recoveryStep();const e=first(h&&h.sel);if(e)return e;}}catch(e){}
+  try{const h=window.__incidentControls&&window.__incidentControls.caseHint();const e=first(h&&h.sel);if(e)return e;}catch(e){}
+  return hintTarget();
+ }
+ function point(e){const r=vis(e);if(!r)return null;
+  if(e.id==='dragPartGhost')return {x:r.left+r.width*.55,y:r.top+r.height*.55};
+  return {x:r.left+Math.min(r.width*.5,r.width-6),y:r.top+Math.min(r.height*.5,r.height-4)};}
+ let tgt=null;
+ function aim(e,now){
+  if(e!==vm.key){vm.key=e;vm.fx=vm.x;vm.fy=vm.y;vm.t0=now;vm.settle=0;
+   const p=e&&point(e);const d=p?Math.hypot(p.x-vm.x,p.y-vm.y):0;vm.dur=Math.max(280,Math.min(600,d*.7));}
+ }
+ function arrived(){return !vm.key||(vm.settle>=140);}
+ function draw(now){
+  if(vm.on){
+   const p=vm.key&&point(vm.key);
+   if(p){const u=Math.min(1,(now-vm.t0)/vm.dur),k=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
+    vm.x=vm.fx+(p.x-vm.fx)*k;vm.y=vm.fy+(p.y-vm.fy)*k;
+    if(u>=1){vm.settle+=now-(vm.lastDraw||now);}}
+   cur.style.left=vm.x+'px';cur.style.top=vm.y+'px';
+  }
+  vm.lastDraw=now;requestAnimationFrame(draw);
+ }
+ requestAnimationFrame(draw);
+ function tap(e){
+  const now=performance.now();if(!vm.on||now-vm.lastTap<220)return;vm.lastTap=now;
+  let x=vm.x,y=vm.y;const p=e&&e!==vm.key&&point(e);if(p&&Math.hypot(p.x-x,p.y-y)<60){x=p.x;y=p.y;}
+  const r=document.createElement('div');r.className='vmRipple';r.style.left=x+'px';r.style.top=y+'px';document.body.appendChild(r);
+  setTimeout(()=>r.remove(),600);cur.classList.add('press');setTimeout(()=>cur.classList.remove('press'),160);
+ }
+ /* 실제 동작 시점에 클릭 효과 — 흐름은 바꾸지 않는다 */
+ const nativeClick=HTMLElement.prototype.click;
+ HTMLElement.prototype.click=function(){if(vm.on&&!vm.silent)tap(this);return nativeClick.apply(this,arguments);};
+ const T=()=>tap(null);
+ try{const o=pressSTART;pressSTART=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=pressSTOP;pressSTOP=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=pressRESET;pressRESET=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=alarmReset;alarmReset=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=doLogin;doLogin=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=installCP;installCP=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=cpPerform;cpPerform=function(){T();return o.apply(this,arguments);};}catch(e){}
+ try{const o=hbClick;hbClick=function(){T();return o.apply(this,arguments);};}catch(e){}
+
+ /* 포장라인 수치 조절 : 영상에서는 조절점 클릭 → 조절창 표시 → 잠시 뒤 [고정 · 확인] 으로 나눠 보여준다 */
+ if(LINE&&typeof openAdjustment==='function'){
+  const ap=apK;let shownAt=0;
+  apK=function(st){
+   if(vm.on&&st&&st.adjust&&!isExam()){
+    if(!adjustActive){T();openAdjustment();shownAt=performance.now();return;}
+    if(performance.now()-shownAt<1100)return;
+    adjustValues=adjustActive.axes.map(a=>a.target);adjustValues.forEach((_,i)=>snapAdjustment(i));T();commitAdjustment();return;
+   }
+   return ap.apply(this,arguments);
+  };
+ }
+ /* ── 가동모드 : 이상사례 · 알람을 HMI 메뉴에서 직접 발생 → 조치 ── */
+ const moving=()=>LINE?S.cpm>0.5:(S.spm>0.5);
+ const calm=()=>S.running&&!S.activeTrouble&&!QC.on&&!QC.restartPending&&!S.qcNeedReset;
+ const prodStep=()=>{const st=STEPS()[S.tIdx];if(!st)return false;
+  if(LINE)return st.k==='watch';const t=typeof st.t==='function'?st.t():st.t;return /^생산/.test(t||'');};
+ /* 알람은 조치 과정이 화면에 잘 드러나는 안전문 알람을 우선 고른다 (없으면 목록 첫 항목) */
+ function faultButton(){
+  const bs=[...document.querySelectorAll(LINE?'#faultOptions [data-fire]':'#faultOptions .faultLaunch')];
+  const pref=/안전문|door/i;
+  const b=bs.find(b=>pref.test((b.closest('label,li,tr,div')||b).textContent))||bs[0]||null;
+  if(b&&!vis(b))b.scrollIntoView({block:'center'});
+  return b&&vis(b)?b:null;
+ }
+ let pending=null;          /* 메뉴 조작 : 커서가 도착하면 누른다 */
+ function press(e,after){pending={e,after};}
+ function director(dt){
+  if(S.course!=='operation')return false;
+  if(pending){aim(pending.e,performance.now());
+   if(!arrived())return true;
+   const p=pending;pending=null;p.e.click();if(p.after)p.after();vm.incT=0;return true;}
+  vm.incT+=dt;
+  switch(vm.inc){
+   case 'wait':
+    vm.runT=(calm()&&moving()&&prodStep())?vm.runT+dt:0;
+    if(vm.runT>=4){vm.inc='caseMenu';vm.incT=0;}
+    return false;
+   case 'caseMenu':{const b=first('#caseMenuBtn');if(!b)return false;
+    press(b,()=>{vm.inc='casePick';});return true;}
+   case 'casePick':{if(vm.incT<0.7)return true;const b=first('#casePicker button[data-case],#casePicker .caseRow button');
+    if(!b){vm.inc='caseMenu';return true;}
+    press(b,()=>{vm.inc='caseSolve';});return true;}
+   case 'caseSolve':
+    if(!apOn())apSet(true);
+    if(vm.incT>1&&calm()&&moving()){vm.runT+=dt;if(vm.runT>=3){vm.inc='faultMenu';vm.runT=0;}}else vm.runT=0;
+    return false;
+   case 'faultMenu':{const b=first('#faultBtn');if(!b)return false;
+    press(b,()=>{vm.inc='faultPick';});return true;}
+   case 'faultPick':{if(vm.incT<0.7)return true;const b=faultButton();
+    if(!b){vm.inc='faultMenu';return true;}
+    press(b,()=>{vm.inc='faultSolve';});return true;}
+   case 'faultSolve':
+    if(!apOn())apSet(true);
+    if(vm.incT>1&&calm())vm.inc='done';
+    return false;
+  }
+  return false;
+ }
+
+ /* ── 자동재생 연결 : 커서가 목표에 도착해야 한 단계 진행 ── */
+ const base=autoTick;
+ autoTick=function(dt){
+  if(!vm.on)return base.apply(this,arguments);
+  const now=performance.now();
+  if(S.tIdx>=STEPS().length||(LINE&&S.finished)||S.session?.ended||$1('#mEnd.on')){stop('영상 자동재생을 마쳤습니다.');return base.apply(this,arguments);}
+  const d=dt/Math.max(1,SPD);
+  if(director(d))return;
+  if(!apOn())apSet(true);
+  aim(autoTarget(),now);
+  if(!arrived())return;
+  return base.apply(this,arguments);
+ };
+
+ function start(){
+  if(!S||!S.session||!S.session.active){toast('먼저 과정을 고르고 [기본모드 · 체험] 으로 시작하세요.','bad');return;}
+  if(S.mode!=='easy'){toast('영상 자동재생은 기본모드 · 체험(학습)에서만 사용할 수 있습니다.','bad');return;}
+  vm.on=true;vm.inc=S.course==='operation'?'wait':'off';vm.runT=0;vm.incT=0;pending=null;vm.key=null;
+  const s5=$1('#spdGrp [data-s="5"]');if(s5){vm.silent=true;s5.click();vm.silent=false;}
+  apSet(true);cur.style.display='block';document.body.classList.add('vmOn');
+  vmBtn.textContent='■ 영상 자동재생 중지';vmBtn.classList.add('on');
+ }
+ function stop(msg,keepAuto){
+  if(!vm.on)return;vm.on=false;pending=null;if(!keepAuto)apSet(false);cur.style.display='none';document.body.classList.remove('vmOn');
+  vmBtn.textContent='🎬 영상 자동재생';vmBtn.classList.remove('on');if(msg)toast(msg);
+ }
+ const vmBtn=document.createElement('button');vmBtn.className='gbtn';vmBtn.id='vmBtn';vmBtn.type='button';vmBtn.textContent='🎬 영상 자동재생';
+ vmBtn.title='커서가 직접 조작하듯 학습 절차를 빠르게 시연합니다 (기본모드 · 체험 전용 · 촬영용)';
+ vmBtn.onclick=()=>vm.on?stop('영상 자동재생을 멈췄습니다.'):start();
+ const ap=$1('#apBtn');if(ap)ap.after(vmBtn);
+ const ab=$1('#apBtn');if(ab)ab.addEventListener('click',()=>{if(vm.on)stop('',true);},true);   /* 일반 자동재생 버튼을 누르면 영상 모드만 끈다 */
+})();
+</script>
 </body>
 </html>
