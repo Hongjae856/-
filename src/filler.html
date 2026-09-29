@@ -8619,6 +8619,16 @@ function cuteEllPoints(c,r,nu,nv){const rows=[];
   if(LINE){autoOn=on;autoT=0;}else{autoPlay=on;apT=99;apEl=null;apKey='';apStep=-1;apStall=0;}
   const b=$1('#apBtn');if(b){b.textContent=on?(LINE?'⏸ 자동재생 중지':'⏸ 자동재생 중'):'▶ 자동재생';b.classList.toggle(LINE?'on':'act',on);}
  }
+ /* 학습(기본·심화) 자동재생 중 알람 · 이상사례가 발생해도 자동재생을 끄지 않고 조치까지 이어서 진행한다
+    (알람 발생 직후 한 번의 정지 요청만 무시 · 평가모드 · 종료 · 사용자 조작에 의한 정지는 그대로) */
+ {const stopAuto=apStop;let keptFor=null;
+  apStop=function(){
+   try{
+    if(apOn()&&!isExam()&&S.session?.active&&!S.session.ended&&S.activeTrouble&&S.recovery&&S.recovery!==keptFor){
+     keptFor=S.recovery;return;}
+   }catch(e){}
+   return stopAuto.apply(this,arguments);
+  };}
  const css=document.createElement('style');css.textContent=`
 #vmCursor{position:fixed;left:0;top:0;width:30px;height:30px;z-index:2147483646;pointer-events:none;display:none;
  filter:drop-shadow(0 2px 3px rgba(0,0,0,.35));transform:translate(-3px,-2px)}
@@ -8681,7 +8691,7 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  // HMI redraws replace DOM nodes; retain arrival time for the same control.
  function targetId(e){
   if(!e)return null;
-  const key=e.id||['data-hb','data-ed','data-mt','data-case','data-fire','data-s'].map(k=>e.hasAttribute(k)?k+':'+e.getAttribute(k):'').filter(Boolean).join('|');
+  const key=e.id||['data-hb','data-ed','data-mt','data-nav','data-goto','data-case','data-fire','data-s'].map(k=>e.hasAttribute(k)?k+':'+e.getAttribute(k):'').filter(Boolean).join('|');
   return key?String(S.tIdx)+':'+(LINE?hMach:'filler')+':'+hScreen+':'+key:e;
  }
  function aim(e,now){
@@ -8822,6 +8832,99 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   const t=hintTarget();
   return t&&t.closest&&t.closest('#hmi,#mNum,#mTxt')?SLOW_CLICK_MS:0;
  }
+ /* 오른쪽 PLC(HMI) 버튼 단계 : 자동재생이 값을 바로 바꾸지 않고, 화면 이동 → 버튼 누르기를 차례로 보여 준다
+    (누를 곳에 노란 화살표를 약 2초 띄운 뒤 누름 · 절차와 판정은 그대로)
+    충전기 가동(기본) : 로그인 · 자동 : 제품공급 · 목표 생산량 설정
+    포장라인 가동     : HMI 로그인 · 중량선별기 영점 · 제조번호 · 사용기한 확인 · 팔렛타이저 원점 복귀 */
+ const plc={key:null,at:0,idx:-1,entered:false,sel:null};
+ const HBS=id=>'#hBody [data-hb="'+id+'"]';
+ function onMachine(m,hb,pre){
+  if(first(HBS(hb)))return {sel:HBS(hb),pre};
+  return {sel:'#hMachTabs [data-mt="'+m+'"]'};
+ }
+ function onFillerScreen(nav,goto,sel,pre){
+  if(first(sel))return {sel,pre};
+  if(goto){const g='#hBody [data-goto="'+goto+'"]';if(first(g))return {sel:g};}
+  return {sel:'#hNav [data-nav="'+nav+'"]'};
+ }
+ function plcPlan(){
+  try{
+   if(incidentActive()||(S.recovery&&S.activeTrouble))return null;
+   const st=STEPS()[S.tIdx];if(!st)return null;
+   if(plc.idx!==S.tIdx){plc.idx=S.tIdx;plc.entered=false;}
+   if(typeof st.ok==='function'&&st.ok())return null;
+   if(LINE){
+    switch(st.k){
+     case 'login':
+      if(S.user||!S.main)return null;
+      return first('#lgOk')?{sel:'#lgOk'}:{sel:'#icLock'};
+     case 'cwZero':
+      if(S.cw.zeroDone)return null;
+      return onMachine('cw','cw_zero');
+     case 'prLot':
+      return onMachine('pr','pr_confirm',()=>{LOT.no=LOT.no||'2F006';LOT.exp=LOT.exp||'2029.06.25';});
+     case 'teach':
+      return onMachine('pt','pta_reset');
+    }
+    return null;
+   }
+   if(!S.demo||workerJob||apBusy)return null;
+   const t=String(typeof st.t==='function'?st.t():st.t);
+   if(/로그인/.test(t)){
+    if(S.user||!S.main)return null;
+    if(first('#lgOk'))return {sel:'#lgOk'};
+    return first('#lgKey')?{sel:'#lgKey'}:null;
+   }
+   if(/^자동 :/.test(t))
+    return onFillerScreen('auto',null,HBS('a_feed'),()=>{S.auto.check=true;});
+   if(/^목표/.test(t)){
+    const nm=$1('#mNum');
+    if(nm&&nm.classList.contains('on')&&numCtx){
+     const v=isExam()?'500':'1500';
+     if(numBuf!==v){numBuf=v;const i=$1('#numV');if(i)i.value=v;}
+     return {sel:'#numOk',pre:()=>{plc.entered=true;}};
+    }
+    if(!plc.entered&&first('#hBody [data-ed="cn_tg"]'))return {sel:'#hBody [data-ed="cn_tg"]'};
+    return onFillerScreen('main','count',HBS('cn_set'));
+   }
+  }catch(e){}
+  return null;
+ }
+ /* 화살표를 누를 곳 위에 고정 — HMI 를 다시 그리면서 화살표가 탭 묶음 쪽으로 돌아가지 않게 한다 */
+ function pinArrow(){
+  const g=$1('#guideArrow'),e=plc.sel&&apOn()&&first(plc.sel);
+  if(!g||!e)return;
+  const r=e.getBoundingClientRect();
+  g.style.display='block';
+  if(LINE){g.style.left=(r.left+r.width/2-13)+'px';g.style.top=Math.max(2,r.top-30)+'px';}
+  else{g.style.left=Math.min(Math.max(r.x+r.width/2,28),innerWidth-28)+'px';g.style.top=Math.max(56,r.y+4)+'px';}
+ }
+ if(LINE){const ah=applyHint;applyHint=function(){const r=ah.apply(this,arguments);pinArrow();return r;};}
+ else{const gp=guidePointer;guidePointer=function(){const r=gp.apply(this,arguments);pinArrow();return r;};}
+ /* 누르기 : 화면 버튼의 동작 그대로 실행 (클릭 효과 · 커서 포함) */
+ function plcPress(p,e){
+  if(p.pre)p.pre();
+  vm.lastAct=performance.now();tap(e);
+  if(typeof e.onclick==='function')e.onclick.call(e,{target:e,currentTarget:e,preventDefault(){},stopPropagation(){}});
+  else nativeClick.call(e);
+  plc.key=null;
+ }
+ /* 반환값 true : 이번 틱은 PLC 단계 진행이 맡았으니 기존 자동재생을 건너뛴다 */
+ function plcDrive(now,video){
+  const p=plcPlan();
+  if(!p){plc.sel=null;plc.key=null;return false;}
+  if(p.wait){plc.sel=null;return true;}
+  const e=first(p.sel);
+  if(!e){plc.sel=null;return false;}
+  plc.sel=p.sel;pinArrow();
+  if(video){aim(e,now);if(!arrived()||vm.settle<1500)return true;plcPress(p,e);vm.nextAt=now+300;return true;}
+  /* HMI 는 수시로 다시 그려지므로 요소가 아니라 '단계 + 누를 곳' 으로 같은 대상인지 판단한다 */
+  const key=S.tIdx+'|'+p.sel;
+  if(key!==plc.key){plc.key=key;plc.at=now;}
+  if(now-plc.at<SLOW_CLICK_MS||now-(vm.lastAct||0)<SLOW_CLICK_MS)return true;
+  plcPress(p,e);
+  return true;
+ }
  function confirmNormalDialog(now){
   const dialog=activeDialog();
   if(!dialog){normalDialog=null;return false;}
@@ -8842,9 +8945,16 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   if(!vm.on){
    if(!apOn()){normalDialog=null;return;}
    if(confirmNormalDialog(now))return;
+   if(plcDrive(now,false))return;
    /* 이상사례 · 알람 조치와 오른쪽 PLC(HMI) 조작은 버튼을 누른 뒤 약 2초 기다렸다가 다음 버튼을 누른다
-      (누르는 동작 사이만 띄우고, 상태 대기 · 판단은 그대로 진행) */
-   if(slowGap()&&now-(vm.lastAct||0)<slowGap())return;
+      (누르는 동작 사이만 띄우고, 상태 대기 · 판단은 그대로 진행)
+      2초는 실제 시간 기준 — 배속과 무관하게, 2초가 지나면 기존 자동재생의 대기 시간을 채워 바로 다음 버튼을 누른다 */
+   const gap=slowGap();
+   if(gap){
+    if(now-(vm.lastAct||0)<gap)return;
+    if(vm.primed!==vm.lastAct){vm.primed=vm.lastAct;
+     if(LINE)autoT=Math.max(autoT,1.1);else{apT=Math.max(apT,99);if(S.demo)S.demoClock=1;}}
+   }
    return base.apply(this,arguments);
   }
   if(S.session?.ended||$1('#mEnd.on')){stop('영상 자동재생을 마쳤습니다.');return base.apply(this,arguments);}
@@ -8872,6 +8982,7 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
    if(vm.ending)return;}
   if(director(d))return;
   if(!apOn())apSet(true);
+  if(plcDrive(now,true))return;
   const target=autoTarget();
   aim(target,now);
   if(!arrived())return;
