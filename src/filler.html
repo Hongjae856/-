@@ -8653,6 +8653,7 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   if(LINE){
    const g=$1('#dragPartGhost');if(g&&g.style.display==='block')return g;
    const ad=$1('#adjustDialog');if(ad&&!ad.hidden)return first('#adjustLock')||ad;
+   if(palletStuck())return first('[data-hb="pta_ready"]')||first('#mPallet');
    return [...document.querySelectorAll('.hintNow')].find(vis)||null;
   }
   const f=[...document.querySelectorAll('.apflash')].find(vis);if(f)return f;
@@ -8705,6 +8706,19 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  try{const o=cpPerform;cpPerform=function(){T();return o.apply(this,arguments);};}catch(e){}
  try{const o=hbClick;hbClick=function(){T();return o.apply(this,arguments);};}catch(e){}
 
+ /* 기존 자동재생 보완 (영상 모드와 무관) : 운전 감시 중 팔레트 교체 뒤 고정이 안 돼 T230 이 걸리면
+    RESET 만 반복하며 멈추던 문제 — 팔레트 투입 · [작업준비 확인] 으로 고정한 뒤 RESET → START 로 이어간다 */
+ function palletStuck(){try{return LINE&&STEPS()[S.tIdx]?.k==='watch'&&!S.running&&!S.activeTrouble&&tripAlarms().some(a=>a.key==='T230')&&!(S.mat.pallet&&S.pt.palletIn&&S.pt.palletFixed);}catch(e){return false;}}
+ if(LINE){
+  const ap=apK;
+  apK=function(st){
+   if(palletStuck()){
+    if(!S.mat.pallet||!S.pt.palletIn){const m=$1('#mPallet');if(m){m.click();return;}}
+    if(!S.pt.palletFixed){hbClick('pta_ready');return;}
+   }
+   return ap.apply(this,arguments);
+  };
+ }
  /* 포장라인 수치 조절 : 영상에서는 조절점 클릭 → 조절창 표시 → 잠시 뒤 [고정 · 확인] 으로 나눠 보여준다 */
  if(LINE&&typeof openAdjustment==='function'){
   const ap=apK;let shownAt=0;
