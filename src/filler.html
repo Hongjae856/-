@@ -4179,7 +4179,7 @@ function pxLightUniforms(gl,prog,eye,ao,lm,sm){
  gl.useProgram(prog.p);
  gl.uniform3fv(prog.u('uEye'),eye);gl.uniform3fv(prog.u('uL1'),PX_L1);gl.uniform3fv(prog.u('uL2'),PX_L2);gl.uniform3fv(prog.u('uL3'),PX_L3);
  gl.uniform3fv(prog.u('uAO'),ao);gl.uniformMatrix4fv(prog.u('uLMat'),false,lm.m);
- gl.uniform4fv(prog.u('uSMI'),[lm.info[0],sm.ok?1:0,lm.info[2],lm.info[3]]);gl.uniform1f(prog.u('uExpo'),PX_EXPO);
+ gl.uniform4fv(prog.u('uSMI'),[lm.info[0],(sm.ok&&window.__shadowOn!==false)?1:0,lm.info[2],lm.info[3]]);gl.uniform1f(prog.u('uExpo'),PX_EXPO);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,sm.tex);gl.uniform1i(prog.u('uSM'),0);
 }
 /* 둥근 모서리 박스 위상(한 번만 생성) : 6면(안쪽으로 r 만큼 줄임) + 12 모서리 띠 + 8 꼭짓점 삼각형.
@@ -4236,8 +4236,8 @@ const main=pxProgram(gl,
 'attribute vec3 a_pos;attribute vec3 a_w;attribute vec3 a_n;attribute vec4 a_col;attribute vec4 a_mat;attribute vec2 a_uv;'+
 'varying vec3 vW;varying vec3 vN;varying vec4 vC;varying vec4 vM;varying vec2 vUV;void main(){'+VS_PROJ+'vW=a_w;vN=a_n;vC=a_col;vM=a_mat;vUV=a_uv;}',
 PX_HEAD+PX_LIGHT+'varying vec3 vW;varying vec3 vN;varying vec4 vC;varying vec4 vM;varying vec2 vUV;uniform vec3 u_ink;void main(){vec3 c=vC.rgb;'+
-'if(vM.w>0.5){float p=fract((vUV.x+vUV.y)/18.0);float stripe=smoothstep(0.02,0.06,p)*(1.0-smoothstep(0.48,0.52,p));c*=mix(vec3(1.0),u_ink,stripe);}'+
-'if(vM.z<0.5)c=pxShade(c,vM.x,vW,normalize(vN),pow(vM.y,2.2));gl_FragColor=vec4(c*vC.a,vC.a);}',
+'float ink=0.0;if(vM.w>0.5){float p=fract((vUV.x+vUV.y)/18.0);float stripe=smoothstep(0.02,0.06,p)*(1.0-smoothstep(0.48,0.52,p));c*=mix(vec3(1.0),u_ink*0.85,stripe);ink=stripe;}'+
+'if(vM.z<0.5){c=pxShade(c,vM.x*(1.0-ink),vW,normalize(vN),pow(vM.y,2.2));if(ink>0.0){float l=dot(c,vec3(0.299,0.587,0.114));c=clamp(mix(vec3(l),c,1.0+0.9*ink),0.0,1.0);}}gl_FragColor=vec4(c*vC.a,vC.a);}',
 ['a_pos','a_w','a_n','a_col','a_mat','a_uv']);
 const catcher=pxProgram(gl,'attribute vec3 a_pos;attribute vec3 a_w;varying vec3 vW;void main(){'+VS_PROJ+'vW=a_w;}',PX_CATCH_FS,['a_pos','a_w']);
 const shadow=pxProgram(gl,PX_SM_VS,PX_SM_FS,['p']);
@@ -4274,13 +4274,13 @@ if(gpu.capacity<gpu.data.byteLength){gl.bufferData(gl.ARRAY_BUFFER,gpu.data.byte
 gl.bufferSubData(gl.ARRAY_BUFFER,0,gpu.data.subarray(0,offset));
 const S=VSTRIDE*4, ptr=(i,k,off)=>{gl.enableVertexAttribArray(i);gl.vertexAttribPointer(i,k,gl.FLOAT,false,S,off*4);};
 /* ① 그림자 맵 : 불투명 형상의 월드 좌표만 광원 시점으로 기록 */
-if(gpu.sm.ok)pxShadowPass(gl,gpu.shadow,gpu.sm,gpu.lm,()=>{for(let i=1;i<6;i++)gl.disableVertexAttribArray(i);gl.bindBuffer(gl.ARRAY_BUFFER,gpu.buffer);ptr(0,3,3);},opaqueCount);
+if(gpu.sm.ok&&window.__shadowOn!==false)pxShadowPass(gl,gpu.shadow,gpu.sm,gpu.lm,()=>{for(let i=1;i<6;i++)gl.disableVertexAttribArray(i);gl.bindBuffer(gl.ARRAY_BUFFER,gpu.buffer);ptr(0,3,3);},opaqueCount);
 gl.viewport(0,0,width,height);gl.clearColor(0,0,0,0);gl.clearDepth(1);gl.depthMask(true);
 gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 const eye=[CAMP.x,CAMP.y,CAMP.z],ao=[AO_B,AO_H,0.006452];
 gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
 /* ② 바닥 그림자 받이 : 2D 바닥 위에 그림자만 얹는다 (깊이 기록 없음 → 이후 형상이 덮어쓴다) */
-if(gpu.sm.ok){
+if(gpu.sm.ok&&window.__shadowOn!==false){
 const y=FLOORY+0.5,x0=SCENE_LO[0],x1=SCENE_HI[0],z0=SCENE_LO[2],z1=SCENE_HI[2];
 const quad=clipWorld([P3(x0,y,z0),P3(x1,y,z0),P3(x1,y,z1),P3(x0,y,z1)],p=>prj(p).z-60);
 if(quad.length>=3){
@@ -8514,5 +8514,91 @@ try{ window.__v9={ showTrbDone, showCaseDone, TIP }; }catch(e){}
 })();
 </script>
 
+<script>
+/* 2026-09-29 귀여운 다관절 클린룸 작업자 — 형상 목록(로컬 좌표, y 위, 정면 -z, 신장 약 500) */
+function cuteOperatorShapes(o){
+ const cr=o.crouch||0,S=[],E=(c,r,col)=>S.push({t:'e',c,r,col}),C=(a,b,r,col)=>S.push({t:'c',a,b,r,col});
+ const IK=(A,T,hint,u=86,l=84)=>{const d0=T.map((v,i)=>v-A[i]),len=Math.hypot(...d0)||1,d=Math.max(2,Math.min(len,u+l-.1)),n=d0.map(v=>v/len);
+  const hn=hint[0]*n[0]+hint[1]*n[1]+hint[2]*n[2];let b=hint.map((v,i)=>v-n[i]*hn),bl=Math.hypot(...b);if(bl<.01){b=[0,0,1];bl=1;}
+  const a=(u*u-l*l+d*d)/(2*d),h=Math.sqrt(Math.max(0,u*u-a*a));return {e:A.map((v,i)=>v+n[i]*a+b[i]/bl*h),h:A.map((v,i)=>v+n[i]*d)};};
+ const sx=o.stride==='x'?1:0,sz=o.stride==='x'?0:-1;
+ /* 다리 : 허벅지 · 무릎 관절 · 정강이 · 둥근 안전화 */
+ for(const s of [-1,1]){
+  const g=Math.sin((o.gait||0)+s*Math.PI/2)*(o.walk||0),lift=Math.max(0,g)*13;
+  const hip=[s*22,228-cr,0],knee=[s*22+g*20*sx,116-cr*.12,g*20*sz-cr*.5],ank=[s*23+g*40*sx,40+lift,g*40*sz];
+  C(hip,knee,22,'suit');E(knee,[20,19,20],'suit');C(knee,ank,18,'suit');
+  E([ank[0],20+lift,ank[2]-8],[22,20,32],'boot');E([ank[0],7+lift,ank[2]-8],[23,6,33],'sole');
+ }
+ /* 몸통 : 골반 + 달걀형 상체 */
+ const TY=300-cr,TR=[47,88,38];
+ E([0,236-cr,0],[45,40,35],'suit');E([0,TY,0],TR,'suit');
+ const front=y=>{const q=(y-TY)/TR[1];return -TR[2]*Math.sqrt(Math.max(0,1-q*q))-.6;};
+ for(let y=226-cr;y<372-cr;y+=18)C([0,y,front(y)],[0,y+18,front(y+18)],1.6,'seam');
+ E([20,330-cr,front(330-cr)-.6],[9,11,2.4],'badge');
+ /* 팔 : 어깨 · 팔꿈치 관절 + 둥근 장갑 */
+ for(const [i,s] of [[0,-1],[1,1]]){
+  const sh=[s*50,366-cr,0];E(sh,[19,19,19],'suit');
+  const k=IK(sh,o.goals[i],[s*.45,0,.9]);C(sh,k.e,16,'suit');E(k.e,[15,15,15],'suit');C(k.e,k.h,13,'suit');
+  E([k.h[0],k.h[1]-6,k.h[2]-3],[14,15,14],'glove');E([k.h[0]-s*9,k.h[1]-2,k.h[2]-9],[6,6,6],'glove');
+ }
+ /* 머리 : 큰 두건 + 고글 창 + 얼굴 + 모자 */
+ const HY=440-cr;
+ C([0,378-cr,0],[0,396-cr,0],17,'suit');
+ E([0,HY,0],[53,55,48],'suit');
+ E([0,HY+2,-34],[41,25,18],'visor');
+ E([0,HY+2,-40],[34,18,14],'skin');
+ for(const s of [-1,1]){E([s*12,HY+6,-53],[3.8,4.8,2.4],'eye');E([s*23,HY-4,-49.5],[5.5,3.2,2],'blush');}
+ E([0,HY-7,-54],[5,2,1.6],'smile');
+ E([0,HY+45,0],[47,13,43],'cap');
+ return S;
+}
+function cuteEllPoints(c,r,nu,nv){const rows=[];
+ for(let j=0;j<=nv;j++){const ph=j/nv*Math.PI,row=[];
+  for(let i=0;i<nu;i++){const th=i/nu*Math.PI*2,sx=Math.sin(ph)*Math.cos(th),sy=Math.cos(ph),sz=Math.sin(ph)*Math.sin(th);
+   const p=[c[0]+r[0]*sx,c[1]+r[1]*sy,c[2]+r[2]*sz],n=[sx/r[0],sy/r[1],sz/r[2]],l=Math.hypot(...n)||1;row.push({p,n:n.map(v=>v/l)});}
+  rows.push(row);}
+ return rows;}
+
+/* ── 충전기 : 작업자 렌더러 (다관절 · 귀여운 클린룸 작업자) ── */
+(function(){
+ const HEX={suit:'#f2f4f6',seam:'#c7d1da',boot:'#e0e6ec',sole:'#9aa8b6',badge:'#1a8f91',glove:'#56a3c2',
+  visor:'#264b59',skin:'#f9cba8',eye:'#1f242d',blush:'#fb9e99',smile:'#8c4843',cap:'#fcfdff',capBand:'#dbe4ea'};
+ worker3=function(wx,wz,opt={}){
+  const X=X3(wx),Z=wz,F=Y3(646);
+  const reach=clamp(opt.reach||0,0,1),target=opt.target||{x:X-35,y:F+290,z:Z-45};
+  const crouch=clamp(F+405-target.y-125,0,105)*reach;
+  const goals=[-1,1].map(s=>{const idle=[s*64,222-crouch,-4],t=[target.x+s*14-X,target.y-F,target.z-Z];return idle.map((v,k)=>v+(t[k]-v)*reach);});
+  const P=a=>({x:X+a[0],y:F+a[1],z:Z+a[2]}),N=n=>({x:n[0],y:n[1],z:n[2]});
+  const lo=typeof far!=='undefined'&&far;
+  for(const s of cuteOperatorShapes({gait:opt.phase||0,walk:opt.walk||0,crouch,goals,stride:'x'})){
+   const hex=HEX[s.col],o=s.col==='suit'||s.col==='cap'?{m:.08,e:'#dde3e9',br:1.18}:{m:.1};
+   if(s.t==='c'){limb(P(s.a),P(s.b),s.r,s.r,hex,lo?10:16,o);continue;}
+   const big=Math.max(...s.r)>25,rows=cuteEllPoints(s.c,s.r,lo?8:(big?18:12),lo?5:(big?11:8));
+   const V=q=>({...P(q.p),n:N(q.n)});
+   for(let j=0;j<rows.length-1;j++)for(let i=0;i<rows[j].length;i++){const k=(i+1)%rows[j].length;
+    const a=V(rows[j][i]),b=V(rows[j][k]),c=V(rows[j+1][k]),d=V(rows[j+1][i]);
+    if(j===0)FA([a,c,d],hex,o);else if(j===rows.length-2)FA([a,b,c],hex,o);else FA([a,b,c,d],hex,o);}
+  }
+ };
+})();
+</script>
+
+<script>
+/* 그림자 ON/OFF — 3D 도구 모음의 [그림자] 버튼. 끄면 그림자 맵 계산도 건너뛴다 */
+(function(){
+ window.__shadowOn=true;
+ function paint(b){b.classList.toggle('on',window.__shadowOn);if(b.dataset.inline){b.style.background=window.__shadowOn?'#1f5fbf':'';b.style.color=window.__shadowOn?'#fff':'';}}
+ function add(){if(document.getElementById('v3Shadow'))return;
+  const b=document.createElement('button');b.id='v3Shadow';b.textContent='그림자';b.title='그림자 켜기/끄기 (저사양 PC에서는 끄면 빨라집니다)';
+  b.onclick=e=>{e.stopPropagation();window.__shadowOn=!window.__shadowOn;paint(b);
+   try{if(typeof m3!=='undefined')m3.dirty=true;}catch(_){}try{if(typeof M3!=='undefined')M3.dirty=true;}catch(_){}
+   if(typeof toast==='function')toast(window.__shadowOn?'그림자 표시':'그림자 숨김');};
+  const nav=document.getElementById('sectionNav'),exp=document.getElementById('v3Exp');
+  if(typeof M3!=='undefined'&&nav){b.className='gbtn';b.dataset.inline=1;b.style.marginLeft='auto';nav.appendChild(b);}
+  else if(exp)exp.after(b);else return;
+  paint(b);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+})();
+</script>
 </body>
 </html>

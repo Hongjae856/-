@@ -4126,7 +4126,7 @@ function pxLightUniforms(gl,prog,eye,ao,lm,sm){
  gl.useProgram(prog.p);
  gl.uniform3fv(prog.u('uEye'),eye);gl.uniform3fv(prog.u('uL1'),PX_L1);gl.uniform3fv(prog.u('uL2'),PX_L2);gl.uniform3fv(prog.u('uL3'),PX_L3);
  gl.uniform3fv(prog.u('uAO'),ao);gl.uniformMatrix4fv(prog.u('uLMat'),false,lm.m);
- gl.uniform4fv(prog.u('uSMI'),[lm.info[0],sm.ok?1:0,lm.info[2],lm.info[3]]);gl.uniform1f(prog.u('uExpo'),PX_EXPO);
+ gl.uniform4fv(prog.u('uSMI'),[lm.info[0],(sm.ok&&window.__shadowOn!==false)?1:0,lm.info[2],lm.info[3]]);gl.uniform1f(prog.u('uExpo'),PX_EXPO);
  gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,sm.tex);gl.uniform1i(prog.u('uSM'),0);
 }
 /* 둥근 모서리 박스 위상(한 번만 생성) : 6면(안쪽으로 r 만큼 줄임) + 12 모서리 띠 + 8 꼭짓점 삼각형.
@@ -4245,14 +4245,14 @@ function depthPaint(w,h){
   up(B.p,GP); up(B.n,GN); up(B.c,GC);
   const nOpq=GP.length/3;
   /* ① 그림자 맵 : 불투명 형상만 광원 시점 깊이 기록 */
-  if(GPU.sm.ok) pxShadowPass(g,GPU.shadow,GPU.sm,GPU.lm,()=>posOnly(B.p),nOpq);
+  if(GPU.sm.ok&&window.__shadowOn!==false) pxShadowPass(g,GPU.shadow,GPU.sm,GPU.lm,()=>posOnly(B.p),nOpq);
   g.viewport(0,0,w,h);
   g.clearColor(0,0,0,0); g.clearDepth(1);
   g.depthMask(true);
   g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
   g.enable(g.BLEND); g.blendFunc(g.ONE,g.ONE_MINUS_SRC_ALPHA);
   /* ② 바닥 그림자 받이 : 깊이 기록 없이 2D 바닥 위에 그림자만 얹는다 (이후 형상이 덮어쓴다) */
-  if(GPU.sm.ok){
+  if(GPU.sm.ok&&window.__shadowOn!==false){
     const y=0.4, x0=SCENE_LO[0], x1=SCENE_HI[0], z0=SCENE_LO[2], z1=SCENE_HI[2];
     pxLightUniforms(g,GPU.catcher,camEye,ao,GPU.lm,GPU.sm);
     g.uniformMatrix4fv(GPU.catcher.u("mvp"),false,camMVP);
@@ -5018,7 +5018,7 @@ function mPalletizer(){
   const E=expOff("pt");
   const x0=X3(2150)+E, x1=X3(2520)+E, H=Y3(268);      /* 프레임 높이 ≈ 폭 */
   /* ══ 구역 바닥 : 밝은 회색 에폭시 (앞 4기종의 연녹색과 구분) ══ */
-  bx(X3(2136)+E,x1+740,-1.0,0,PZB-170,PZF+230,COL.floorPT,COL.floorPT);
+  bx(X3(2136)+E,x1+1000,-1.0,0,PZB-230,PZF+230,COL.floorPT,COL.floorPT);
 
   /* ══ ① 포탈 프레임 : 각파이프 4주 + 상부 빔 ══ */
   const col=[[x0+16,PZB+16],[x1-16,PZB+16],[x0+16,PZF-16],[x1-16,PZF-16]];
@@ -5119,7 +5119,7 @@ function mPalletizer(){
     }
     /* ① 빈 팔레트 4매 적층 (전면측) */
     { const cx=x1+310, cz=PZF+74;
-      for(let i=0;i<4;i++) pal(cx,2+i*20,cz,false); }
+      for(let i=0;i<(window.__spareN??4);i++) pal(cx,2+i*20,cz,false); }
   })();
 
   /* ══ ⑧ 투명 폴리카보네이트 안전 패널 ══ */
@@ -6857,8 +6857,8 @@ Object.assign(COL,{
 PRODS.length=0;
 PRODS.push(
  {k:"A", nm:"샤이닝 정", cd:"SHN-10", cartonA:62, cartonB:20, cartonC:98,
-  cols:1, rows:5, stk:6, caseL:395, caseW:255, caseH:235, wt:21.5, tolLow:1.0, tolUp:1.5, tol:1.25,
-  palCols:3, palRows:4, palLayers:3, tabs:10,
+  cols:1, rows:5, stk:2, caseL:395, caseW:255, caseH:235, wt:21.5, tolLow:1.0, tolUp:1.5, tol:1.25,
+  palCols:3, palRows:4, palLayers:1, tabs:10,
   d:"진경·진통제 · 10정/카톤 · 박스 50입(1열 × 5행 × 10단) · 팔레트 3열 × 4줄 × 4단 = 48 EA"}
 );
 
@@ -6872,9 +6872,9 @@ initState=function(){
   S.spd.line=200;                       /* 실측 146 cpm */
   S.cw.up=23.0; S.cw.low=20.5;          /* 기준 21.5 g · −1.0 / +1.5 */
   S.cfg.wt=21.5; S.cfg.tol=1.25;
-  S.cfg.cols=1; S.cfg.rows=5; S.cfg.stk=6;
-  S.cfg.palCols=3; S.cfg.palRows=4; S.cfg.palLayers=3;   /* 3열 × 4줄 × 4단 = 48 EA */
-  S.cp.stackTarget=30;                 /* 박스 1개 = 카톤 100 (5×2×10) */
+  S.cfg.cols=1; S.cfg.rows=5; S.cfg.stk=2;
+  S.cfg.palCols=3; S.cfg.palRows=4; S.cfg.palLayers=1;   /* 3열 × 4줄 × 1단 = 12 EA */
+  S.cp.stackTarget=10;                 /* 박스 1개 = 카톤 10 (1×5×2) */
   S.ct.wheel=0;                         /* 성형 원판 회전각 (가동 시에만 증가) */
   S.cp.formPh=0;                        /* 박스 성형 위상 */
   S.pr.msg="제조번호 "+LOT.no+" / 사용기한 "+LOT.exp;
@@ -7458,9 +7458,9 @@ window.__m3.wk=()=>WK.map(w=>({id:w.id,x:w.x,z:w.z,job:w.job}));
 
 // Packaging sequence: one physical batch, no per-carton case pusher.
 const revInit=initState;
-initState=function(){revInit();S.spd.line=200;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=6;S.cp.stackTarget=30;S.cp.batchPhase=null;S.cp.batchT=0;S.cp.boxReady=0;};
+initState=function(){revInit();S.spd.line=200;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=2;S.cp.stackTarget=10;S.cp.batchPhase=null;S.cp.batchT=0;S.cp.boxReady=0;};
 const revProduct=applyProduct;
-applyProduct=function(p){revProduct(p);S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=6;S.cp.stackTarget=30;};
+applyProduct=function(p){revProduct(p);S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=2;S.cp.stackTarget=10;};
 const revLine=stepLine;
 stepLine=function(dt){
  if(!S.running)return;
@@ -7643,7 +7643,7 @@ const TARGET_DEFAULT=20000;          /* 로트 목표 생산량 (HMI 기본값) 
 const revEdit=edClick;
 edClick=function(id){ if(id==='sp_line'){ toast("라인 속도는 "+LINE_CPM+" CPM 으로 고정되어 있습니다."); return; } revEdit(id); };
 const revTick=tick;
-tick=function(dt){S.spd.line=LINE_CPM;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=6;S.cp.stackTarget=30;revTick(dt);};
+tick=function(dt){S.spd.line=LINE_CPM;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=2;S.cp.stackTarget=10;revTick(dt);};
 /* 배속(×1·×2·×5) 은 상단 메뉴에 그대로 노출한다 */
 const speedEl=$('#motorRPM'); if(speedEl){ speedEl.value=String(LINE_CPM);
   speedEl.addEventListener('change',()=>{ speedEl.value=String(LINE_CPM); S.spd.line=LINE_CPM; }); }
@@ -8554,7 +8554,7 @@ _s2Key=null;_s2=null;rqKey=null;rqArr=null;
 function resetOperationPrerequisites(){
  palletTransfer=null;S.palletReadyForRemoval=false;
  if(S.course!=='change'){S.cw.zeroDone=false;S.pt.homed=false;S.pt.taught=false;flags.prLot=false;flags.prExp=false;}
- S.cfg.stk=6;S.cp.stackTarget=30;S.cfg.palLayers=3;
+ S.cfg.stk=2;S.cp.stackTarget=10;S.cfg.palLayers=1;
 }
 const linePrerequisiteStart=startSim,linePrerequisiteReset=resetAll;
 startSim=function(mode){linePrerequisiteStart(mode);resetOperationPrerequisites();};
@@ -8569,7 +8569,7 @@ placeOnPallet=function(slot3){
  S.pt.busy=0;S.pt.done++;S.pt.layer=Math.floor(palletStack.length/(S.cfg.palCols*S.cfg.palRows));
  if(palletStack.length>=palletCapacity()){
   S.running=false;S.cpm=0;S.pt.palletFixed=false;S.palletReadyForRemoval=true;
-  toast('팔레트 3단 적재 완료 · [팔레트 반출] → 빈 팔레트 투입 → START','good');
+  toast('팔레트 1단 적재 완료 · [팔레트 반출] → 빈 팔레트 투입 → START','good');
  }
 };
 function removeLoadedPallet(){
@@ -8598,7 +8598,7 @@ bindUtil();
 const handlingChecks=startChecks;
 startChecks=function(){const checks=handlingChecks().filter(c=>c.k!=='P200');checks.push({nm:'팔레트 반출 완료 및 빈 팔레트 준비',ok:!S.palletReadyForRemoval&&!palletTransfer,k:'PALLET_HANDLING'});return checks;};
 const handlingPTScreen=SCREENS.pt.main;
-SCREENS.pt.main=function(){return handlingPTScreen()+(S.palletReadyForRemoval?'<div style="padding:14px;background:#fff5d6;border-radius:10px;font-size:17px">3단 적재 완료 · 반출 후 빈 팔레트를 투입하세요.</div>'+btn(false,palletTransfer?'팔레트 반출 중':'팔레트 반출','PALLET JACK','↗','pta_out'):'');};
+SCREENS.pt.main=function(){return handlingPTScreen()+(S.palletReadyForRemoval?'<div style="padding:14px;background:#fff5d6;border-radius:10px;font-size:17px">1단 적재 완료 · 반출 후 빈 팔레트를 투입하세요.</div>'+btn(false,palletTransfer?'팔레트 반출 중':'팔레트 반출','PALLET JACK','↗','pta_out'):'');};
 const handlingTick=trainingTick;
 trainingTick=function(dt){
  handlingTick(dt);const t=palletTransfer;if(!t)return;
@@ -10448,5 +10448,260 @@ try{ window.__v9={ showTrbDone, showCaseDone, TIP }; }catch(e){}
 })();
 </script>
 
+<script>
+/* 2026-09-29 귀여운 다관절 클린룸 작업자 — 형상 목록(로컬 좌표, y 위, 정면 -z, 신장 약 500) */
+function cuteOperatorShapes(o){
+ const cr=o.crouch||0,S=[],E=(c,r,col)=>S.push({t:'e',c,r,col}),C=(a,b,r,col)=>S.push({t:'c',a,b,r,col});
+ const IK=(A,T,hint,u=86,l=84)=>{const d0=T.map((v,i)=>v-A[i]),len=Math.hypot(...d0)||1,d=Math.max(2,Math.min(len,u+l-.1)),n=d0.map(v=>v/len);
+  const hn=hint[0]*n[0]+hint[1]*n[1]+hint[2]*n[2];let b=hint.map((v,i)=>v-n[i]*hn),bl=Math.hypot(...b);if(bl<.01){b=[0,0,1];bl=1;}
+  const a=(u*u-l*l+d*d)/(2*d),h=Math.sqrt(Math.max(0,u*u-a*a));return {e:A.map((v,i)=>v+n[i]*a+b[i]/bl*h),h:A.map((v,i)=>v+n[i]*d)};};
+ const sx=o.stride==='x'?1:0,sz=o.stride==='x'?0:-1;
+ /* 다리 : 허벅지 · 무릎 관절 · 정강이 · 둥근 안전화 */
+ for(const s of [-1,1]){
+  const g=Math.sin((o.gait||0)+s*Math.PI/2)*(o.walk||0),lift=Math.max(0,g)*13;
+  const hip=[s*22,228-cr,0],knee=[s*22+g*20*sx,116-cr*.12,g*20*sz-cr*.5],ank=[s*23+g*40*sx,40+lift,g*40*sz];
+  C(hip,knee,22,'suit');E(knee,[20,19,20],'suit');C(knee,ank,18,'suit');
+  E([ank[0],20+lift,ank[2]-8],[22,20,32],'boot');E([ank[0],7+lift,ank[2]-8],[23,6,33],'sole');
+ }
+ /* 몸통 : 골반 + 달걀형 상체 */
+ const TY=300-cr,TR=[47,88,38];
+ E([0,236-cr,0],[45,40,35],'suit');E([0,TY,0],TR,'suit');
+ const front=y=>{const q=(y-TY)/TR[1];return -TR[2]*Math.sqrt(Math.max(0,1-q*q))-.6;};
+ for(let y=226-cr;y<372-cr;y+=18)C([0,y,front(y)],[0,y+18,front(y+18)],1.6,'seam');
+ E([20,330-cr,front(330-cr)-.6],[9,11,2.4],'badge');
+ /* 팔 : 어깨 · 팔꿈치 관절 + 둥근 장갑 */
+ for(const [i,s] of [[0,-1],[1,1]]){
+  const sh=[s*50,366-cr,0];E(sh,[19,19,19],'suit');
+  const k=IK(sh,o.goals[i],[s*.45,0,.9]);C(sh,k.e,16,'suit');E(k.e,[15,15,15],'suit');C(k.e,k.h,13,'suit');
+  E([k.h[0],k.h[1]-6,k.h[2]-3],[14,15,14],'glove');E([k.h[0]-s*9,k.h[1]-2,k.h[2]-9],[6,6,6],'glove');
+ }
+ /* 머리 : 큰 두건 + 고글 창 + 얼굴 + 모자 */
+ const HY=440-cr;
+ C([0,378-cr,0],[0,396-cr,0],17,'suit');
+ E([0,HY,0],[53,55,48],'suit');
+ E([0,HY+2,-34],[41,25,18],'visor');
+ E([0,HY+2,-40],[34,18,14],'skin');
+ for(const s of [-1,1]){E([s*12,HY+6,-53],[3.8,4.8,2.4],'eye');E([s*23,HY-4,-49.5],[5.5,3.2,2],'blush');}
+ E([0,HY-7,-54],[5,2,1.6],'smile');
+ E([0,HY+45,0],[47,13,43],'cap');
+ return S;
+}
+function cuteEllPoints(c,r,nu,nv){const rows=[];
+ for(let j=0;j<=nv;j++){const ph=j/nv*Math.PI,row=[];
+  for(let i=0;i<nu;i++){const th=i/nu*Math.PI*2,sx=Math.sin(ph)*Math.cos(th),sy=Math.cos(ph),sz=Math.sin(ph)*Math.sin(th);
+   const p=[c[0]+r[0]*sx,c[1]+r[1]*sy,c[2]+r[2]*sz],n=[sx/r[0],sy/r[1],sz/r[2]],l=Math.hypot(...n)||1;row.push({p,n:n.map(v=>v/l)});}
+  rows.push(row);}
+ return rows;}
+
+/* ── 포장라인 : 작업자 렌더러 (방향 전환 · 다관절) ── */
+(function(){
+ const PAL={suit:[.95,.96,.97],seam:[.78,.83,.87],boot:[.88,.91,.94],sole:[.60,.66,.72],badge:[.10,.56,.57],glove:[.33,.64,.76],
+  visor:[.15,.29,.35],skin:[.98,.80,.66],eye:[.12,.14,.18],blush:[.99,.62,.60],smile:[.55,.28,.26],cap:[.99,.99,1],capBand:[.86,.90,.93]};
+ drawWorker=function(w){
+  const scale=WK_H/488,x=w.x,z=w.z+((S&&S.doorT)||0)*120;
+  const moving=!!w.walking;
+  let want=w.yawLock!==undefined?w.yawLock:(moving&&Math.abs(w.xt-w.x)>1?(w.xt>w.x?-Math.PI/2:Math.PI/2):0);
+  if(w.yawCur===undefined)w.yawCur=want;
+  let d=want-w.yawCur;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;w.yawCur+=d*.22;
+  const yaw=w.yawCur,cy=Math.cos(yaw),sy=Math.sin(yaw);
+  const work=!!w.job&&!moving&&w.job!=='jack',reach=work?Math.min(1,(w.workPhase||0)*3):0;
+  const crouch=(w.job==='install'||w.job==='repair'?34:12)*reach;
+  const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,g[1]/scale+crouch,dx*sy+dz*cy];};
+  const goals=[-1,1].map((s,i)=>{
+   if(w.grip)return toLocal(w.grip[i]);
+   const sway=Math.sin((w.gait||0)+s*Math.PI/2)*(moving?22:0);
+   const idle=[s*64,222,-4+sway],tgt=[s*24,310+Math.sin((w.workPhase||0)*4)*5,-105];
+   return idle.map((v,k)=>v+(tgt[k]-v)*reach);});
+  const W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale,z+(-a*sy+c*cy)*scale];
+  const R=([a,b,c])=>[a*cy+c*sy,b,-a*sy+c*cy];
+  for(const s of cuteOperatorShapes({gait:w.gait||0,walk:moving?1:0,crouch,goals,stride:'z'})){
+   const col=PAL[s.col];
+   if(s.t==='c'){tube(W(s.a),W(s.b),s.r*scale,col,14,true);continue;}
+   const big=Math.max(...s.r)>25,rows=cuteEllPoints(s.c,s.r,big?18:12,big?11:8);
+   for(let j=0;j<rows.length-1;j++)for(let i=0;i<rows[j].length;i++){const k=(i+1)%rows[j].length;
+    const a=rows[j][i],b=rows[j][k],c=rows[j+1][k],e=rows[j+1][i];
+    triV(W(a.p),W(b.p),W(c.p),R(a.n),R(b.n),R(c.n),col,col,col);triV(W(a.p),W(c.p),W(e.p),R(a.n),R(c.n),R(e.n),col,col,col);}
+  }
+ };
+})();
+
+/* ── 팔렛타이저 : 작업자가 핸드파렛트카로 빈 팔레트 투입 · 만적 팔레트를 옆 적재구역에 보관 ──
+   좌표 : 핸드카 상태 J={cx,cz,ang,lift} — (cx,cz)는 포크 위 팔레트 중심, ang 은 포크 끝→손잡이 방향.
+   작업자는 통로(z=LANE)를 따라 우회해 이동하므로 팔레트 · 핸드카를 관통하지 않는다. */
+(function(){
+ const PX=X3(2400),STAGE=PX+440,PARKC=X3(2520)+662,LANE=85,GRIPD=260;
+ const STACK={x:X3(2520)+310,y:62,z:239};
+ const SLOTS=[{x:X3(2520)+560,z:-250},{x:X3(2520)+810,z:-250}];
+ const w=()=>WK[2];
+ window.__spareN=4;
+ let stored=[];
+ /* 회전 가능한 상자 (u:포크 방향, v:좌우, y:높이) */
+ function frame(cx,cz,ang,E){const U=[Math.cos(ang),Math.sin(ang)],P=[-Math.sin(ang),Math.cos(ang)];
+  return {U,P,tx:cx-112*U[0]+(E||0),tz:cz-112*U[1],at(u,y,v){return [this.tx+u*U[0]+v*P[0],y,this.tz+u*U[1]+v*P[1]];}};}
+ function obox(f,u0,u1,y0,y1,v0,v1,col){
+  const c=(u,y,v)=>f.at(u,y,v),nU=[f.U[0],0,f.U[1]],nP=[f.P[0],0,f.P[1]],neg=n=>n.map(x=>-x);
+  const q=(a,b,cc,d,n)=>{triV(a,b,cc,n,n,n,col,col,col);triV(a,cc,d,n,n,n,col,col,col);};
+  q(c(u1,y0,v0),c(u1,y1,v0),c(u1,y1,v1),c(u1,y0,v1),nU);q(c(u0,y0,v0),c(u0,y0,v1),c(u0,y1,v1),c(u0,y1,v0),neg(nU));
+  q(c(u0,y1,v0),c(u0,y1,v1),c(u1,y1,v1),c(u1,y1,v0),[0,1,0]);q(c(u0,y0,v0),c(u1,y0,v0),c(u1,y0,v1),c(u0,y0,v1),[0,-1,0]);
+  q(c(u0,y0,v1),c(u1,y0,v1),c(u1,y1,v1),c(u0,y1,v1),nP);q(c(u0,y0,v0),c(u0,y1,v0),c(u1,y1,v0),c(u1,y0,v0),neg(nP));
+ }
+ function drawJack(J,E){
+  const f=frame(J.cx,J.cz,J.ang,E),L=J.lift||0;
+  for(const dz of [-32,32]){obox(f,0,240,8+L,16+L,dz-12,dz+12,COL.rejOrange);tube(f.at(14,8,dz-7),f.at(14,8,dz+7),8,COL.black,10,true);}
+  obox(f,240,288,8,46+L,-30,30,COL.rejOrange);tube(f.at(300,16,-14),f.at(300,16,14),16,COL.black,12,true);
+  tube(f.at(276,52+L,0),f.at(330,166,0),6,COL.rejOrange,10);tube(f.at(330,166,-34),f.at(330,166,34),5,COL.dark,10,true);
+ }
+ function drawPallet(cx,cz,ang,y,items,alpha,E,boards=true){
+  const g=gAlpha;gAlpha=alpha??1;const f=frame(cx,cz,ang,E);
+  obox(f,0,224,y+6,y+24,-112,112,COL.pallet);
+  for(let i=0;i<3;i++)obox(f,0,224,y,y+8,-112+i*104,-88+i*104,COL.pallet);
+  if(boards)for(let i=0;i<5;i++)obox(f,i*50,i*50+14,y,y+6,-112,112,COL.pallet);
+  for(const s of items||[]){const q=s.p3,u=112+(q.x-PX),v=q.z;
+   obox(f,u-CASEW/2,u+CASEW/2,q.y+y-CASEH/2,q.y+y+CASEH/2,v-CASED/2,v+CASED/2,COL.caseD);
+   obox(f,u-5,u+5,q.y+y+CASEH/2,q.y+y+CASEH/2+.5,v-CASED/2,v+CASED/2,COL.white);}
+  gAlpha=g;
+ }
+ const zOff=()=>((S&&S.doorT)||0)*120;
+ function stepWalk(p,t){ /* p.route 를 따라 걷는다. 끝나면 true */
+  const W=w();if(!p.route.length)return true;
+  const [tx,tz]=p.route[0],dx=tx-W.x,dz=tz-zOff()-W.z,d=Math.hypot(dx,dz),st=Math.min(d,t*230);
+  if(d>.5){W.x+=dx/d*st;W.z+=dz/d*st;W.yawLock=Math.atan2(-dx,-dz);W.walking=true;W.gait=(W.gait||0)+st/24;}
+  W.xt=W.x;if(d-st<=.5)p.route.shift();return !p.route.length;
+ }
+ const FRONT=395;
+ /* 설비 앞 통로(z=FRONT)로 나와 오른쪽으로 이동한 뒤 목적지로 들어간다 — 설비 안을 지나지 않는다 */
+ function frontRoute(p,x,z){const W=w(),cx=W.x,cz=W.z+zOff();p.route=[[cx,FRONT],[x,FRONT],[x,z]];}
+ function routeTo(p,x,z){const W=w(),cx=W.x,cz=W.z+zOff();p.route=[[cx,LANE],[x,LANE],[x,z]];if(Math.abs(cz-LANE)<1)p.route.shift();}
+ function hold(p){const W=w(),J=p.J,U=[Math.cos(J.ang),Math.sin(J.ang)],P=[-U[1],U[0]];
+  W.x=J.cx+U[0]*GRIPD;W.z=J.cz+U[1]*GRIPD-zOff();W.xt=W.x;W.yawLock=Math.atan2(U[0],U[1]);
+  const hx=J.cx+U[0]*218,hz=J.cz+U[1]*218;W.grip=[[hx+P[0]*26,166,hz+P[1]*26],[hx-P[0]*26,166,hz-P[1]*26]];}
+ function moveJack(p,t,x,z,sp=150){const J=p.J,dx=x-J.cx,dz=z-J.cz,d=Math.hypot(dx,dz),st=Math.min(d,t*sp);
+  if(d>.01){J.cx+=dx/d*st;J.cz+=dz/d*st;}hold(p);if(st>.01){w().walking=true;w().gait=(w().gait||0)+st/24;}if(p.load)p.load.cx=J.cx,p.load.cz=J.cz;return d-st<.5;}
+ function turnJack(p,t,to,pivot){const J=p.J,d=to-J.ang,st=Math.sign(d)*Math.min(Math.abs(d),t*1.2);J.ang+=st;
+  hold(p);w().walking=Math.abs(st)>1e-4;w().gait=(w().gait||0)+Math.abs(st)*8;if(p.load)p.load.ang=J.ang;return Math.abs(to-J.ang)<1e-3;}
+ let J0={cx:PARKC,cz:0,ang:0,lift:0};
+ function begin(kind,cb){const W=w();W.job='jack';W.t=999;W.workPhase=0;W.cb=null;
+  palletTransfer={kind,cb,J:{...J0},load:null,k:0,homeX:W.x,homeZ:W.z,route:[]};
+  const p=palletTransfer;
+  if(kind==='in'){frontRoute(p,STACK.x+150,STACK.z);p.phase='walkStack';}
+  else{frontRoute(p,PARKC+GRIPD,0);p.phase='walkJack';}
+  workerJob='work';}
+ function finish(){const W=w();W.job=null;W.t=0;W.grip=null;W.yawLock=undefined;W.walking=false;W.xt=W.x;
+  palletTransfer=null;workerJob=WK.some(q=>q.job)?'work':null;}
+ removeLoadedPallet=function(){
+  if(!S.palletReadyForRemoval||palletTransfer||workerJob)return;
+  S.running=false;S.pt.palletFixed=false;begin('out');
+  toast('작업자가 핸드파렛트카로 만적 팔레트를 옆 적재구역으로 옮깁니다.');
+ };
+ const priorAction=startWorkerAction;
+ startWorkerAction=function(key,cb,sec){if(key!=='pallet'||palletTransfer)return priorAction(key,cb,sec);begin('in',cb);};
+ const priorTick=trainingTick;
+ trainingTick=function(dt){
+  priorTick(dt);const p=palletTransfer;if(!p||!p.J)return;
+  const W=w(),t=Math.min(.1,Math.max(0,dt)),J=p.J;W.walking=false;W.grip=null;
+  switch(p.phase){
+   /* ── 빈 팔레트 투입 ── */
+   case 'walkStack':if(stepWalk(p,t))p.phase='unstack',p.k=0;break;
+   case 'unstack':{p.k+=t/1.6;const k=Math.min(1,p.k),e=k*k*(3-2*k);window.__spareN=3;
+    p.load={cx:STACK.x+(STAGE-STACK.x)*e,cz:STACK.z*(1-e),ang:0,y:STACK.y*(1-e)+Math.sin(e*Math.PI)*18,items:[],boards:false};
+    W.x=p.load.cx+150;W.z=p.load.cz-zOff();W.xt=W.x;W.yawLock=Math.PI/2;W.walking=k<1;W.gait=(W.gait||0)+t*4;
+    W.grip=[[p.load.cx+112,p.load.y+30,p.load.cz+60],[p.load.cx+112,p.load.y+30,p.load.cz-60]];
+    if(k>=1){p.load.y=0;p.load.cz=0;p.load.cx=STAGE;const L=p.load;p.load=null;p.staged=L;routeTo(p,PARKC+GRIPD,0);p.phase='walkJackIn';}break;}
+   case 'walkJackIn':if(stepWalk(p,t))p.phase='slideUnder';break;
+   case 'slideUnder':if(moveJack(p,t,STAGE,0)){p.load=p.staged;p.staged=null;p.phase='liftIn';p.k=0;}break;
+   case 'liftIn':p.k+=t;J.lift=Math.min(10,p.k*14);p.load.y=J.lift;hold(p);if(p.k>=.8)p.phase='pushIn';break;
+   case 'pushIn':if(moveJack(p,t,PX,0))p.phase='lowerIn',p.k=0;break;
+   case 'lowerIn':p.k+=t;J.lift=Math.max(0,10-p.k*14);p.load.y=J.lift;hold(p);
+    if(p.k>=.8){p.load=null;window.__spareN=4;const cb=p.cb;p.cb=null;if(cb)cb();p.phase='retract';}break;
+   case 'retract':if(moveJack(p,t,PARKC,0,220)){frontRoute(p,p.homeX,p.homeZ+zOff());p.phase='walkHome';}break;
+   /* ── 만적 팔레트 반출 → 옆 적재구역 ── */
+   case 'walkJack':if(stepWalk(p,t))p.phase='slideIn';break;
+   case 'slideIn':if(moveJack(p,t,PX,0))p.phase='liftOut',p.k=0;break;
+   case 'liftOut':if(!p.load){p.load={cx:PX,cz:0,ang:0,y:0,items:palletStack.map(s=>({...s,p3:{...s.p3}}))};palletStack=[];S.pt.palletIn=false;S.mat.pallet=false;
+     let i=SLOTS.findIndex(s=>!stored.some(q=>q.slot===s));if(i<0){i=stored[0].slot===SLOTS[0]?0:1;stored.shift();}p.slot=SLOTS[i];}
+    p.k+=t;J.lift=Math.min(10,p.k*14);p.load.y=J.lift;hold(p);if(p.k>=.8)p.phase='pullOut';break;
+   case 'pullOut':if(moveJack(p,t,p.slot.x,0,130))p.phase='turnOut';break;
+   case 'turnOut':if(turnJack(p,t,Math.PI/2))p.phase='pushStore';break;
+   case 'pushStore':if(moveJack(p,t,p.slot.x,p.slot.z,110))p.phase='lowerStore',p.k=0;break;
+   case 'lowerStore':p.k+=t;J.lift=Math.max(0,10-p.k*14);p.load.y=J.lift;hold(p);
+    if(p.k>=.8){stored.push({...p.load,y:0,slot:p.slot});p.load=null;
+     S.cnt.pallets++;S.pt.done=0;S.pt.layer=0;S.pt.idx=0;S.palletReadyForRemoval=false;S.pt.full=false;
+     toast('만적 팔레트를 옆 적재구역에 보관했습니다 · 빈 팔레트를 투입한 뒤 START를 누르세요.','good');p.phase='backOut';}break;
+   case 'backOut':if(moveJack(p,t,p.slot.x,30,150))p.phase='turnBack';break;
+   case 'turnBack':if(turnJack(p,t,0))p.phase='toPark';break;
+   case 'toPark':if(moveJack(p,t,PARKC,0,220)){frontRoute(p,p.homeX,p.homeZ+zOff());p.phase='walkHome';}break;
+   case 'walkHome':if(stepWalk(p,t)){J0={cx:J.cx,cz:J.cz,ang:J.ang,lift:0};finish();}break;
+  }
+  if(palletTransfer)workerJob='work';
+ };
+ const priorReset=resetAll;
+ resetAll=function(){stored=[];J0={cx:PARKC,cz:0,ang:0,lift:0};window.__spareN=4;return priorReset.apply(this,arguments);};
+ mPalletizer=function(){
+  palletHandlingDraw();const p=palletTransfer,E=expOff('pt');
+  /* 옆 적재구역 : 바닥 표시 */
+  const z0=SLOTS[0].z-130,z1=SLOTS[0].z+130,x0=SLOTS[0].x-130,x1=SLOTS[1].x+130;
+  bx(x0+E,x1+E,-0.5,0,z0,z1,COL.floorPT,COL.floorPT);
+  for(const [a,b,c,d] of [[x0,x1,z0,z0+8],[x0,x1,z1-8,z1],[x0,x0+8,z0,z1],[x1-8,x1,z0,z1]])bx(a+E,b+E,-0.4,0,c,d,COL.yellow,COL.yellow);
+  for(const s of stored)drawPallet(s.cx,s.cz,s.ang,0,s.items,1,E);
+  if(p&&p.staged)drawPallet(p.staged.cx,p.staged.cz,0,0,[],1,E,false);
+  if(p&&p.load)drawPallet(p.load.cx,p.load.cz,p.load.ang||0,p.load.y||0,p.load.items,1,E,p.load.boards!==false);
+  drawJack(p?p.J:J0,E);
+ };
+})();
+/* ── 작업자 대기 위치 : 2조는 중량선별기 오른쪽 앞 (카톤인쇄기 · 중량선별기 화면을 가리지 않음) ── */
+(function(){
+ const B=WK[1],IDLE_X=X3(1318),IDLE_Z=ZF+70,WORK_Z=B.z;
+ B.home=1300;B.x=IDLE_X;B.xt=IDLE_X;B.z=IDLE_Z;
+ const prior=trainingTick;
+ trainingTick=function(dt){
+  prior(dt);const t=Math.min(.1,Math.max(0,dt));
+  if(!B.job)B.xt=IDLE_X;
+  const tz=B.job?WORK_Z:IDLE_Z,d=tz-B.z,st=Math.min(Math.abs(d),t*160);
+  if(Math.abs(d)>.3){B.z+=Math.sign(d)*st;if(Math.abs(B.xt-B.x)<1){B.walking=true;B.gait=(B.gait||0)+st/24;B.yawLock=d>0?Math.PI:0;}}
+  else if(B.yawLock!==undefined&&!B.grip)B.yawLock=undefined;
+ };
+ const priorReset=resetAll;
+ resetAll=function(){const r=priorReset.apply(this,arguments);B.x=IDLE_X;B.xt=IDLE_X;B.z=IDLE_Z;return r;};
+})();
+/* ── 3D 뷰 : 평면 · 정면 모드 유지 상태에서 장비 버튼으로 해당 장비 이동 ──
+   평면/정면을 다시 누르거나 [전체 라인]을 누르면 대각선 뷰로 돌아간다 */
+(function(){
+ let axis=null,cur='all';
+ const base=m3SetView;
+ function mark(){$$('#v3Grp [data-v]').forEach(x=>x.classList.toggle('on',x.dataset.v===cur||x.dataset.v===axis));}
+ function apply(v){
+  cur=M3VIEW[v]&&v!=='top'&&v!=='front'?v:'all';
+  if(!axis){base(cur);mark();return;}
+  const p=M3VIEW[cur],a=M3VIEW[axis];
+  base(axis);m3.view=cur;
+  m3.yawT=a.yaw;m3.pitchT=a.pitch;m3.tyT=a.ty;m3.tzT=0;m3.txT=cur==='all'?a.tx:p.tx;
+  m3.distT=cur==='all'?a.dist:(axis==='top'?p.dist*1.3+350:p.dist*1.3+250);
+  mark();
+ }
+ m3SetView=function(v){
+  if(v==='top'||v==='front'){axis=axis===v?null:v;apply(cur);return;}
+  if(v==='all')axis=null;
+  apply(v);
+ };
+})();
+</script>
+
+<script>
+/* 그림자 ON/OFF — 3D 도구 모음의 [그림자] 버튼. 끄면 그림자 맵 계산도 건너뛴다 */
+(function(){
+ window.__shadowOn=true;
+ function paint(b){b.classList.toggle('on',window.__shadowOn);if(b.dataset.inline){b.style.background=window.__shadowOn?'#1f5fbf':'';b.style.color=window.__shadowOn?'#fff':'';}}
+ function add(){if(document.getElementById('v3Shadow'))return;
+  const b=document.createElement('button');b.id='v3Shadow';b.textContent='그림자';b.title='그림자 켜기/끄기 (저사양 PC에서는 끄면 빨라집니다)';
+  b.onclick=e=>{e.stopPropagation();window.__shadowOn=!window.__shadowOn;paint(b);
+   try{if(typeof m3!=='undefined')m3.dirty=true;}catch(_){}try{if(typeof M3!=='undefined')M3.dirty=true;}catch(_){}
+   if(typeof toast==='function')toast(window.__shadowOn?'그림자 표시':'그림자 숨김');};
+  const nav=document.getElementById('sectionNav'),exp=document.getElementById('v3Exp');
+  if(typeof M3!=='undefined'&&nav){b.className='gbtn';b.dataset.inline=1;b.style.marginLeft='auto';nav.appendChild(b);}
+  else if(exp)exp.after(b);else return;
+  paint(b);}
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',add);else add();
+})();
+</script>
 </body>
 </html>
