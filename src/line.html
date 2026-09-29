@@ -10756,7 +10756,10 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   if(LINE){
    const g=$1('#dragPartGhost');if(g&&g.style.display==='block')return g;
    const ad=$1('#adjustDialog');if(ad&&!ad.hidden)return first('#adjustLock')||ad;
-   if(palletStuck())return first('[data-hb="pta_ready"]')||first('#mPallet');
+   const pn=palletNeed();
+   if(pn==='out')return first('[data-hb="pta_out"]')||first('#hMachTabs');
+   if(pn==='fix')return first('[data-hb="pta_ready"]')||first('#hMachTabs');
+   if(pn==='in')return first('#mPallet');
    return [...document.querySelectorAll('.hintNow')].find(vis)||null;
   }
   const f=[...document.querySelectorAll('.apflash')].find(vis);if(f)return f;
@@ -10809,16 +10812,28 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  try{const o=cpPerform;cpPerform=function(){T();return o.apply(this,arguments);};}catch(e){}
  try{const o=hbClick;hbClick=function(){T();return o.apply(this,arguments);};}catch(e){}
 
- /* 기존 자동재생 보완 (영상 모드와 무관) : 운전 감시 중 팔레트 교체 뒤 고정이 안 돼 T230 이 걸리면
-    RESET 만 반복하며 멈추던 문제 — 팔레트 투입 · [작업준비 확인] 으로 고정한 뒤 RESET → START 로 이어간다 */
- function palletStuck(){try{return LINE&&STEPS()[S.tIdx]?.k==='watch'&&!S.running&&!S.activeTrouble&&tripAlarms().some(a=>a.key==='T230')&&!(S.mat.pallet&&S.pt.palletIn&&S.pt.palletFixed);}catch(e){return false;}}
+ /* 기존 자동재생 보완 (영상 모드와 무관) : 운전 감시 중 팔레트 1단 만적으로 정지하면 START 만 반복해
+    '조건 미충족 START' 감점이 쌓이며 멈추던 문제 — [팔레트 반출] → (작업자 반출 대기) → 빈 팔레트 투입 → 고정 순으로 진행한다 */
+ function palletNeed(){
+  if(!LINE)return null;
+  try{
+   if(STEPS()[S.tIdx]?.k!=='watch'||S.running||S.activeTrouble||QC.on)return null;
+   if(palletTransfer||workerJob)return 'wait';
+   if(S.palletReadyForRemoval)return 'out';
+   if(!S.mat.pallet||!S.pt.palletIn)return 'in';
+   if(!S.pt.palletFixed)return 'fix';
+  }catch(e){}
+  return null;
+ }
+ function ptScreen(hb){if(first('[data-hb="'+hb+'"]'))return true;hMach='pt';hScreen='main';drawHMI();return false;}
  if(LINE){
   const ap=apK;
   apK=function(st){
-   if(palletStuck()){
-    if(!S.mat.pallet||!S.pt.palletIn){const m=$1('#mPallet');if(m){m.click();return;}}
-    if(!S.pt.palletFixed){hbClick('pta_ready');return;}
-   }
+   const pn=palletNeed();
+   if(pn==='wait')return;
+   if(pn==='out'){if(ptScreen('pta_out'))hbClick('pta_out');return;}
+   if(pn==='in'){const m=$1('#mPallet');if(m)m.click();return;}
+   if(pn==='fix'){if(ptScreen('pta_ready'))hbClick('pta_ready');return;}
    return ap.apply(this,arguments);
   };
  }
@@ -10877,6 +10892,9 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
    case 'faultSolve':
     if(!apOn())apSet(true);
     if(vm.incT>1&&calm())vm.inc='done';
+    return false;
+   case 'done':   /* 포장라인 학습 : 목표 수량 도달 후 사용자가 STOP 을 눌러야 운전 감시 단계가 끝난다 */
+    if(LINE&&prodStep()&&calm()&&S.cnt.remain<=0){const b=first('#swStop');if(b){press(b,()=>{vm.inc='end';});return true;}}
     return false;
   }
   return false;
