@@ -8680,6 +8680,7 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  }
  function arrived(){return !vm.key||(vm.settle>=140);}
  function draw(now){
+  if(vm.on&&$1('#mEnd.on'))stop('영상 자동재생을 마쳤습니다.');
   if(vm.on){
    const p=vm.key&&point(vm.key);
    if(p){const u=Math.min(1,(now-vm.t0)/vm.dur),k=u<.5?2*u*u:1-Math.pow(-2*u+2,2)/2;
@@ -8763,9 +8764,6 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  function press(e,after){pending={e,after};}
  function director(dt){
   if(S.course!=='operation')return false;
-  if(pending){aim(pending.e,performance.now());
-   if(!arrived())return true;
-   const p=pending;pending=null;p.e.click();if(p.after)p.after();vm.incT=0;return true;}
   vm.incT+=dt;
   switch(vm.inc){
    case 'wait':
@@ -8802,8 +8800,16 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  autoTick=function(dt){
   if(!vm.on)return base.apply(this,arguments);
   const now=performance.now();
-  if(S.tIdx>=STEPS().length||(LINE&&S.finished)||S.session?.ended||$1('#mEnd.on')){stop('영상 자동재생을 마쳤습니다.');return base.apply(this,arguments);}
+  if(S.session?.ended||$1('#mEnd.on')){stop('영상 자동재생을 마쳤습니다.');return base.apply(this,arguments);}
   const d=dt/Math.max(1,SPD);
+  if(pending){aim(pending.e,now);
+   if(!arrived())return;
+   const p=pending;pending=null;p.e.click();if(p.after)p.after();vm.incT=0;return;}
+  /* 마지막 단계까지 마치면 상단 [학습 종료] 를 눌러 결과 화면까지 보여준다 */
+  {const L=STEPS();let last=S.tIdx>=L.length;try{last=last||(S.tIdx===L.length-1&&!!L[S.tIdx].ok());}catch(e){}
+   const b=last&&!vm.ending&&first('#testEnd');
+   if(b&&!b.disabled){vm.ending=true;press(b);return;}
+   if(vm.ending)return;}
   if(director(d))return;
   if(!apOn())apSet(true);
   aim(autoTarget(),now);
@@ -8814,7 +8820,7 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  function start(){
   if(!S||!S.session||!S.session.active){toast('먼저 과정을 고르고 [기본모드 · 체험] 으로 시작하세요.','bad');return;}
   if(S.mode!=='easy'){toast('영상 자동재생은 기본모드 · 체험(학습)에서만 사용할 수 있습니다.','bad');return;}
-  vm.on=true;vm.inc=S.course==='operation'?'wait':'off';vm.runT=0;vm.incT=0;pending=null;vm.key=null;
+  vm.on=true;vm.ending=false;vm.inc=S.course==='operation'?'wait':'off';vm.runT=0;vm.incT=0;pending=null;vm.key=null;
   const s5=$1('#spdGrp [data-s="5"]');if(s5){vm.silent=true;s5.click();vm.silent=false;}
   apSet(true);cur.style.display='block';document.body.classList.add('vmOn');
   vmBtn.textContent='■ 영상 자동재생 중지';vmBtn.classList.add('on');
