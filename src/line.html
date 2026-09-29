@@ -6872,9 +6872,9 @@ initState=function(){
   S.spd.line=200;                       /* 실측 146 cpm */
   S.cw.up=23.0; S.cw.low=20.5;          /* 기준 21.5 g · −1.0 / +1.5 */
   S.cfg.wt=21.5; S.cfg.tol=1.25;
-  S.cfg.cols=1; S.cfg.rows=5; S.cfg.stk=2;
+  S.cfg.cols=1; S.cfg.rows=5; S.cfg.stk=6;
   S.cfg.palCols=3; S.cfg.palRows=4; S.cfg.palLayers=1;   /* 3열 × 4줄 × 1단 = 12 EA */
-  S.cp.stackTarget=10;                 /* 박스 1개 = 카톤 10 (1×5×2) */
+  S.cp.stackTarget=30;                 /* 박스 1개 = 카톤 30 (1×5×6) — 실제 적재 로직(30개)과 일치 */
   S.ct.wheel=0;                         /* 성형 원판 회전각 (가동 시에만 증가) */
   S.cp.formPh=0;                        /* 박스 성형 위상 */
   S.pr.msg="제조번호 "+LOT.no+" / 사용기한 "+LOT.exp;
@@ -7458,9 +7458,9 @@ window.__m3.wk=()=>WK.map(w=>({id:w.id,x:w.x,z:w.z,job:w.job}));
 
 // Packaging sequence: one physical batch, no per-carton case pusher.
 const revInit=initState;
-initState=function(){revInit();S.spd.line=200;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=2;S.cp.stackTarget=10;S.cp.batchPhase=null;S.cp.batchT=0;S.cp.boxReady=0;};
+initState=function(){revInit();S.spd.line=200;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=6;S.cp.stackTarget=30;S.cp.batchPhase=null;S.cp.batchT=0;S.cp.boxReady=0;};
 const revProduct=applyProduct;
-applyProduct=function(p){revProduct(p);S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=2;S.cp.stackTarget=10;};
+applyProduct=function(p){revProduct(p);S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=6;S.cp.stackTarget=30;};
 const revLine=stepLine;
 stepLine=function(dt){
  if(!S.running)return;
@@ -7643,7 +7643,7 @@ const TARGET_DEFAULT=20000;          /* 로트 목표 생산량 (HMI 기본값) 
 const revEdit=edClick;
 edClick=function(id){ if(id==='sp_line'){ toast("라인 속도는 "+LINE_CPM+" CPM 으로 고정되어 있습니다."); return; } revEdit(id); };
 const revTick=tick;
-tick=function(dt){S.spd.line=LINE_CPM;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=2;S.cp.stackTarget=10;revTick(dt);};
+tick=function(dt){S.spd.line=LINE_CPM;S.cfg.cols=1;S.cfg.rows=5;S.cfg.stk=6;S.cp.stackTarget=30;revTick(dt);};
 /* 배속(×1·×2·×5) 은 상단 메뉴에 그대로 노출한다 */
 const speedEl=$('#motorRPM'); if(speedEl){ speedEl.value=String(LINE_CPM);
   speedEl.addEventListener('change',()=>{ speedEl.value=String(LINE_CPM); S.spd.line=LINE_CPM; }); }
@@ -8554,7 +8554,7 @@ _s2Key=null;_s2=null;rqKey=null;rqArr=null;
 function resetOperationPrerequisites(){
  palletTransfer=null;S.palletReadyForRemoval=false;
  if(S.course!=='change'){S.cw.zeroDone=false;S.pt.homed=false;S.pt.taught=false;flags.prLot=false;flags.prExp=false;}
- S.cfg.stk=2;S.cp.stackTarget=10;S.cfg.palLayers=1;
+ S.cfg.stk=6;S.cp.stackTarget=30;S.cfg.palLayers=1;
 }
 const linePrerequisiteStart=startSim,linePrerequisiteReset=resetAll;
 startSim=function(mode){linePrerequisiteStart(mode);resetOperationPrerequisites();};
