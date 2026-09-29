@@ -10811,8 +10811,8 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  }
  /* 실제 동작 시점에 클릭 효과 — 흐름은 바꾸지 않는다 */
  const nativeClick=HTMLElement.prototype.click;
- HTMLElement.prototype.click=function(){if(vm.on&&!vm.silent)tap(this);return nativeClick.apply(this,arguments);};
- const T=()=>tap(null);
+ HTMLElement.prototype.click=function(){vm.lastAct=performance.now();if(vm.on&&!vm.silent)tap(this);return nativeClick.apply(this,arguments);};
+ const T=()=>{vm.lastAct=performance.now();tap(null);};
  try{const o=pressSTART;pressSTART=function(){T();return o.apply(this,arguments);};}catch(e){}
  try{const o=pressSTOP;pressSTOP=function(){T();return o.apply(this,arguments);};}catch(e){}
  try{const o=pressRESET;pressRESET=function(){T();return o.apply(this,arguments);};}catch(e){}
@@ -10911,22 +10911,16 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  // All playback entry points share assessment/session and dialog guards.
  let normalDialog=null,normalDialogAt=0;
  function activeDialog(){return first('#trbDonePop:not([hidden]),#casePopup:not([hidden])');}
- /* 자동재생 감속 구간 : 이상사례 · 알람(돌발상황) 조치 중 → 배속 ×1 + 동작 간격 2.4초
-    오른쪽 PLC(HMI) 버튼을 누르는 단계 → 동작 간격 1.8초 · 그 밖의 단계는 기존 속도 */
- const SLOW_INCIDENT_MS=2400, SLOW_PLC_MS=1800;
+ /* 자동재생 감속 구간 : 이상사례 · 알람(돌발상황) 조치 중이거나 오른쪽 PLC(HMI) 버튼을 누르는 단계 →
+    버튼 클릭 사이 약 2초 · 배속과 그 밖의 단계는 기존 그대로 */
+ const SLOW_CLICK_MS=2000;
  function incidentActive(){
   try{return !!(S.activeTrouble||QC.on||QC.restartPending||S.qcNeedReset||activeDialog());}catch(e){return false;}
  }
- function slowSpeed(on){
-  if(on&&!vm.spdSave&&SPD>1){vm.spdSave=SPD;setSpd(1);}
-  else if(!on&&vm.spdSave){const v=vm.spdSave;vm.spdSave=0;setSpd(v);}
- }
- function setSpd(v){SPD=v;document.querySelectorAll('#spdGrp [data-s]').forEach(b=>b.classList.toggle('on',+b.dataset.s===v));}
  function slowGap(){
-  const inc=incidentActive();slowSpeed(inc);
-  if(inc)return SLOW_INCIDENT_MS;
+  if(incidentActive())return SLOW_CLICK_MS;
   const t=hintTarget();
-  return t&&t.closest&&t.closest('#hmi,#mNum,#mTxt')?SLOW_PLC_MS:0;
+  return t&&t.closest&&t.closest('#hmi,#mNum,#mTxt')?SLOW_CLICK_MS:0;
  }
  function confirmNormalDialog(now){
   const dialog=activeDialog();
@@ -10946,18 +10940,11 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   }
   const now=performance.now();
   if(!vm.on){
-   if(!apOn()){normalDialog=null;slowSpeed(false);vm.slowWas=false;return;}
+   if(!apOn()){normalDialog=null;return;}
    if(confirmNormalDialog(now))return;
-   /* 이상사례 · 알람 조치와 오른쪽 PLC(HMI) 조작은 한 동작씩 천천히 보여준다 */
-   const gap=slowGap();
-   if(gap){
-    if(!vm.slowWas){vm.slowWas=true;vm.slowAt=now;vm.slowAcc=0;}
-    vm.slowAcc=(vm.slowAcc||0)+dt;
-    if(now-vm.slowAt<gap)return;
-    vm.slowAt=now;const acc=vm.slowAcc;vm.slowAcc=0;
-    return base.call(this,acc);
-   }
-   vm.slowWas=false;vm.slowAcc=0;
+   /* 이상사례 · 알람 조치와 오른쪽 PLC(HMI) 조작은 버튼을 누른 뒤 약 2초 기다렸다가 다음 버튼을 누른다
+      (누르는 동작 사이만 띄우고, 상태 대기 · 판단은 그대로 진행) */
+   if(slowGap()&&now-(vm.lastAct||0)<slowGap())return;
    return base.apply(this,arguments);
   }
   if(S.session?.ended||$1('#mEnd.on')){stop('영상 자동재생을 마쳤습니다.');return base.apply(this,arguments);}
