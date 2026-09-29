@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PTP 충전기 시뮬레이터</title>
+<title>PTP 충전기 IDT</title>
 <style>
 :root{
 --ff:"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif;
@@ -450,7 +450,7 @@ table.ht tr.rcRow:hover td{background:#f2f7fd}
 .trainingModal table{width:100%;border-collapse:collapse}.trainingModal th,.trainingModal td{padding:9px;border-bottom:1px solid #dbe3ed;text-align:left}.trainingModal input{width:85px;padding:8px;font-size:16px}.trainingModal button,.trainingModal select{padding:10px 15px;margin:8px 8px 8px 0;font-size:16px}
 #endBox{max-height:86vh;overflow:auto;font-size:16px}#endBox .ht{font-size:14px}#testEnd{background:#fff0e9;border-color:#f0ad8e;color:#9b3417}#testStart{background:#1459a4;color:white}
 #cDesc{font-size:16px}#cTitle{font-size:21px}#coach #autoStatus{font-size:16px;flex-basis:215px}
-.inspection{filter:drop-shadow(0 0 9px #ffce22);stroke:#f1b900!important;stroke-width:4px!important}</style></head>
+.inspection{filter:drop-shadow(0 0 9px #ffce22);stroke:#f1b900!important;stroke-width:4px!important}</style><style>#splash .intro:empty{display:none}</style></head>
 <body>
 <style>
 #autoStatus{display:none;position:relative;margin:8px auto;padding:12px 24px;max-width:760px;border-radius:16px;background:linear-gradient(110deg,#112b53,#1959a3);color:white;box-shadow:0 5px 18px #102c5326;font:600 18px/1.4 system-ui;text-align:center;pointer-events:none}
@@ -462,7 +462,7 @@ table.ht tr.rcRow:hover td{background:#f2f7fd}
 <div id="faultPicker" role="region" aria-labelledby="faultTitle"><section><h2 id="faultTitle">랜덤 발생 오류 선택</h2><p>선택한 항목에서만 무작위 발생합니다. 전체 해제 시 발생하지 않습니다.<br>기존 교육용 오류 목록이며 실제 설비 알람 코드와의 일치는 별도 확인이 필요합니다.</p><label>발생 확률 <input id="faultProbability" type="number" min="0" max="100" value="20" style="width:80px"> % / 운전 10초</label><p>첫 발생은 실제 운전시간 10초 후 1회입니다. 이후 10초마다 확률을 적용합니다. OFF 또는 선택 항목이 없으면 발생하지 않습니다.</p><div id="faultOptions"></div><button id="faultAll">전체 선택</button><button id="faultNone">전체 해제</button><button id="faultDone">적용 · 닫기</button></section></div>
 <div id="stage"><div id="app">
 <div id="head">
-<div class="mk">PTP 충전기 시뮬레이터</div>
+<div class="mk">PTP 충전기 IDT</div>
 <div class="sp"></div>
 <div class="kpi">정품 <b id="kGood">0</b></div>
 <div class="kpi">불량 <b id="kBad">0</b></div>
@@ -652,8 +652,8 @@ table.ht tr.rcRow:hover td{background:#f2f7fd}
 </div></div>
 <div id="splash">
 <div class="box">
-<h1>PTP 충전기 시뮬레이터</h1>
-<p class="intro">실제 장비를 기반으로 한 장비교육 시뮬레이터</p>
+<h1>PTP 충전기 IDT</h1>
+<p class="intro"></p>
 <div class="go">
 <div class="modeColumn"><button class="s" id="spEasy" data-tip="기본 준비와 운전을 짧은 절차와 안내로 체험합니다.">기본학습</button><button class="e" id="spExamEasy" data-tip="간편 과정의 조작 능력을 힌트 없이 평가합니다.">기본평가</button></div>
 <div class="modeColumn"><button class="g" id="spGuide" data-tip="장비 설정부터 운전·알람 대응까지 단계별로 학습합니다.">심화학습</button><button class="e" id="spExam" data-tip="가이드 과정의 전체 절차를 힌트 없이 평가합니다.">심화평가</button></div>
@@ -666,7 +666,7 @@ table.ht tr.rcRow:hover td{background:#f2f7fd}
 <script>
 "use strict";
 /* ═══════════════════════════════════════════════════════════════
-HM 400P 시뮬레이터 — 매뉴얼 근거
+HM 400P IDT — 매뉴얼 근거
 [구조&기능] 3.1~3.23 / [운전지침] 4.1~4.18
 ═══════════════════════════════════════════════════════════════ */
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -1258,7 +1258,7 @@ const heat=heaterList().map(h=>h.nm+" PV "+F(S.pv[h.k],0)+"/SV "+F(S.sv[h.k],0)+
 const on2=Object.keys(S.man2).filter(k=>S.man2[k]);
 const on1=Object.keys(S.man).filter(k=>S.man[k]);
 return [
-"[설비] 흥아기연 HM 400P 발코니형 고속 PTP 블리스터 포장기 교육 시뮬레이터",
+"[설비] 흥아기연 HM 400P 발코니형 고속 PTP 블리스터 포장기 교육 IDT",
 "[모드] "+(isExam()?"평가":isEasy()?"기본학습":"심화학습")+
 " / 현재 단계 "+(S.tIdx+1)+"/"+L.length+" : "+(st?st.t:"완료"),
 "[제품] "+(S.cfg.prodNm||"-")+" ("+(S.cfg.prodCd||"-")+") · "+S.cfg.material+" MODE · "+S.cfg.cols+"열 × "+S.cfg.rows+"행",
@@ -2941,7 +2941,8 @@ v=Math.max(R[0],Math.min(R[1],v));
 numBuf=String(numCtx.dec?v.toFixed(numCtx.dec):Math.round(v));
 $("#numV").value=numBuf;
 apBusy=true; const ok=$("#numOk"); ok.classList.add("apflash");
-setTimeout(()=>{ ok.classList.remove("apflash"); if(autoPlay)ok.click(); apBusy=false; },550/Math.max(1,SPD));
+const epoch=window.__playbackEpoch||0;
+setTimeout(()=>{ if(epoch!==(window.__playbackEpoch||0))return; ok.classList.remove("apflash"); if(autoPlay)ok.click(); apBusy=false; },(window.__videoMode?.on?550:550/Math.max(1,SPD)));
 return; } }
 /* 강조된 곳이 여럿이면(값 입력 + 설정 버튼 등) 방금 누른 곳 다음 것을 누른다.
 drawHMI() 가 DOM 을 새로 만들기 때문에 요소가 아니라 키로 찾는다. */
@@ -2964,16 +2965,18 @@ lgId=acc.id; pwBuf=acc.pw;
 const i1=$("#lgId"), i2=$("#lgPw"); if(i1) i1.value=lgId; if(i2) i2.value=pwBuf;
 apBusy=true; const ok=$("#lgOk");
 if(ok){ ok.classList.add("apflash");
-setTimeout(()=>{ ok.classList.remove("apflash"); if(autoPlay)doLogin(); apBusy=false; },600/Math.max(1,SPD)); }
+const epoch=window.__playbackEpoch||0;
+setTimeout(()=>{ if(epoch!==(window.__playbackEpoch||0))return; ok.classList.remove("apflash"); if(autoPlay)doLogin(); apBusy=false; },(window.__videoMode?.on?600:600/Math.max(1,SPD))); }
 else { doLogin(); apBusy=false; }
 return;
 }
 if(e.id==="swEmg"){ apT=0; return; }          /* 비상정지는 자동으로 누르지 않는다 */
 const scheduledStep=S.tIdx;
 apT=0; apEl=e; apKey=apK(e); apBusy=true; e.classList.add("apflash");
-setTimeout(()=>{ e.classList.remove("apflash");
+const epoch=window.__playbackEpoch||0;
+setTimeout(()=>{ if(epoch!==(window.__playbackEpoch||0))return; e.classList.remove("apflash");
 try{ if(autoPlay&&S.tIdx===scheduledStep&&!(typeof st.ok==='function'&&st.ok())&&!(e.id==='uAir'&&S.air&&S.airP<5.5))e.click(); }catch(x){}
-apBusy=false; }, 400/Math.max(1,SPD));
+apBusy=false; }, (window.__videoMode?.on?400:400/Math.max(1,SPD)));
 }
 /* ═══════════ 사내 이상현상 사례 (사용자 등록) ═══════════
 이상 유형만 고르면 기계에 실제로 그 상태가 만들어지고, 조치하면 자동으로 풀린다.
@@ -5930,9 +5933,9 @@ const missing=r.rows.filter(x=>x.fraction<1&&x.weight>0);
 const summary=missing.length?'우선 복습: '+missing.slice().sort((a,b)=>(b.weight-b.points)-(a.weight-a.points)).slice(0,4).map(x=>x.title).join(' · '):'배점이 있는 절차를 모두 완료했습니다.';
 $('#endBox').innerHTML='<h2>'+(isEasy()?'간편':'가이드')+' '+(isExam()?'평가':'학습')+' 결과</h2><p style="font-size:34px;font-weight:800;color:'+(r.pass?'#087548':'#b13b21')+'">'+(r.pass?'합격':'불합격')+' · '+r.score+'점</p><p>실제 경과시간 '+mmss(r.seconds)+' · 완료 '+r.completed+' / '+r.rows.length+' · 합격 기준 '+r.threshold+'점</p><p>'+esc(summary)+'</p><table class="ht"><tr><th>채점항목</th><th>완료율</th><th>획득 / 배점</th></tr>'+r.rows.map(x=>'<tr><td>'+esc(x.title)+'</td><td>'+Math.round(x.fraction*100)+'%</td><td>'+x.points.toFixed(1)+' / '+x.weight+'</td></tr>').join('')+'</table><p>획득 배점 ÷ 총 배점 × 100 − 오류 감점 '+r.penalty+'점. 미완료 항목은 0점이며 부품 장착·생산은 진행 비율만큼 인정합니다.</p><p>'+S.exam.faults.map(esc).join('<br>')+'</p><h3>기록 기반 총평</h3><p>'+esc(summary)+' 오류 조작 '+S.exam.faults.length+'건, 알람 조치 '+S.trbLog.length+'건.</p><h3>AI 분석</h3><p id="resultAI">'+(ASK?'분석 결과를 요청하려면 아래 버튼을 누르세요.':'AI 서비스 미연결 — 위 총평은 채점 기록에 따른 자동 요약이며 AI 분석 결과가 아닙니다.')+'</p><div class="mbtn">'+(ASK?'<button id="resultAIButton">AI 총평 생성</button>':'')+'<button onclick="copyReport(this)">결과 복사</button><button onclick="printReport()">인쇄</button><button id="endClose">닫기</button><button onclick="location.reload()">새로 시작</button></div>';
 $('#endClose').onclick=()=>$('#mEnd').classList.remove('on');$('#mEnd').classList.add('on');
-if(ASK){$('#resultAIButton').onclick=async()=>{const btn=$('#resultAIButton'),box=$('#resultAI');btn.disabled=true;box.textContent='학습 기록 분석 중…';try{const response=await ASK('다음 시뮬레이터 채점 기록만을 근거로 한국어 5문장 총평을 작성하세요. 합불 판정을 변경하지 말고 부족한 항목과 복습 순서를 설명하세요. 실제 작업자 자격 인증을 의미한다고 주장하지 마세요.\n'+JSON.stringify(r),{modelTier:'default',onText:({text})=>box.textContent=text});box.textContent=response?.text||'분석 결과를 받지 못했습니다.';}catch(e){box.textContent='AI 분석을 완료하지 못했습니다. 채점 결과는 유지됩니다.';}btn.disabled=false;};$('#resultAIButton').onclick();}
+if(ASK){$('#resultAIButton').onclick=async()=>{const btn=$('#resultAIButton'),box=$('#resultAI');btn.disabled=true;box.textContent='학습 기록 분석 중…';try{const response=await ASK('다음 IDT 채점 기록만을 근거로 한국어 5문장 총평을 작성하세요. 합불 판정을 변경하지 말고 부족한 항목과 복습 순서를 설명하세요. 실제 작업자 자격 인증을 의미한다고 주장하지 마세요.\n'+JSON.stringify(r),{modelTier:'default',onText:({text})=>box.textContent=text});box.textContent=response?.text||'분석 결과를 받지 못했습니다.';}catch(e){box.textContent='AI 분석을 완료하지 못했습니다. 채점 결과는 유지됩니다.';}btn.disabled=false;};$('#resultAIButton').onclick();}
 };
-const baseReportText=reportText;reportText=function(){if(!lastResult)return baseReportText();const r=lastResult;return ['PTP 충전기 시뮬레이터 평가 결과',(r.pass?'합격':'불합격')+' '+r.score+'점 / 기준 '+r.threshold+'점','실제 경과시간 '+mmss(r.seconds),...r.rows.map(x=>x.title+': '+x.points.toFixed(1)+' / '+x.weight+' ('+Math.round(x.fraction*100)+'%)'),'오류 감점 '+r.penalty+'점',...S.exam.faults,'AI 분석: '+($('#resultAI')?.textContent||'미연결')].join('\n');};
+const baseReportText=reportText;reportText=function(){if(!lastResult)return baseReportText();const r=lastResult;return ['PTP 충전기 IDT 평가 결과',(r.pass?'합격':'불합격')+' '+r.score+'점 / 기준 '+r.threshold+'점','실제 경과시간 '+mmss(r.seconds),...r.rows.map(x=>x.title+': '+x.points.toFixed(1)+' / '+x.weight+' ('+Math.round(x.fraction*100)+'%)'),'오류 감점 '+r.penalty+'점',...S.exam.faults,'AI 분석: '+($('#resultAI')?.textContent||'미연결')].join('\n');};
 const rubricModal=document.createElement('div');rubricModal.className='trainingModal';rubricModal.hidden=true;rubricModal.innerHTML='<section><h2>채점 기준 관리</h2><p>교육용 초기 배점입니다. 회사 평가 기준으로 조정하세요. 변경값은 이 브라우저에 저장되며 다음 시험부터 적용됩니다.</p><select id="rubricMode"><option value="easy">간편 과정</option><option value="guide">가이드 과정</option></select><label>합격 기준 <input id="rubricPass" type="number" min="1" max="100">점</label><table><thead><tr><th>채점항목</th><th>배점</th></tr></thead><tbody id="rubricRows"></tbody></table><p id="rubricTotal"></p><p>부품 장착: 6종 중 완료 비율. 생산: 목표 정품 수량 대비 진행률. 나머지 절차: 완료 시 배점 인정. 최종 점수는 100점으로 환산합니다.</p><h3>오류 조작별 감점</h3><p>각 시도마다 차감합니다. 시나리오가 주입한 정지 자체는 감점하지 않습니다.</p><table><tbody id="penaltyRows"></tbody></table><button id="rubricSave">저장</button><button id="rubricClose">닫기</button></section>';document.body.append(rubricModal);
 function renderRubric(){const k=$('#rubricMode').value,flow=k==='easy'?FLOW_EASY:FLOW_GUIDE;$('#rubricPass').value=rubricStore.pass;$('#penaltyRows').innerHTML=PENALTY_RULES.map(([k,v],i)=>'<tr><td>'+esc(k)+'</td><td><input data-penalty="'+i+'" type="number" min="0" max="100" value="'+(rubricStore.penalties?.[k]??v)+'"></td></tr>').join('');$('#rubricRows').innerHTML=flow.map((st,i)=>'<tr><td>'+esc(st.t)+'</td><td><input aria-label="'+esc(st.t)+' 배점" data-weight="'+i+'" type="number" min="0" max="100" value="'+rubricStore[k][i]+'"></td></tr>').join('');$('#rubricTotal').textContent='미완료 절차는 배점을 획득하지 못합니다.';}
 $('#rubricBtn').onclick=()=>{renderRubric();rubricModal.hidden=false;};$('#rubricMode').onchange=renderRubric;$('#rubricClose').onclick=()=>rubricModal.hidden=true;
@@ -6086,7 +6089,7 @@ if(!lastResult){finishSession();return;}const r=lastResult,losses=r.rows.filter(
 $('#endBox').innerHTML='<h2>시험 결과 · '+(isEasy()?'간편':'가이드')+'</h2><p class="resultGrade">'+(r.pass?'합격':'불합격')+' · '+r.score+'점</p><p>소요시간 '+mmss(r.seconds)+' · 완료 '+r.completed+' / '+r.rows.length+' · 합격 기준 '+r.threshold+'점</p><h3>감점·미완료 항목</h3><table class="ht"><tr><th>미완료 절차</th><th>미획득 배점</th></tr>'+losses.map(x=>'<tr><td>'+esc(x.title)+'</td><td>'+(x.weight-x.points).toFixed(1)+'</td></tr>').join('')+'</table><p>'+ (S.exam.faults.length?S.exam.faults.map(esc).join('<br>'):'오류 조작 감점 없음')+'</p><p>완료 배점 ÷ 전체 배점 × 100 − 오류·힌트 감점 '+r.penalty+'점</p><h3>맞춤 총평</h3><div>'+feedback.map(t=>'<p>'+esc(t)+'</p>').join('')+'</div><p class="feedbackNote">학습 기록과 유형별 평가 문구를 조합한 자동 총평입니다.</p><div class="mbtn"><button onclick="copyReport(this)">결과 복사</button><button onclick="printReport()">인쇄</button><button id="endClose">닫기</button><button onclick="location.reload()">새로 시작</button></div>';
 $('#endClose').onclick=()=>$('#mEnd').classList.remove('on');$('#mEnd').classList.add('on');
 };
-reportText=function(){if(!lastResult)return '아직 종료된 시험이 없습니다.';const r=lastResult;return ['PTP 충전기 시뮬레이터 결과',(r.pass?'합격':'불합격')+' '+r.score+'점 / '+r.threshold+'점','소요시간 '+mmss(r.seconds),'감점·미완료 항목',...r.rows.filter(x=>x.weight>0&&x.fraction<1).map(x=>x.title+': 미획득 '+(x.weight-x.points).toFixed(1)),...S.exam.faults,'맞춤 총평',...(S.session.feedback||offlineFeedback(r))].join('\n');};
+reportText=function(){if(!lastResult)return '아직 종료된 시험이 없습니다.';const r=lastResult;return ['PTP 충전기 IDT 결과',(r.pass?'합격':'불합격')+' '+r.score+'점 / '+r.threshold+'점','소요시간 '+mmss(r.seconds),'감점·미완료 항목',...r.rows.filter(x=>x.weight>0&&x.fraction<1).map(x=>x.title+': 미획득 '+(x.weight-x.points).toFixed(1)),...S.exam.faults,'맞춤 총평',...(S.session.feedback||offlineFeedback(r))].join('\n');};
 /* Release v2 · independent installation and operation curricula. */
 let selectedCourse=null;
 const CHANGE_PARTS=[
@@ -6167,7 +6170,7 @@ const releaseLink=document.createElement('a');releaseLink.className='releaseLink
 const releaseNav=document.createElement('a');releaseNav.href='/releases/';releaseNav.className='versionNav';releaseNav.textContent='버전 선택';$('#head').appendChild(releaseNav);
 function chooseCourse(k){selectedCourse=k;coursePicker.style.display='none';$('#splash .go').style.display='grid';courseBack.style.display='inline-block';$('#splash .intro').textContent=k==='change'?'체인지파트 전용 · 매뉴얼에 따른 장착 학습':'가동 전용 · 교체부품 장착 완료 상태에서 시작';$('#spEasy').textContent='기본학습';}
 $('#chooseChange').onclick=()=>chooseCourse('change');$('#chooseOperation').onclick=()=>chooseCourse('operation');
-courseBack.onclick=()=>{coursePicker.style.display='grid';$('#splash .go').style.display='none';courseBack.style.display='none';$('#splash .intro').textContent='실제 장비를 기반으로 한 장비교육 시뮬레이터';};
+courseBack.onclick=()=>{coursePicker.style.display='grid';$('#splash .go').style.display='none';courseBack.style.display='none';$('#splash .intro').textContent='';};
 $('#splash .go').style.display='none';courseBack.style.display='none';
 const oldOpenProduct=openProdSel;
 openProdSel=function(mode){if(selectedCourse==='change'){startSim(mode);return;}selectedCourse='operation';oldOpenProduct(mode);};
@@ -8664,6 +8667,7 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   const at=hs.findIndex(x=>apK(x)===apKey);return hs[(at+1)%hs.length];
  }
  function autoTarget(){
+  const done=first('#trbDonePop:not([hidden]) .trbOk');if(done)return done;
   const pop=window.__v4&&window.__v4.pop;
   if(pop&&!pop.hidden)return [...pop.querySelectorAll('button')].find(vis)||pop;
   try{if(S.recovery&&S.activeTrouble){const h=recoveryStep();const e=first(h&&h.sel);if(e)return e;}}catch(e){}
@@ -8674,11 +8678,19 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   if(e.id==='dragPartGhost')return {x:r.left+r.width*.55,y:r.top+r.height*.55};
   return {x:r.left+Math.min(r.width*.5,r.width-6),y:r.top+Math.min(r.height*.5,r.height-4)};}
  let tgt=null;
- function aim(e,now){
-  if(e!==vm.key){vm.key=e;vm.fx=vm.x;vm.fy=vm.y;vm.t0=now;vm.settle=0;
-   const p=e&&point(e);const d=p?Math.hypot(p.x-vm.x,p.y-vm.y):0;vm.dur=Math.max(280,Math.min(600,d*.7));}
+ // HMI redraws replace DOM nodes; retain arrival time for the same control.
+ function targetId(e){
+  if(!e)return null;
+  const key=e.id||['data-hb','data-ed','data-mt','data-case','data-fire','data-s'].map(k=>e.hasAttribute(k)?k+':'+e.getAttribute(k):'').filter(Boolean).join('|');
+  return key?String(S.tIdx)+':'+(LINE?hMach:'filler')+':'+hScreen+':'+key:e;
  }
- function arrived(){return !vm.key||(vm.settle>=140);}
+ function aim(e,now){
+  const id=targetId(e);
+  if(id!==vm.targetId){vm.targetId=id;vm.fx=vm.x;vm.fy=vm.y;vm.t0=now;vm.settle=0;
+   const p=e&&point(e);const d=p?Math.hypot(p.x-vm.x,p.y-vm.y):0;vm.dur=Math.max(280,Math.min(600,d*.7));}
+  vm.key=e;
+ }
+ function arrived(){return !vm.key||(vm.settle>=450);}
  function draw(now){
   if(vm.on&&$1('#mEnd.on'))stop('영상 자동재생을 마쳤습니다.');
   if(vm.on){
@@ -8796,15 +8808,76 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
  }
 
  /* ── 자동재생 연결 : 커서가 목표에 도착해야 한 단계 진행 ── */
+ // All playback entry points share assessment/session and dialog guards.
+ let normalDialog=null,normalDialogAt=0;
+ function activeDialog(){return first('#trbDonePop:not([hidden]),#casePopup:not([hidden])');}
+ /* 자동재생 감속 구간 : 이상사례 · 알람(돌발상황) 조치 중 → 배속 ×1 + 동작 간격 2.4초
+    오른쪽 PLC(HMI) 버튼을 누르는 단계 → 동작 간격 1.8초 · 그 밖의 단계는 기존 속도 */
+ const SLOW_INCIDENT_MS=2400, SLOW_PLC_MS=1800;
+ function incidentActive(){
+  try{return !!(S.activeTrouble||QC.on||QC.restartPending||S.qcNeedReset||activeDialog());}catch(e){return false;}
+ }
+ function slowSpeed(on){
+  if(on&&!vm.spdSave&&SPD>1){vm.spdSave=SPD;setSpd(1);}
+  else if(!on&&vm.spdSave){const v=vm.spdSave;vm.spdSave=0;setSpd(v);}
+ }
+ function setSpd(v){SPD=v;document.querySelectorAll('#spdGrp [data-s]').forEach(b=>b.classList.toggle('on',+b.dataset.s===v));}
+ function slowGap(){
+  const inc=incidentActive();slowSpeed(inc);
+  if(inc)return SLOW_INCIDENT_MS;
+  const t=hintTarget();
+  return t&&t.closest&&t.closest('#hmi,#mNum,#mTxt')?SLOW_PLC_MS:0;
+ }
+ function confirmNormalDialog(now){
+  const dialog=activeDialog();
+  if(!dialog){normalDialog=null;return false;}
+  if(dialog!==normalDialog){normalDialog=dialog;normalDialogAt=now;}
+  if(now-normalDialogAt>=1600){
+   const button=[...dialog.querySelectorAll('button')].find(e=>vis(e)&&!e.disabled);
+   if(button){button.click();normalDialog=null;if(LINE)autoT=0;else apT=0;}
+  }
+  return true;
+ }
  const base=autoTick;
  autoTick=function(dt){
-  if(!vm.on)return base.apply(this,arguments);
+  if(isExam()||!S.session?.active||S.session.ended){
+   if(vm.on)stop('');
+   apSet(false);return;
+  }
   const now=performance.now();
+  if(!vm.on){
+   if(!apOn()){normalDialog=null;slowSpeed(false);vm.slowWas=false;return;}
+   if(confirmNormalDialog(now))return;
+   /* 이상사례 · 알람 조치와 오른쪽 PLC(HMI) 조작은 한 동작씩 천천히 보여준다 */
+   const gap=slowGap();
+   if(gap){
+    if(!vm.slowWas){vm.slowWas=true;vm.slowAt=now;vm.slowAcc=0;}
+    vm.slowAcc=(vm.slowAcc||0)+dt;
+    if(now-vm.slowAt<gap)return;
+    vm.slowAt=now;const acc=vm.slowAcc;vm.slowAcc=0;
+    return base.call(this,acc);
+   }
+   vm.slowWas=false;vm.slowAcc=0;
+   return base.apply(this,arguments);
+  }
   if(S.session?.ended||$1('#mEnd.on')){stop('영상 자동재생을 마쳤습니다.');return base.apply(this,arguments);}
   const d=dt/Math.max(1,SPD);
-  if(pending){aim(pending.e,now);
+  vm.credit=Math.min(1.2,(vm.credit||0)+d);
+  // Confirm both case and alarm dialogs before menus, restart or completion.
+  const dialog=activeDialog();
+  if(dialog){
+   const button=[...dialog.querySelectorAll('button')].find(e=>vis(e)&&!e.disabled);
+   if(button){aim(button,now);if(arrived()&&vm.settle>=1600){button.click();vm.nextAt=now+700;vm.credit=0;}}
+   return;
+  }
+  if(now<(vm.nextAt||0))return;
+  if(pending){
+   const id=pending.e.id;
+   if(id)pending.e=$1('#'+id)||pending.e;
+   if(!vis(pending.e)||!pending.e.isConnected){pending=null;return;}
+   aim(pending.e,now);
    if(!arrived())return;
-   const p=pending;pending=null;p.e.click();if(p.after)p.after();vm.incT=0;return;}
+   const p=pending;pending=null;p.e.click();if(p.after)p.after();vm.incT=0;vm.nextAt=now+900;return;}
   /* 마지막 단계까지 마치면 상단 [학습 종료] 를 눌러 결과 화면까지 보여준다 */
   {const L=STEPS();let last=S.tIdx>=L.length;try{last=last||(S.tIdx===L.length-1&&!!L[S.tIdx].ok());}catch(e){}
    const b=last&&!vm.ending&&first('#testEnd');
@@ -8812,15 +8885,22 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
    if(vm.ending)return;}
   if(director(d))return;
   if(!apOn())apSet(true);
-  aim(autoTarget(),now);
+  const target=autoTarget();
+  aim(target,now);
   if(!arrived())return;
-  return base.apply(this,arguments);
+  const plc=target&&target.closest('#hmi,#mNum,#mTxt');
+  if(plc){
+   const elapsed=vm.credit;vm.credit=0;vm.nextAt=now+900;
+   return base.call(this,elapsed);
+  }
+  vm.credit=0;
+  return base.call(this,d);
  };
 
  function start(){
   if(!S||!S.session||!S.session.active){toast('먼저 과정을 고르고 [기본모드 · 체험] 으로 시작하세요.','bad');return;}
   if(S.mode!=='easy'){toast('영상 자동재생은 기본모드 · 체험(학습)에서만 사용할 수 있습니다.','bad');return;}
-  vm.on=true;vm.ending=false;vm.inc=S.course==='operation'?'wait':'off';vm.runT=0;vm.incT=0;pending=null;vm.key=null;
+  vm.on=true;vm.ending=false;vm.inc=S.course==='operation'?'wait':'off';vm.runT=0;vm.incT=0;pending=null;vm.key=null;vm.targetId=null;vm.nextAt=0;vm.credit=0;
   const s5=$1('#spdGrp [data-s="5"]');if(s5){vm.silent=true;s5.click();vm.silent=false;}
   apSet(true);cur.style.display='block';document.body.classList.add('vmOn');
   vmBtn.textContent='■ 영상 자동재생 중지';vmBtn.classList.add('on');
@@ -8829,10 +8909,44 @@ body.vmOn #autoStatus{visibility:hidden!important}`;
   if(!vm.on)return;vm.on=false;pending=null;if(!keepAuto)apSet(false);cur.style.display='none';document.body.classList.remove('vmOn');
   vmBtn.textContent='🎬 영상 자동재생';vmBtn.classList.remove('on');if(msg)toast(msg);
  }
+ function resetPlayback(){
+  stop('');apSet(false);pending=null;normalDialog=null;normalDialogAt=0;
+  vm.key=null;vm.targetId=null;vm.settle=0;vm.credit=0;vm.nextAt=0;
+  vm.ending=false;vm.inc='off';vm.incT=0;vm.runT=0;
+  window.__playbackEpoch=(window.__playbackEpoch||0)+1;
+  if(!LINE){apBusy=false;apEl=null;apKey='';apStep=-1;apStall=0;}
+  document.querySelectorAll('.apflash').forEach(el=>el.classList.remove('apflash'));
+  for(const selector of ['#trbDonePop','#casePopup']){const el=$1(selector);if(el)el.hidden=true;}
+ }
+ function syncPlaybackButtons(){
+  const exam=isExam(),active=!!(S.session?.active&&!S.session.ended);
+  const button=$1('#apBtn');
+  if(button){button.disabled=exam||!active;button.title=exam?'평가에서는 자동재생을 사용할 수 없습니다.':'';}
+  vmBtn.disabled=exam||S.mode!=='easy'||!active;
+ }
+ const sessionStart=startSim;
+ startSim=function(){resetPlayback();const r=sessionStart.apply(this,arguments);syncPlaybackButtons();return r;};
+ if(typeof resetAll==='function'){const reset=resetAll;
+  resetAll=function(){resetPlayback();const r=reset.apply(this,arguments);syncPlaybackButtons();return r;};}
+ const sessionEnd=finishSession;
+ finishSession=function(){const r=sessionEnd.apply(this,arguments);if(S.session?.ended)resetPlayback();syncPlaybackButtons();return r;};
+ // Capture existing button handlers too; some retain an earlier function reference.
+ document.addEventListener('click',e=>{
+  if(e.target.closest?.('#rsBtn,#homeButton,#testEnd'))resetPlayback();
+  if(e.target.closest?.('#apBtn')){
+   window.__playbackEpoch=(window.__playbackEpoch||0)+1;
+   if(!LINE){apBusy=false;apEl=null;}
+   document.querySelectorAll('.apflash').forEach(el=>el.classList.remove('apflash'));
+   normalDialog=null;
+   if(isExam()||!S.session?.active||S.session.ended){
+    e.preventDefault();e.stopImmediatePropagation();resetPlayback();
+   }
+  }
+ },true);
  const vmBtn=document.createElement('button');vmBtn.className='gbtn';vmBtn.id='vmBtn';vmBtn.type='button';vmBtn.textContent='🎬 영상 자동재생';
  vmBtn.title='커서가 직접 조작하듯 학습 절차를 빠르게 시연합니다 (기본모드 · 체험 전용 · 촬영용)';
  vmBtn.onclick=()=>vm.on?stop('영상 자동재생을 멈췄습니다.'):start();
- const ap=$1('#apBtn');if(ap)ap.after(vmBtn);
+ /* 2026-09-29 : 영상 자동재생 버튼 삭제 (사용자 요청) — 일반 [▶ 자동재생] 은 유지 */
  const ab=$1('#apBtn');if(ab)ab.addEventListener('click',()=>{if(vm.on)stop('',true);},true);   /* 일반 자동재생 버튼을 누르면 영상 모드만 끈다 */
 })();
 </script>

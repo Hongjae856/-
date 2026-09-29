@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>PTP 라인 시뮬레이터</title>
+<title>PTP 라인 IDT (PTP Line Interactive Digital Tutor)</title>
 <style>
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#fff;color:#142b47;font-family:"Malgun Gothic",Arial,sans-serif}
 #entry{position:relative;isolation:isolate;min-height:100%;display:flex;align-items:center;justify-content:center;background:#fff}
@@ -16,7 +16,7 @@ iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:white} 
 @media(max-width:900px){.choices{gap:12px}button{padding:20px}button strong{font-size:26px}button span{font-size:17px}}
 @media(max-width:600px){.content{padding:20px}h1{font-size:32px}.intro{font-size:18px}button{padding:20px 10px}button strong{font-size:22px}button small{font-size:12px;letter-spacing:1px}button span{font-size:14px}}
 </style></head><body>
-<main id="entry"><div class="content"><h1>PTP 라인 시뮬레이터</h1><p class="intro">실제 장비를 기반으로 한 장비교육 시뮬레이터</p><div class="choices"><button type="button" data-course="filler"><small>01 · PTP FILLING</small><strong>PTP 충전기</strong><span>PTP 충전·포장 공정 학습</span></button><button type="button" data-course="line"><small>02 · PACKAGING LINE</small><strong>PTP 포장라인</strong><span>카톤 포장부터 팔렛트 적재까지</span></button></div></div><div class="ver" aria-label="버전">V7</div></main>
+<main id="entry"><div class="content"><h1>PTP 라인 IDT<span style="display:block;font-size:.46em;font-weight:600;letter-spacing:0;color:#3a5070;margin-top:8px">(PTP Line Interactive Digital Tutor)</span></h1><div class="choices"><button type="button" data-course="filler"><small>01 · PTP FILLING</small><strong>PTP 충전기</strong><span>PTP 충전·포장 공정 학습</span></button><button type="button" data-course="line"><small>02 · PACKAGING LINE</small><strong>PTP 포장라인</strong><span>카톤 포장부터 팔렛트 적재까지</span></button></div></div><div class="ver" aria-label="버전">V7</div></main>
 <script id="simulators" type="application/json">__SIMULATORS__</script>
 <script>
 const sources=JSON.parse(document.getElementById('simulators').textContent);
@@ -42,7 +42,7 @@ function openSimulator(key){
    host.prepend(back);
   }
  });
- frame.title=key==='filler'?'PTP 충전기 시뮬레이터':'PTP 포장라인 시뮬레이터';
+ frame.title=key==='filler'?'PTP 충전기 IDT':'PTP 포장라인 IDT';
  frame.srcdoc=new TextDecoder().decode(Uint8Array.from(atob(sources[key]),c=>c.charCodeAt(0)));
  document.getElementById('entry').hidden=true;document.body.appendChild(frame);
 }
