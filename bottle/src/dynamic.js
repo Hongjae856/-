@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════════
-   동적 형상 — 매 프레임 생성 (움직이는 부품 · 병 · 정제 · 캡 · 작업자)
+   동적 형상 — 매 프레임 생성 (움직이는 부품 · 병 · 정제 · 캡 · 도어 · 작업자)
    ═══════════════════════════════════════════════════════════════════ */
 const FAR=()=>cam.dist>7600;
 const NEAR=()=>cam.dist<4200;
@@ -16,19 +16,27 @@ function lampState(mk){
   if(al.length) return "warn";
   return S.running?"run":"off";
 }
+/* 캡 1개 : 윗면 위치 p · 축 방향 n(xy 평면) */
+function drawCap(p,n,seg){
+  const b=BD();
+  mPush(); mT(p[0],p[1],p[2]);
+  if(n&&(Math.abs(n[0])>0.02||n[1]<0.98)) mRZ(Math.atan2(-n[0],n[1]));
+  mT(0,-(b.h+b.capH),0); lathe(botProf().cap,C[b.capCol],seg||10);
+  mPop();
+}
 
 function drawDynamic(){
   geoBegin(GEO.dyn);
   if(!S) return;
-  dConveyor(); dUA(); dInserter("sg"); dLoadCell("lc1",L.lc1); dDMC(); dLoadCell("lc2",L.lc2); dReject(); dInserter("pe"); dRCS(); dTable();
-  dBottles(); dPanels(); drawWorkers();
+  dConveyor(); dUA(); dSG(); dLoadCell(LN.st.lc1); dDMC(); dLoadCell(LN.st.lc2); dReject(); dPE(); dRCS(); dTable();
+  dBottles(); dPanels(); drawDoors(); drawWorkers();
 }
 
 /* ── 컨베이어 슬랫 이동 ── */
 function dConveyor(){
   if(FAR()) return;
   const pitch=38.1, off=LN.conv%pitch;
-  const skip=[[L.lc1-L.lcW/2-6,L.lc1+L.lcW/2+6],[L.lc2-L.lcW/2-6,L.lc2+L.lcW/2+6]];
+  const skip=[[L.lc1-L.lcW/2-2,L.lc1+L.lcW/2+2],[L.lc2-L.lcW/2-2,L.lc2+L.lcW/2+2]];
   for(let x=XS+off;x<XE;x+=pitch){
     if(skip.some(s=>x>s[0]&&x<s[1])) continue;
     box(x-1.2,x+1.2,CH,CH+0.5,-43,43,C.slatL,C.slatL,0);
@@ -38,7 +46,7 @@ function dConveyor(){
 /* ── UA-120 ── */
 function dUA(){
   const b=BD(), tt=L.tt, far=FAR();
-  /* 턴테이블 원판 + 병 */
+  /* 레벨 디스크 + 병 */
   mPush(); mT(tt.x,0,tt.z); mRY(-LN.tt.ang);
   disc(CH-3,0,tt.r,C.brushed,40);
   for(let i=0;i<8;i++){ const a=i*Math.PI/4; mPush(); mRY(a); box(60,tt.r-6,CH-3,CH+2,-4,4,C.ssD,C.ssD,0); mPop(); }
@@ -51,28 +59,25 @@ function dUA(){
     else drawBottle(r*Math.cos(a),CH-2,r*Math.sin(a),{});
   }
   mPop();
-  /* 호퍼 속 병 (적재량 비례) */
-  const hp=L.hop, hn=Math.round(clamp(S.mat.bottle/MAT_CAP.bottle,0,1)*26);
+  /* 벌크 호퍼 속 병 (적재량 비례 · 경사 바닥 위에 눕힘) */
+  const hp=L.hop, hn=Math.round(clamp(S.mat.bottle/MAT_CAP.bottle,0,1)*30);
   for(let i=0;i<hn;i++){
-    const layer=Math.floor(i/9), k=i%9;
-    const x=hp.x0+60+(k%3)*((hp.x1-hp.x0-120)/2)+hash1(i)*30, z=hp.z0+70+Math.floor(k/3)*((hp.z1-hp.z0-140)/2)+hash1(i+9)*30;
-    const yb=1100-(x-hp.x0)/(hp.x1-hp.x0)*240+b.d/2+layer*(b.d-6);
-    drawBottle(x,yb,z,{yaw:hash1(i*5)*3,tilt:Math.PI/2});
+    const layer=Math.floor(i/10), k=i%10;
+    const u=(k%5+0.5)/5, v=(Math.floor(k/5)+0.5)/2;
+    const x=lerp(hp.x0+b.h*0.5+20,hp.x1-40,u)+hash1(i)*20, z=lerp(hp.z0+b.d,hp.z1-b.d,v)+hash1(i+9)*30;
+    const yf=hp.y0+60+(x-hp.x0)/(hp.x1-hp.x0)*180;
+    drawBottle(x,yf+b.d/2+layer*(b.d-8),z,{yaw:hash1(i*5)*3,tilt:Math.PI/2});
   }
-  /* 엘리베이터 클리트 · 병 */
-  const e0=[hp.x1-20,860,20], e1=[tt.x-150,CH+470,tt.z-80];
+  /* 엘리베이터 녹색 클리트 벨트 · 병 */
+  const e0=UA_EL[0], e1=UA_EL[1];
   mPush(); const len=mAlong(e0,e1);
-  for(let y=(LN.elev%160);y<len;y+=160){ box(-104,104,y,y+5,-36,-8,C.dark,C.dark,0); if(S.ua.elev&&!far&&Math.floor((y+LN.elev)/160)%2===0&&y>60&&y<len-60){ drawBottle(0,y+b.d/2+5,-36+b.h/2,{tilt:Math.PI/2,yaw:Math.PI/2}); } }
+  box(-110,110,0,len,-44,-36,[0.12,0.46,0.32,0.05],null,0);
+  for(let y=(LN.elev%160);y<len;y+=160){ box(-104,104,y,y+5,-36,-8,[0.10,0.38,0.26,0.05],null,0);
+    if(S.ua.elev&&!far&&Math.floor((y+LN.elev)/160)%2===0&&y>60&&y<len-60){ drawBottle(0,y+b.d/2+5,-36+b.h/2,{tilt:Math.PI/2,yaw:Math.PI/2}); } }
   mPop();
   /* 반전 사이드 벨트 (병과 함께 비틀림) */
   const ym=CH+b.h/2, w=b.d/2+7, bw=Math.min(62,b.h*0.55);
   for(const side of [-1,1]){
-    const Lp=[],Rp=[];
-    for(let x=L.belt0;x<=L.belt1+0.1;x+=35){
-      const th=uaRoll(x), c=Math.cos(th), s=Math.sin(th);
-      const py=ym-side*w*s, pz=side*w*c;
-      Lp.push([x,py-bw/2*c,pz-bw/2*s]); Rp.push([x,py+bw/2*c,pz+bw/2*s]);
-    }
     const bc=[0.16,0.46,0.34,0.05], lug=[0.09,0.30,0.21,0.05], ph=LN.sbelt%40;
     for(let x=L.belt0;x<L.belt1-1;x+=40){
       const xm=x+20, th=uaRoll(xm), c=Math.cos(th), s=Math.sin(th), py=ym-side*w*s, pz=side*w*c;
@@ -94,83 +99,87 @@ function dUA(){
   }
 }
 
-/* ── SG-120 · HPE-100 (피드 · 커터 · 플런저 공용) ── */
-function dInserter(k){
-  const I=insCfg(k), x=I.x, st=LN.st[k], b=BD(), H=sgHeadY(), far=FAR();
-  const gel=k==="sg";
-  const stock=gel?S.mat.gel/MAT_CAP.gel:S.mat.film/MAT_CAP.film;
-  const r0=I.r0, rF=I.rF, rr=r0+(rF-r0)*Math.sqrt(clamp(stock,0,1));
-  const wd=I.wd, rz=I.rz;
-  const fed=(gel?S.sg.fed:S.pe.fed)+(st?st.kin.feed:0);
-  const travel=fed*(gel?S.sg.pitch:S.pe.len);
-  /* 릴 : 플랜지 · 코어 · 감긴 자재 */
-  mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));
-  for(const z of [-wd/2-6,wd/2+2]) { mPush(); mRX(Math.PI/2); mT(0,z,0); disc(0,0,r0+14,C.ssD,20); disc(4,0,r0+14,C.ssD,20); mPop(); }
-  if(!far){ const g=gAlpha; gAlpha=0.16; mPush(); mRX(Math.PI/2); mT(0,wd/2+4,0); disc(0,r0+14,rF+14,C.acryl,32); mPop(); gAlpha=g; }
-  if(!far){ mPush(); mRX(Math.PI/2); mT(0,-wd/2-8,0); disc(0,r0+14,rF+14,C.ssL,32); mPop(); }
-  cylZ(0,0,-wd/2-4,wd/2+4,r0-6,C.dark,18);
-  if(stock>0.005){
-    cylZ(0,0,-wd/2,wd/2,rr,gel?C.gel:[0.80,0.90,0.95,0.15],28);
-    if(gel&&!far) for(let i=0;i<6;i++){ const a=i*Math.PI/3; box(rr*0.3*Math.cos(a)-2,rr*0.3*Math.cos(a)+2,rr*0.3*Math.sin(a)-2,rr*0.3*Math.sin(a)+2,wd/2,wd/2+0.6,C.gelPrint,null,0); }
-  }
-  for(let i=0;i<3;i++){ const a=i*Math.PI*2/3; box(Math.cos(a)*14-3,Math.cos(a)*14+3,Math.sin(a)*14-3,Math.sin(a)*14+3,-wd/2-8,wd/2+6,C.ss,null,0); }
-  mPop();
-  /* 댄서 암 */
-  const dAng=0.25+0.15*Math.sin((st&&st.kin.feed)?st.kin.feed*Math.PI:0);
-  const dp=I.dp, dr=[dp[0]+Math.cos(dAng+I.da)*150,dp[1]+Math.sin(dAng+I.da)*150,dp[2]];
-  tube([dp[0],dp[1],rz-wd/2-8],[dr[0],dr[1],rz-wd/2-8],9,C.ss,8); cylZ(dr[0],dr[1],rz-wd/2-6,rz+wd/2+6,18,C.ssL,14);
-  /* 띠 경로 : 릴 → 댄서 롤러 → 입구 롤러 → (가이드 롤러) → 헤드 */
-  if(stock>0.005){
-    const pts=[[I.rx+rr*0.2,I.ry-rr,rz],[dr[0],dr[1]-18,rz],[I.in[0],I.in[1]-12,rz]];
-    if(I.g) pts.push([I.g[0],I.g[1]-9,0]);
-    pts.push([x,H.y1-4,0],[x,H.y0+46,0]);
-    const col=gel?C.gel:[0.80,0.90,0.95,0.15];
-    const g=gAlpha; if(!gel) gAlpha=0.7;
-    for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1];
-      quad([a[0],a[1],a[2]-wd/2],[c[0],c[1],c[2]-wd/2],[c[0],c[1],c[2]+wd/2],[a[0],a[1],a[2]+wd/2],col); }
-    gAlpha=g;
-    if(gel&&!far){ /* 파우치 경계 (피치마다 실링선) */
-      const ph=travel%S.sg.pitch;
-      for(let y=H.y1-4-ph;y>H.y0+46;y-=S.sg.pitch) box(x-1,x+1,y-1.5,y+1.5,-wd/2-0.5,wd/2+0.5,[0.72,0.74,0.76,0.05],null,0);
-    }
-  }
-  /* 피드 롤러 (회전 표시) */
-  for(const sx of [-15,15]){ mPush(); mT(x+sx,H.y1-40,0); mRZ((sx>0?-1:1)*travel/14); cylZ(0,0,-wd/2-6,wd/2+6,13,C.rubber,12); box(-2,2,-13,13,wd/2+6,wd/2+7,C.ss,null,0); mPop(); }
-  /* 커터 : 왕복 / 가열 커터 발광 */
-  const cut=st?st.kin.cut:0;
-  box(x-100+cut*80,x-40+cut*80,H.y0+30,H.y0+44,-wd/2-6,wd/2+6,gel?C.brushed:(S.pe.heat&&S.pe.pv>60?E.heat:[0.55,0.30,0.20,0.3]),null,0);
-  /* 잘린 조각 → 튜브 → 병 */
-  if(st&&st.ph==="proc"&&st.kin.drop>0&&st.b){
-    const t=st.kin.drop, y=lerp(H.y0+30,CH+b.h-6,Math.min(1,t*1.2));
-    if(gel) box(x-15,x+15,y-20,y+20,-4,4,C.gel,C.gel,0);
-    else { const g=gAlpha; gAlpha=0.7; mPush(); mT(x,y,0); lathe([[b.nk/2-3,0],[b.nk/2-6,8],[0,12]],C.film,12); mPop(); gAlpha=g; }
-  }
-  /* 플런저 로드 */
-  const plg=st?st.kin.plg:0, tip=lerp(H.y1-24,CH+b.h+4,plg);
-  tube([x,H.y1+20,0],[x,tip,0],6,C.rodC,10); cylY(x,0,tip-6,tip,Math.max(8,b.nk/2-6),C.ss,12);
-  /* 스토퍼 핀 · 클램프 */
-  if(st) stopperPins(x,b,st.pin,st.clamp);
-}
+/* ── 앞쪽 스토퍼 핀 · 클램프 패드 (SG · HPE 공용) ── */
 function stopperPins(x,b,pin,clampV){
-  const y=CH+b.h*0.42;
-  tube([x+b.d/2+7,y,-78],[x+b.d/2+7,y,-78+pin*74],4.5,C.rodC,8);
-  const cx=x-b.d/2-5-b.d/2, cz=-78+clampV*(78-b.d/2-3);
-  tube([cx,y,-78],[cx,y,cz],4.5,C.rodC,8); box(cx-9,cx+9,y-10,y+10,cz-2,cz+1,C.rubber,C.rubber,0);
+  pinFront(x+b.d/2+7,pin);
+  const y=CH+b.h*0.42, cx=x-b.d-5, zr=b.d/2+34, cz=lerp(zr-6,b.d/2+3,clampV);
+  tube([cx,y,zr],[cx,y,cz],4.5,C.rodC,8); box(cx-10,cx+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
 }
 
-/* ── 로드셀 ── */
-function dLoadCell(k,x){
-  const st=LN.st[k], b=BD(), w=L.lcW;
-  const run=S.running;
-  box(x-w/2+14,x+w/2-14,CH-8,CH,-44,44,[0.93,0.94,0.92,0.05],null,0);
-  if(!FAR()) for(let u=(LN.conv%50)-w/2;u<w/2-10;u+=50) if(u>-w/2+14) box(x+u-1,x+u+1,CH,CH+0.4,-44,44,[0.80,0.82,0.80,0.05],null,0);
-  if(st){
-    const y=CH+b.h*0.42;
-    tube([x+b.d/2+5,y,-80],[x+b.d/2+5,y,-80+st.pin*76],4.2,C.rodC,8);
+/* ── SG-120 : 릴 · 띠 경로 · 트윈 벨트 · 커터 · 낙하 ── */
+function dSG(){
+  const I=insCfg("sg"), x=I.x, st=LN.st.sg, b=BD(), H=sgHeadY(), far=FAR();
+  const stock=S.mat.gel/MAT_CAP.gel, rr=I.r0+(I.rF-I.r0)*Math.sqrt(clamp(stock,0,1)), wd=I.wd, rz=I.rz;
+  const fed=S.sg.fed+(st?st.kin.feed:0), travel=fed*S.sg.pitch;
+  /* 릴 (커버 창 안) */
+  mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));
+  cylZ(0,0,-wd/2-8,wd/2+8,I.r0-6,C.dark,18);
+  if(stock>0.005) cylZ(0,0,-wd/2,wd/2,rr,C.gel,28);
+  for(const z of [-wd/2-6,wd/2+4]){ mPush(); mT(0,0,z); mRX(Math.PI/2); disc(0,I.r0-6,I.rF+6,C.ssD,24); mPop(); }
+  for(let i=0;i<3;i++){ const a=i*Math.PI*2/3; box(Math.cos(a)*14-3,Math.cos(a)*14+3,Math.sin(a)*14-3,Math.sin(a)*14+3,-wd/2-10,wd/2+8,C.ss,null,0); }
+  mPop();
+  /* 릴 커버 앞 뚜껑 (짙은 투명창) : 왼쪽 경첩 · 릴 교체 때 열린다 */
+  { const o=smooth(DOOR_OPEN.sgLid||0), Rr=I.R;
+    mPush(); mT(I.rx-Rr,I.ry,70); mRY(-o*1.9); mT(Rr,0,0);
+    mPush(); mRX(-Math.PI/2); disc(0,Rr-22,Rr,C.ssL,40); mPop();
+    { const g2=gAlpha; gAlpha=0.45; mPush(); mRX(-Math.PI/2); disc(0,0,Rr-22,[0.12,0.13,0.15,0.4],40); mPop(); gAlpha=g2; }
+    cylZ(0,0,0,14,16,C.ssL,12); cylZ(Rr*0.7,Rr*0.7,0,10,8,C.ssD,10); cylZ(-Rr*0.7,-Rr*0.7,0,10,8,C.ssD,10);
+    box(Rr-30,Rr-8,-40,40,6,22,C.dark,C.dark,0);
+    mPop(); }
+  /* 띠 경로 : 릴 → 커버 출구 → 윗면 롤러 2 → 슬롯 → 트윈 벨트 사이 → 커터 */
+  const by0=H.y0+50, by1=H.y0+290, [r1,r2]=I.top, top=SGH.yT;
+  if(stock>0.005){
+    const pts=[[I.rx+rr*0.6,I.ry-rr*0.8,rz],[I.rx+I.R*0.75,I.ry-I.R+6,rz],[r1[0]-26,r1[1]-4,0],[r1[0]-18,r1[1]+19,0],[r1[0],r1[1]+26,0],
+      [r2[0],r2[1]+26,0],[r2[0]-19,r2[1]+18,0],[x,top-10,0],[x,H.y0+40,0]];
+    for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1];
+      quad([a[0],a[1],a[2]-wd/2],[c[0],c[1],c[2]-wd/2],[c[0],c[1],c[2]+wd/2],[a[0],a[1],a[2]+wd/2],C.gel); }
+    if(!far){ const ph=travel%S.sg.pitch;
+      for(let y=top-10-ph;y>H.y0+46;y-=S.sg.pitch) box(x-1.2,x+1.2,y-1.5,y+1.5,-wd/2-0.5,wd/2+0.5,[0.72,0.74,0.76,0.05],null,0);
+      for(let y=top-10-ph+S.sg.pitch*0.5;y>H.y0+46;y-=S.sg.pitch) box(x-1.3,x+1.3,y-4,y+4,-8,8,C.gelPrint,null,0); }
   }
-  /* 표시기 화면 */
-  box(x-60,x+60,CH+340,CH+382,215,216.5,S.main?[0.06,0.12,0.10,-1]:E.scrDim,null,0);
-  if(S.main) for(let i=0;i<5;i++) box(x-52+i*21,x-38+i*21,CH+348,CH+374,216.5,217.2,E.digit,null,0);
+  /* 롤러 회전 표시 · 트윈 벨트 (노란 타이밍 벨트 : 띠와 같은 속도) */
+  for(const [rx,ry] of I.top){ mPush(); mT(rx,ry,0); mRZ(-travel/26); box(-2,2,-24,24,34,36,C.ssD,null,0); mPop(); }
+  const belt=[0.86,0.66,0.22,0.1], tooth=[0.55,0.40,0.12,0.1];
+  for(const s of [-1,1]){
+    box(x+s*9,x+s*14,by0,by1,-38,38,belt,null,0);
+    if(!far){ const ph=travel%12; for(let y=by1-ph;y>by0;y-=12) box(x+s*8.4,x+s*9.4,y-1.5,y+1.5,-38,38,tooth,null,0); }
+  }
+  /* 커터 (왕복) */
+  const cut=st?st.kin.cut:0;
+  box(x-100+cut*80,x-40+cut*80,H.y0+26,H.y0+36,-wd/2-6,wd/2+6,C.brushed,null,0);
+  /* 잘린 파우치 → 튜브 → 병 */
+  if(st&&st.ph==="proc"&&st.kin.drop>0&&st.b){
+    const t=st.kin.drop, y=lerp(H.y0+24,CH+b.h-6,Math.min(1,t*1.2));
+    box(x-15,x+15,y-20,y+20,-4,4,C.gel,C.gel,0);
+  }
+  if(st) stopperPins(x,b,st.pin,st.clamp);
+}
+
+/* ── 로드셀 스테이션 : 포크(캐리지 · 4 핑거 · 실린더) · 케이블 체인 · 게이트 / IN 핀 · 클램프 ── */
+function dLoadCell(st){
+  if(!st) return;
+  const b=BD(), d=b.d, G=lcGeo(st.X), P=L.lcP, dx=st.car*P, far=FAR();
+  const tipZ=lerp(d/2+16,-(d/2+8),st.fin);
+  const fx=[G.IN-d/2-10,G.A-d/2-10,G.B-d/2-10,G.B+d/2+10].map(v=>v+dx);
+  const cx0=fx[0]-40, cx1=fx[3]+40;
+  box(cx0,cx1,CH-116,CH-88,140,270,[0.78,0.81,0.84,0.6],[0.84,0.86,0.88,0.6]);
+  for(const x of fx){
+    box(x-6,x+6,CH-88,CH+46,150,172,C.ss);                                      /* 세움 암 */
+    box(x-3,x+3,CH+24,CH+46,tipZ,172,C.brushed,null,0);                          /* 핑거 날 */
+    ellipsoid([x,CH+35,tipZ],[3,11,10],C.brushed,8,4);
+    if(!far){ cylZ(x,CH-70,178,262,12,C.cyl,12); cylZ(x,CH-70,262,262+(1-st.fin)*26,5,C.rodC,8); cylZ(x,CH-70,168,178,15,C.ssD,12); }
+  }
+  /* 케이블 체인 (캐리지 끝 → 고정점) */
+  if(!far){ const ax=cx1, fx2=st.X+60, yA=CH-80, yB=CH-150, zc=285, r=(yA-yB)/2, pts=[];
+    const midX=Math.max(ax,fx2)+20;
+    for(let x=ax;x<midX;x+=16) pts.push([x,yA,zc]);
+    for(let i=0;i<=8;i++){ const a=Math.PI/2-i/8*Math.PI; pts.push([midX+r*Math.cos(a),yB+r+r*Math.sin(a),zc]); }
+    for(let x=midX;x>fx2;x-=16) pts.push([x,yB,zc]);
+    for(const p of pts) box(p[0]-7,p[0]+7,p[1]-9,p[1]+9,zc-16,zc+16,C.black,null,0); }
+  /* 핀 · 클램프 */
+  pinFront(G.gateFace+4,st.gate); pinFront(G.inFace+4,st.inPin);
+  const y=CH+b.h*0.42, cxp=G.gateFace-1.5*d, zr=d/2+34, cz=lerp(zr-6,d/2+3,st.clamp);
+  tube([cxp,y,zr],[cxp,y,cz],4.5,C.rodC,8); box(cxp-10,cxp+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
 }
 
 /* ── DMC-60T ── */
@@ -179,24 +188,25 @@ function dDMC(){
   if(!D) return;
   const run=S.running;
   const jig=run?Math.sin(D.vibPh*2*Math.PI*23)*1.2:0;
+  mPush(); mT(L.dmcDX,0,0);
   /* 호퍼 속 정제 (적재량 → 높이) */
-  const f=clamp(S.mat.tab/matCap("tab"),0,1);
+  const f=clamp(S.mat.tab/matCap("tab"),0,1), h=DMC.hop;
   if(f>0.002){
-    const y=1660+18+f*300, u=(y-1660)/(2040-1660);
-    const x0=lerp(-900,-1110,u)+6, x1=lerp(-700,-490,u)-6, z0=lerp(-880,-1080,u)+6, z1=lerp(-780,-700,u)-6, cx=(x0+x1)/2, cz=(z0+z1)/2;
+    const y=h.y0+18+f*(h.y1-h.y0-40), u=(y-h.y0)/(h.y1-h.y0);
+    const x0=lerp(h.ox0,h.x0,u)+6, x1=lerp(h.ox1,h.x1,u)-6, z0=lerp(h.oz0,h.z0,u)+6, z1=lerp(h.oz1,h.z1,u)-6, cx=(x0+x1)/2, cz=(z0+z1)/2;
     tri([x0,y,z0],[x1,y,z0],[cx,y+26,cz],col); tri([x1,y,z0],[x1,y,z1],[cx,y+26,cz],col);
     tri([x1,y,z1],[x0,y,z1],[cx,y+26,cz],col); tri([x0,y,z1],[x0,y,z0],[cx,y+26,cz],col);
     if(!far) for(let i=0;i<24;i++){ const px=lerp(x0+10,x1-10,hash1(i*1.7)), pz=lerp(z0+10,z1-10,hash1(i*3.1));
       const e=1-Math.max(Math.abs(px-cx)/((x1-x0)/2),Math.abs(pz-cz)/((z1-z0)/2)); drawTab(px,y+e*26+2,pz,hash1(i)*3,col); }
   }
-  /* 트레이 1 · 2 : 흩어진 정제가 앞으로 흘러간다 */
   if(!far){
-    const tr=[[DMC.t1,D.tray[0],34,0.35],[DMC.t2,D.tray[1],40,0.55]];
-    for(const [t,fill,n,sp] of tr){
-      const m=Math.round(n*fill), Lz=t.z1-t.z0-12;
+    /* 트레이 1 · 2 : 흩어진 정제가 앞으로 흘러간다 */
+    const tr=[[DMC.t1,D.tray[0],22,0.35,4],[DMC.t2,D.tray[1],36,0.55,12]];
+    for(const [t,fill,n,sp,amp] of tr){
+      const m=Math.round(n*fill), Lz=t.z1-t.z0-12, gw=(t.x1-t.x0)/12;
       for(let i=0;i<m;i++){
-        const z=t.z0+6+((hash1(i*2.3)*Lz+D.vibPh*sp*60)%Lz), x=t.x0+10+hash1(i*5.7+1)*(t.x1-t.x0-20);
-        drawTab(x,t.y+S.rc.prod.thk/2+jig,z,hash1(i*9.1)*6,col);
+        const z=t.z0+6+((hash1(i*2.3)*Lz+D.vibPh*sp*60)%Lz), gi=Math.floor(hash1(i*5.7+1)*12), x=t.x0+gi*gw+gw/2+(hash1(i*3.9)-0.5)*gw*0.3;
+        drawTab(x,t.y+S.rc.prod.thk/2+jig+(amp>4?1:0),z,hash1(i*9.1)*6,col);
       }
     }
     /* 트레이 3 : 12 트랙 */
@@ -210,16 +220,17 @@ function dDMC(){
         drawTab(xc,DMC.t3y+S.rc.prod.thk/2-2+jig,DMC.t3z1-u,Math.PI/2,col);
       }
     }
-    /* 센서로 떨어지는 정제 */
+    /* 센서로 떨어지는 정제 (센서 박스 윗면 아래로 사라짐) */
     for(const q of D.falls){
       const y=DMC.t3y-4-0.5*9800*q.t*q.t;
-      if(y<1300) continue;
+      if(y<1450) continue;
       drawTab(DMC.x0+q.c*DMC.tw+DMC.tw/2,y,DMC.t3z1+14,Math.PI/2,col);
     }
   }
-  /* 센서 LED (계수 순간 점등) */
+  /* 센서 LED (윗면 점검창 아래 · 계수 순간 점등) */
   for(let c=0;c<12;c++){ const xc=DMC.x0+c*DMC.tw+DMC.tw/2, on=D.led[c]>0.25, dirty=S.dmc.dirt[c]>0.6;
-    box(xc-5,xc+5,1446,1449,-100,-90,on?E.ledG:dirty?E.ledY:(S.main?[0.10,0.40,0.20,-1]:OFF.g),null,0); }
+    box(xc-5,xc+5,1446,1449,-104,-86,on?E.ledG:dirty?E.ledY:(S.main?[0.10,0.40,0.20,-1]:OFF.g),null,0); }
+  mPop();
   /* 게이트 버퍼 · 게이트 날개 · 노즐 흐름 */
   for(const g of [0,1]){
     const nx=g===0?L.n1:L.n2, fill=Math.min(1,D.buf[g]/N);
@@ -232,34 +243,95 @@ function dDMC(){
         drawTab(nx+Math.sin(i*2.1)*5,y,Math.cos(i*1.7)*5,i,col); }
     }
   }
-  /* 병 스토퍼 3조 */
-  const y=CH+b.h*0.42;
-  for(const [px,v] of [[L.n2+b.d/2+4,D.exit],[L.n1+b.d/2+4,D.mid],[L.n1-b.d-6,D.entry]])
-    tube([px,y,-80],[px,y,-80+v*76],4.5,C.rodC,8);
-  if(D.clampB){ const cx=L.n1-b.d-6-b.d/2-4; tube([cx,y+18,-80],[cx,y+18,-b.d/2-3],4,C.rodC,8); }
+  /* 병 스토퍼 3조 · 입구 클램프 (앞) */
+  for(const [px,v] of [[L.n2+b.d/2+4,D.exit],[L.n1+b.d/2+4,D.mid],[L.n1-b.d-6,D.entry]]) pinFront(px,v);
+  const y=CH+b.h*0.42, cxp=L.n1-b.d*1.5-10, zr=b.d/2+34, cz=lerp(zr-6,b.d/2+3,D.clampB?1:0);
+  tube([cxp,y,zr],[cxp,y,cz],4.5,C.rodC,8); box(cxp-10,cxp+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
 }
 
-/* ── 리젝트 ── */
+/* ── 리젝트 : 푸셔 · 트레이로 미끄러지는 병 · 트레이 속 불합격 병 ── */
+const REJT={tw:150, zA:60, zB:460, yA:CH-12, yB:CH-190};
+const rejFloorY=z=>REJT.yA+(clamp(z,REJT.zA,REJT.zB)-REJT.zA)*(REJT.yB-REJT.yA)/(REJT.zB-REJT.zA);
+function rejSlot(i){
+  const b=BD(), nc=Math.max(1,Math.floor((2*REJT.tw-20)/(b.h+8))), nr=Math.max(1,Math.floor((REJT.zB-REJT.zA-30)/(b.d+4)));
+  const col=i%nc, row=Math.floor(i/nc)%nr, layer=Math.floor(i/(nc*nr));
+  const z=REJT.zB+REJT.tw*0.35-b.d/2-row*(b.d+4), x=L.rej-REJT.tw+14+col*(b.h+8)+b.h;
+  return {x, y:rejFloorY(z)+b.d/2-2+layer*b.d*0.85, z};
+}
 function dReject(){
   const R=LN.rej, b=BD(), x=L.rej, y=CH+b.h*0.42;
   const pz=-(b.d/2+40)+R.ext*(b.d+70);
-  tube([x,y,-300],[x,y,pz],6,C.rodC,10); box(x-24,x+24,y-22,y+22,pz-6,pz,C.rubber,C.rubber,0);
-  /* 밀려나는 병 → 슈트 → 리젝트함 */
+  tube([x,y,-330],[x,y,pz],6,C.rodC,10); box(x-26,x+26,y-24,y+24,pz-6,pz,C.rubber,C.rubber,0);
   for(const q of LN.pushing){
-    const t=q.pt;
-    let bx=x, by=CH, bz=0, tilt=0;
-    if(t<0.22){ bz=(t/0.22)*(b.d/2+70); }
-    else { const u=Math.min(1,(t-0.22)/0.5); bz=b.d/2+70+u*300; by=CH-u*170; tilt=u*1.2; }
-    drawBottle(bx,by,bz,{fill:q.fill,gel:q.gel,ng:true,tilt:-tilt,yaw:Math.PI/2});
+    const t=q.pt, sl=rejSlot(LN.rejBin.length);
+    if(t<0.22){ drawBottle(x,CH-1,(t/0.22)*(b.d/2+62),{fill:q.fill,gel:q.gel,ng:true}); continue; }
+    const u=smooth(Math.min(1,(t-0.22)/0.6)), z0=b.d/2+62;
+    const tip=Math.min(1,u*2.2), zz=lerp(z0,sl.z,u), xx=lerp(x+b.h/2*tip,sl.x,u);
+    const yy=lerp(CH-1,rejFloorY(zz)+b.d/2-2,Math.min(1,u*1.6));
+    drawBottle(xx,yy-(1-tip)*0,zz,{fill:q.fill,gel:q.gel,ng:true,tilt:tip*Math.PI/2});
   }
-  const bin=L.rejBin;
-  LN.rejBin.forEach((q,i)=>{ const k=i%12, layer=Math.floor(i/12);
-    drawBottle(bin.x-150+(k%4)*100+hash1(q.seed)*20,140+b.d/2+layer*b.d*0.8,bin.z-150+Math.floor(k/4)*110,{tilt:Math.PI/2,yaw:hash1(q.seed*3)*3,ng:true}); });
+  LN.rejBin.forEach((q,i)=>{ const p=rejSlot(i); drawBottle(p.x,p.y,p.z,{tilt:Math.PI/2,ng:true,fill:1}); });
+}
+
+/* ── HPE-100 : 필름 롤 · 필름 띠 · 톱날 커터 · 인덱싱 디스크 · 튜브 속 필름 · 푸셔 ── */
+function dPE(){
+  const st=LN.st.pe, b=BD(), x=L.pe, yD=peDiscY(), far=FAR(), zc=PED.zc, n=PED.n, r=PED.r;
+  const stock=clamp(S.mat.film/MAT_CAP.film,0,1), I=insCfg("pe");
+  const idx=st&&st.ph==="proc"?st.kin.idx:0, base=Math.PI/2+(S.pe.fed+idx)*2*Math.PI/n;
+  const film=[0.86,0.93,0.97,0.12];
+  /* 필름 롤 2 (가로 축) */
+  const rr=I.r0+(I.rF-I.r0)*Math.sqrt(stock), rot=(S.pe.fed+(st?st.kin.feed:0))*S.pe.len/Math.max(rr,30);
+  for(const sx of [-1,1]){
+    const x0=x+sx*70, x1=x+sx*270, xa=Math.min(x0,x1), xb=Math.max(x0,x1);
+    cylX(xa,xb,1450,-590,I.r0-8,C.dark,16);
+    if(stock>0.005){ const g=gAlpha; gAlpha=0.85; cylX(xa+6,xb-6,1450,-590,rr,film,28); gAlpha=g; }
+    for(const ex of [xa,xb]){ mPush(); mT(ex,1450,-590); mRX(rot*(sx)); box(-2,2,-I.r0+10,I.r0-10,-4,4,C.ss,null,0); box(-2,2,-4,4,-I.r0+10,I.r0-10,C.ss,null,0); mPop(); }
+    /* 필름 띠 : 롤 아래 → 장구 롤러 → 포머 → 뒤 튜브 */
+    if(stock>0.005){
+      const lx=x+sx*106, lz=zc-106, w=26, g=gAlpha; gAlpha=0.7;
+      const pts=[[lx,1450-rr,-590],[lx,yD+330,lz-80],[lx,yD+230,lz-80],[lx,yD+150,lz-40],[lx,yD+18,lz]];
+      for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1]; quad([a[0]-w,a[1],a[2]],[a[0]+w,a[1],a[2]],[c[0]+w,c[1],c[2]],[c[0]-w,c[1],c[2]],film); }
+      gAlpha=g;
+      /* 톱날 커터 (검은 톱니) */
+      const ct=st?st.kin.cut:0, cz=lz-58+ct*44;
+      box(lx-44,lx+44,yD+30,yD+46,cz-8,cz,C.black,C.black,0);
+      if(!far) for(let k=-40;k<=40;k+=8) box(lx+k-2,lx+k+2,yD+30,yD+46,cz,cz+5,C.black,null,0);
+      /* 캐리지 (위아래 이송) */
+      const cy=yD+180+(st?Math.sin((st.kin.feed||0)*Math.PI)*24:0);
+      box(lx-30,lx+30,cy-30,cy+30,lz-84,lz-60,C.ss);
+      cylY(lx,lz-40,cy-40,cy+60,14,C.ssL,12);
+    }
+  }
+  /* 인덱싱 디스크 : 림 · 스포크 · 허브 · 튜브 8 */
+  const g2=gAlpha;
+  mPush(); mT(x,yD,zc); mRY(-(base-Math.PI/2));
+  mPush(); lathe([[r+40,0],[r+40,14],[r+22,14],[r+22,0]],C.alu,40); mPop();
+  cylY(0,0,0,14,56,C.alu,24);
+  for(let k=0;k<n;k++){ const a=k*2*Math.PI/n+Math.PI/n; mPush(); mRY(-a); box(40,r+24,0,14,-7,7,C.alu,C.alu,0); mPop(); }
+  mPop();
+  const tr=Math.max(12,b.nk/2+2);
+  for(let k=0;k<n;k++){
+    const a=base+k*2*Math.PI/n, tx=x+r*Math.cos(a), tz=zc+r*Math.sin(a);
+    cylY(tx,tz,yD-4,yD+18,tr+6,C.ssL,16);
+    tube([tx,yD,tz],[tx,yD-220,tz],tr,C.ss,16,false);
+    cylY(tx,tz,yD-226,yD-214,tr+2,C.ssD,16);
+    /* 튜브 속 필름 : 뒤 레인을 지난 튜브부터 앞 투입 위치 전까지 */
+    let ang=((a-Math.PI/2)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);   /* 0 = 앞 */
+    const loaded=S.mat.film>0&&ang>Math.PI*0.70&&ang<Math.PI*2-0.01;
+    if(loaded&&!far){ gAlpha=0.85; mPush(); mT(tx,yD-30,tz); lathe([[tr-3,0],[tr-6,10],[0,16]],film,12); mPop(); gAlpha=g2; }
+  }
+  /* 앞 푸셔 로드 */
+  const plg=st?st.kin.plg:0, tip=lerp(yD+150,CH+b.h+2,plg);
+  tube([x,yD+170,0],[x,tip,0],6,C.rodC,10); cylY(x,0,tip-4,tip,Math.max(8,tr-3),C.ss,12);
+  if(st&&st.ph==="proc"&&st.kin.drop>0&&st.b){
+    const y=Math.min(yD-30,tip-4); gAlpha=0.8; mPush(); mT(x,y,0); lathe([[tr-3,-4],[tr-6,6],[0,12]],film,12); mPop(); gAlpha=g2;
+  }
+  if(st) stopperPins(x,b,st.pin,st.clamp);
 }
 
 /* ── RCS-120 ── */
 function dRCS(){
-  const R=LN.rc, b=BD(), A=L.A, B=L.B, T=L.T, Y=rcY(), far=FAR(), P=P_PITCH;
+  const R=LN.rc, b=BD(), A=L.A, B=L.B, T=L.T, Y=rcY(), far=FAR();
   const d=b.d;
   /* 타이밍 스크류 (가변 피치 나선) */
   const f=SCREW.fit(d), zs=d/2+32, ys=CH+b.h*0.42, rF=Math.min(30,d/2+6);
@@ -268,43 +340,77 @@ function dRCS(){
   for(let u=-f.nS;u<=0;u+=0.04){ const x=XS+screwS(u,d); if(x>L.A.x-24) break;
     const a=2*Math.PI*(u-R.phi)+Math.PI; pts.push([x,ys+rF*Math.sin(a),zs-rF*Math.cos(a)]); }
   tubePath(pts,4.5,C.uhmw,6);
-  /* 스타휠 (A · B) · 터렛 포켓 판 */
+  /* 스타휠 (A · B) · 터렛 포켓 판 (흰 UHMW) */
   const star=(c,base)=>{ for(const yy of [CH+b.h*0.30,CH+b.h*0.70]) starPlate(c,yy,base,d); };
   star(A,Math.PI/2-R.phi*Math.PI/2);
   star(B,PATH.bT-(S_A-S_T1)/L.R-R.phi*Math.PI/2);
   star(T,PATH.tA+(S_A-S_T0)/L.R+R.phi*Math.PI/2);
-  /* 터렛 헤드 캐러셀 */
+  /* 황색 타이밍 벨트 (터렛 바깥 · 병을 포켓에 눌러 잡음) */
+  timingBelt(R.phi*P_PITCH);
+  /* 헤드 캐러셀 */
   const car=R.phi*Math.PI/2;
   mPush(); mT(T.x,0,T.z); mRY(-car);
   cylY(0,0,Y.yc+60,Y.yc+110,L.R+58,C.ss,32); cylY(0,0,Y.yc+110,Y.yc+170,90,C.ssD,20);
-  for(let i=0;i<4;i++){ const a=i*Math.PI/2; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); box(L.R+40,L.R+42,Y.yc+5,Y.yc+50,-24,24,C.orange,C.orange,0); mPop(); }
+  for(let i=0;i<4;i++){ const a=i*Math.PI/2; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); mPop(); }
   mPop();
+  /* 3조 공압 척 헤드 4 */
   for(let j=0;j<4;j++){
     const a=headAngle(j), h=R.heads[j], hx=T.x+L.R*Math.cos(a), hz=T.z+L.R*Math.sin(a);
-    const cup0=CH+b.h-b.capH*0.62+(1-h.y)*112;
-    const drop=h.y;
-    cylY(hx,hz,cup0+b.capH+12,Y.yc,11,C.rodC,12);
-    cylY(hx,hz,cup0+b.capH+30,cup0+b.capH+90,24,C.cyl,14);
+    const cup0=CH+b.h-b.capH*0.62+(1-h.y)*112, ct=cup0+b.capH+12;
+    cylY(hx,hz,ct+70,Y.yc,11,C.rodC,12);
+    cylY(hx,hz,ct+10,ct+74,27,C.ssL,18);
+    cylY(hx,hz,ct+74,ct+84,22,C.ssD,16);
+    cylY(hx,hz,ct,ct+10,24,C.brushed,18);
     mPush(); mT(hx,0,hz); mRY(-h.spin);
-    mPush(); mT(0,cup0,0); lathe([[b.capD/2+2,0],[b.capD/2+7,0],[b.capD/2+7,b.capH+12],[0,b.capH+12]],C.ssD,16); mPop();
-    box(b.capD/2+6,b.capD/2+9,cup0+4,cup0+b.capH,-3,3,C.orange,C.orange,0);
+    const jr=b.capD/2+(h.cap?4:12);
+    for(let k=0;k<3;k++){ mPush(); mRY(-k*2*Math.PI/3); box(jr,jr+16,cup0+2,ct+4,-9,9,C.black,C.black); box(jr-2,jr+30,ct-4,ct+4,-12,12,C.black,C.black,0); mPop(); }
     mPop();
-    if(h.cap){ mPush(); mT(hx,cup0+b.capH+12-(b.h+b.capH)-2,hz); lathe(botProf().cap,C[b.capCol],14); mPop(); }
-    void drop;
+    if(h.cap) drawCap([hx,ct-2,hz],null,14);
   }
-  /* 슈트의 캡 */
-  const cp=capChute(), n=R.chute, dv=[cp.b[0]-cp.a[0],cp.b[1]-cp.a[1],cp.b[2]-cp.a[2]], Lc=Math.hypot(...dv);
-  for(let i=0;i<n;i++){ const t=1-(i*(b.capD+2)+b.capD/2)/Lc; if(t<0) break;
-    mPush(); mT(cp.a[0]+dv[0]*t,cp.a[1]+dv[1]*t-(b.h+b.capH)+b.capH,cp.a[2]+dv[2]*t); lathe(botProf().cap,C[b.capCol],far?8:14); mPop(); }
-  /* 볼 피더 속 캡 */
+  /* 슈트 · 벨트 · 체인의 캡 */
+  const n=R.chute;
+  for(let i=0;i<n;i++){ const q=capAt(i*(b.capD+3)+b.capD/2+4); drawCap(q.p,q.k==="c"?q.n:null,far?8:12); }
+  /* 녹색 캡 벨트 · 검은 포켓 체인 (움직임) */
+  const cp=capPath(), bl=cp.belt, run=S.running&&!S.rcp.jam, mv=R.phi*P_PITCH*(run?1:1);
+  box(bl.x0,bl.x1,bl.y-4,bl.y,bl.z-b.capD/2-3,bl.z+b.capD/2+3,[0.12,0.46,0.30,0.08],null,0);
+  if(!far) for(let x=bl.x0+((mv*0.6)%30);x<bl.x1;x+=30) box(x-1,x+1,bl.y,bl.y+0.4,bl.z-b.capD/2-3,bl.z+b.capD/2+3,[0.08,0.30,0.20,0.08],null,0);
+  const ch=cp.chain, per=4*ch.hl+2*Math.PI*ch.r, np=Math.max(10,Math.floor(per/34));
+  mPush(); mT(ch.cx,ch.y,ch.cz); mRY(-ch.ang);
+  for(let i=0;i<np;i++){ let s=((i/np)*per+mv*0.6)%per, px,pz;
+    if(s<2*ch.hl){ px=-ch.hl+s; pz=-ch.r; }
+    else if(s<2*ch.hl+Math.PI*ch.r){ const a=-Math.PI/2+(s-2*ch.hl)/ch.r; px=ch.hl+ch.r*Math.cos(a); pz=ch.r*Math.sin(a); }
+    else if(s<4*ch.hl+Math.PI*ch.r){ px=ch.hl-(s-2*ch.hl-Math.PI*ch.r); pz=ch.r; }
+    else { const a=Math.PI/2+(s-4*ch.hl-Math.PI*ch.r)/ch.r; px=-ch.hl+ch.r*Math.cos(a); pz=ch.r*Math.sin(a); }
+    box(px-12,px+12,-18,-4,pz-10,pz+10,C.black,null,0);
+  }
+  mPop();
+  /* 볼 피더 속 캡 (나선 트랙을 오른다 · 바닥 더미) */
   if(!far&&S.mat.cap>0){ const bw=RCBOWL;
-    for(let i=0;i<10;i++){ const a=i*0.6+R.bowl*0.9, t=(i/10); mPush(); mT(bw.x+236*Math.cos(a),bw.y-20+t*100-(b.h+b.capH)+b.capH,bw.z+236*Math.sin(a)); lathe(botProf().cap,C[b.capCol],8); mPop(); }
-    for(let i=0;i<Math.min(16,Math.round(S.mat.cap/40));i++){ const a=hash1(i)*6.28, r=hash1(i+3)*150; mPush(); mT(bw.x+r*Math.cos(a),bw.y-38-(b.h+b.capH)+b.capH,bw.z+r*Math.sin(a)); lathe(botProf().cap,C[b.capCol],8); mPop(); }
+    for(let i=0;i<12;i++){ const t=((i/12)+R.bowl*0.08)%1, a=t*Math.PI*3.6, rr=226; drawCap([bw.x+rr*Math.cos(a),bw.y-210+t*205+b.capH,bw.z+rr*Math.sin(a)],null,8); }
+    for(let i=0;i<Math.min(18,Math.round(S.mat.cap/30));i++){ const a=hash1(i)*6.28, rr=60+hash1(i+3)*130; drawCap([bw.x+rr*Math.cos(a),bw.y-212+b.capH+Math.floor(i/9)*b.capH,bw.z+rr*Math.sin(a)],null,8); }
   }
-  /* 캡 호퍼 속 캡 (적재량 비례) */
-  if(!far){ const H=CAPHOP, n=Math.round(clamp(S.mat.cap/MAT_CAP.cap,0,1)*30), cx=(H.x0+H.x1)/2, cz=(H.z0+H.z1)/2;
-    for(let i=0;i<n;i++){ const u=hash1(i*1.9), v=hash1(i*4.3), lay=Math.floor(i/10), yy=H.y0+30+lay*b.capH*1.2, sp=0.35+0.65*(yy-H.y0)/(H.y1-H.y0);
-      mPush(); mT(cx+(u-0.5)*(H.x1-H.x0-60)*sp,yy-b.h,cz+(v-0.5)*(H.z1-H.z0-60)*sp); lathe(botProf().cap,C[b.capCol],8); mPop(); } }
+}
+/* 타이밍 벨트 : 터렛 바깥 원호(병 접촉) + 두 풀리 감김 + 바깥 복귀 원호 */
+function timingBelt(mv){
+  const b=BD(), T=L.T, rb=L.R+b.d/2+8, pr=30, a0=PATH.tA+0.30, a1=PATH.tB-0.30, yB=CH+b.h*0.40, far=FAR();
+  const pts=[];
+  for(let i=0;i<=40;i++){ const a=a0+(a1-a0)*i/40; pts.push([rb*Math.cos(a),rb*Math.sin(a)]); }
+  const wrap=(ac,from)=>{ const cx=(rb+pr)*Math.cos(ac), cz=(rb+pr)*Math.sin(ac), rad=[Math.cos(ac),Math.sin(ac)], tan=[-Math.sin(ac),Math.cos(ac)];
+    for(let i=1;i<=10;i++){ const t=i/10*Math.PI, c=Math.cos(t), s=Math.sin(t);
+      const dir=[-rad[0]*c+from*tan[0]*s, -rad[1]*c+from*tan[1]*s]; pts.push([cx+pr*dir[0],cz+pr*dir[1]]); } };
+  wrap(a1,1);
+  for(let i=0;i<=40;i++){ const a=a1+(a0-a1)*i/40; pts.push([(rb+2*pr)*Math.cos(a),(rb+2*pr)*Math.sin(a)]); }
+  wrap(a0,-1);
+  const col=[0.84,0.66,0.34,0.08], dk=[0.62,0.46,0.20,0.08];
+  let acc=0; const L2=[0];
+  for(let i=1;i<pts.length;i++){ acc+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]); L2.push(acc); }
+  for(let i=0;i<pts.length-1;i++){
+    const p=pts[i], q=pts[i+1];
+    quad([T.x+p[0],yB-14,T.z+p[1]],[T.x+q[0],yB-14,T.z+q[1]],[T.x+q[0],yB+14,T.z+q[1]],[T.x+p[0],yB+14,T.z+p[1]],col);
+  }
+  if(!far){ const pitch=16, off=mv%pitch;
+    for(let s=off;s<acc;s+=pitch){ let i=1; while(i<L2.length-1&&L2[i]<s) i++; const t=(s-L2[i-1])/((L2[i]-L2[i-1])||1), p=pts[i-1], q=pts[i];
+      const x=T.x+p[0]+(q[0]-p[0])*t, z=T.z+p[1]+(q[1]-p[1])*t; box(x-1.5,x+1.5,yB-14,yB+14,z-1.5,z+1.5,dk,null,0); } }
 }
 /* 포켓 4개 스타 판 (윤곽 : 원 − 포켓 반원) */
 function starPlate(c,y,base,d){
@@ -341,9 +447,9 @@ function dTable(){
   }
 }
 
+
 /* ── 라인 위 병 ── */
 function dBottles(){
-  const b=BD();
   for(const q of LN.bottles){
     if(q.zone!=="line") continue;
     const p=pathAt(q.s);
@@ -355,31 +461,31 @@ function dBottles(){
 /* ── 경광등 · HMI 화면 ── */
 function dPanels(){
   const on=S.main;
-  for(const k of ["ua","sg","dmc","pe","rc"]){
+  for(const k of ["ua","sg","dmc","wc","pe","rc"]){
     const l=LAMPS[k], h=HMIS[k];
     lampLights(l[0],l[1],l[2],on?lampState(k):"off");
-    hmiFace(h[0],h[1],h[2],h[3],h[4],on,0);
+    hmiFace(h[0],h[1],h[2]+2,h[3],h[4],on,0);
   }
-  hmiFace(120,1420,762,330,250,on,0.05);
 }
 
 /* ═══ 작업자 ═══ */
 const WK=[
   {id:"A", x:-2900, z:AISLE, home:[-2900,AISLE], route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"B", x:2300,  z:AISLE, home:[2300,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0}
+  {id:"B", x:4400,  z:AISLE, home:[4400,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0}
 ];
-/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 확대 시점 */
+/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점
+   서는 위치는 설비 앞면 · 열린 도어와 겹치지 않게 잡았다 (통로 z=AISLE 에서 수직으로 들어온다) */
 const JOBS={
-  bottle:{stand:[-5390,560], reach:[-5390,1280,120], carry:"box",  view:"bottle", dur:2.2},
-  gel:   {stand:[L.sg,430],  reach:[L.sg,1480,40],   carry:"reel", view:"gel", dur:2.4},
-  tab:   {stand:[-1250,420], reach:[-1040,1980,-520],carry:"drum", view:"tab", dur:2.6},
-  film:  {stand:[L.pe,430],  reach:[L.pe,1500,40],   carry:"roll", view:"film", dur:2.4},
-  cap:   {stand:[2110,760],  reach:[2110,1900,60],  carry:"bag",  view:"cap", dur:2.2},
-  reject:{stand:[L.rej,1000],reach:[L.rej,700,560],  carry:null,   view:"reject", dur:2.0},
-  table: {stand:[4800,900],  reach:[4800,1000,330],  carry:null,   view:"table", dur:2.2},
+  bottle:{stand:[-3640,640], reach:[-3640,1560,-300], carry:"box",  view:"bottle", dur:2.8, door:"uaR", pour:true},
+  gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
+  tab:   {stand:[-64,440], reach:[336,1800,-620], carry:"drum", view:"tab", dur:2.9, pour:true},
+  film:  {stand:[3557,710], reach:[3487,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peL"},
+  cap:   {stand:[5128,700], reach:[5028,1530,-300], carry:"bag",  view:"cap", dur:2.7, door:"rcL", pour:true},
+  reject:{stand:[L.rej+40,800], reach:[L.rej,CH-100,380], carry:null, view:"reject", dur:2.0},
+  table: {stand:[L.table.x,900], reach:[L.table.x,1000,330], carry:null, view:"table", dur:2.2},
   look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}
 };
-function wkFor(x){ return x<0?WK[0]:WK[1]; }
+function wkFor(x){ return x<1500?WK[0]:WK[1]; }
 function wkBusy(){ return WK.some(w=>w.job||w.route.length); }
 /* 작업 시작 : 통로를 따라 걸어가서 작업 → 콜백 */
 function startWork(key,cb,opt){
@@ -388,12 +494,15 @@ function startWork(key,cb,opt){
   if(w.job){ return false; }
   const rt=[];
   if(Math.abs(w.z-AISLE)>30) rt.push([w.x,AISLE]);
-  rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],j.stand[1]]);
-  w.route=rt; w.job={key,j,cb,phase:"walk",t:0}; w.carry=j.carry;
+  if(j.door){ rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],DOOR_Z]); }     /* 도어 회전 범위 밖에서 대기 */
+  else { rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],j.stand[1]]); }
+  w.route=rt; w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
   if(j.view&&WORKVIEW[j.view]&&R3.gl){ w.job.prevView=cam.view; const v=WORKVIEW[j.view]; cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
   return true;
 }
+const DOOR_Z=AISLE+320;
 function wkTick(dt){
+  doorTick(dt);
   for(const w of WK){
     w.walking=false;
     if(w.route.length){
@@ -404,13 +513,17 @@ function wkTick(dt){
     }
     const J=w.job;
     if(J){
+      if(J.phase==="walk0"){ J.phase="door"; J.t=0; }
+      if(J.phase==="door"){ w.face=0; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
+      if(J.phase==="exit"){ w.job=null; w.idle=0; continue; }
       if(J.phase==="walk"){ J.phase="work"; J.t=0; }
       J.t+=dt;
       if(J.j.reach){ const r=J.j.reach; w.face=Math.atan2(-(r[0]-w.x),-(r[2]-w.z)); }
       else w.face=0;
       if(J.t>=J.j.dur){
-        w.job=null; w.carry=null; w.idle=0;
+        w.carry=null; w.idle=0;
         if(J.prevView&&cam.view==="work") camSet(J.prevView==="work"?"all":J.prevView);
+        if(J.j.door){ J.phase="exit"; w.route=[[w.x,DOOR_Z]]; } else w.job=null;
         try{ J.cb&&J.cb(); }catch(e){ console.error(e); }
       }
     }else{
@@ -455,25 +568,31 @@ function cuteOperatorShapes(o){
  return SS;
 }
 function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900,e[2]-w.z); if(dd>1500&&(dd>cam.dist*0.8||w.job)) drawWorker(w); } }
+/* 작업 진행 : 도어가 먼저 열리고 (0.45 s) 손을 뻗는다 · 끝나기 0.45 s 전에 손을 거둔다 */
+function reachAmt(J){ const t=J.t-0.15, e=J.j.dur-0.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/0.45):1); }
 function drawWorker(w){
   const scale=1650/488, x=w.x, z=w.z, far=FAR();
   const want=w.face!==undefined?w.face:0;
   if(w.yaw===undefined) w.yaw=want;
   let dl=want-w.yaw; while(dl>Math.PI) dl-=2*Math.PI; while(dl<-Math.PI) dl+=2*Math.PI; w.yaw+=dl*0.2;
   const cy=Math.cos(w.yaw), sy=Math.sin(w.yaw);
-  const J=w.job, work=J&&J.phase==="work"&&J.j.reach, reach=work?Math.min(1,J.t*2.5)*(J.t>J.j.dur-0.35?Math.max(0,(J.j.dur-J.t)/0.35):1):0;
+  const J=w.job, work=J&&J.phase==="work"&&J.j.reach, reach=work?reachAmt(J):0;
   const W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale,z+(-a*sy+c*cy)*scale];
   const Rn=([a,b,c])=>[a*cy+c*sy,b,-a*sy+c*cy];
   const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,g[1]/scale,dx*sy+dz*cy];};
-  const carry=w.carry&&(w.walking||(J&&J.phase==="work"&&J.t<J.j.dur*0.5));
+  /* 들고 있는 물건 : 걷는 동안 가슴 앞 → 작업 중 손으로 (쏟는 물건은 기울였다가 비운다) */
+  const holdEnd=J?(J.j.pour?J.j.dur*0.78:J.j.dur*0.55):0;
+  const walkCarry=w.carry&&w.walking;
+  const handCarry=w.carry&&J&&J.phase==="work"&&J.t<holdEnd;
   const goals=[-1,1].map((s,i)=>{
     const sway=Math.sin((w.gait||0)+s*Math.PI/2)*(w.walking?22:0);
     const idle=[s*64,222,-4+sway];
-    if(carry) return [s*34,300,-86];
+    if(walkCarry||(handCarry&&reach<0.05)) return [s*34,300,-86];
     if(!work) return idle;
-    const tl=toLocal(J.j.reach), osc=Math.sin(J.t*7+i)*5;
-    const tgt=[tl[0]+s*26,Math.min(560,tl[1])+osc,Math.max(-220,Math.min(-60,tl[2]))];
-    return idle.map((v,k)=>v+(tgt[k]-v)*reach);
+    const tl=toLocal(J.j.reach), osc=J.j.pour?0:Math.sin(J.t*7+i)*5;
+    const tgt=[tl[0]+s*(handCarry?34:26),Math.min(560,tl[1])+osc,Math.max(-220,Math.min(-60,tl[2]))];
+    const from=w.carry?[s*34,300,-86]:idle;
+    return from.map((v,k)=>v+(tgt[k]-v)*reach);
   });
   for(const s of cuteOperatorShapes({gait:w.gait||0,walk:w.walking?1:0,crouch:0,goals})){
     const col=WPAL[s.col];
@@ -481,14 +600,27 @@ function drawWorker(w){
     const big=Math.max(...s.r)>25, nu=far?8:(big?16:10), nv=far?5:(big?9:6);
     ellipsoidT(s.c,s.r,col,nu,nv,W,Rn);
   }
-  if(carry){ const c=W([0,300,-110]);
-    mPush(); mT(c[0],c[1],c[2]); mRY(w.yaw);
-    if(w.carry==="box") box(-110,110,-70,70,-80,80,C.box,C.box);
-    else if(w.carry==="reel") { cylZ(0,0,-24,24,150,C.gel,20); cylZ(0,0,-26,26,40,C.dark,12); }
-    else if(w.carry==="roll") { cylZ(0,0,-48,48,130,[0.80,0.90,0.95,0.15],20); }
-    else if(w.carry==="drum") { cylY(0,0,-120,120,120,[0.30,0.52,0.82,0.1],18); }
-    else if(w.carry==="bag") { ellipsoid([0,0,0],[120,90,70],[0.85,0.88,0.92,0.05],12,8); }
-    mPop(); }
+  if(walkCarry||handCarry){
+    const mid=[(goals[0][0]+goals[1][0])/2,(goals[0][1]+goals[1][1])/2,(goals[0][2]+goals[1][2])/2-24];
+    const c=W(mid);
+    const tilt=J&&J.j.pour&&handCarry?smooth(clamp((J.t-0.9)/0.5,0,1))*1.05:0;
+    mPush(); mT(c[0],c[1],c[2]); mRY(w.yaw); mRX(tilt);
+    if(w.carry==="box"){ box(-110,110,-70,70,-80,80,C.box,C.box); }
+    else if(w.carry==="reel"){ cylZ(0,0,-17,17,150,C.gel,20); cylZ(0,0,-20,20,40,C.dark,12); }
+    else if(w.carry==="roll"){ cylX(-90,90,0,0,100,[0.86,0.93,0.97,0.15],20); cylX(-96,96,0,0,34,C.dark,12); }
+    else if(w.carry==="drum"){ cylY(0,0,-110,110,110,[0.30,0.52,0.82,0.1],18); cylY(0,0,110,116,112,[0.22,0.40,0.66,0.1],18); }
+    else if(w.carry==="bag"){ ellipsoid([0,0,0],[120,90,70],[0.85,0.88,0.92,0.05],12,8); }
+    mPop();
+    /* 쏟는 흐름 : 용기 입구 → 목표 */
+    if(tilt>0.6&&!far&&J.t<holdEnd-0.1){
+      const r=J.j.reach, lip=W([mid[0],mid[1]+30,mid[2]-70]), k=J.key, b=BD();
+      for(let i=0;i<10;i++){ const t=((J.t*2.2+i/10)%1), px=lerp(lip[0],r[0],t), pz=lerp(lip[2],r[2]-40,t), py=lerp(lip[1],r[1]-40,t)-Math.sin(t*Math.PI)*-30;
+        if(k==="tab") drawTab(px,py,pz,i,tabCol());
+        else if(k==="cap") drawCap([px,py+b.capH,pz],null,8);
+        else if(k==="bottle") drawBottle(px,py,pz,{tilt:Math.PI/2,yaw:i});
+      }
+    }
+  }
 }
 /* 변환 함수를 받는 타원체 (작업자 전용) */
 function ellipsoidT(c,r,col,nu,nv,W,Rn){

@@ -383,7 +383,7 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
 <body>
 <div id="stage"><div id="app">
   <div id="head">
-    <div class="ttl">병충전 라인 IDT <i>V1</i></div>
+    <div class="ttl">병충전 라인 IDT <i>V3</i></div>
     <div id="bpmCtl">라인 속도 <button class="gbtn" id="bpmDn" aria-label="속도 낮춤">−</button><b id="bpmV">60</b><button class="gbtn" id="bpmUp" aria-label="속도 높임">＋</button> 병/분</div>
     <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button></div>
     <button class="gbtn" id="apBtn">▶ 자동재생</button>
@@ -415,7 +415,7 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
           <div class="tile" id="mTab"><div class="e">💊</div><b>정제 투입</b><s id="tTab">DMC-60T 호퍼</s><div class="lv"><i></i></div></div>
           <div class="tile" id="mFilm"><div class="e">🎞️</div><b>PE 필름 롤</b><s id="tFilm">HPE-100 릴</s><div class="lv"><i></i></div></div>
           <div class="tile" id="mCap"><div class="e">⚪</div><b>캡 투입</b><s id="tCap">RCS-120 호퍼</s><div class="lv"><i></i></div></div>
-          <div class="tile" id="mReject"><div class="e">🗑️</div><b>리젝트함</b><s id="tReject">0 병</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mReject"><div class="e">🗑️</div><b>리젝트</b><s id="tReject">0 병</s><div class="lv"><i></i></div></div>
           <div class="tile" id="mTable"><div class="e">🛞</div><b>완제품 회수</b><s id="tTable">집적 테이블 0 병</s><div class="lv"><i></i></div></div>
         </div>
       </div>
@@ -528,7 +528,7 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
   <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
   <div id="splash">
     <div class="box">
-      <span class="ver">V1</span>
+      <span class="ver">V3</span>
       <h1>병충전 라인 IDT<small>Bottle Filling Line · Interactive Digital Tutor</small></h1>
       <div id="lineStrip"></div>
       <div id="coursePicker">
@@ -1093,21 +1093,22 @@ function bindOrbit(cv,onClick,onHover){
           · HPE-100: PE 필름 조각을 병에 투입해 운반 중 정제 파손 방지, 병 자동 조정(교체부품 불필요)
           · RCS-120: 서보 로타리 4헤드, 스타휠로 터렛 이송, 헤드가 내려오며 회전해 설정 토크로 체결,
                      벌크 캡 공급 · 진동 피더 정렬, 최대 120병/분
-   ※ 내부 치수 · 세부 기구는 공개 자료가 없어 일반적인 동종 설비 구조로 구현함 (실물 확인 필요)
+   · 외형 · 기구 배치는 현장 사진(2026-09) · Key International 브로셔(CT-AU-120 · DMC-60S/60T · CT-PE-60 · CT-RC-120) 기준
+   ※ 세부 치수는 사진 비율로 추정 (실측 아님)
    ═══════════════════════════════════════════════════════════════════ */
 const MACH=[
  {k:"ua", md:"UA-120", nm:"언스크램블러 · 에어세척기", en:"Bottle Unscrambler & Air Cleaner", max:120,
   d:"벌크로 투입된 빈 병을 호퍼 엘리베이터가 턴테이블로 올리고, 턴테이블이 한 줄로 정렬해 내보냅니다. 병을 양옆 사이드 벨트로 잡아 180° 뒤집은 상태에서 이온화 에어로 불어내고 진공으로 흡입해 이물을 제거한 뒤 다시 세워 컨베이어로 보냅니다."},
  {k:"sg", md:"SG-120", nm:"실리카겔 투입기", en:"Sachet Desiccant Inserter", max:120,
-  d:"릴에 감긴 실리카겔 파우치 띠를 피드 롤러가 한 개 길이만큼 내리고, 마크 센서로 위치를 맞춘 뒤 왕복 커터가 절단합니다. 잘린 파우치는 가이드 튜브를 지나 플런저가 병 안으로 밀어 넣습니다."},
+  d:"원통 커버 속 릴에서 풀린 실리카겔 파우치 띠가 헤드 윗면의 흰 가이드 롤러 2개를 지나 헤드로 들어갑니다. 트윈 벨트 이송 유닛이 띠를 한 개 길이만큼 내려 보내고, 센서가 파우치 경계를 읽어 커터가 절단하면 파우치가 가이드 튜브를 지나 병 속으로 떨어집니다."},
  {k:"dmc", md:"DMC-60T", nm:"정제 계수기", en:"Electronic Tablet Counter", max:120,
   d:"호퍼의 정제를 3단 진동 트레이가 12개 트랙으로 한 줄씩 정렬해 보냅니다. 트랙 끝에서 떨어지는 정제를 채널마다 IR/LED 센서가 세고, 6채널씩 모인 정제는 중간 게이트에 대기했다가 병이 도착하면 트윈 노즐로 두 병에 동시에 충전됩니다."},
  {k:"wc", md:"중량선별 PLC", nm:"정제 중량선별", en:"Pre/Post Check Weighing", max:120,
-  d:"계수기 전단 로드셀이 빈 병(병 + 실리카겔) 중량을 재고, 후단 로드셀이 충전 후 총중량을 잽니다. PLC 가 순중량(총중량 − 빈병 중량)을 기준 중량과 비교해 허용오차를 벗어나면 리젝트 푸셔로 배출합니다."},
+  d:"계수기 전단 · 후단에 같은 구조의 계량 스테이션이 있습니다. 게이트가 병을 한 개씩 떼어 보내면 포크(공압 핑거 4개 · 서보 캐리지)가 병을 한 칸씩 옮겨 원형 계량 팬 A · B 에 차례로 올립니다. 전단은 빈 병(병 + 실리카겔), 후단은 충전 후 총중량을 재고, PLC 가 순중량(총중량 − 빈병 중량)을 허용오차와 비교해 불합격 병을 후단 오른쪽 푸셔로 리젝트 트레이에 쳐냅니다."},
  {k:"pe", md:"HPE-100", nm:"비닐(PE 필름) 투입기", en:"High Speed PE Inserter", max:120,
-  d:"PE 필름 롤을 풀어 한 장 길이만큼 공급하고, 가열 커터로 잘라 플런저가 병 입구로 밀어 넣습니다. 필름이 정제 위를 덮어 운반 중 정제끼리 부딪혀 깨지는 것을 막습니다."},
+  d:"뒤쪽 필름 롤 2군에서 풀린 PE 필름을 캐리지가 내려 보내고 톱날 커터가 한 장 길이로 자릅니다. 잘린 필름은 스포크 인덱싱 디스크의 튜브(8개)에 들어가고, 디스크가 돌아 필름이 든 튜브가 병 위에 오면 앞쪽 수직 푸셔가 병 입구로 밀어 넣습니다. 필름이 정제 위를 덮어 운반 중 파손을 막습니다."},
  {k:"rc", md:"RCS-120", nm:"로타리 캡핑기", en:"Rotary Screw Capper", max:120,
-  d:"캡 엘리베이터와 진동 피더가 캡을 정렬해 슈트로 보냅니다. 병은 타이밍 스크류와 인피드 스타휠로 터렛에 들어가고, 4개 헤드가 캡을 집어 내려오며 회전해 설정 토크로 체결한 뒤 아웃피드 스타휠로 다시 컨베이어에 놓습니다."}
+  d:"왼쪽 칸의 진동 볼 피더가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 병은 타이밍 스크류와 흰 스타휠로 터렛에 들어가 황색 타이밍 벨트에 눌려 고정되고, 3조 공압 척 헤드가 캡을 집어 내려오며 회전해 설정 토크로 체결한 뒤 아웃피드 스타휠로 컨베이어에 놓습니다."}
 ];
 const machOf=k=>MACH.find(m=>m.k===k);
 
@@ -1159,40 +1160,40 @@ const ALARMS={
  "DM32":{mk:"dmc",t:"센서창 오염 — 계수 신뢰도 저하",kind:"warn"},
  "DM33":{mk:"dmc",t:"노즐 막힘 (정제 브리지)",kind:"trip"},
  "WC41":{mk:"wc",t:"중량 불합격 연속 3병",kind:"trip"},
- "WC42":{mk:"wc",t:"리젝트함 만량",kind:"trip"},
+ "WC42":{mk:"wc",t:"리젝트 트레이 만량",kind:"trip"},
  "WC43":{mk:"wc",t:"빈병 중량 이상 (실리카겔 누락 의심)",kind:"warn"},
  "WC44":{mk:"wc",t:"로드셀 영점 미실시",kind:"warn"},
  "PE51":{mk:"pe",t:"PE 필름 소진",kind:"trip"},
- "PE52":{mk:"pe",t:"가열 커터 온도 미달",kind:"trip"},
- "RC61":{mk:"rc",t:"캡 공급 부족 (슈트 캡 없음)",kind:"trip"},
- "RC62":{mk:"rc",t:"캡 슈트 걸림",kind:"trip"},
+ "PE52":{mk:"pe",t:"필름 이송 불량 (튜브 걸림)",kind:"trip"},
+ "RC61":{mk:"rc",t:"슈트 캡 없음 (캡 공급 부족)",kind:"trip"},
+ "RC62":{mk:"rc",t:"캡 이송 불량 (슈트 · 벨트 걸림)",kind:"trip"},
  "RC63":{mk:"rc",t:"체결 토크 이상",kind:"warn"},
  "RC64":{mk:"rc",t:"집적 테이블 만량",kind:"trip"}
 };
 
 /* ═══ 장치 설명 (3D ＋ 핫스팟) : 좌표는 layout.js 의 DEVPOS ═══ */
 const DEVICES=[
- {n:1, k:"ua", nm:"병 호퍼 · 엘리베이터", en:"Bottle Hopper & Elevator", d:"벌크 빈 병을 담는 호퍼와 클리트 벨트 엘리베이터입니다. 턴테이블의 병이 줄면 자동으로 올려 보냅니다(온디맨드)."},
- {n:2, k:"ua", nm:"언스크램블 턴테이블", en:"Unscrambling Turntable", d:"회전하는 원판이 병을 가장자리로 밀어 한 줄로 세웁니다. 출구에서 병을 바로 세워 벨트로 보냅니다."},
+ {n:1, k:"ua", nm:"벌크 호퍼 · 엘리베이터", en:"Bulk Hopper & Elevator", d:"가드 안 뒤쪽의 벌크 호퍼(경사 바닥 체인 벨트 · 레벨 센서)와 녹색 클리트 가변속 엘리베이터입니다. 디스크의 병이 줄면 자동으로 올려 보냅니다(온디맨드). 오른칸 도어를 위로 열어 병을 투입합니다."},
+ {n:2, k:"ua", nm:"레벨 디스크 소터", en:"Level-Sensing Disc Sorter", d:"회전하는 원판이 병을 가장자리로 밀어 한 줄로 세웁니다. 옆 나사 기둥으로 높이를 조정합니다."},
  {n:3, k:"ua", nm:"반전 사이드 벨트", en:"Inverting Side Belts", d:"양옆 벨트가 병 몸통을 잡고 비틀어진 경로를 따라 이동해 병을 180° 뒤집었다가 다시 세웁니다. 병 크기가 바뀌어도 교체부품 없이 폭만 조정합니다."},
  {n:4, k:"ua", nm:"이온 에어 · 진공 세척부", en:"Ionized Air & Vacuum", d:"뒤집힌 병 입구로 필터·이온화 에어를 불어넣어 정전기로 붙은 먼지를 떼고, 바로 옆 진공 노즐이 빨아냅니다. 2회 반복 세척합니다."},
- {n:5, k:"sg", nm:"실리카겔 릴", en:"Sachet Reel", d:"파우치가 띠 형태로 감긴 릴입니다. 댄서 롤러가 장력을 일정하게 유지합니다."},
- {n:6, k:"sg", nm:"피드 롤러 · 마크 센서", en:"Feed Rollers & Mark Sensor", d:"한 번에 파우치 한 개 길이(피치)만큼 띠를 내립니다. 마크 센서가 파우치 경계를 읽어 절단 위치를 맞춥니다."},
- {n:7, k:"sg", nm:"왕복 커터 · 플런저", en:"Cutter & Plunger", d:"커터가 파우치 경계를 자르고, 플런저가 가이드 튜브 안의 파우치를 병 속으로 밀어 넣습니다."},
- {n:8, k:"wc", nm:"전단 로드셀", en:"Pre-Weigh Load Cell", d:"계수 전 빈 병(병 + 실리카겔) 중량을 잽니다. 기준 범위를 벗어나면(파우치 누락·이물) 추적 신호를 걸어 후단에서 배출합니다."},
- {n:9, k:"dmc", nm:"정제 호퍼", en:"Product Hopper", d:"정제를 담는 호퍼입니다. 레벨 센서가 부족을 감지하면 경고를 냅니다. 하단 게이트로 1단 트레이 공급량을 조절합니다."},
- {n:10,k:"dmc", nm:"3단 진동 트레이", en:"3-Stage Vibratory Trays", d:"1·2단 트레이가 정제를 넓게 펼치고, 3단 트레이의 12개 V 트랙이 한 줄씩 세웁니다. 진동 강도로 계수 속도를 조절합니다."},
- {n:11,k:"dmc", nm:"계수 센서 블록", en:"Optical Sensor Block", d:"채널마다 IR/LED 센서가 떨어지는 정제를 셉니다. 먼지 감지창이 오염되면 경고하며, 파손정·겹침정은 통과 시간(다크 타임)으로 판별합니다."},
- {n:12,k:"dmc", nm:"중간 게이트 · 트윈 노즐", en:"Gates & Twin Nozzles", d:"6채널씩 모인 정제가 게이트 위에 대기하다가 병이 멈추면 열려 노즐로 떨어집니다. 두 병을 동시에 충전합니다."},
- {n:13,k:"dmc", nm:"병 스토퍼", en:"Bottle Stoppers", d:"입구·중간·출구 스토퍼 핀이 병 두 개를 노즐 바로 아래에 세웁니다."},
- {n:14,k:"wc", nm:"후단 로드셀", en:"Post-Weigh Load Cell", d:"충전 후 총중량을 잽니다. 순중량 = 총중량 − 전단 빈병 중량 으로 계산해 허용오차와 비교합니다."},
- {n:15,k:"wc", nm:"리젝트 푸셔 · 리젝트함", en:"Reject Pusher & Bin", d:"불합격 병이 도착하면 공압 푸셔가 옆으로 밀어 잠금식 리젝트함으로 보냅니다."},
- {n:16,k:"wc", nm:"중량선별 PLC 패널", en:"Check-Weigher PLC", d:"별도 PLC 와 터치 패널입니다. 제품 기준 중량, 허용오차, 빈병 기준, 영점, 판정 이력을 관리합니다."},
- {n:17,k:"pe", nm:"PE 필름 롤", en:"PE Film Reel", d:"병 입구를 덮을 PE 필름 롤입니다."},
- {n:18,k:"pe", nm:"가열 커터 · 투입 플런저", en:"Hot Cutter & Plunger", d:"필름을 한 장 길이만큼 공급해 가열 커터로 자르고, 플런저가 병 입구로 밀어 넣습니다. 커터 온도가 설정값에 도달해야 운전됩니다."},
- {n:19,k:"rc", nm:"캡 호퍼 · 진동 볼 피더 · 슈트", en:"Cap Feeder", d:"앞 위 캡 호퍼(50 L)의 캡을 진동 트레이가 볼 피더로 보내고, 볼 피더가 캡 방향을 맞춰 슈트로 한 줄씩 내려 보냅니다."},
- {n:20,k:"rc", nm:"타이밍 스크류 · 스타휠", en:"Timing Screw & Star Wheels", d:"타이밍 스크류가 병 간격을 터렛 피치에 맞추고, 인피드 스타휠이 터렛으로, 아웃피드 스타휠이 컨베이어로 옮깁니다."},
- {n:21,k:"rc", nm:"4헤드 캡핑 터렛", en:"4-Head Capping Turret", d:"서보 터렛이 도는 동안 헤드가 캠을 따라 내려와 캡을 병에 씌우고 회전해 설정 토크로 체결합니다. 토크에 도달하면 클러치가 미끄러져 과체결을 막습니다."},
+ {n:5, k:"sg", nm:"실리카겔 릴 (원통 커버)", en:"Sachet Reel", d:"파우치가 띠 형태로 감긴 릴입니다. 헤드 왼쪽 암 끝의 원통 커버 안에 있고 앞면 창으로 잔량을 봅니다."},
+ {n:6, k:"sg", nm:"트윈 벨트 이송 · 센서", en:"Twin Belt Feeder & Sensors", d:"노란 타이밍 벨트 두 줄이 띠를 물고 한 번에 파우치 한 개 길이(피치)만큼 내립니다. 센서(SE2 · SE6)가 파우치 경계를 읽어 절단 위치를 맞춥니다."},
+ {n:7, k:"sg", nm:"커터 · 가이드 튜브", en:"Cutter & Guide Tube", d:"커터가 파우치 경계를 자르고, 잘린 파우치가 투명 가이드 튜브를 지나 병 속으로 떨어집니다. 점검 도어에는 안전 스위치(SW3)가 있습니다."},
+ {n:8, k:"wc", nm:"전단 계량 스테이션", en:"Pre-Weigh Station", d:"게이트가 병을 한 개씩 보내고 포크가 원형 계량 팬 A · B 로 옮깁니다. 계수 전 빈 병(병 + 실리카겔) 중량을 재며, 기준 범위를 벗어나면(파우치 누락 · 이물) 추적 신호를 걸어 후단에서 배출합니다. (3급 · 0.02~200 g · 최소눈금 0.01 g)"},
+ {n:9, k:"dmc", nm:"정제 호퍼", en:"Product Hopper", d:"헤드 뒤 위의 호퍼입니다. 레벨 센서가 부족을 감지하면 경고를 냅니다. 호퍼 게이트(mm)로 1단 타공 트레이 공급량을 조절합니다."},
+ {n:10,k:"dmc", nm:"3단 진동 트레이", en:"3-Stage Vibratory Trays", d:"1단 타공 트레이가 분진을 거르고, 2 · 3단 골판(물결) 트레이의 12 홈이 정제를 한 줄씩 세웁니다. 바이브레이터 속도 1 · 2 · 3 으로 계수 속도를 조절합니다."},
+ {n:11,k:"dmc", nm:"계수 센서 박스", en:"Optical Sensor Head", d:"트레이 끝 앞쪽 박스입니다. 채널마다 IR/LED 센서가 떨어지는 정제를 셉니다. 윗면 점검창 2개로 내부를 보며, 먼지 감지창이 오염되면 경고합니다."},
+ {n:12,k:"dmc", nm:"중간 게이트 · 원뿔 노즐", en:"Gates & Twin Nozzles", d:"6채널씩 모인 정제가 게이트 위에 대기하다가 병이 멈추면 열려 백색 원뿔 노즐로 떨어집니다. 두 병을 동시에 충전합니다."},
+ {n:13,k:"dmc", nm:"병 스토퍼", en:"Bottle Stoppers", d:"컨베이어 앞쪽의 공압 스토퍼(널링 캡으로 위치 조정) 3조와 입구 클램프가 병 두 개를 노즐 바로 아래에 세웁니다."},
+ {n:14,k:"wc", nm:"후단 계량 스테이션", en:"Post-Weigh Station", d:"전단과 같은 포크 · 팬 A · B 구조입니다. 충전 후 총중량을 재어 순중량 = 총중량 − 전단 빈병 중량 으로 계산해 허용오차와 비교합니다."},
+ {n:15,k:"wc", nm:"리젝트 푸셔 · 트레이", en:"Reject Pusher & Tray", d:"후단 스테이션 오른쪽에서 불합격 병이 도착하면 뒤쪽 공압 푸셔가 쳐내 앞쪽 곡면 스테인리스 트레이로 보냅니다."},
+ {n:16,k:"wc", nm:"중량선별 PLC 패널", en:"Check-Weigher PLC", d:"후단 스테이션 뒤 기둥 위의 별도 PLC 터치 패널입니다. 기준 중량, 허용오차, 빈병 기준, 영점, 판정 이력을 관리하고 성적서를 프린터로 출력합니다."},
+ {n:17,k:"pe", nm:"PE 필름 롤 2군", en:"PE Film Rolls", d:"뒤쪽에 가로로 걸린 필름 롤 두 군(좌 · 우 레인)입니다. 필름 센서가 소진을 감지합니다."},
+ {n:18,k:"pe", nm:"인덱싱 디스크 · 톱날 커터 · 푸셔", en:"Index Disc, Saw Cutter & Pusher", d:"톱날 커터가 필름을 한 장 길이로 자르면 스포크 디스크의 튜브에 들어가고, 디스크가 돌아 병 위에 온 튜브의 필름을 앞쪽 수직 푸셔가 병 입구로 밀어 넣습니다. (톱날식 · 가열 없음)"},
+ {n:19,k:"rc", nm:"진동 볼 피더 · C 슈트 · 캡 벨트", en:"Cap Feeder", d:"왼쪽 칸의 진동 볼 피더(레벨 센서 봉)가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 왼칸 도어를 열어 볼에 캡을 보충합니다."},
+ {n:20,k:"rc", nm:"타이밍 스크류 · 스타휠", en:"Timing Screw & Star Wheels", d:"타이밍 스크류가 병 간격을 터렛 피치에 맞추고, 흰 UHMW 인피드 스타휠(교체부품)이 터렛으로, 아웃피드 스타휠이 컨베이어로 옮깁니다."},
+ {n:21,k:"rc", nm:"캡핑 터렛 · 타이밍 벨트", en:"Capping Turret", d:"2단 원통 드럼 아래 3조 공압 척 헤드가 캡을 집어 캠을 따라 내려와 회전해 설정 토크로 체결합니다. 병은 황색 타이밍 벨트가 터렛 포켓에 눌러 잡습니다."},
  {n:22,k:"rc", nm:"집적 테이블", en:"Accumulation Table", d:"캡핑이 끝난 병을 모으는 회전 테이블입니다. 가득 차면 작업자가 완제품을 회수합니다."}
 ];
 const devOf=n=>DEVICES.find(d=>d.n===n);
@@ -1233,7 +1234,7 @@ function initState(){
     dmc:{vib:[55,65,78], gateDelay:0.15, dirt:new Array(12).fill(0), bridge:false, checked:false, buf:[0,0], cnt:new Array(12).fill(0), total:0, err:0},
     wc:{zero:[false,false], off:[0.62,-0.48], drift:[0.0009,-0.0007], checked:false, log:[], consec:0, tare:null, gross:null, net:null, judge:null,
         nOK:0, nNG:0, sumNet:0, nNet:0, lastTare:null},
-    pe:{heat:false, sv:165, pv:24, len:60, sensor:true, fed:0},
+    pe:{len:60, sensor:true, fed:0, jam:false},
     rcp:{torque:12, feed:true, checked:false, jam:false, torqueBad:false},
     /* 생산 */
     cnt:{good:0, reject:0, target:40, filled:0, tabs:0, bottlesIn:0},
@@ -1253,30 +1254,30 @@ initState();
    ═══════════════════════════════════════════════════════════════════ */
 const CH=900;                      /* 컨베이어 상면 높이 */
 const XS=-4760;                    /* 컨베이어 시작 (턴테이블 출구) */
-const XE=4300;                     /* 컨베이어 끝 (집적 테이블 입구) */
+const XE=7325;                     /* 컨베이어 끝 (집적 테이블 입구) */
 const AISLE=1250;                  /* 작업자 통로 z */
 const L={
   /* UA-120 */
-  uaX0:-5050, uaX1:-3230,
+  uaX0:-5200, uaX1:-3230,
   tt:{x:-4760, z:-372, r:370},                       /* 언스크램블 턴테이블 (가장자리가 z=0 에 닿음) */
-  hop:{x0:-5620, x1:-5160, z0:-240, z1:260},         /* 빈 병 호퍼 (라인 왼쪽 앞) */
+  hop:{x0:-3900, x1:-3380, z0:-760, z1:-280, y0:1080, y1:1560},   /* 벌크 호퍼 (가드 안 뒤쪽 오른칸) */
   belt0:-4560, inv0:-4460, inv1:-4160, flat1:-3700, inv2:-3700, inv3:-3400, belt1:-3330,
   air:[-4080,-3890], vac:[-3990,-3800],               /* 1차·2차 이온 에어 / 진공 */
   /* SG-120 */
-  sg:-2620,
+  sg:-2050,
   /* 로드셀 */
-  lc1:-1900, lc2:360, lcW:280,
+  lc1:-898, lc2:1989, lcW:300, lcP:150,              /* 로드셀 스테이션 : 데드 플레이트 폭 · 포크 피치 */
   /* DMC-60T : 트윈 노즐 (N1 = 상류, N2 = 하류) */
-  n1:-880, n2:-720, dmcX0:-1460, dmcX1:-150,
+  n1:356, n2:516, dmcDX:1236,                            /* DMC 는 설계 좌표 + dmcDX 로 배치 */
   /* 리젝트 */
-  rej:660, rejBin:{x:660, z:560},
+  rej:2489, rejBin:{x:2489, z:330},
   /* HPE-100 */
-  pe:1500,
+  pe:3687,
   /* RCS-120 : 인피드 스타휠 A · 터렛 T · 아웃피드 스타휠 B (피치원 반지름 같음) */
-  R:180, A:{x:2640,z:-180}, B:{x:3240,z:-180}, T:null,
-  screw0:1940, screw1:2610,
+  R:180, A:{x:5428,z:-180}, B:{x:6028,z:-180}, T:null,
+  screw0:4728, screw1:5398,
   /* 집적 테이블 */
-  table:{x:4800, z:-10, r:500}
+  table:{x:7825, z:-10, r:500}
 };
 L.T={x:(L.A.x+L.B.x)/2, z:L.A.z-Math.sqrt((2*L.R)**2-((L.B.x-L.A.x)/2)**2)};
 
@@ -1308,6 +1309,9 @@ function pathAt(s){
   const dir=Math.sign(g.a1-g.a0);
   return {x:g.c.x+L.R*Math.cos(a), z:g.c.z+L.R*Math.sin(a), h:Math.atan2(Math.cos(a)*dir,-Math.sin(a)*dir), a, seg:g};
 }
+/* 로드셀 스테이션 위치 : IN(컨베이어 끝) → A 팬 → B 팬 → OUT(컨베이어 시작) · 게이트 핀 · IN 스토퍼 */
+function lcGeo(X){ const d=BD().d, p=L.lcP;
+  return {IN:X-1.5*p, A:X-0.5*p, B:X+0.5*p, OUT:X+1.5*p, inFace:X-1.5*p+d/2, gateFace:X-1.5*p-d/2-40}; }
 const sOfX=x=>x-XS;                                   /* 직선 구간 (캡핑기 이전) */
 const S_A=PATH.segs[1].s0, S_T0=PATH.segs[2].s0, S_T1=PATH.segs[2].s1, S_B1=PATH.segs[3].s1;
 const S_END=PATH.len;
@@ -1315,35 +1319,35 @@ const S_END=PATH.len;
 
 /* ── 카메라 시점 ── */
 Object.assign(CAMVIEW,{
-  all:{yaw:-0.46,pitch:0.27,dist:9900,tx:-150,ty:820,tz:-150},
-  ua: {yaw:-0.62,pitch:0.34,dist:3600,tx:-4380,ty:1000,tz:-200},
-  sg: {yaw:-0.45,pitch:0.22,dist:2700,tx:-2720,ty:1350,tz:-100},
-  dmc:{yaw:-0.50,pitch:0.30,dist:2700,tx:-820,ty:1250,tz:-320},
-  wc: {yaw:-0.42,pitch:0.30,dist:3700,tx:-700,ty:980,tz:-100},
-  pe: {yaw:-0.45,pitch:0.22,dist:2800,tx:1450,ty:1350,tz:-150},
-  rc: {yaw:-0.50,pitch:0.30,dist:4300,tx:2800,ty:1450,tz:-300},
-  table:{yaw:-0.62,pitch:0.55,dist:2400,tx:4700,ty:950,tz:0},
-  top:{yaw:-0.0001,pitch:1.42,dist:13000,tx:-100,ty:300,tz:0}
+  all:{yaw:-0.36,pitch:0.26,dist:14600,tx:1250,ty:1000,tz:-150},
+  ua: {yaw:-0.55,pitch:0.28,dist:3900,tx:-4250,ty:1250,tz:-200},
+  sg: {yaw:-0.42,pitch:0.20,dist:2900,tx:-2290,ty:1400,tz:-150},
+  dmc:{yaw:-0.45,pitch:0.26,dist:3100,tx:560,ty:1350,tz:-300},
+  wc: {yaw:-0.40,pitch:0.30,dist:4800,tx:545,ty:1050,tz:-100},
+  pe: {yaw:-0.42,pitch:0.22,dist:2800,tx:3637,ty:1350,tz:-200},
+  rc: {yaw:-0.45,pitch:0.26,dist:4200,tx:5568,ty:1500,tz:-350},
+  table:{yaw:-0.62,pitch:0.55,dist:2400,tx:7725,ty:950,tz:0},
+  top:{yaw:-0.0001,pitch:1.42,dist:16500,tx:1400,ty:300,tz:0}
 });
 /* 작업 영역 확대 시점 (자재 보충 · 조치) */
 const WORKVIEW={
-  bottle:{yaw:-0.85,pitch:0.30,dist:3300,tx:-5000,ty:900,tz:100},
-  gel:   {yaw:-0.40,pitch:0.20,dist:2300,tx:-2560,ty:1250,tz:150},
-  tab:   {yaw:-0.70,pitch:0.34,dist:3000,tx:-1250,ty:1300,tz:0},
-  film:  {yaw:-0.40,pitch:0.20,dist:2300,tx:1480,ty:1250,tz:150},
-  cap:   {yaw:-0.40,pitch:0.22,dist:3400,tx:2200,ty:1500,tz:100},
-  reject:{yaw:-0.30,pitch:0.30,dist:2600,tx:600,ty:800,tz:200},
-  table: {yaw:-0.55,pitch:0.42,dist:2800,tx:4700,ty:900,tz:250}
+  bottle:{yaw:-0.30,pitch:0.22,dist:3000,tx:-3800,ty:1250,tz:0},
+  gel:   {yaw:-0.40,pitch:0.18,dist:2600,tx:-2390,ty:1400,tz:150},
+  tab:   {yaw:-0.55,pitch:0.30,dist:3000,tx:300,ty:1450,tz:-100},
+  film:  {yaw:-0.35,pitch:0.20,dist:2700,tx:3587,ty:1300,tz:100},
+  cap:   {yaw:-0.35,pitch:0.22,dist:3000,tx:5138,ty:1350,tz:0},
+  reject:{yaw:-0.30,pitch:0.30,dist:2600,tx:2389,ty:900,tz:250},
+  table: {yaw:-0.55,pitch:0.42,dist:2800,tx:7725,ty:900,tz:250}
 };
 
 /* ── 장치 핫스팟 위치 (월드 mm) ── */
 const DEVPOS={
-  1:[-5390,1250,60], 2:[-4760,1020,-372], 3:[-4300,1080,0], 4:[-3900,880,60],
-  5:[-3090,1640,120], 6:[-2620,1300,170], 7:[-2620,1130,170],
-  8:[-1900,960,80], 9:[-820,2000,-800], 10:[-820,1560,-500], 11:[-800,1440,-150], 12:[-800,1200,0], 13:[-800,950,70],
-  14:[360,960,80], 15:[660,760,560], 16:[120,1420,770],
-  17:[1500,1560,0], 18:[1500,1200,50],
-  19:[2110,1990,60], 20:[2350,980,90], 21:[2940,1500,-379], 22:[4800,1050,-10]
+  1:[-3640,1500,-500], 2:[-4760,1020,-372], 3:[-4000,1080,0], 4:[-3900,880,60],
+  5:[L.sg-440,1700,80], 6:[L.sg,1400,160], 7:[L.sg,1180,160],
+  8:[L.lc1,960,120], 9:[436,1850,-700], 10:[436,1560,-450], 11:[436,1420,20], 12:[436,1200,60], 13:[436,960,120],
+  14:[L.lc2,960,120], 15:[L.rej,780,330], 16:[L.lc2+420,1650,-230],
+  17:[L.pe,1560,-560], 18:[L.pe,1330,40],
+  19:[5038,1560,-420], 20:[5138,980,90], 21:[L.T.x,1900,-379], 22:[L.table.x,1050,-10]
 };
 
 /* ── models.js ── */
@@ -1425,38 +1429,92 @@ function panelY(x0,x1,z0,z1,y,h){
   const [hx0,hx1,hz0,hz1]=h, a=Math.max(x0,hx0), b=Math.min(x1,hx1);
   G(x0,Math.min(x1,hx0),z0,z1); G(Math.max(x0,hx1),x1,z0,z1); G(a,b,z0,Math.min(z1,hz0)); G(a,b,Math.max(z0,hz1),z1);
 }
-/* 알루미늄 프로파일 프레임 + 아크릴 도어 (카운텍 상부 가드 형식)
-   o.mx : 중간 기둥 x · o.fskip/bskip : 판을 생략할 칸 · o.hole : {f0,b0,t0,l,r} 구멍 · o.top:false 윗판 생략 */
+/* ── 여닫는 아크릴 도어 (작업자가 가드 안 자재를 보충할 때 열린다) ── */
+let DOORS=[];
+const DOOR_OPEN={};
+/* 도어 판 : 국부 원점 = 경첩 · 판은 +x(좌 경첩) / −x(우 경첩) / −y(윗 경첩) 방향으로 펼쳐진다 */
+function doorLeaf(D){
+  const w=D.x1-D.x0, h=D.y1-D.y0, p=16;
+  let X0,X1,Y0,Y1;
+  if(D.hinge==="left"){ X0=0; X1=w; Y0=0; Y1=h; }
+  else if(D.hinge==="right"){ X0=-w; X1=0; Y0=0; Y1=h; }
+  else { X0=0; X1=w; Y0=-h; Y1=0; }
+  const col=C.alu;
+  box(X0,X1,Y0,Y0+p,-p/2,p/2,col,col,3); box(X0,X1,Y1-p,Y1,-p/2,p/2,col,col,3);
+  box(X0,X0+p,Y0,Y1,-p/2,p/2,col,col,3); box(X1-p,X1,Y0,Y1,-p/2,p/2,col,col,3);
+  /* 손잡이 : 경첩 반대쪽 */
+  if(D.hinge==="top"){ const hx=(X0+X1)/2; box(hx-70,hx+70,Y0+22,Y0+36,p/2,p/2+18,C.dark,C.dark,0); }
+  else { const hx=D.hinge==="left"?X1-30:X0+30; box(hx-7,hx+7,h*0.45-80,h*0.45+80,p/2,p/2+18,C.dark,C.dark,0); }
+  glassBox(X0+p,X1-p,Y0+p,Y1-p,-2,2,C.acryl,0.13);
+}
+/* 도어 개폐 : 작업자가 회전 범위 밖(통로 뒤)에서 먼저 열고 들어가며, 나온 뒤 닫힌다 */
+function doorTick(dt){
+  const ids=new Set(DOORS.map(D=>D.id)); ids.add("sgLid");
+  for(const id of ids){
+    const want=WK.some(w=>w.job&&((w.job.j.door===id&&w.job.phase!=="walk0")||(w.job.j.lid===id&&w.job.phase==="work"&&w.job.t<w.job.j.dur-0.3)))?1:0;
+    const o=DOOR_OPEN[id]||0; DOOR_OPEN[id]=want?Math.min(1,o+dt*1.6):Math.max(0,o-dt*1.4);
+  }
+}
+function drawDoors(){
+  for(const D of DOORS){
+    const o=DOOR_OPEN[D.id]||0;
+    if(!VIEW3.guard&&o<0.02) continue;
+    const a=smooth(o)*(D.hinge==="top"?1.75:1.45);
+    mPush();
+    if(D.hinge==="left"){ mT(D.x0,D.y0,D.z); mRY(-a); }
+    else if(D.hinge==="right"){ mT(D.x1,D.y0,D.z); mRY(a); }
+    else { mT(D.x0,D.y1,D.z); mRX(-a); }
+    doorLeaf(D);
+    mPop();
+  }
+}
+/* 알루미늄 프로파일 프레임 + 아크릴 판 (카운텍 상부 가드 형식)
+   o.mx : 중간 기둥 x · o.fskip/bskip : 판을 생략할 칸 · o.hole : {f0,b0,t0,l,r} 구멍 · o.top:false 윗판 생략
+   o.door : {칸번호:{id,hinge}} 여닫는 도어 (동적) */
 function alFrame(x0,x1,y0,y1,z0,z1,o){
-  o=o||{}; const p=20, col=C.alu, xs=[x0,...(o.mx||[]),x1], H=o.hole||{};
+  o=o||{}; const p=20, col=C.alu, xs=[x0,...(o.mx||[]),x1], H=o.hole||{}, DR=o.door||{};
   for(const x of xs) for(const z of [z0,z1]) box(x-p,x+p,y0,y1,z-p,z+p,col,col,4);
   for(const z of [z0,z1]) for(const y of [y0+p,y1-p]) box(x0-p,x1+p,y-p,y+p,z-p,z+p,col,col,4);
   for(const x of xs) for(const y of [y0+p,y1-p]) box(x-p,x+p,y-p,y+p,z0,z1,col,col,4);
-  if(!VIEW3.guard) return;
+  /* 모서리 캡 (검은 둥근 마개) */
+  for(const x of [x0,x1]) for(const z of [z0,z1]) cylY(x,z,y1,y1+6,p+2,C.black,10);
   for(let i=0;i<xs.length-1;i++){
     const a=xs[i]+p, c=xs[i+1]-p;
+    if(DR[i]){ const q={id:DR[i].id, y0:y0+2*p, y1:y1-2*p, z:z1+p};
+      if(DR[i].hinge==="double"){ const m=(a+c)/2; DOORS.push(Object.assign({hinge:"left",x0:a,x1:m-3},q),Object.assign({hinge:"right",x0:m+3,x1:c},q)); }
+      else DOORS.push(Object.assign({hinge:DR[i].hinge,x0:a,x1:c},q));
+      continue; }
+    if(!VIEW3.guard) continue;
     if(!(o.fskip||[]).includes(i)){
       panelZ(a,c,y0+2*p,y1-2*p,z1,H["f"+i]);
       const hx=c-34, hy=y0+(y1-y0)*0.45;                              /* 도어 손잡이 · 경첩 */
       box(hx-7,hx+7,hy-80,hy+80,z1+p,z1+p+16,C.dark,C.dark,0);
       for(const hy2 of [y0+120,y1-120]) box(a+4,a+22,hy2-30,hy2+30,z1+p,z1+p+6,C.ssD,C.ssD,0);
     }
+  }
+  if(!VIEW3.guard) return;
+  for(let i=0;i<xs.length-1;i++){
+    const a=xs[i]+p, c=xs[i+1]-p;
     if(!(o.bskip||[]).includes(i)) panelZ(a,c,y0+2*p,y1-2*p,z0,H["b"+i]);
     if(o.top!==false) panelY(a,c,z0+p,z1-p,y1-p,H["t"+i]);
   }
   panelX(z0+p,z1-p,y0+2*p,y1-2*p,x0,H.l);
   panelX(z0+p,z1-p,y0+2*p,y1-2*p,x1,H.r);
 }
-/* 카운텍 조작 패널 : 스테인리스 하우징 + 화면(동적 hmiFace) + 버튼 줄 + 비상정지. z = 하우징 앞면 (+z 를 본다) */
-function cntHMI(x,y,z,w,h){
-  const hw=w/2+22, yb=y-h/2-96, yt=y+h/2+22;
-  box(x-hw,x+hw,yb,yt,z-60,z,C.ssL,C.ssL);
-  box(x-hw+8,x+hw-8,yb+10,yb+80,z,z+1.5,C.dark,C.dark,0);
-  const by=yb+45, cols=[C.green,C.red,C.white,C.yellow], n=Math.max(2,Math.min(4,Math.floor((2*hw-96)/34)));
-  for(let i=0;i<n;i++){ const bx=x-hw+30+i*34; cylZ(bx,by,z,z+12,11,cols[i],14); box(bx-11,bx+11,by+17,by+21,z+1.5,z+2.2,C.white,C.white,0); }
-  const ex=x+hw-40;
-  box(ex-25,ex+25,by-25,by+25,z,z+12,C.yellow,C.yellow); cylZ(ex,by,z+12,z+20,10,C.dark,12); cylZ(ex,by,z+20,z+34,22,C.red,18);
-  box(x-hw+14,x-hw+80,yt-16,yt-8,z,z+1.5,C.blue,C.blue,0);          /* COUNTEC 표기 */
+/* 카운텍 조작 패널 : 스테인리스 하우징 + 화면(동적 hmiFace) + POWER 키 · SAFETY RESET · (CONVEYOR SPEED) · 비상정지
+   z = 하우징 앞면 (+z 를 본다) · o.knob : 속도 노브 · o.flush : 하우징 없이 판만 */
+function cntHMI(x,y,z,w,h,o){
+  o=o||{};
+  const hw=w/2+26, yb=y-h/2-100, yt=y+h/2+34;
+  if(!o.flush) box(x-hw,x+hw,yb,yt,z-70,z,C.ssL,C.ssL);
+  box(x-w/2-14,x+w/2+14,y-h/2-14,y+h/2+14,z,z+2,C.black,C.black,0);        /* 베젤 */
+  box(x-hw+12,x-hw+120,yt-24,yt-10,z,z+1.2,C.dark,C.dark,0);                 /* COUNTEC 로고 */
+  const by=yb+48, n=o.knob?4:3, gap=(2*hw-40)/n;
+  let bx=x-hw+20+gap/2;
+  cylZ(bx,by,z,z+14,17,C.black,16); box(bx-2,bx+2,by-9,by+9,z+14,z+20,C.ssD,C.ssD,0); bx+=gap;       /* POWER 키 */
+  cylZ(bx,by,z,z+6,14,C.ssD,14); cylZ(bx,by,z+6,z+14,10,C.blueL,14); bx+=gap;                     /* SAFETY RESET */
+  if(o.knob){ cylZ(bx,by,z,z+8,18,C.ssD,16); cylZ(bx,by,z+8,z+22,12,C.black,12); bx+=gap; }        /* CONVEYOR SPEED */
+  box(bx-26,bx+26,by-26,by+26,z,z+10,C.yellow,C.yellow); cylZ(bx,by,z+10,z+18,10,C.dark,12); cylZ(bx,by,z+18,z+32,21,C.red,18);  /* 비상정지 */
 }
 /* 핸드휠 (+z 를 본다) */
 function handWheel(x,y,z,R){
@@ -1467,39 +1525,52 @@ function handWheel(x,y,z,R){
   for(let i=0;i<3;i++){ const a=i*2*Math.PI/3+0.4; tube([x,y,z+34],[x+R*Math.cos(a),y+R*Math.sin(a),z+34],5,C.ssL,8); }
   cylZ(x+R*Math.cos(0.4),y+R*Math.sin(0.4),z+34,z+86,9,C.dark,10);
 }
+/* 메인 스위치 (적 · 황, +z 를 본다) */
+function mainSwitch(x,y,z){ box(x-32,x+32,y-32,y+32,z,z+8,C.yellow,C.yellow); cylZ(x,y,z+8,z+22,24,C.red,16); box(x-6,x+6,y-30,y+30,z+18,z+34,C.red,C.red,0); }
 /* 컨베이어 베드 스커트 (설비 구간의 새니터리 프레임) + 다리 */
 function convBed(x0,x1){
   for(const s of [-1,1]) box(x0,x1,CH-150,CH-62,s*60,s*72,C.ssL);
   for(const x of [x0+50,x1-50]) for(const z of [-46,46]){ foot(x,z,40); cylY(x,z,40,CH-150,16,C.ss,10); }
   for(const x of [x0+50,x1-50]) box(x-10,x+10,300,318,-46,46,C.ss);
 }
+/* 앞쪽 공압 스토퍼 (본체 · 널링 조정 캡 · 브래킷) : 핀은 동적 */
+function frontStopper(x){
+  const b=BD(), y=CH+b.h*0.42, z0=b.d/2+34, z1=z0+118;
+  airCyl([x,y,z0],[x,y,z1],10);
+  cylZ(x,y,z1,z1+16,15,C.ssL,16);
+  box(x-18,x+18,CH-60,y-14,z0+30,z0+48,C.ss);
+}
+function pinFront(x,v){ const b=BD(), y=CH+b.h*0.42, zr=b.d/2+34, ze=-6; tube([x,y,zr],[x,y,lerp(zr-6,ze,v)],4.5,C.rodC,8); }
+
 /* ── 설비 외곽 · 조작 패널 · 경광등 위치 (정적 · 동적 공용) ── */
-const UAB={x0:-5050,x1:-3230,z0:-800,z1:400,yT:1800,col0:-4180,col1:-4020};
-const DMCB={x0:-1460,x1:-150};
-const PEB={x0:1040,x1:1820,z0:-760,z1:220,yT:1780};
-const RCB={x0:1900,x1:3650,z0:-1000,z1:220,yT:2150};
-const RCBOWL={x:2250,y:1650,z:-520};
-const CAPHOP={x0:1970,x1:2250,z0:-60,z1:190,y0:1880,y1:2090};   /* 캡 호퍼 (앞 위) */
+const UAB={x0:-5200,x1:-3230,z0:-800,z1:400,yT:1800,col0:-4180,col1:-4020};
+const DMCB={x0:-224,x1:1086};
+const PEB={x0:3227,x1:4007,z0:-760,z1:220,yT:1780};
+const RCB={x0:4688,x1:6438,z0:-1000,z1:220,yT:1980,mid:5568};
+const RCBOWL={x:5018,y:1500,z:-470};
 const CAP_PICK=130;                                  /* 헤드가 캡을 집는 터렛 각 (°) */
+const SGH={x0:-190,x1:190,z0:-170,z1:150,yT:1760};  /* SG 헤드 박스 (L.sg 기준) */
 /* HMI : [x, y, 앞면 z, 화면 w, 화면 h] · 경광등 : [x, z, 등 아래 y] */
-const HMIS={ua:[-4100,1570,480,170,120], sg:[L.sg+185,1720,195,150,112], dmc:[-300,1660,-120,240,170], pe:[PEB.x1-150,1560,PEB.z1+62,200,140], rc:[2560,1580,RCB.z1+62,240,170]};
-const LAMPS={ua:[-4100,UAB.z1-60,UAB.yT+68], sg:[L.sg+230,-150,1958], dmc:[-300,-150,1878], pe:[PEB.x1-40,PEB.z1-40,PEB.yT+68], rc:[2560,RCB.z1-30,RCB.yT+68]};
+const HMIS={ua:[-4100,1575,445,150,112], sg:[L.sg-40,1655,SGH.z1+6,150,110], dmc:[-290+L.dmcDX,1690,-40,230,172],
+  wc:[L.lc2+420,1680,-150,250,188], pe:[3977,1570,345,150,112], rc:[RCB.x1+180,1650,230,230,172]};
+const LAMPS={ua:[-4100,UAB.z1-70,UAB.yT+8], sg:[L.sg+140,40,SGH.yT+60], dmc:[-290+L.dmcDX,-75,1890],
+  wc:[L.lc2+420,-185,1930], pe:[3977,310,1790], rc:[RCB.x1+180,195,1880]};
 
 /* ═══ 정적 형상 ═══ */
 let STATIC_KEY="";
 function staticKey(){ const b=BD(); return [b.ml,VIEW3.guard?1:0].join("|"); }
 function buildStatic(){
-  STATIC_KEY=staticKey();
+  STATIC_KEY=staticKey(); DOORS=[];
   geoBegin(GEO.stat);
-  sConveyor(); sUA(); sSG(); sLoadCell(L.lc1,1); sDMC(); sLoadCell(L.lc2,2); sReject(); sWCPanel(); sPE(); sRCS(); sTable(); sDust();
+  sConveyor(); sUA(); sSG(); sLoadCell(L.lc1,1); sDMC(); sLoadCell(L.lc2,2); sReject(); sPrinter(); sPE(); sRCS(); sTable(); sDust();
   R3.statDirty=true;
   geoBegin(GEO.dyn);
 }
 
-/* ── 컨베이어 (슬랫 체인 · 가이드 레일) ── */
+/* ── 컨베이어 (브라운 슬랫 체인 · 가이드 레일) ── */
 function sConveyor(){
   const b=BD(), w=44;
-  const gaps=[[L.lc1-L.lcW/2-4,L.lc1+L.lcW/2+4],[L.lc2-L.lcW/2-4,L.lc2+L.lcW/2+4]];
+  const gaps=[[L.lc1-L.lcW/2,L.lc1+L.lcW/2],[L.lc2-L.lcW/2,L.lc2+L.lcW/2]];
   let a=XS;
   const run=(x0,x1)=>{
     box(x0,x1,CH-10,CH,-w,w,C.slat,C.slat,0);
@@ -1512,12 +1583,13 @@ function sConveyor(){
   for(let x=XS+900;x<XE;x+=1150){
     if(x>UAB.x0-80&&x<UAB.x1+80) continue;
     if(Math.abs(x-L.sg)<560) continue;
+    if(Math.abs(x-L.lc1)<380||Math.abs(x-L.lc2)<380) continue;
     if(x>DMCB.x0-80&&x<DMCB.x1+80) continue;
     if(x>PEB.x0-80&&x<RCB.x1+80) continue;
     for(const z of [-w+6,w-6]) { foot(x,z,40); cylY(x,z,40,CH-96,14,C.ss,10); }
     box(x-10,x+10,300,318,-w+6,w-6,C.ss);
   }
-  /* 가이드 레일 : 병 지름 + 10 간격, 2단 */
+  /* 가이드 레일 : 병 지름 + 10 간격, 2단 · 별 손잡이 브래킷 */
   const zr=b.d/2+5, y1=CH+Math.max(16,b.h*0.28), y2=CH+b.h*0.70;
   const rail=(x0,x1,side)=>{
     if(x1-x0<30) return;
@@ -1526,11 +1598,14 @@ function sConveyor(){
     for(let x=x0+60;x<x1-30;x+=430){
       box(x-8,x+8,CH+5,y2+10,side*(w+10),side*(w+22),C.ss);
       for(const y of [y1,y2]) box(x-6,x+6,y-6,y+6,side*zr,side*(w+10),C.ss,C.ss,0);
+      cylZ(x,y2+22,side*(w+16),side*(w+40),13,C.black,6);                     /* 별 손잡이 */
     }
   };
   const segs=[[XS+60,L.belt0-20],[L.belt1+20,L.screw0]];
-  const cutsBack=[[L.sg-70,L.sg+b.d+30],[L.n1-b.d-50,L.n2+b.d/2+40],[L.rej-70,L.rej+70],[L.pe-70,L.pe+b.d+30],[L.lc1-40,L.lc1+b.d/2+30],[L.lc2-40,L.lc2+b.d/2+30]];
-  const cutsFront=[[L.rej-55,L.rej+55]];
+  const g1=lcGeo(L.lc1), g2=lcGeo(L.lc2);
+  const cutsFront=[[L.sg-b.d-30,L.sg+b.d+30],[L.n1-2*b.d-24,L.n2+b.d/2+40],[L.rej-60,L.rej+60],[L.pe-b.d-30,L.pe+b.d+30],
+    [g1.gateFace-1.5*b.d-24,g1.OUT+b.d/2+10],[g2.gateFace-1.5*b.d-24,g2.OUT+b.d/2+10]];
+  const cutsBack=[[L.rej-40,L.rej+40],[L.lc1-L.lcW/2,L.lc1+L.lcW/2],[L.lc2-L.lcW/2,L.lc2+L.lcW/2]];
   const cut=(segs,cuts)=>{ let out=segs.slice();
     for(const c of cuts){ const nx=[]; for(const [p,q] of out){ if(c[1]<=p||c[0]>=q){nx.push([p,q]);continue;} if(c[0]>p) nx.push([p,c[0]]); if(c[1]<q) nx.push([c[1],q]); } out=nx; }
     return out; };
@@ -1538,59 +1613,75 @@ function sConveyor(){
   for(const [p,q] of cut(segs,cutsFront)) rail(p,q,1);
   rail(L.screw0,L.A.x-20,-1);
   rail(L.B.x+20,XE-20,1); rail(L.B.x+20,XE-20,-1);
-  /* 스타휠 · 터렛 바깥 가이드 (원호) */
+  /* 스타휠 바깥 가이드 (원호) — 터렛 구간은 타이밍 벨트가 잡는다 */
   const arcRail=(c,a0,a1,rr)=>{ for(const y of [y1,y2]){ const pts=[]; for(let i=0;i<=24;i++){ const a=a0+(a1-a0)*i/24; pts.push([c.x+rr*Math.cos(a),y,c.z+rr*Math.sin(a)]); } tubePath(pts,5,C.guide,8); } };
   arcRail(L.A,Math.PI/2+0.12,PATH.aT+0.1,L.R+zr);
-  arcRail(L.T,PATH.tA+0.35,PATH.tB-0.35,L.R+zr);
   arcRail(L.B,PATH.bT-0.1,Math.PI/2-0.12,L.R+zr);
+  /* 앞쪽 스토퍼 본체 */
+  for(const k of ["sg","pe"]){ const x=k==="sg"?L.sg:L.pe; frontStopper(x+b.d/2+7); frontStopper(x-b.d-5); }
+  for(const px of [L.n2+b.d/2+4,L.n1+b.d/2+4,L.n1-b.d-6]) frontStopper(px);
+  frontStopper(L.n1-b.d*1.5-10);
+  for(const g of [g1,g2]){ frontStopper(g.gateFace+4); frontStopper(g.inFace+4); frontStopper(g.gateFace-1.5*b.d); }
 }
 
-/* ── UA-120 : 스테인리스 하부 캐비닛 + 알루미늄 프레임 아크릴 가드, 중앙 기둥에 HMI · 경광등 ── */
+/* ── UA-120 : 스테인리스 하부 캐비닛 + 알루미늄 프레임 아크릴 가드 3칸
+      왼칸 = 레벨 디스크 소터 · 가운데 기둥 = HMI · 경광등 · 오른칸 = 사이드 벨트(앞) + 벌크 호퍼(뒤) ── */
 function sUA(){
-  const b=BD(), tt=L.tt, U=UAB;
-  cabinet(U.x0,U.x1,110,CH-100,U.z0,U.z1,{doors:4});
-  box(U.x0,U.x1,CH-100,CH-86,U.z0,U.z1,C.ssL,C.ssL);                    /* 상판 */
-  handWheel(U.x1-190,640,U.z1+1,70);                                       /* 사이드 벨트 높이 조정 */
-  box(U.x0+110,U.x0+170,CH-260,CH-200,U.z1,U.z1+14,C.yellow,C.yellow); cylZ(U.x0+140,CH-230,U.z1+14,U.z1+30,14,C.red,14);  /* 비상정지 */
-  /* 상부 가드 : 좌 · 우 2칸 + 중앙 기둥 칸 */
+  const b=BD(), tt=L.tt, U=UAB, hp=L.hop;
+  cabinet(U.x0,U.x1,110,CH-100,U.z0,U.z1,{doors:3});
+  box(U.x0-10,U.x1+10,CH-100,CH-86,U.z0-10,U.z1+10,C.ssL,C.ssL);           /* 상판 */
+  handWheel(U.x1-230,600,U.z1+1,95);                                      /* 사이드 벨트 높이 조정 */
+  mainSwitch(U.x0+200,640,U.z1+1);
+  /* 상부 가드 : 왼칸(디스크) · 가운데 기둥 · 오른칸(벨트 · 호퍼) — 앞 도어는 위로 여는 방식 */
   alFrame(U.x0,U.x1,CH-86,U.yT,U.z0,U.z1,{mx:[U.col0,U.col1], fskip:[1],
-    hole:{l:[-470,90,930,1400], r:[-100,100,CH-90,CH+b.h+70]}});
-  /* 중앙 기둥 (스테인리스) : 조작 패널 · 경광등 */
-  box(U.col0,U.col1,CH-86,U.yT,U.z1-150,U.z1+20,C.cab,C.ssL);
-  const H=HMIS.ua; cntHMI(H[0],H[1],H[2],H[3],H[4]);
-  lampPole(LAMPS.ua[0],LAMPS.ua[1],U.yT,U.yT+60);
-  /* 레벨 디스크 소터 (턴테이블) 드럼 · 림 */
+    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}},
+    hole:{r:[-110,110,CH-90,CH+b.h+60]}});
+  /* 가운데 기둥 : 조작 패널 (위) · 점검창 (아래) */
+  const H=HMIS.ua;
+  cntHMI(H[0],H[1],H[2],H[3],H[4]);
+  box(U.col0+20,U.col1-20,1350,1375,U.z1-80,U.z1+10,C.ssL,C.ssL);
+  panelZ(U.col0+20,U.col1-20,CH-46,1350,U.z1+2);
+  lampPole(LAMPS.ua[0],LAMPS.ua[1],U.yT,U.yT);
+  /* 레벨 디스크 소터 : 드럼 · 림 · 높이 조정 나사 기둥 */
   cylY(tt.x,tt.z,CH-86,CH-14,tt.r+22,C.ss,48);
   mPush(); mT(tt.x,0,tt.z);
   const gap=(b.d/2+16)/tt.r;
   lathe([[tt.r+4,CH-14],[tt.r+4,CH+120],[tt.r+14,CH+120],[tt.r+14,CH-14]],C.ss,44,Math.PI/2+gap,Math.PI/2-gap+Math.PI*2);
   mPop();
-  /* 출구 안내 가이드 (턴테이블 → 컨베이어) */
+  const px=U.x0+62;
+  for(const z of [tt.z-230,tt.z+130]){ cylY(px,z,CH-86,1420,14,C.ss,10); cylY(px,z,CH+20,1360,9,C.brushed,8);
+    box(px-24,px+24,1180,1240,z-30,z+30,C.black,C.black); }
+  box(px-22,px+22,1420,1450,tt.z-260,tt.z+160,C.ss);
+  cylY(px,(tt.z-230+tt.z+130)/2,1450,1520,16,C.ssL,12);
+  /* 출구 안내 가이드 (디스크 → 사이드 벨트) */
   for(const s of [-1,1]) box(tt.x-20,tt.x+90,CH+2,CH+b.h*0.6,s*(b.d/2+5),s*(b.d/2+11),C.guide,C.guide,0);
-  /* 벌크 호퍼 (라인 왼쪽 끝) */
-  const hp=L.hop;
-  for(const x of [hp.x0+30,hp.x1-30]) for(const z of [hp.z0+30,hp.z1-30]) { foot(x,z,40); cylY(x,z,40,820,16,C.ss,10); }
-  box(hp.x0,hp.x1,800,830,hp.z0,hp.z1,C.ss);
-  box(hp.x0,hp.x0+4,830,1250,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,830,1080,hp.z0,hp.z1,C.ss);
-  box(hp.x0,hp.x1,830,1250,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,830,1250,hp.z1-4,hp.z1,C.ss);
-  quad([hp.x0+4,1100,hp.z0+4],[hp.x0+4,1100,hp.z1-4],[hp.x1-4,860,hp.z1-4],[hp.x1-4,860,hp.z0+4],C.ssD);
-  cylY(hp.x0+60,hp.z0+10,1150,1200,14,C.dark,10);                        /* 레벨 센서 */
-  /* 가변속 엘리베이터 (클리트 벨트) : 호퍼 → 디스크 소터 */
-  const e0=[hp.x1-20,860,20], e1=[tt.x-150,CH+470,tt.z-80];
+  /* 벌크 호퍼 (가드 안 뒤쪽) : 스테인리스 통 + 경사 바닥 브라운 체인 벨트 + 레벨 센서 */
+  const y0=hp.y0, y1=hp.y1;
+  box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
+  box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
+  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,y0,y1-120,hp.z1-4,hp.z1,C.ss);
+  quad([hp.x0+4,y0+60,hp.z0+4],[hp.x0+4,y0+60,hp.z1-4],[hp.x1-4,y0+240,hp.z1-4],[hp.x1-4,y0+240,hp.z0+4],[0.36,0.25,0.19,0.08]);
+  for(const x of [hp.x0+40,hp.x1-40]) for(const z of [hp.z0+40,hp.z1-40]) cylY(x,z,CH-86,y0,16,C.ss,10);
+  cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
+  /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
+  const e0=UA_EL[0], e1=UA_EL[1];
   mPush(); const len=mAlong(e0,e1);
-  box(-120,-110,0,len,-50,40,C.ss); box(110,120,0,len,-50,40,C.ss); box(-110,110,0,len,-44,-36,C.slat,C.slat,0); box(-110,110,0,len,-70,-44,C.ss);
+  box(-120,-110,0,len,-50,40,C.ss); box(110,120,0,len,-50,40,C.ss); box(-110,110,0,len,-70,-44,C.ss);
   cylZ(0,30,-38,60,26,C.ssD,14); cylZ(0,len-30,-38,60,26,C.ssD,14);
   mPop();
-  cylY(e1[0],e1[2],CH-86,e1[1]-40,20,C.ss,10);
-  /* 배출 슈트 */
-  quad([e1[0]-70,e1[1]-20,e1[2]-70],[e1[0]+70,e1[1]-20,e1[2]-70],[tt.x-40,CH+140,tt.z+10],[tt.x-200,CH+140,tt.z+10],C.ss);
-  /* 반전 사이드 벨트 : 풀리 하우징 · 폭 조정 브래킷 */
+  cylY(e1[0],e1[2],CH-86,e1[1]-40,20,C.ss,10); cylY(e0[0]-40,e0[2],CH-86,e0[1],20,C.ss,10);
+  /* 배출 슈트 (엘리베이터 → 디스크) */
+  quad([e1[0]-70,e1[1]-20,e1[2]-60],[e1[0]+70,e1[1]-20,e1[2]-60],[tt.x+20,CH+150,tt.z-40],[tt.x-140,CH+150,tt.z-40],C.ss);
+  /* 반전 사이드 벨트 : 흰 풀리 · 폭 조정 브래킷 · 눈금 */
   const zb=b.d/2+8, ym=CH+b.h/2;
   for(const x of [L.belt0,L.belt1]) for(const s of [-1,1]){
     box(x-55,x+55,CH+6,CH+b.h+6,s*(zb+14),s*(zb+80),C.ss);
-    cylY(x,s*(zb+6),CH+2,CH+b.h+10,10,C.ssD,12);
+    cylY(x,s*(zb+6),CH+2,CH+b.h+10,46,C.uhmw,20);
+    cylY(x,s*(zb+6),CH+b.h+10,CH+b.h+22,16,C.ssL,12);
   }
   for(let x=L.belt0+200;x<L.belt1-100;x+=420) for(const s of [-1,1]){ box(x-12,x+12,CH-86,CH+b.h+40,s*(zb+90),s*(zb+110),C.ss); cylZ(x,CH+b.h+30,s*(zb+14),s*(zb+100),7,C.ssD,8); }
+  for(const s of [-1,1]) box(L.belt0+60,L.belt1-60,CH+b.h+44,CH+b.h+52,s*(zb+86),s*(zb+114),C.ssL,C.ssL,0);
+  for(let x=L.belt0+80;x<L.belt1-80;x+=60) box(x-1,x+1,CH+b.h+52,CH+b.h+53,zb+90,zb+104,C.dark,C.dark,0);
   /* 비틀림 벨트 지지 롤러 링 (병 축 둘레) */
   for(let x=L.inv0;x<=L.inv3;x+=150){
     mPush(); mT(x,ym,0); mRZ(Math.PI/2);
@@ -1605,281 +1696,383 @@ function sUA(){
   hoseTo([L.vac[1],CH-150,-60],[-3700,CH-200,-420],[-3680,CH-300,-560],24,[0.62,0.66,0.70,0.2]);
   /* 이오나이저 · 필터 레귤레이터 */
   box(-4030,-3860,CH+b.h+120,CH+b.h+150,-60,60,C.dark); box(-4000,-3890,CH+b.h+115,CH+b.h+121,-40,40,E.ledB,null,0);
-  box(-5000,-4900,560,760,U.z1,U.z1+40,C.dark); cylZ(-4950,720,U.z1+40,U.z1+50,26,C.white,20); cylY(-4950,U.z1+20,560,600,20,[0.75,0.82,0.9,0.1],14);
+  box(U.x1-420,U.x1-320,560,760,U.z1,U.z1+40,C.dark); cylZ(U.x1-370,720,U.z1+40,U.z1+50,26,C.white,20); cylY(U.x1-370,U.z1+20,560,600,20,[0.75,0.82,0.9,0.1],14);
 }
+/* UA 엘리베이터 : 호퍼 바닥 → 디스크 위 */
+const UA_EL=[[L.hop.x0-40,1110,-520],[L.tt.x+180,1560,-600]];
 /* 호스 (3점 곡선) */
 function hoseTo(a,m,e,r,col){ const pts=[]; for(let i=0;i<=10;i++){ const t=i/10,u=1-t; pts.push([u*u*a[0]+2*u*t*m[0]+t*t*e[0],u*u*a[1]+2*u*t*m[1]+t*t*e[1],u*u*a[2]+2*u*t*m[2]+t*t*e[2]]); } tubePath(pts,r,col,10); }
 
-/* ── SG-120 : 기둥형 받침 캐비닛 · 컨베이어 베드, 뒤 기둥에 헤드 박스, 전면 좌측 원형 릴, 우측 HMI ── */
+/* ── SG-120 : 기둥형 받침 캐비닛 + 뒤 전기함(기둥 4개) · 헤드 박스(위 HMI · 아래 점검 도어)
+      · 왼쪽 암 끝 원통 릴 커버 · 윗면 흰 가이드 롤러 2개 · 창 안 트윈 벨트 이송 유닛 ── */
 function sgHeadY(){ const b=BD(); return {y0:CH+b.h+130, y1:CH+b.h+320}; }
-/* 릴 · 댄서 · 입구 롤러 위치 (정적 · 동적 공용) */
+/* 릴 · 롤러 위치 (정적 · 동적 공용) */
 function insCfg(k){
   const H=sgHeadY();
-  if(k==="sg"){ const x=L.sg; return {x, rx:x-470, ry:1640, rz:95, wd:34, r0:48, rF:170, dp:[x-330,1440,95], da:Math.PI, in:[x-300,H.y1+70], g:[x-60,H.y1+62]}; }
-  const x=L.pe; return {x, rx:x, ry:1520, rz:0, wd:92, r0:52, rF:150, dp:[x+195,1360,0], da:Math.PI, in:[x+60,H.y1+70], g:null};
-}
-/* 투입 헤드 (HPE) : 뒤판 · 옆판 · 상하판 + 앞 투명창 */
-function inserterHead(x,H,hw,hd){
-  box(x-hw,x+hw,H.y0,H.y1,-hd,-hd+14,C.cab,C.ssL);
-  box(x-hw,x-hw+10,H.y0,H.y1,-hd,hd,C.cab,C.ssL); box(x+hw-10,x+hw,H.y0,H.y1,-hd,hd,C.cab,C.ssL);
-  box(x-hw,x+hw,H.y1-12,H.y1,-hd,hd,C.cab,C.ssL); box(x-hw,x+hw,H.y0,H.y0+12,-hd,hd,C.cab,C.ssL);
-  glassBox(x-hw+10,x+hw-10,H.y0+12,H.y1-12,hd-3,hd,C.acryl,0.18);
+  if(k==="sg"){ const x=L.sg; return {x, rx:x-440, ry:1700, rz:-40, wd:34, r0:40, rF:150, R:200, top:[[x-120,SGH.yT+44],[x+30,SGH.yT+44]]}; }
+  const x=L.pe; return {x, wd:92, r0:40, rF:105};
 }
 function sSG(){
-  const x=L.sg, b=BD(), H=sgHeadY(), I=insCfg("sg");
+  const x=L.sg, b=BD(), H=sgHeadY(), I=insCfg("sg"), G=SGH;
   /* 받침 캐비닛 · 컨베이어 베드 */
-  cabinet(x-230,x+230,110,CH-150,-340,230,{doors:1,front:230});
-  namePlate(x,CH-240,231,150);
-  convBed(x-540,x+540);
-  /* 뒤 기둥 */
-  box(x-110,x+110,CH-150,1900,-450,-250,C.cab,C.ssL);
-  /* 헤드 박스 : 앞면 창(피드 롤러 · 커터 · 플런저가 보인다) */
-  const hx0=x-280, hx1=x+280, hy0=H.y0-40, hy1=1900, hz0=-250, hz1=150, t=14;
-  const wx0=x-130, wx1=x+80, wy0=hy0+t, wy1=Math.min(H.y1+210,1590);
-  box(hx0,hx1,hy0,hy1,hz0,hz0+t,C.cab,C.ssL);
-  box(hx0,hx0+t,hy0,hy1,hz0,hz1,C.cab,C.ssL); box(hx1-t,hx1,hy0,hy1,hz0,hz1,C.cab,C.ssL);
-  box(hx0,hx1,hy1-t,hy1,hz0,hz1,C.cab,C.ssL);
-  box(hx0,x-34,hy0,hy0+t,hz0,hz1,C.cab); box(x+34,hx1,hy0,hy0+t,hz0,hz1,C.cab);
-  box(x-34,x+34,hy0,hy0+t,hz0,-34,C.cab); box(x-34,x+34,hy0,hy0+t,34,hz1,C.cab);
-  box(hx0,wx0,hy0,hy1,hz1-t,hz1,C.cab,C.ssL); box(wx1,hx1,hy0,hy1,hz1-t,hz1,C.cab,C.ssL);
-  box(wx0,wx1,wy1,hy1,hz1-t,hz1,C.cab,C.ssL);
-  glassBox(wx0,wx1,wy0,wy1,hz1-5,hz1-1,C.acryl,0.16);
-  for(const [a,c,d,e] of [[wx0-4,wx1+4,wy0-4,wy0],[wx0-4,wx1+4,wy1,wy1+4],[wx0-4,wx0,wy0,wy1],[wx1,wx1+4,wy0,wy1]]) box(a,c,d,e,hz1,hz1+4,C.alu,C.alu,0);
-  box(wx0+10,wx0+120,wy1+30,wy1+60,hz1,hz1+2,C.blue,C.blue,0);            /* 명판 */
-  /* 릴 받침판 · 릴 축 · 댄서 축 · 입구 롤러 */
-  box(x-620,hx0,1360,1690,-100,-78,C.cab,C.ssL);
-  cylZ(I.rx,I.ry,-100,I.rz+I.wd/2+12,18,C.ss,14);
-  cylZ(I.dp[0],I.dp[1],-100,I.rz-I.wd/2-8,10,C.ss,10);
-  cylZ(I.in[0],I.in[1],-100,I.rz+I.wd/2+8,11,C.ssD,12);
-  box(hx0-8,hx0,I.in[1]-14,I.in[1]+14,I.rz-I.wd/2-6,I.rz+I.wd/2+6,C.dark,C.dark,0);   /* 투입 슬롯 */
-  cylZ(I.g[0],I.g[1],-60,60,9,C.ss,10);                                   /* 안쪽 가이드 롤러 */
-  /* 가이드 튜브 (투명) · 플런저 실린더 · 마크 센서 */
+  cabinet(x-230,x+230,110,CH-150,-700,230,{doors:1,front:230});
+  box(x-250,x+250,CH-150,CH-136,-720,250,C.ssL,C.ssL);
+  convBed(x-400,x+360);
+  /* 뒤 전기함 : 기둥 4개 위 · 메인 스위치 */
+  for(const px of [x-180,x+180]) for(const pz of [-640,-380]) cylY(px,pz,CH-136,1010,18,C.brushed,12);
+  box(x-250,x+250,1010,1520,-700,-320,C.cab,C.ssL);
+  mainSwitch(x-150,1380,-319);
+  box(x+60,x+200,1180,1260,-320,-316,C.white,C.white,0);
+  /* 헤드 박스 (연회색 판금) : 뒤 전기함에 고정 */
+  const hx0=x+G.x0, hx1=x+G.x1, hy0=H.y0-40, hy1=G.yT, hz0=G.z0, hz1=G.z1, t=12;
+  const col=[0.84,0.86,0.88,0.35];
+  box(hx0,hx1,hy0,hy1,hz0,hz0+t,col,col);
+  box(hx0,hx0+t,hy0,hy1,hz0,hz1,col,col); box(hx1-t,hx1,hy0,hy1,hz0,hz1,col,col);
+  box(hx0,hx1,hy1-t,hy1,hz0,hz1,col,col);
+  box(hx0,x-40,hy0,hy0+t,hz0,hz1,col,col); box(x+40,hx1,hy0,hy0+t,hz0,hz1,col,col);
+  box(x-40,x+40,hy0,hy0+t,hz0,-40,col,col); box(x-40,x+40,hy0,hy0+t,40,hz1,col,col);
+  box(x-120,x+120,hy0+120,hy1-80,-320,hz0,C.cab,C.ssL);                     /* 전기함 연결 브래킷 */
+  /* 앞면 : 위 = HMI 판 · 아래 = 점검 도어(창) */
+  const wy1=Math.max(hy0+200,1500);
+  box(hx0,hx1,wy1,hy1,hz1-t,hz1,col,col);
+  box(hx0,hx0+30,hy0,wy1,hz1-t,hz1,col,col); box(hx1-30,hx1,hy0,wy1,hz1-t,hz1,col,col);
+  glassBox(hx0+30,hx1-30,hy0+t,wy1,hz1-6,hz1-2,C.acryl,0.15);
+  for(const [a,c,d,e] of [[hx0+26,hx1-26,hy0+t,hy0+t+8],[hx0+26,hx1-26,wy1-8,wy1],[hx0+26,hx0+34,hy0+t,wy1],[hx1-34,hx1-26,hy0+t,wy1]]) box(a,c,d,e,hz1-2,hz1+4,C.brushed,C.brushed,0);
+  for(const hy2 of [hy0+60,wy1-60]) box(hx0+2,hx0+22,hy2-24,hy2+24,hz1,hz1+8,C.ssD,C.ssD,0);   /* 경첩 */
+  const Hm=HMIS.sg; cntHMI(Hm[0],Hm[1],Hm[2],Hm[3],Hm[4],{flush:true});
+  box(hx1-70,hx1-20,hy1-40,hy1-18,hz1,hz1+1.5,C.dark,C.dark,0);            /* CE · COUNTEC */
+  /* 창 안 : 트윈 벨트 이송 유닛 · 커터 블록 · 레버 · 센서 SE2 · SE6 · 도어 스위치 SW3 */
+  const by0=H.y0+50, by1=H.y0+290;
+  box(x-150,x+150,by0-30,by1+30,hz0+t,hz0+t+10,C.ssL,C.ssL,0);             /* 뒤 판 */
+  for(const s of [-1,1]){
+    box(x+s*14,x+s*62,by0,by1,-40,40,C.brushed);
+    for(const yy of [by0+14,by1-14]){ cylZ(x+s*38,yy,40,48,13,C.ssL,14); cylZ(x+s*38,yy,48,52,6,C.dark,10); }
+  }
+  box(x-150,x+150,H.y0+6,H.y0+22,-70,70,C.ssL);                            /* 커터 받침판 */
+  box(x-110,x-60,by0+40,by0+70,-10,60,C.ss); tube([x-85,by0+55,60],[x-150,by0-10,110],7,C.ssL,8); ellipsoid([x-156,by0-18,114],[18,18,18],C.black,10,6);
+  box(x-150,x-110,by1-10,by1+30,20,50,C.ss); box(x-146,x-116,by1+2,by1+18,50,52,C.yellow,C.yellow,0);
+  box(x+100,x+140,by0+30,by0+70,20,56,C.green,C.green);                    /* SE6 */
+  box(x+96,x+144,by1-30,by1+50,10,48,C.red,C.red);                         /* SW3 */
+  /* 가이드 튜브 (투명) */
   const tr=Math.max(9,b.nk/2-4);
   const g=gAlpha; gAlpha=0.28; tube([x,CH+b.h+16,0],[x,H.y0,0],tr+2,C.acryl,16,false); gAlpha=g;
   cylY(x,0,CH+b.h+12,CH+b.h+18,tr+5,C.ss,16);
-  airCyl([x,H.y1,0],[x,H.y1+190,0],22);
-  box(x+30,x+50,H.y1-110,H.y1-86,20,40,C.dark);
-  box(x-60,x+60,H.y1-60,H.y1-20,-60,-40,C.ssD);                           /* 피드 롤러 브래킷 */
-  /* 스토퍼 · 클램프 실린더 (후면) */
-  airCyl([x+b.d/2+7,CH+b.h*0.42,-190],[x+b.d/2+7,CH+b.h*0.42,-78],11);
-  airCyl([x-b.d/2-5-b.d/2,CH+b.h*0.42,-190],[x-b.d/2-5-b.d/2,CH+b.h*0.42,-78],11);
-  const Hm=HMIS.sg; cntHMI(Hm[0],Hm[1],Hm[2],Hm[3],Hm[4]);
+  /* 윗면 : 흰 가이드 롤러 2개 · 투입 슬롯 */
+  for(const [rx,ry] of I.top){ cylZ(rx,ry,-34,34,26,C.uhmw,20); cylZ(rx,ry,-38,38,9,C.ssL,12); box(rx-10,rx+10,hy1,ry,-44,-36,C.ssL); }
+  box(x-30,x+30,hy1,hy1+4,-24,24,C.dark,C.dark,0);
+  /* 릴 : 박스 암 · 원통 커버 (앞 짙은 투명창) */
+  const Rr=I.R;
+  box(I.rx+Rr-20,hx0,I.ry-40,I.ry+40,-130,-50,C.ssL);
+  box(hx0-60,hx0,I.ry-70,I.ry+70,-140,-40,C.ssL);
+  cylZ(I.rx,I.ry,-150,70,Rr,C.ss,40,false);
+  mPush(); mT(I.rx,I.ry,-150); mRX(Math.PI/2); disc(0,0,Rr,C.ss,40); mPop();
+  cylZ(I.rx,I.ry,-150,-120,24,C.ssD,14);                                   /* 릴 축 받침 (앞 뚜껑은 동적) */
+  box(I.rx+Rr*0.55,I.rx+Rr*0.95,I.ry-Rr-2,I.ry-Rr+14,-40,60,C.ssL);       /* 띠 출구 */
   lampPole(LAMPS.sg[0],LAMPS.sg[1],hy1,LAMPS.sg[2]-8);
 }
 
-/* ── 로드셀 (전단 1 · 후단 2) ── */
-function sLoadCell(x,i){
-  const b=BD(), w=L.lcW;
-  box(x-w/2,x+w/2,CH-70,CH-8,-48,48,C.ss);
-  cylZ(x-w/2+14,CH-22,-44,44,13,C.ssD,14); cylZ(x+w/2-14,CH-22,-44,44,13,C.ssD,14);
-  box(x-110,x+110,CH-300,CH-70,-120,120,C.cab,C.ssL);
-  box(x-60,x+60,CH-270,CH-100,120,122,C.blue,C.blue,0);
-  foot(x-70,0,CH-300); foot(x+70,0,CH-300);
-  /* 표시기 (앞) */
-  cylY(x,190,CH-300,CH+300,14,C.ss,10);
-  box(x-80,x+80,CH+320,CH+400,170,215,C.dark,C.dark);
-  /* 스토퍼 실린더 */
-  airCyl([x+b.d/2+5,CH+b.h*0.42,-200],[x+b.d/2+5,CH+b.h*0.42,-80],10);
-  box(x+b.d/2-8,x+b.d/2+18,CH+5,CH+b.h*0.42+18,-210,-190,C.ss);
+/* ── 로드셀 스테이션 (전단 1 · 후단 2) : 전용 캐비닛 + 서보 · 아크릴 박스 · 데드 플레이트 원형 팬 2개 · 포크 이송부 ── */
+function sLoadCell(X,i){
+  const b=BD(), P=L.lcP, hw=L.lcW/2, g=lcGeo(X);
+  cabinet(X-290,X+290,110,CH-176,-330,250,{doors:2,front:250});
+  box(X-300,X+300,CH-176,CH-160,-340,260,C.ssL,C.ssL);
+  box(X+150,X+280,CH-310,CH-200,250,330,[0.68,0.72,0.76,0.6]); box(X+280,X+320,CH-300,CH-210,258,322,C.black,C.black);   /* 서보 M */
+  box(X+184,X+220,CH-250,CH-236,330,331,C.yellow,C.yellow,0);
+  /* 데드 플레이트 · 원형 팬 (계량 팬 A · B) */
+  box(X-hw,X+hw,CH-14,CH-2,-70,70,C.brushed,C.brushed,0);
+  for(const px of [g.A,g.B]){ mPush(); mT(px,0,0); disc(CH-1.4,58,63,C.black,32); mPop(); cylY(px,0,CH-160,CH-14,22,C.ssD,12); }
+  box(X-hw,X+hw,CH-150,CH-14,-60,60,C.ssD);                                 /* 로드셀 하우징 */
+  /* 포크 이송부 : 앞쪽 리니어 가이드 · 받침판 · 케이블 체인 받침 */
+  box(X-300,X+300,CH-160,CH-130,90,300,C.ssL);
+  box(X-280,X+280,CH-130,CH-116,150,176,C.ssD,C.ssD,0);
+  for(const z of [150,176]) box(X-280,X+280,CH-116,CH-110,z-4,z+4,C.ss,C.ss,0);
+  box(X-60,X+280,CH-130,CH-120,210,290,C.ss,C.ss,0);
+  /* 아크릴 박스 가드 */
+  alFrame(X-320,X+320,CH-160,CH+430,-340,340,{hole:{l:[-100,100,CH-162,CH+b.h+60],r:[-100,100,CH-162,CH+b.h+60]}});
+  /* 뒤 가이드 레일 (잎 모양 끝) : 팬 구간 */
+  const zr=b.d/2+5, y1=CH+Math.max(16,b.h*0.28), y2=CH+b.h*0.70;
+  for(const y of [y1,y2]){ cylX(X-hw-40,X+hw+40,y,-zr,5,C.guide,10);
+    for(const xe of [X-hw-60,X+hw+60]) ellipsoid([xe,y,-zr],[26,4,4],C.guide,8,4); }
+  box(X-hw+20,X-hw+36,CH+5,y2+10,-(zr+6),-(zr+60),C.ss); box(X+hw-36,X+hw-20,CH+5,y2+10,-(zr+6),-(zr+60),C.ss);
+  /* 교정 라벨 */
+  box(X-120,X-30,CH-160,CH-120,260.5,261,C.white,C.white,0); box(X+100,X+140,CH-150,CH-138,260.5,261,C.yellow,C.yellow,0);
+  /* 후단 : 중량선별 PLC 조작 패널 (뒤쪽 기둥) */
+  if(i===2){
+    const Hm=HMIS.wc;
+    foot(Hm[0],-220,40); cylY(Hm[0],-220,40,Hm[1]-Hm[4]/2-100,34,C.ss,14);
+    cntHMI(Hm[0],Hm[1],Hm[2],Hm[3],Hm[4],{knob:true});
+    lampPole(LAMPS.wc[0],LAMPS.wc[1],Hm[1]+Hm[4]/2+34,LAMPS.wc[2]-8);
+  }
 }
 
-/* ── DMC-60T : 기둥형 받침 캐비닛 · 긴 컨베이어 베드, 헤드 박스(진동기) 위 3단 트레이 · 뒤 호퍼, 우측 폴 HMI ── */
+/* ── DMC-60T : 기둥형 받침 캐비닛(메인 스위치 · 팬) · 크롬 기둥 위 경사 헤드 · 골판 3단 트레이 · 뒤 호퍼
+      · 앞 센서 박스(점검창 2) · 게이트 · 백색 원뿔 노즐 2 · S자 파이프 암 HMI · 천장 집진 배관 ── */
 function dmcGateY(){ return CH+BD().h+175; }
-const DMC={x0:-956,x1:-644,tw:26,t3z0:-420,t3z1:-172,t3y:1452, t2:{x0:-1030,x1:-570,z0:-640,z1:-420,y:1498}, t1:{x0:-990,x1:-610,z0:-900,z1:-640,y:1540}};
+const DMC={x0:-956,x1:-644,tw:26,t3z0:-400,t3z1:-172,t3y:1462, t2:{x0:-1000,x1:-600,z0:-620,z1:-400,y:1510}, t1:{x0:-960,x1:-640,z0:-760,z1:-620,y:1556},
+  hop:{x0:-1080,x1:-520,z0:-920,z1:-500,y1:1800,ox0:-880,ox1:-720,oz0:-780,oz1:-660,y0:1640}};
+/* 골판(물결) 트레이 : x 방향 12 홈 */
+function corrTray(t,n,amp,col){
+  const w=(t.x1-t.x0)/n;
+  for(let i=0;i<n;i++){
+    const xa=t.x0+i*w, xm=xa+w/2, xb=xa+w;
+    quad([xa,t.y+amp,t.z0],[xa,t.y+amp,t.z1],[xm,t.y,t.z1],[xm,t.y,t.z0],col);
+    quad([xm,t.y,t.z0],[xm,t.y,t.z1],[xb,t.y+amp,t.z1],[xb,t.y+amp,t.z0],col);
+  }
+  box(t.x0-4,t.x0,t.y,t.y+amp+30,t.z0,t.z1,C.ss,C.ss,0); box(t.x1,t.x1+4,t.y,t.y+amp+30,t.z0,t.z1,C.ss,C.ss,0);
+  box(t.x0,t.x1,t.y,t.y+amp+30,t.z0-4,t.z0,C.ss,C.ss,0);
+}
 function sDMC(){
-  const b=BD(), yG=dmcGateY();
-  /* 받침 캐비닛 (컨베이어 뒤 기둥) · 컨베이어 베드 */
-  cabinet(-1110,-530,110,1150,-800,-150,{doors:1,front:-150});
-  convBed(DMCB.x0,DMCB.x1);
-  for(let x=DMCB.x0+140;x<DMCB.x1-100;x+=300) for(const s of [-1,1]) box(x-10,x+10,CH-150,CH-62,s*72,s*80,C.ssD,C.ssD,0);
-  /* 헤드 박스 (진동기 · 구동부) */
-  box(-1110,-530,1150,1440,-960,-150,C.cab,C.ssL);
-  box(-1110,-530,1150,1170,-960,-150,C.ssD,C.ssD,0);
-  for(let z=-900;z<-220;z+=42) box(-1112,-1110,1220,1380,z,z+22,C.dark,C.dark,0);   /* 옆 통풍구 */
-  box(-960,-680,1190,1250,-150,-147,C.dark,C.dark,0); box(-950,-690,1212,1228,-147,-146,C.white,C.white,0);   /* COUNTEC 명판 */
+  const b=BD(), yG=dmcGateY(), DX=L.dmcDX, n1=L.n1-DX, n2=L.n2-DX;
+  mPush(); mT(DX,0,0);
+  /* 받침 캐비닛 · 윗판 · 크롬 기둥 4 */
+  cabinet(-1110,-530,110,980,-800,-150,{doors:1,front:-150});
+  mainSwitch(-1020,860,-149);
+  cylZ(-820,860,-150,-144,60,C.ssD,24); for(let r=20;r<=56;r+=12){ mPush(); mT(-820,860,-143); mRX(-Math.PI/2); disc(0,r-1.5,r,C.dark,24); mPop(); }
+  for(let y=260;y<460;y+=18) box(-900,-740,y,y+8,-150,-147,C.dark,C.dark,0);   /* 루버 */
+  box(-1150,-490,980,1000,-840,-110,C.ssL,C.ssL);
+  convBed(DMCB.x0-DX,DMCB.x1-DX);
+  for(const px of [-1060,-580]) for(const pz of [-860,-230]){ cylY(px,pz,1000,1160,26,C.rodC,16); mPush(); mT(px,1000,pz); lathe([[40,0],[30,8],[26,14]],C.uhmw,16); mPop(); }
+  /* 경사 헤드 몸체 (뒤가 높다) : 옆에서 보면 사다리꼴 */
+  const zf=-150, zb=-960, yb=1160, ytf=1440, ytb=1560;
+  const P=(x,y,z)=>[x,y,z];
+  for(const x of [-1110,-530]) quad(P(x,yb,zb),P(x,yb,zf),P(x,ytf,zf),P(x,ytb,zb),C.cab);
+  quad(P(-1110,yb,zf),P(-530,yb,zf),P(-530,ytf,zf),P(-1110,ytf,zf),C.cab);
+  quad(P(-530,yb,zb),P(-1110,yb,zb),P(-1110,ytb,zb),P(-530,ytb,zb),C.cab);
+  quad(P(-1110,yb,zb),P(-530,yb,zb),P(-530,yb,zf),P(-1110,yb,zf),C.cabD);
+  quad(P(-1110,ytb,zb),P(-1110,ytf,zf),P(-530,ytf,zf),P(-530,ytb,zb),C.ssD);
+  box(-1060,-580,1200,1380,-151,-150,[0.74,0.77,0.80,0.6],null,0);           /* 앞 점검판 */
+  for(const [yy,zz] of [[1250,-500],[1250,-700]]) box(-1112,-1110,yy-70,yy+70,zz-160,zz+160,[0.72,0.75,0.78,0.6],null,0);
+  /* 호퍼 (뒤 · 위) : 기둥 2 · 출구 · 레벨 센서 · 타공 1단 트레이 */
+  const h=DMC.hop;
+  const H0=[[h.x0,h.y1,h.z0],[h.x1,h.y1,h.z0],[h.x1,h.y1,h.z1],[h.x0,h.y1,h.z1]], H1=[[h.ox0,h.y0,h.oz0],[h.ox1,h.y0,h.oz0],[h.ox1,h.y0,h.oz1],[h.ox0,h.y0,h.oz1]];
+  for(let i=0;i<4;i++){ const j=(i+1)%4; quad(H0[i],H0[j],H1[j],H1[i],C.ss); tube(H0[i],H0[j],6,C.ssL,8); }
+  box(h.ox0,h.ox1,h.y0-30,h.y0,h.oz0,h.oz1,C.ssD);
+  for(const px of [-1030,-570]){ cylY(px,-840,1500,1740,22,C.rodC,14); box(px-30,px+30,1740,1760,-900,-780,C.ss); }
+  box(-1060,-540,1740,1752,-800,-770,C.ss);
+  for(const px of [-880,-720]) cylZ(px,1680,-790,-760,18,C.ssL,14);          /* 게이트 조정 노브 */
+  cylY(-760,-700,1700,1760,6,C.ss,8); cylY(-760,-700,1760,1778,14,C.ssL,12);
+  cylY(-520,-900,h.y1-120,h.y1-60,14,C.dark,10);
+  /* 트레이 1 (타공) · 2 · 3 (골판 12 홈) */
+  const t1=DMC.t1;
+  box(t1.x0,t1.x1,t1.y-6,t1.y,t1.z0,t1.z1,C.brushed,C.brushed,0);
+  for(let x=t1.x0+14;x<t1.x1-10;x+=16) for(let z=t1.z0+12;z<t1.z1-8;z+=16) box(x-2.5,x+2.5,t1.y,t1.y+0.4,z-2.5,z+2.5,C.dark,C.dark,0);
+  box(t1.x0-4,t1.x0,t1.y,t1.y+36,t1.z0,t1.z1,C.ss,C.ss,0); box(t1.x1,t1.x1+4,t1.y,t1.y+36,t1.z0,t1.z1,C.ss,C.ss,0);
+  corrTray(DMC.t2,12,12,C.brushed);
+  const t3={x0:DMC.x0,x1:DMC.x1,z0:DMC.t3z0,z1:DMC.t3z1,y:DMC.t3y-4};
+  corrTray(t3,12,10,[0.66,0.69,0.72,0.85]);
+  box(DMC.x0-40,DMC.x1+40,DMC.t3y-40,DMC.t3y-14,DMC.t3z0,DMC.t3z1,C.black,C.black);   /* 검은 콤 받침 */
+  for(let i=0;i<=12;i++){ const x=DMC.x0+i*DMC.tw; box(x-3,x+3,DMC.t3y-40,DMC.t3y-10,DMC.t3z1-40,DMC.t3z1,C.black,C.black,0); }
+  for(const px of [-1030,-570]) for(const pz of [-600,-240]){ cylY(px,pz,1450,1500,8,C.ss,8); cylY(px,pz,1500,1512,11,C.ssL,8); }
   /* 트레이 벽 · 아크릴 덮개 */
-  box(-1110,-1096,1440,1580,-960,-172,C.ss); box(-544,-530,1440,1580,-960,-172,C.ss); box(-1110,-530,1440,1580,-960,-946,C.ss);
-  guardPanel(-1096,-544,1576,1582,-946,-172);
-  guardPanel(-1096,-544,1440,1582,-176,-172);
-  /* 호퍼 (뒤 · 위) */
-  const hy0=1660, hy1=2040;
-  const H0=[[-1110,hy1,-1080],[-490,hy1,-1080],[-490,hy1,-700],[-1110,hy1,-700]], H1=[[-900,hy0,-880],[-700,hy0,-880],[-700,hy0,-780],[-900,hy0,-780]];
-  for(let i=0;i<4;i++){ const j=(i+1)%4; quad(H0[i],H0[j],H1[j],H1[i],C.ss); }
-  for(let i=0;i<4;i++){ const j=(i+1)%4; tube(H0[i],H0[j],6,C.ssL,8); }
-  for(const p of [[-1080,-1060],[-520,-1060],[-1080,-720],[-520,-720]]) cylY(p[0],p[1],1580,hy1,12,C.ss,8);
-  box(-1110,-520,1580,1600,-1080,-940,C.ss);
-  box(-900,-700,hy0-40,hy0,-880,-780,C.ssD);
-  cylY(-490,-900,hy1-120,hy1-60,14,C.dark,10);                                    /* 레벨 센서 */
-  const g=gAlpha; gAlpha=0.22; box(-1112,-488,hy1,hy1+6,-1082,-698,C.acryl,C.acryl,0); gAlpha=g;
-  /* 트레이 1 · 2 (팬) */
-  const pan=(t,wall)=>{ box(t.x0,t.x1,t.y-10,t.y,t.z0,t.z1,C.brushed,C.brushed,0);
-    box(t.x0-4,t.x0,t.y,t.y+wall,t.z0,t.z1,C.ss,C.ss,0); box(t.x1,t.x1+4,t.y,t.y+wall,t.z0,t.z1,C.ss,C.ss,0); box(t.x0,t.x1,t.y,t.y+wall,t.z0-4,t.z0,C.ss,C.ss,0);
-    box(t.x0+30,t.x1-30,Math.max(1440,t.y-110),t.y-10,t.z0+30,t.z1-30,C.dark); };
-  pan(DMC.t1,34); pan(DMC.t2,28);
-  for(let i=1;i<12;i++){ const x=DMC.x0+i*DMC.tw; box(x-1,x+1,DMC.t2.y,DMC.t2.y+12,DMC.t2.z1-90,DMC.t2.z1,C.ss,C.ss,0); }
-  /* 트레이 3 : 12 트랙 (V 홈) */
-  box(DMC.x0-6,DMC.x1+6,DMC.t3y-14,DMC.t3y-4,DMC.t3z0,DMC.t3z1,C.brushed,C.brushed,0);
-  for(let i=0;i<12;i++){
-    const x0=DMC.x0+i*DMC.tw, xc=x0+DMC.tw/2;
-    const tc=[0.50,0.54,0.58,0.8];
-    quad([x0+1,DMC.t3y+6,DMC.t3z0],[x0+1,DMC.t3y+6,DMC.t3z1],[xc,DMC.t3y-4,DMC.t3z1],[xc,DMC.t3y-4,DMC.t3z0],tc);
-    quad([xc,DMC.t3y-4,DMC.t3z0],[xc,DMC.t3y-4,DMC.t3z1],[x0+DMC.tw-1,DMC.t3y+6,DMC.t3z1],[x0+DMC.tw-1,DMC.t3y+6,DMC.t3z0],tc);
-    box(x0-1,x0+1,DMC.t3y,DMC.t3y+16,DMC.t3z0,DMC.t3z1,C.ssL,C.ssL,0);
-  }
-  box(DMC.x1-1,DMC.x1+1,DMC.t3y,DMC.t3y+16,DMC.t3z0,DMC.t3z1,C.ssL,C.ssL,0);
-  /* 센서 블록 : 12 창 (헤드 앞으로 돌출) */
-  box(-972,-628,1320,1446,-172,-84,[0.30,0.33,0.37,0.35],[0.36,0.39,0.43,0.35]);
-  for(let i=0;i<12;i++){ const xc=DMC.x0+i*DMC.tw+DMC.tw/2; box(xc-9,xc+9,1360,1420,-84,-83,[0.04,0.05,0.06,0.2],null,0); }
-  /* 깔때기 · 게이트 하우징 · 노즐 */
-  for(const [nx,gx] of [[L.n1,-878],[L.n2,-722]]){
-    tube([gx,1322,-128],[nx,yG+28,0],74,C.ss,20,false,22);
-    glassBox(nx-40,nx+40,yG-34,yG+28,-40,40,C.acryl,0.26);
+  box(-1110,-1096,1440,1590,-960,-172,C.ss); box(-544,-530,1440,1590,-960,-172,C.ss);
+  guardPanel(-1096,-544,1586,1592,-600,-172);
+  /* 센서 박스 : 앞으로 돌출 · 윗면 점검창 2 · 12 창 · 좌우 널링 노브 */
+  const sy0=1300, sy1=1446, sz0=-200, sz1=50;
+  box(-1000,-600,sy0,sy1,sz0,sz1,[0.72,0.75,0.78,0.7],[0.78,0.81,0.84,0.7]);
+  for(const cx of [-890,-710]){ box(cx-70,cx+70,sy1,sy1+6,-130,-60,[0.55,0.62,0.70,0.3]); glassBox(cx-60,cx+60,sy1+6,sy1+9,-122,-68,C.acryl,0.4); }
+  for(const sx of [-1000,-600]){ cylX(sx-(sx<-800?30:-30),sx,1380,0,22,C.ssL,16); cylX(sx-(sx<-800?44:-44),sx-(sx<-800?30:-30),1380,0,18,C.brushed,16); }
+  for(let i=0;i<12;i++){ const xc=DMC.x0+i*DMC.tw+DMC.tw/2; box(xc-9,xc+9,sy0-1,sy0,-120,-60,[0.04,0.05,0.06,0.2],null,0); }
+  /* 게이트 하우징(스테인리스 틀 + 앞 창) · 중앙 실린더 · 백색 원뿔 노즐 */
+  for(const nx of [n1,n2]){
+    const top=sy0, gy=yG+28;
+    quad([nx-70,top,-60],[nx+70,top,-60],[nx+42,gy,-40],[nx-42,gy,-40],C.ss);
+    quad([nx+70,top,40],[nx-70,top,40],[nx-42,gy,40],[nx+42,gy,40],C.ss);
+    quad([nx-70,top,40],[nx-70,top,-60],[nx-42,gy,-40],[nx-42,gy,40],C.ss);
+    quad([nx+70,top,-60],[nx+70,top,40],[nx+42,gy,40],[nx+42,gy,-40],C.ss);
+    glassBox(nx-40,nx+40,yG-34,yG+28,-40,40,C.acryl,0.24);
     for(const sx of [-40,40]) for(const sz of [-40,40]) box(nx+sx-3,nx+sx+3,yG-34,yG+28,sz-3,sz+3,C.ss,C.ss,0);
-    box(nx-43,nx+43,yG+24,yG+30,-43,43,C.ss,C.ss,0);
+    box(nx-52,nx+52,yG-40,yG-32,-52,52,C.ss,C.ss,0);
+    for(const sx of [-46,46]) cylZ(nx+sx,yG-36,52,68,12,C.brushed,14);
     const nr=Math.min(15,b.nk/2-3);
-    tube([nx,yG-34,0],[nx,CH+b.h+14,0],nr+3,C.ss,16,true,nr);
-    airCyl([nx+44,yG-6,-4],[nx+44,yG-6,-110],7);
+    mPush(); mT(nx,0,0); lathe([[48,yG-40],[46,yG-44],[nr+2,CH+b.h+16],[nr,CH+b.h+12]],C.uhmw,24); mPop();
   }
-  box(-930,-670,yG+28,1322,-150,-120,C.ss);
-  /* 병 스토퍼 3조 (후면) */
-  for(const px of [L.n2+b.d/2+4,L.n1+b.d/2+4,L.n1-b.d-6]){
-    airCyl([px,CH+b.h*0.42,-200],[px,CH+b.h*0.42,-80],10);
-    box(px-14,px+14,CH+5,CH+b.h*0.42+16,-212,-190,C.ss);
-  }
-  /* 집진 덕트 */
-  hoseTo([-640,1400,-180],[-450,1250,-700],[-900,700,-1380],30,[0.62,0.66,0.70,0.2]);
-  /* 폴 HMI · 경광등 (오른쪽) */
-  const Hm=HMIS.dmc;
-  foot(Hm[0],-300,40); cylY(Hm[0],-300,40,Hm[1]-40,26,C.ss,12);
-  box(Hm[0]-24,Hm[0]+24,Hm[1]-70,Hm[1]-30,-300,Hm[2]-50,C.ss);
-  cntHMI(Hm[0],Hm[1],Hm[2],Hm[3],Hm[4]);
-  const top=Hm[1]+Hm[4]/2+22;
-  lampPole(LAMPS.dmc[0],LAMPS.dmc[1],top,LAMPS.dmc[2]-8);
+  airCyl([(n1+n2)/2,yG+60,0],[(n1+n2)/2,yG+60,-60],13);
+  /* 병 스토퍼 브래킷은 컨베이어 쪽 (sConveyor) */
+  /* S자 파이프 암 · 조작 패널 · 경광등 */
+  const Hm=HMIS.dmc, yb2=Hm[1]-Hm[4]/2-100;
+  tubePath([[-560,1000,-460],[-470,1060,-440],[-380,1140,-380],[-310,1250,-280],[-290,1340,-170],[-290,yb2,-80]],28,C.rodC,16);
+  cylY(-290,-80,yb2-30,yb2,40,C.ss,16);
+  cntHMI(Hm[0]-DX,Hm[1],Hm[2],Hm[3],Hm[4],{knob:true});
+  lampPole(LAMPS.dmc[0]-DX,LAMPS.dmc[1],Hm[1]+Hm[4]/2+34,LAMPS.dmc[2]-8);
+  mPop();
 }
 
-/* ── 리젝트 (후단 로드셀 뒤) ── */
+/* ── 리젝트 : 후단 스테이션 오른쪽 · 뒤 푸셔 → 앞 곡면 스테인리스 트레이 ── */
 function sReject(){
   const x=L.rej, b=BD(), bin=L.rejBin;
-  airCyl([x,CH+b.h*0.42,-300],[x,CH+b.h*0.42,-120],22);
-  box(x-24,x+24,CH+5,CH+b.h*0.42+30,-320,-290,C.ss);
-  /* 슈트 : 컨베이어 앞 → 리젝트함 (작업자 쪽) */
-  quad([x-70,CH-2,60],[x+70,CH-2,60],[x+70,CH-150,330],[x-70,CH-150,330],C.uhmw);
-  box(x-76,x-70,CH-150,CH+40,60,330,C.ss,C.ss,0); box(x+70,x+76,CH-150,CH+40,60,330,C.ss,C.ss,0);
-  /* 잠금식 리젝트함 */
-  box(bin.x-230,bin.x+230,110,CH-160,bin.z-230,bin.z-210,C.ss);
-  box(bin.x-230,bin.x-210,110,CH-160,bin.z-230,bin.z+200,C.ss); box(bin.x+210,bin.x+230,110,CH-160,bin.z-230,bin.z+200,C.ss);
-  box(bin.x-230,bin.x+230,110,130,bin.z-230,bin.z+200,C.ss);
-  for(const xx of [bin.x-190,bin.x+190]) for(const zz of [bin.z-200,bin.z+170]) foot(xx,zz,110);
-  const g=gAlpha; gAlpha=0.24; box(bin.x-210,bin.x+210,130,CH-170,bin.z+196,bin.z+200,C.acryl,C.acryl,0); gAlpha=g;
-  box(bin.x-230,bin.x+230,CH-176,CH-160,bin.z-230,bin.z-150,C.ssL,C.ssL,0);
-  { const g2=gAlpha; gAlpha=0.2; box(bin.x-210,bin.x+230,CH-172,CH-166,bin.z-150,bin.z+200,C.acryl,C.acryl,0); gAlpha=g2; }
-  box(bin.x+150,bin.x+190,CH-260,CH-200,bin.z+200,bin.z+214,C.yellow,C.yellow,0);   /* 잠금 */
+  airCyl([x,CH+b.h*0.42,-330],[x,CH+b.h*0.42,-130],22);
+  box(x-28,x+28,CH-60,CH+b.h*0.42+30,-350,-320,C.ss);
+  /* 곡면 트레이 : 경사 바닥 · 옆벽 · 둥근 앞 끝 · 크롬 U 다리 */
+  const tw=150, zA=60, zB=460, yA=CH-12, yB=CH-190;
+  quad([x-tw,yA,zA],[x+tw,yA,zA],[x+tw,yB,zB],[x-tw,yB,zB],C.ssL);
+  for(const s of [-1,1]) quad([x+s*tw,yA-6,zA],[x+s*tw,yB-6,zB],[x+s*tw,yB+90,zB],[x+s*tw,yA+50,zA],C.ss);
+  mPush(); mT(x,0,zB); lathe([[tw,yB-6],[tw,yB+90],[tw+6,yB+90],[tw+6,yB-6]],C.ss,20,0,Math.PI); disc(yB-6,0,tw,C.ssL,20,0,Math.PI); mPop();
+  for(const s of [-1,1]) tubePath([[x+s*110,0,bin.z+60],[x+s*110,yB-120,bin.z+60],[x+s*110,yB-20,bin.z+20]],14,C.rodC,12);
+  for(const s of [-1,1]) foot(x+s*110,bin.z+60,20);
 }
-/* ── 중량선별 PLC 패널 ── */
-function sWCPanel(){
-  const x=120, z=760;
-  foot(x,z,40); cylY(x,z,40,1140,30,C.ss,14);
-  box(x-190,x+190,1140,1620,z-80,z,C.cab,C.ssL);
-  namePlate(x,1180,z+1,150,[0.07,0.49,0.53,0.2]);
+/* ── 성적서 프린터 카트 (아크릴 커버) ── */
+function sPrinter(){
+  const x0=L.lc2-30,x1=L.lc2+280,z0=370,z1=750;
+  for(const x of [x0+30,x1-30]) for(const z of [z0+30,z1-30]){ cylY(x,z,0,40,22,[0.72,0.16,0.14,0.2],12); cylY(x,z,40,560,11,C.ss,10); }
+  box(x0,x1,70,90,z0,z1,C.ss); box(x0,x1,540,560,z0,z1,C.ss);
+  box(x0+30,x1-30,90,300,z0+40,z1-40,[0.28,0.29,0.31,0.3],[0.34,0.35,0.37,0.3]);
+  box(x0+60,x1-60,300,330,z0+60,z1-60,[0.22,0.23,0.25,0.3]);
+  glassBox(x0+4,x1-4,90,540,z0+4,z1-4,C.acryl,0.14);
 }
-/* ── HPE-100 : 하부 캐비닛 + 알루미늄 프레임 아크릴 가드, 앞 오른쪽 HMI · 경광등 ── */
+
+/* ── HPE-100 : 하부 캐비닛 + 알루미늄 프레임 양문 가드 · 오른쪽 폴 HMI
+      뒤 필름 롤 2군(가로) · 장구 롤러 · 캐리지 2조 · 톱날 커터 · 스포크 인덱싱 디스크(튜브 8) · 앞 수직 푸셔 ── */
+const PED={n:8, r:150, zc:-150};
+function peDiscY(){ const b=BD(); return CH+b.h+14+220; }
 function sPE(){
-  const x=L.pe, b=BD(), H=sgHeadY(), P=PEB;
+  const x=L.pe, b=BD(), P=PEB, yD=peDiscY(), mid=(P.x0+P.x1)/2;
   cabinet(P.x0,P.x1,110,CH-110,P.z0,P.z1,{doors:2,front:P.z1});
-  namePlate(x-200,CH-200,P.z1+1,160,C.green);
-  box(P.x0,P.x1,CH-110,CH-96,P.z0,P.z1,C.ssL,C.ssL);
-  alFrame(P.x0,P.x1,CH-96,P.yT,P.z0,P.z1,{hole:{l:[-100,100,CH-100,CH+b.h+70], r:[-100,100,CH-100,CH+b.h+70]}});
-  /* 내부 : 뒤 장착판 · 릴 축 · 댄서 · 가이드 롤러 */
-  box(x-170,x+170,CH-96,1720,-570,-270,C.cab,C.ssL);
-  cylZ(x,1520,-270,-58,20,C.ss,14);
-  cylZ(x+195,1360,-270,-40,10,C.ss,10);
-  cylZ(x+60,H.y1+70,-270,-40,9,C.ss,10);
-  box(x-70,x+70,H.y1-90,H.y1,-270,-60,C.cab);
-  inserterHead(x,H,96,70);
-  box(x+60,x+92,H.y0+36,H.y0+76,70,90,[0.84,0.30,0.12,0.3]);          /* 가열 커터 표시 */
-  box(x-150,x-110,H.y0+20,H.y0+60,70,82,C.dark);                        /* 필름 없음 센서 */
-  const tr=Math.max(10,b.nk/2-3);
-  const g=gAlpha; gAlpha=0.28; tube([x,CH+b.h+16,0],[x,H.y0,0],tr+2,C.acryl,16,false); gAlpha=g;
-  cylY(x,0,CH+b.h+12,CH+b.h+18,tr+5,C.ss,16);
-  airCyl([x,H.y1,0],[x,H.y1+190,0],22);
-  airCyl([x+b.d/2+7,CH+b.h*0.42,-190],[x+b.d/2+7,CH+b.h*0.42,-78],11);
-  airCyl([x-b.d-5,CH+b.h*0.42,-190],[x-b.d-5,CH+b.h*0.42,-78],11);
-  /* 조작 패널 (앞 오른쪽 기둥) · 경광등 */
-  const Hm=HMIS.pe;
-  box(P.x1-20,P.x1+20,Hm[1]-40,Hm[1]+40,P.z1,Hm[2]-60,C.alu);
+  mainSwitch(P.x0+130,660,P.z1+1);
+  box(P.x0-10,P.x1+10,CH-110,CH-96,P.z0-10,P.z1+10,C.ssL,C.ssL);
+  alFrame(P.x0,P.x1,CH-96,P.yT,P.z0,P.z1,{mx:[mid],door:{0:{id:"peL",hinge:"left"},1:{id:"peR",hinge:"right"}},
+    hole:{l:[-100,100,CH-100,CH+b.h+60],r:[-100,100,CH-100,CH+b.h+60]}});
+  /* 뒤 스테인리스 후드 · 받침 테이블 */
+  box(x-300,x+300,yD+120,yD+136,-620,-60,C.ssL,C.ssL);
+  for(const px of [x-280,x+280]) for(const pz of [-600,-80]) box(px-16,px+16,CH-96,yD+120,pz-16,pz+16,C.alu,C.alu,3);
+  box(x-290,x+290,yD+136,yD+470,-600,-420,C.ss,C.ssL);
+  mPush(); mT(x,yD+470,-510); mRZ(Math.PI/2); lathe([[90,-290],[90,290]],C.ss,16,0,Math.PI); mPop();
+  /* 필름 롤 2군 (가로 축) · 롤 지지판(원형 캡 4) · 필름 센서 4 */
+  box(x-300,x+300,1560,1580,-760,-420,C.ssL,C.ssL);
+  for(const sx of [-1,1]){ box(x+sx*300-(sx>0?16:0),x+sx*300+(sx<0?16:0),1300,1720,-760,-420,C.ssL,C.ssL); }
+  box(P.x0+40,P.x0+56,1420,1640,-620,-380,C.ssL,C.ssL);
+  for(let i=0;i<4;i++) { cylX(P.x0+56,P.x0+62,1480+Math.floor(i/2)*110,-560+(i%2)*120,28,C.ssD,16); cylX(P.x0+62,P.x0+66,1480+Math.floor(i/2)*110,-560+(i%2)*120,16,C.ss,12); }
+  for(let i=0;i<4;i++) box(x-56+i*28,x-34+i*28,1590,1650,-470,-430,C.green,C.green);
+  /* 장구 롤러 · 리니어 가이드 캐리지 · 포머 튜브 (좌 · 우 레인) */
+  for(const sx of [-1,1]){
+    const lx=x+sx*106, lz=PED.zc-106;
+    box(lx-80,lx+80,yD+190,yD+340,-420,-404,C.ssL,C.ssL);
+    for(const yy of [yD+300,yD+230]){ cylZ(lx-66,yy,-404,lz-80,7,C.ss,8); cylZ(lx+66,yy,-404,lz-80,7,C.ss,8);
+      mPush(); mT(lx,yy,lz-80); mRZ(Math.PI/2); lathe([[34,-60],[22,-40],[14,0],[22,40],[34,60]],C.ss,18); mPop(); }
+    box(lx-50,lx+50,yD+136,yD+150,lz-60,lz+60,C.ss);
+    box(lx-8,lx+8,yD+150,yD+360,lz-100,lz-84,C.ssD,C.ssD,0);
+  }
+  /* 디스크 축 · 푸셔 (앞) */
+  cylY(x,PED.zc,yD+14,yD+120,30,C.ss,16);
+  box(x-40,x+40,yD+136,yD+160,-120,20,C.ss);
+  airCyl([x,yD+160,0],[x,yD+470,0],22);
+  box(x+30,x+62,yD+300,yD+340,-16,16,C.green,C.green);
+  /* 조작 패널 (오른쪽 폴) · 경광등 */
+  const Hm=HMIS.pe, yb2=Hm[1]-Hm[4]/2-100;
+  foot(Hm[0],Hm[2]-35,40); cylY(Hm[0],Hm[2]-35,40,yb2,30,C.ss,14);
   cntHMI(Hm[0],Hm[1],Hm[2],Hm[3],Hm[4]);
-  lampPole(LAMPS.pe[0],LAMPS.pe[1],P.yT,LAMPS.pe[2]-8);
+  lampPole(LAMPS.pe[0],LAMPS.pe[1],Hm[1]+Hm[4]/2+34,LAMPS.pe[2]-8);
 }
-/* ── RCS-120 : 대형 하부 캐비닛 + 알루미늄 프레임 가드, 위 원통 드럼(터렛 헤드), 왼쪽 위 진동 볼 피더 · 슈트, 앞 중앙 HMI ── */
-function rcY(){ const b=BD(); const yc=CH+b.h+b.capH+190; return {yc, top:1790, pick:CH+b.h+48}; }
+
+/* ── RCS-120 : 대형 하부 캐비닛 + 가드 2칸 (왼칸 = 진동 볼 피더 · C 슈트 · 캡 벨트 / 오른칸 = 2단 원통 드럼 터렛)
+      · 흰 UHMW 스타휠 · 황색 타이밍 벨트 클램핑 · 3조 공압 척 헤드 · 검은 포켓 체인 · 오른쪽 폴 HMI ── */
+function rcY(){ const b=BD(); const yc=CH+b.h+b.capH+190; return {yc, top:RCB.yT, pick:CH+b.h+48}; }
 function sRCS(){
   const b=BD(), A=L.A, B=L.B, T=L.T, Y=rcY(), R=RCB, bw=RCBOWL;
   cabinet(R.x0,R.x1,110,CH-110,R.z0,R.z1,{doors:4,front:R.z1});
-  namePlate(R.x1-220,CH-200,R.z1+1,180,C.blue);
-  box(R.x0,R.x1,CH-110,CH-96,R.z0,R.z1,C.ssL,C.ssL);
+  mainSwitch(R.x0+380,660,R.z1+1);
+  box(R.x0-10,R.x1+10,CH-110,CH-96,R.z0-10,R.z1+10,C.ssL,C.ssL);
   /* 스타휠 · 터렛 데크 */
   box(A.x-220,B.x+220,CH-96,CH-14,T.z-230,-70,C.ssD);
   box(A.x-240,B.x+240,CH-14,CH-2,T.z-250,-50,C.uhmw,C.uhmw);
   for(const c of [A,B]) cylY(c.x,c.z,CH-2,CH+b.h*0.75+16,22,C.ss,14);
   cylY(T.x,T.z,CH-2,CH+b.h*0.75+16,40,C.ss,16);
-  /* 가드 프레임 (드럼 자리 윗판 구멍 · 엘리베이터 구멍 · 컨베이어 개구) */
+  /* 가드 (드럼 자리 윗판 구멍) */
   const dr=300;
-  alFrame(R.x0,R.x1,CH-96,R.yT,R.z0,R.z1,{mx:[2780],
-    hole:{t1:[T.x-dr-10,T.x+dr+10,T.z-dr-10,T.z+dr+10], l:[-100,100,CH-100,CH+b.h+70], r:[-100,100,CH-100,CH+b.h+70]}});
-  /* 드럼 받침 브리지 · 구동 기둥 · 스핀들 */
-  for(const z of [T.z-dr-40,T.z+dr+40]) box(R.x0,R.x1,Y.top,Y.top+50,z-25,z+25,C.ss);
-  box(T.x-dr-30,T.x+dr+30,Y.top,Y.top+50,T.z-dr-30,T.z+dr+30,C.ss);
-  box(T.x-90,T.x+90,CH-96,Y.top,R.z0+40,R.z0+220,C.cab,C.ssL);
-  cylY(T.x,T.z,Y.yc+140,Y.top,46,C.ss,16);
-  cylY(T.x,T.z,Y.top-190,Y.top,120,C.ssD,24);                                     /* 캠 하우징 */
-  /* 원통 드럼 (헤드 구동부 · 파우더 클러치 하우징) */
-  cylY(T.x,T.z,Y.top+50,Y.top+650,dr,C.ss,44);
-  for(const y of [Y.top+200,Y.top+520]) cylY(T.x,T.z,y,y+12,dr+4,C.ssD,44);
-  cylY(T.x,T.z,Y.top+650,Y.top+668,dr-18,C.ssL,44);
-  box(T.x-60,T.x+60,Y.top+360,Y.top+420,T.z+dr-6,T.z+dr+2,C.blue,C.blue,0);
+  alFrame(R.x0,R.x1,CH-96,R.yT,R.z0,R.z1,{mx:[R.mid],door:{0:{id:"rcL",hinge:"double"},1:{id:"rcR",hinge:"double"}},
+    hole:{t1:[T.x-dr-12,T.x+dr+12,T.z-dr-12,T.z+dr+12], l:[-100,100,CH-100,CH+b.h+60], r:[-100,100,CH-100,CH+b.h+60]}});
+  /* 2단 원통 드럼 (위 대경 : 가드 위로 돌출 · 아래 소경) · 기둥 */
+  const yu0=1640, yu1=2340, yl0=1400;
+  box(T.x-90,T.x+90,CH-96,yu0,R.z0+40,R.z0+230,C.cab,C.ssL);
+  box(T.x-60,T.x+60,yu0-60,yu0,R.z0+230,T.z-dr+20,C.cab,C.ssL);
+  cylY(T.x,T.z,yu0,yu1,dr,C.ss,48);
+  cylY(T.x,T.z,yu0-12,yu0,dr+30,C.ssL,48);
+  cylY(T.x,T.z,yu1,yu1+10,dr-6,C.ssL,48);
+  for(const a of [0.3,Math.PI+0.3]) box(T.x+dr*Math.cos(a)-2,T.x+dr*Math.cos(a)+2,yu0,yu1,T.z+dr*Math.sin(a)-2,T.z+dr*Math.sin(a)+2,C.ssD,C.ssD,0);
+  cylY(T.x,T.z,yl0,yu0-12,210,C.ss,40);
+  cylY(T.x,T.z,Y.yc+110,yl0,100,C.brushed,24);
   /* 타이밍 스크류 베어링 블록 · 구동 커버 */
   const zs=b.d/2+32, ys=CH+b.h*0.42;
   box(L.screw0-60,L.screw0-20,CH-60,ys+40,zs-40,zs+40,C.ss); box(L.screw1+10,L.screw1+50,CH-60,ys+40,zs-40,zs+40,C.ss);
   box(L.screw0-90,L.screw0-60,CH-110,ys+60,zs-50,zs+50,C.cab);
-  /* 캡 공급 : 앞 위 캡 호퍼(50 L) → 진동 트레이 → 왼쪽 위 진동 볼 피더 → 슈트 */
-  const CH_=CAPHOP;
-  const T0=[[CH_.x0,CH_.y1,CH_.z0],[CH_.x1,CH_.y1,CH_.z0],[CH_.x1,CH_.y1,CH_.z1],[CH_.x0,CH_.y1,CH_.z1]];
-  const cx=(CH_.x0+CH_.x1)/2, cz=(CH_.z0+CH_.z1)/2;
-  const T1=[[cx-70,CH_.y0,cz-60],[cx+70,CH_.y0,cz-60],[cx+70,CH_.y0,cz+60],[cx-70,CH_.y0,cz+60]];
-  for(let i=0;i<4;i++){ const j=(i+1)%4; quad(T0[i],T0[j],T1[j],T1[i],C.ss); tube(T0[i],T0[j],6,C.ssL,8); }
-  box(cx-70,cx+70,CH_.y0-30,CH_.y0,cz-60,cz+60,C.ssD);
-  for(const x of [CH_.x0+20,CH_.x1-20]) box(x-12,x+12,Y.top+50,CH_.y1-20,CH_.z0+10,CH_.z0+34,C.ss);
-  const t0=[cx,CH_.y0-40,cz], t1=[bw.x-60,bw.y+100,bw.z+120];
-  mPush(); const tl=mAlong(t0,t1); box(-50,50,0,tl,-6,0,C.ss); box(-54,-50,0,tl,-6,30,C.ss); box(50,54,0,tl,-6,30,C.ss); mPop();
-  cylY(cx,cz,Y.top+50,CH_.y0-40,50,C.dark,14);                                  /* 진동기 */
-  cylY(bw.x,bw.z,CH-96,bw.y-120,40,C.ss,14);
-  cylY(bw.x,bw.z,bw.y-120,bw.y-30,120,C.dark,20);
-  mPush(); mT(bw.x,bw.y-30,bw.z);
-  lathe([[0,0],[200,0],[236,8],[244,20],[244,140],[252,140],[252,-4],[210,-12],[0,-12]],C.ss,40);
+  /* 타이밍 벨트 풀리 (터렛 바깥) */
+  const rb=L.R+b.d/2+8, yB=CH+b.h*0.40;
+  for(const a of [PATH.tA+0.30,PATH.tB-0.30]){
+    const pr=28, rr=rb+30, px=T.x+rr*Math.cos(a), pz=T.z+rr*Math.sin(a);
+    cylY(px,pz,yB-18,yB+18,pr,C.ssL,18); cylY(px,pz,yB+18,yB+24,pr+4,C.ssD,18); cylY(px,pz,CH-2,yB-18,10,C.ss,8);
+  }
+  /* 진동 볼 피더 (DEIL) : 선반 2단 · 구동부 · 볼 · 나선 트랙 · 레벨 센서 봉 */
+  for(const x of [bw.x-200,bw.x+200]) for(const z of [bw.z-200,bw.z+200]) cylY(x,z,CH-96,bw.y-440,14,C.brushed,10);
+  box(bw.x-230,bw.x+230,bw.y-440,bw.y-420,bw.z-230,bw.z+230,C.ssL,C.ssL);
+  cylY(bw.x,bw.z,bw.y-420,bw.y-230,200,C.ss,32);
+  box(bw.x-60,bw.x+60,bw.y-330,bw.y-280,bw.z+196,bw.z+201,C.white,C.white,0);
+  mPush(); mT(bw.x,bw.y,bw.z);
+  lathe([[0,-230],[200,-230],[238,-222],[250,-205],[250,0],[258,0],[258,-235],[210,-245],[0,-245]],C.ss,44);
   mPop();
-  const spiral=[]; for(let i=0;i<=80;i++){ const a=i/80*Math.PI*3.4, r=236, y=bw.y-20+i/80*108; spiral.push([bw.x+r*Math.cos(a),y,bw.z+r*Math.sin(a)]); }
-  tubePath(spiral,6,C.ssL,8);
-  /* 슈트 : 바닥판 · 양 옆 레일 · 받침 */
-  const P=capChute(), ex=P.ex, hw=b.capD/2+4;
-  const off=(p,s,dy)=>[p[0]+ex[0]*s,p[1]+dy,p[2]+ex[2]*s];
-  const fl=-b.capH*0.82-2;
-  quad(off(P.a,-hw,fl),off(P.b,-hw,fl),off(P.b,hw,fl),off(P.a,hw,fl),C.ss);
-  for(const s of [-1,1]) for(const dy of [fl+12,fl+P.w]) tube(off(P.a,s*(hw+4),dy),off(P.b,s*(hw+4),dy),5,C.ssL,8);
-  const mid=[(P.a[0]+P.b[0])/2,(P.a[1]+P.b[1])/2+fl,(P.a[2]+P.b[2])/2];
-  tube([bw.x,bw.y-160,bw.z],mid,8,C.ss,8);
-  /* 조작 패널 · 경광등 */
-  const Hm=HMIS.rc;
-  box(Hm[0]-24,Hm[0]+24,Hm[1]+Hm[4]/2+22,R.yT-20,R.z1+20,R.z1+40,C.alu);
+  const spiral=[]; for(let i=0;i<=90;i++){ const a=i/90*Math.PI*3.6, r=240, y=bw.y-215+i/90*205; spiral.push([bw.x+r*Math.cos(a),y,bw.z+r*Math.sin(a)]); }
+  tubePath(spiral,5,C.ssL,8);
+  mPush(); mT(bw.x,bw.y-200,bw.z); lathe([[0,60],[80,30],[200,-10]],C.ssD,28); mPop();
+  tubePath([[R.x0+40,R.yT-80,bw.z-300],[bw.x-40,R.yT-80,bw.z-300],[bw.x+60,R.yT-80,bw.z-60],[bw.x+60,R.yT-160,bw.z-60]],14,C.rodC,12);
+  cylY(bw.x+60,bw.z-60,bw.y-80,R.yT-160,4,C.ss,8); box(bw.x+45,bw.x+75,R.yT-200,R.yT-170,bw.z-80,bw.z-40,C.green,C.green);
+  /* C 슈트 · 녹색 캡 벨트 · 검은 포켓 체인 */
+  const cp=capPath(), hwc=b.capD/2+5;
+  for(let i=0;i<cp.pts.length-1;i++){
+    const p=cp.pts[i], q=cp.pts[i+1], seg=cp.kind[i];
+    if(seg==="c"){ for(const s of [-1,1]) tube([p[0],p[1],p[2]+s*(hwc+6)],[q[0],q[1],q[2]+s*(hwc+6)],6,C.ss,8,false);
+      tube([p[0]+cp.nrm[i][0]*(b.capH*0.6+4),p[1]+cp.nrm[i][1]*(b.capH*0.6+4),p[2]],[q[0]+cp.nrm[i+1][0]*(b.capH*0.6+4),q[1]+cp.nrm[i+1][1]*(b.capH*0.6+4),q[2]],8,C.ssD,8,false); }
+  }
+  const bl=cp.belt;
+  box(bl.x0-30,bl.x1+30,bl.y-44,bl.y-24,bl.z-hwc-14,bl.z+hwc+14,C.ss);
+  for(const s of [-1,1]) box(bl.x0,bl.x1,bl.y-24,bl.y+10,bl.z+s*(hwc+4),bl.z+s*(hwc+10),C.ss,C.ss,0);
+  box(bl.x0+60,bl.x0+220,bl.y-150,bl.y-44,bl.z-hwc-30,bl.z+hwc+30,C.ssL);
+  cylY(bl.x0+40,bl.z-hwc-40,CH-96,bl.y-44,12,C.ss,8);
+  const ch=cp.chain;
+  mPush(); mT(ch.cx,ch.y-18,ch.cz); mRY(-ch.ang);
+  box(-ch.hl-ch.r,ch.hl+ch.r,-6,0,-ch.r-10,ch.r+10,C.dark,C.dark,0);
+  box(-ch.hl,ch.hl,0,10,-ch.r+22,ch.r-22,C.ssL,C.ssL,0);
+  mPop();
+  box(ch.cx-22,ch.cx+22,ch.y-44,ch.y-24,-760,ch.cz,C.ss);                    /* 체인 받침 암 (뒤에서) */
+  box(bl.x1-20,bl.x1+20,bl.y-66,bl.y-44,-760,bl.z,C.ss);
+  box(ch.cx-40,bl.x1+40,ch.y-66,ch.y-24,-800,-760,C.ss);
+  cylY(ch.cx-60,-780,CH-96,ch.y-66,20,C.ss,10);
+  /* 조작 패널 (오른쪽 폴) · 경광등 */
+  const Hm=HMIS.rc, yb2=Hm[1]-Hm[4]/2-100;
+  foot(Hm[0],Hm[2]-35,40); cylY(Hm[0],Hm[2]-35,40,yb2,30,C.ss,14);
   cntHMI(Hm[0],Hm[1],Hm[2],Hm[3],Hm[4]);
-  lampPole(LAMPS.rc[0],LAMPS.rc[1],R.yT,LAMPS.rc[2]-8);
+  lampPole(LAMPS.rc[0],LAMPS.rc[1],Hm[1]+Hm[4]/2+34,LAMPS.rc[2]-8);
 }
-/* 캡 슈트 : 볼 출구 a → 픽업 지점 b (터렛 φ=CAP_PICK) · ex = 슈트 폭 방향 (수평) */
-function capChute(){
-  const b=BD(), T=L.T, Y=rcY(), ap=CAP_PICK*Math.PI/180, bw=RCBOWL;
-  const px=T.x+L.R*Math.cos(ap), pz=T.z+L.R*Math.sin(ap);
-  const dx=px-bw.x, dz=pz-bw.z, dl=Math.hypot(dx,dz), ux=dx/dl, uz=dz/dl;
-  const pb=[px+ux*(b.capD/2+2),Y.pick+b.capH+6,pz+uz*(b.capD/2+2)];
-  return {a:[bw.x+ux*250,bw.y+80,bw.z+uz*250], b:pb, w:b.capH+4, dir:ap, ex:[-uz,0,ux]};
+/* 캡 경로 : 볼 출구 → C 슈트(수직면에서 휘어 내려옴) → 녹색 벨트 → 포켓 체인 → 픽업점 (CAP_PICK)
+   pts 는 캡 윗면 위치 · kind 'c'=슈트 'b'=벨트 'k'=체인 · nrm 은 캡 축 방향 (슈트에서 기운다) */
+let CAP_CACHE={ml:-1};
+function capPath(){
+  const b=BD();
+  if(CAP_CACHE.ml===b.ml) return CAP_CACHE;
+  const T=L.T, Y=rcY(), bw=RCBOWL, ap=CAP_PICK*Math.PI/180;
+  const pk=[T.x+L.R*Math.cos(ap),Y.pick+b.capH+6,T.z+L.R*Math.sin(ap)];
+  const zc=bw.z+300, yb=pk[1];
+  const pts=[], kind=[], nrm=[];
+  /* C 슈트 : 위(볼 림) → 바깥(왼쪽)으로 반원 → 아래 */
+  const cx=bw.x-120, cy=(bw.y+30+yb)/2, rr=(bw.y+30-yb)/2;
+  pts.push([bw.x-40,bw.y+30,zc]); kind.push("c"); nrm.push([0,1]);
+  for(let i=0;i<=16;i++){ const a=Math.PI/2+i/16*Math.PI; pts.push([cx+rr*Math.cos(a)*0.8,cy+rr*Math.sin(a),zc]); kind.push("c"); nrm.push([-Math.cos(a),-Math.sin(a)]); }
+  /* 벨트 : +x */
+  const bx0=cx, bx1=RCB.x0+660;
+  pts.push([bx1,yb,zc]); kind.push("b"); nrm.push([0,1]);
+  /* 체인 : 벨트 끝 → 픽업점 */
+  pts.push(pk); kind.push("k"); nrm.push([0,1]);
+  const len=[0]; for(let i=1;i<pts.length;i++) len.push(len[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1],pts[i][2]-pts[i-1][2]));
+  const ccx=(bx1+pk[0])/2, ccz=(zc+pk[2])/2, hl=Math.hypot(pk[0]-bx1,pk[2]-zc)/2;
+  CAP_CACHE={ml:b.ml, pts, kind, nrm, len, total:len[len.length-1], pick:pk,
+    belt:{x0:bx0,x1:bx1,y:yb-b.capH-2,z:zc}, chain:{cx:ccx,cz:ccz,y:yb-b.capH-2,hl,r:b.capD/2+16,ang:Math.atan2(pk[2]-zc,pk[0]-bx1)}};
+  return CAP_CACHE;
+}
+/* 캡 경로 위 거리 u (끝에서부터) → {p, n} */
+function capAt(u){
+  const C2=capPath(), s=C2.total-u;
+  if(s<=0) return {p:C2.pts[0],n:C2.nrm[0],k:"c"};
+  for(let i=1;i<C2.pts.length;i++){ if(s<=C2.len[i]){ const t=(s-C2.len[i-1])/(C2.len[i]-C2.len[i-1]||1), a=C2.pts[i-1], c=C2.pts[i];
+    const na=C2.nrm[i-1], nb=C2.nrm[i];
+    return {p:[a[0]+(c[0]-a[0])*t,a[1]+(c[1]-a[1])*t,a[2]+(c[2]-a[2])*t], n:[na[0]+(nb[0]-na[0])*t,na[1]+(nb[1]-na[1])*t], k:C2.kind[i]}; } }
+  return {p:C2.pick,n:[0,1],k:"k"};
 }
 /* ── 집적 테이블 ── */
 function sTable(){
@@ -1893,14 +2086,16 @@ function sTable(){
   box(XE-20,t.x-t.r+30,CH-10,CH-2,-50,50,C.ss);
   for(const s of [-1,1]) box(XE-20,t.x-t.r+30,CH-2,CH+b.h*0.5,s*(b.d/2+5),s*(b.d/2+10),C.guide,C.guide,0);
 }
-/* ── 집진기 (계수기 뒤) ── */
+/* ── 천장 집진 배관 (DMC 헤드 뒤 · 주름 호스) ── */
 function sDust(){
-  const x=-900, z=-1500;
-  cylY(x,z,0,20,230,C.dark,20);
-  cylY(x,z,20,1150,200,C.cab,24);
-  mPush(); mT(x,0,z); lathe([[200,1150],[120,1320],[60,1360]],C.ss,24); mPop();
-  cylY(x,z,1360,1500,70,C.dark,16);
-  box(x+190,x+260,500,700,z-40,z+40,C.dark);
+  const x=-1180+L.dmcDX, z=-1040;
+  cylY(x,z,2500,3300,70,C.ss,18); cylY(x,z,2440,2500,82,C.ssL,18);
+  cylY(x-40,z,2360,2440,26,C.ss,12); cylY(x+40,z,2360,2440,26,C.ss,12); cylY(x+40,z,2340,2360,30,C.blue,12);
+  const pts=[]; const a=[x-40,2360,z], m=[x-120,1700,z+40], e=[-1112+L.dmcDX,1330,-700];
+  for(let i=0;i<=16;i++){ const t=i/16,u=1-t; pts.push([u*u*a[0]+2*u*t*m[0]+t*t*e[0],u*u*a[1]+2*u*t*m[1]+t*t*e[1],u*u*a[2]+2*u*t*m[2]+t*t*e[2]]); }
+  tubePath(pts,26,[0.80,0.74,0.62,0.05],10);
+  for(let i=1;i<16;i+=1){ const p=pts[i]; cylY(p[0],p[2],p[1]-4,p[1]+4,29,[0.62,0.60,0.56,0.05],10); }
+  cylX(-1140+L.dmcDX,-1112+L.dmcDX,1330,-700,34,C.rodC,14);
 }
 
 /* ═══ 동적 형상 ═══ */
@@ -1957,7 +2152,8 @@ function tabCol(){ const k=S.rc.prod.col; return k==="caps"?C.capsR:C[k]; }
 /* ═══════════════════════════════════════════════════════════════════
    라인 물류 · 공정 로직
    · 병은 경로 좌표 s 를 따라 움직이고, 앞 병 · 스토퍼 핀 · 클램프 · 스크류 입구에서 멈춘다
-   · 공정(SG · 로드셀 · DMC 쌍 · HPE)은 "도착 → 처리 → 해제" 사이클
+   · 공정(SG · HPE)은 "도착 → 처리 → 해제" 사이클 · DMC 는 쌍 인덱싱
+   · 로드셀(전단 · 후단)은 게이트로 1병씩 떼어 IN 에 세운 뒤 포크가 IN → A 팬 → B 팬 → OUT 으로 한 칸씩 옮긴다
    · 캡핑기는 가상 포켓 체인(타이밍 스크류 → 스타휠 A → 터렛 → 스타휠 B)으로 이동
    ═══════════════════════════════════════════════════════════════════ */
 const LN={
@@ -1994,13 +2190,14 @@ function makeStations(){
   const d=BD().d;
   LN.st={
     sg:{k:"sg", x:L.sg, ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.52*cycK(), kin:{feed:0,cut:0,plg:0,sachet:null}},
-    lc1:{k:"lc1",x:L.lc1,ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.34*cycK(), read:null},
-    lc2:{k:"lc2",x:L.lc2,ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.34*cycK(), read:null},
-    pe:{k:"pe", x:L.pe, ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.56*cycK(), kin:{feed:0,cut:0,plg:0,piece:null}}
+    lc1:lcStation("lc1",L.lc1,0), lc2:lcStation("lc2",L.lc2,1),
+    pe:{k:"pe", x:L.pe, ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.56*cycK(), kin:{feed:0,cut:0,plg:0,idx:0,piece:null}}
   };
   LN.dmc={ph:"rA", t:0, A:null, B:null, entry:1, clamp:0, clampB:null, mid:0, exit:1, gate:[0,0], gateT:[0,0], buf:[0,0], hold:[false,false],
     chPh:new Array(12).fill(0), led:new Array(12).fill(0), falls:[], vibPh:0, tray:[1,1,1], single:false, waitT:0, dump:[null,null]};
 }
+function lcStation(k,X,i){ return {k, X, i, lc:true, ph:"wait", t:0, fin:0, car:0, gate:1, inPin:1, meter:"closed", gb:null, clampB:null, clamp:0,
+  IN:null, A:null, B:null, OUT:null, read:null, rA:null, rB:null, idleT:0}; }
 function pinFace(st){ return sOfX(st.x)+BD().d/2; }
 
 /* ═══ 한 스텝 ═══ */
@@ -2018,7 +2215,6 @@ function simTick(dt){
   moveBottles(dt,v,run);
   rejectTick(dt,run);
   tableTick(dt,run);
-  peHeat(dt);
   dirtTick(dt,run);
   if(run) prodCheck();
   if(S.jog>0){ S.jog-=dt; if(S.jog<=0){ S.jog=0; S.running=false; } }
@@ -2070,7 +2266,8 @@ function needFeed(){
 /* 뒤 병 (맞닿아 있는 바로 다음 병) */
 function behindOf(b){ const d=BD().d; return LN.bottles.filter(x=>x.zone==="line"&&x.pocket==null&&x.s<b.s&&b.s-x.s<d+8).sort((a,c)=>c.s-a.s)[0]||null; }
 function stationsTick(dt,run){
-  for(const k of ["sg","lc1","lc2","pe"]){
+  lcTick(LN.st.lc1,dt,run); lcTick(LN.st.lc2,dt,run);
+  for(const k of ["sg","pe"]){
     const st=LN.st[k], d=BD().d, face=pinFace(st);
     if(st.ph==="wait"){
       st.pin=Math.min(1,st.pin+dt*14);
@@ -2096,19 +2293,26 @@ function stationsTick(dt,run){
 }
 function stationReady(k){
   if(k==="sg"){ if(S.mat.gel<=0){ raise("SG21"); return false; } if(S.sg.markBad&&!S.activeTrouble){ return true; } }
-  if(k==="pe"){ if(S.mat.film<=0){ raise("PE51"); return false; } if(S.pe.pv<S.pe.sv-10){ raise("PE52"); return false; } }
+  if(k==="pe"){ if(S.mat.film<=0){ raise("PE51"); return false; } if(S.pe.jam){ raise("PE52"); return false; } }
   return true;
 }
 /* 공정별 동작 진행 (0→1 구간) */
 function procKin(st,dt){
   const u=st.t/st.dur();
+  if(st.k==="pe"){  /* 디스크 인덱싱 → 뒤 레인 필름 공급 · 톱날 절단 → 앞 푸셔 투입 */
+    st.kin.idx=smooth(clamp(u/0.30,0,1));
+    st.kin.feed=clamp((u-0.05)/0.30,0,1);
+    st.kin.cut=u>0.30&&u<0.42?Math.sin((u-0.30)/0.12*Math.PI):0;
+    st.kin.plg=u>0.36?Math.sin(clamp((u-0.36)/0.58,0,1)*Math.PI):0;
+    st.kin.drop=clamp((u-0.40)/0.30,0,1);
+    return;
+  }
   if(st.kin){
     st.kin.feed=clamp(u/0.34,0,1);
     st.kin.cut=u>0.34&&u<0.52?Math.sin((u-0.34)/0.18*Math.PI):0;
     st.kin.plg=u>0.50?Math.sin(clamp((u-0.50)/0.46,0,1)*Math.PI):0;
     st.kin.drop=clamp((u-0.52)/0.3,0,1);
   }
-  if(st.k==="lc1"||st.k==="lc2"){ st.read=weigh(st.b,st.k==="lc1"?0:1)*(u<0.5?u*2:1); }
 }
 function procDone(st){
   const b=st.b, bd=BD();
@@ -2116,14 +2320,75 @@ function procDone(st){
     S.mat.gel=Math.max(0,S.mat.gel-1); S.sg.fed++;
     if(S.sg.markBad){ b.gel=0; b.gelW=0; }            /* 마크 센서 틀어짐 : 절단 위치 이상 → 파우치 미투입 */
     else { b.gel=1; b.gelW=bd.gel*(1+0.03*gauss()); }
-  }else if(st.k==="lc1"){
-    const r=weigh(b,0); b.tare=r; st.read=r; S.wc.tare=r; S.wc.lastTare=r;
-    if(Math.abs(r-S.rc.tareStd)>S.rc.tareTol){ b.tareNG=true; raise("WC43"); }
-  }else if(st.k==="lc2"){
-    const r=weigh(b,1); b.gross=r; st.read=r; judge(b);
   }else if(st.k==="pe"){
-    S.mat.film=Math.max(0,S.mat.film-1); b.pe=1; S.pe.fed++;
+    S.mat.film=Math.max(0,S.mat.film-1); b.pe=1; S.pe.fed++; st.kin.idx=0;
   }
+}
+/* ═══ 로드셀 스테이션 : 게이트(1병 분리) → IN 스토퍼 → 포크(4 핑거) 한 칸 이송 → A · B 팬 계량 ═══ */
+function lcTick(st,dt,run){
+  const d=BD().d, G=lcGeo(st.X), P=L.lcP, K=cycK();
+  const sIN=sOfX(G.IN), sGate=sOfX(G.gateFace), sOut=sOfX(G.OUT);
+  const free=b=>b.zone==="line"&&!b.held&&b.pocket==null;
+  const line=LN.bottles.filter(free);
+  const inB=line.find(b=>Math.abs(b.s-sIN)<1.5);
+  const gb=line.find(b=>Math.abs(b.s-(sGate-d/2))<1.5);
+  const between=line.some(b=>b.s>sGate-d/2+2&&b.s<sIN-1);
+  /* 게이트 : IN 이 비면 한 병만 보낸다 (뒤 병 클램프) */
+  if(st.meter==="closed"){
+    st.gate=Math.min(1,st.gate+dt*14);
+    if(st.clampB&&st.gate>=1) st.clampB=null;
+    if(run&&gb&&!inB&&!between&&st.gate>=1&&st.inPin>=1&&!st.clampB&&(st.ph==="wait"||st.ph==="back"||st.ph==="proc")){
+      st.meter="open"; st.gb=gb; st.clampB=behindOf(gb);
+    }
+  }else{
+    st.gate=Math.max(0,st.gate-dt*14);
+    if(!st.gb||st.gb.zone!=="line"||st.gb.s>sGate+d/2+4){ st.meter="closed"; st.gb=null; }
+  }
+  st.clamp+=((st.clampB?1:0)-st.clamp)*Math.min(1,dt*16);
+  const hold=b=>{ if(b){ b.held=true; } };
+  const outClear=!line.some(b=>b.s>sOut-d-6&&b.s<sOut+d+6);
+  const upstream=line.some(b=>b.s<sIN-1&&b.s>sIN-2600&&!b.done[st.k]);
+  if(run) st.t+=dt;
+  switch(st.ph){
+    case "wait": {
+      st.fin=Math.max(0,st.fin-dt*10); st.car=0; st.inPin=Math.min(1,st.inPin+dt*14);
+      if(run) st.idleT+=dt;
+      const go=run&&outClear&&st.meter==="closed"&&!between&&(inB||((st.A||st.B)&&!upstream&&!gb&&st.idleT>1.2));
+      if(go){ st.IN=inB||null; hold(st.IN); hold(st.A); hold(st.B); st.ph="grip"; st.t=0; st.idleT=0; }
+      break; }
+    case "grip": {
+      st.fin=clamp(st.t/(0.10*K),0,1); if(st.fin>0.5) st.inPin=Math.max(0,st.inPin-dt*16);
+      if(st.fin>=1&&st.inPin<=0.05){ st.inPin=0; st.ph="move"; st.t=0; }
+      break; }
+    case "move": {
+      const u=smooth(clamp(st.t/(0.26*K),0,1)); st.car=u;
+      if(st.IN) st.IN.s=sIN+u*P; if(st.A) st.A.s=sOfX(G.A)+u*P; if(st.B) st.B.s=sOfX(G.B)+u*P;
+      st.read=null;
+      if(st.t>=0.26*K){ st.OUT=st.B; st.B=st.A; st.A=st.IN; st.IN=null; st.rB=st.rA; st.rA=null; st.ph="rel"; st.t=0; }
+      break; }
+    case "rel": {
+      st.fin=Math.max(0,1-st.t/(0.08*K));
+      if(st.fin<=0){ if(st.OUT){ st.OUT.held=false; st.OUT.s=sOut; } st.OUT=null; st.ph="back"; st.t=0; }
+      break; }
+    case "back": {
+      st.car=1-smooth(clamp(st.t/(0.18*K),0,1)); st.inPin=Math.min(1,st.inPin+dt*14);
+      if(st.t>=0.18*K){ st.car=0; st.ph="proc"; st.t=0; }
+      break; }
+    case "proc": {   /* 계량 안정 → A · B 판독 */
+      st.inPin=Math.min(1,st.inPin+dt*14);
+      const tw=0.22*K, u=clamp(st.t/tw,0,1), i=st.i, tgt=st.B||st.A;
+      if(tgt) st.read=weigh(tgt,i)+(u<0.7?0.35*Math.sin(st.t*38)*(1-u/0.7):0);
+      if(st.t>=tw){
+        if(st.A){ st.A.wA=weigh(st.A,i); }
+        if(st.B){ const r=((st.B.wA!=null?st.B.wA:weigh(st.B,i))+weigh(st.B,i))/2; st.B.wA=null; lcDone(st,st.B,r); st.B.done[st.k]=true; st.read=r; }
+        st.ph="wait"; st.t=0;
+      }
+      break; }
+  }
+}
+function lcDone(st,b,r){
+  if(st.k==="lc1"){ b.tare=r; S.wc.tare=r; S.wc.lastTare=r; if(Math.abs(r-S.rc.tareStd)>S.rc.tareTol){ b.tareNG=true; raise("WC43"); } }
+  else { b.gross=r; judge(b); }
 }
 /* 로드셀 측정값 (g) : 참값 + 영점 오프셋 + 잡음 */
 function weigh(b,i){
@@ -2258,7 +2523,9 @@ function moveBottles(dt,v,run){
   const d=BD().d;
   /* 정지 조건 : 스토퍼 핀 · 클램프 */
   const stops=[], clamped=new Set();
-  for(const k in LN.st){ const st=LN.st[k]; if(st.pin>0.5) stops.push(pinFace(st)); if(st.clampB) clamped.add(st.clampB); }
+  for(const k in LN.st){ const st=LN.st[k];
+    if(st.lc){ const G=lcGeo(st.X); if(st.gate>0.5) stops.push(sOfX(G.gateFace)); if(st.inPin>0.5) stops.push(sOfX(G.inFace)); if(st.clampB) clamped.add(st.clampB); continue; }
+    if(st.pin>0.5) stops.push(pinFace(st)); if(st.clampB) clamped.add(st.clampB); }
   const D=LN.dmc;
   if(D){
     if(D.exit>0.5) stops.push(sOfX(L.n2)+d/2);
@@ -2270,7 +2537,7 @@ function moveBottles(dt,v,run){
   const line=LN.bottles.filter(b=>b.zone==="line").sort((a,b)=>b.s-a.s);
   let prev=null;
   for(const b of line){
-    if(b.pocket!==null&&b.pocket!==undefined){ prev=b; continue; }
+    if((b.pocket!==null&&b.pocket!==undefined)||b.held){ prev=b; continue; }
     let ns=b.s+v*dt;
     if(clamped.has(b)) ns=b.s;
     if(prev){ const lim=prev.s-d; if(ns>lim) ns=Math.max(b.s,Math.min(ns,lim)); if(ns>lim) ns=lim; }
@@ -2311,7 +2578,7 @@ function capperTick(dt,run){
   R.phi+=dPhi;
   /* 캡 공급 : 볼 피더 → 슈트 (최대 7개) */
   R.bowl+=dt*(run?1:0);
-  if(run&&rc.feed&&S.mat.cap>0&&R.chute<7){ R.chuteFeed+=dt*2.6; if(R.chuteFeed>=1){ R.chuteFeed=0; R.chute++; S.mat.cap--; } }
+  if(run&&rc.feed&&S.mat.cap>0&&R.chute<capSlots()){ R.chuteFeed+=dt*2.6; if(R.chuteFeed>=1){ R.chuteFeed=0; R.chute++; S.mat.cap--; } }
   if(run) R.elev+=dt*200;
   if(rc.jam) raise("RC62");
   /* 스크류 입구의 병을 새 포켓에 배정 */
@@ -2344,6 +2611,8 @@ function capperTick(dt,run){
     if(soon) raise("RC61");
   }
 }
+/* 슈트 · 벨트 · 체인에 줄 서는 캡 수 */
+function capSlots(){ const b=BD(); return Math.max(6,Math.min(16,Math.floor(capPath().total/(b.capD+3))-1)); }
 /* 헤드 j 의 터렛 각 (rad) : 포켓 체인과 같은 위상 */
 function headAngle(j){
   const R=LN.rc, base=PATH.tA-(S_T0-S_A)/L.R;
@@ -2384,12 +2653,7 @@ function unloadTable(){
   const T=LN.table; T.list=[]; S.table.n=0; clearAlarm("RC64");
 }
 
-/* ── HPE 가열 커터 · 센서 오염 ── */
-function peHeat(dt){
-  const P=S.pe, want=(S.main&&P.heat)?P.sv:24;
-  P.pv+=(want-P.pv)*Math.min(1,dt*(P.heat?0.10:0.05));
-  if(P.pv>=P.sv-10) clearAlarm("PE52");
-}
+/* ── 센서 오염 ── */
 function dirtTick(dt,run){
   if(!run) return;
   const k=S.dust?0.0008:0.012;
@@ -2428,14 +2692,14 @@ function startBlockers(){
   if(!S.user) r.push("HMI 에 로그인하지 않았습니다.");
   if(!S.recipeApplied) r.push("생산 품목(레시피)이 적용되지 않았습니다.");
   if(tripAlarms().length) r.push("해제되지 않은 알람이 있습니다 — RESET.");
-  if(S.pe.pv<S.pe.sv-10) r.push("HPE-100 가열 커터 온도가 낮습니다 ("+Math.round(S.pe.pv)+" / "+S.pe.sv+" ℃).");
+  if(S.pe.jam) r.push("HPE-100 필름 이송 불량이 해제되지 않았습니다.");
   if(S.mat.bottle<=0&&LN.tt.n<=0) r.push("빈 병이 없습니다.");
   if(S.mat.gel<=0) r.push("실리카겔 롤이 없습니다.");
   if(S.mat.tab<=0) r.push("정제가 없습니다.");
   if(S.mat.film<=0) r.push("PE 필름이 없습니다.");
   if(S.mat.cap<=0&&LN.rc.chute<=0) r.push("캡이 없습니다.");
   if(S.table.n>=S.table.cap) r.push("집적 테이블이 가득 찼습니다.");
-  if(S.reject.n>=S.reject.cap) r.push("리젝트함이 가득 찼습니다.");
+  if(S.reject.n>=S.reject.cap) r.push("리젝트 트레이가 가득 찼습니다.");
   return r;
 }
 function lineStart(){
@@ -2464,7 +2728,7 @@ function lineReset(){
     if(k==="WC42") return S.reject.n>=S.reject.cap;
     if(k==="WC44") return !(S.wc.zero[0]&&S.wc.zero[1]);
     if(k==="PE51") return S.mat.film<=0;
-    if(k==="PE52") return S.pe.pv<S.pe.sv-10;
+    if(k==="PE52") return S.pe.jam;
     if(k==="RC61") return S.mat.cap<=0&&LN.rc.chute<=0;
     if(k==="RC62") return S.rcp.jam;
     if(k==="RC63") return S.rcp.torqueBad;
@@ -2477,14 +2741,14 @@ function lineReset(){
 }
 /* 라인 초기화 (새 세션) */
 function lineInit(){
-  LN.bottles=[]; LN.pushing=[]; LN.rejBin=[]; LN.table.list=[]; LN.fed=0; LN.feedT=0; LN.tt.n=18;
+  LN.bottles=[]; LN.pushing=[]; LN.rejBin=[]; LN.table.list=[]; LN.fed=0; LN.feedT=0; LN.tt.n=18; CAP_CACHE={ml:-1};
   LN.rc.captured=new Map(); LN.rc.chute=0; LN.rc.heads.forEach(h=>{h.cap=false;});
   makeStations();
 }
 
 /* ── dynamic.js ── */
 /* ═══════════════════════════════════════════════════════════════════
-   동적 형상 — 매 프레임 생성 (움직이는 부품 · 병 · 정제 · 캡 · 작업자)
+   동적 형상 — 매 프레임 생성 (움직이는 부품 · 병 · 정제 · 캡 · 도어 · 작업자)
    ═══════════════════════════════════════════════════════════════════ */
 const FAR=()=>cam.dist>7600;
 const NEAR=()=>cam.dist<4200;
@@ -2501,19 +2765,27 @@ function lampState(mk){
   if(al.length) return "warn";
   return S.running?"run":"off";
 }
+/* 캡 1개 : 윗면 위치 p · 축 방향 n(xy 평면) */
+function drawCap(p,n,seg){
+  const b=BD();
+  mPush(); mT(p[0],p[1],p[2]);
+  if(n&&(Math.abs(n[0])>0.02||n[1]<0.98)) mRZ(Math.atan2(-n[0],n[1]));
+  mT(0,-(b.h+b.capH),0); lathe(botProf().cap,C[b.capCol],seg||10);
+  mPop();
+}
 
 function drawDynamic(){
   geoBegin(GEO.dyn);
   if(!S) return;
-  dConveyor(); dUA(); dInserter("sg"); dLoadCell("lc1",L.lc1); dDMC(); dLoadCell("lc2",L.lc2); dReject(); dInserter("pe"); dRCS(); dTable();
-  dBottles(); dPanels(); drawWorkers();
+  dConveyor(); dUA(); dSG(); dLoadCell(LN.st.lc1); dDMC(); dLoadCell(LN.st.lc2); dReject(); dPE(); dRCS(); dTable();
+  dBottles(); dPanels(); drawDoors(); drawWorkers();
 }
 
 /* ── 컨베이어 슬랫 이동 ── */
 function dConveyor(){
   if(FAR()) return;
   const pitch=38.1, off=LN.conv%pitch;
-  const skip=[[L.lc1-L.lcW/2-6,L.lc1+L.lcW/2+6],[L.lc2-L.lcW/2-6,L.lc2+L.lcW/2+6]];
+  const skip=[[L.lc1-L.lcW/2-2,L.lc1+L.lcW/2+2],[L.lc2-L.lcW/2-2,L.lc2+L.lcW/2+2]];
   for(let x=XS+off;x<XE;x+=pitch){
     if(skip.some(s=>x>s[0]&&x<s[1])) continue;
     box(x-1.2,x+1.2,CH,CH+0.5,-43,43,C.slatL,C.slatL,0);
@@ -2523,7 +2795,7 @@ function dConveyor(){
 /* ── UA-120 ── */
 function dUA(){
   const b=BD(), tt=L.tt, far=FAR();
-  /* 턴테이블 원판 + 병 */
+  /* 레벨 디스크 + 병 */
   mPush(); mT(tt.x,0,tt.z); mRY(-LN.tt.ang);
   disc(CH-3,0,tt.r,C.brushed,40);
   for(let i=0;i<8;i++){ const a=i*Math.PI/4; mPush(); mRY(a); box(60,tt.r-6,CH-3,CH+2,-4,4,C.ssD,C.ssD,0); mPop(); }
@@ -2536,28 +2808,25 @@ function dUA(){
     else drawBottle(r*Math.cos(a),CH-2,r*Math.sin(a),{});
   }
   mPop();
-  /* 호퍼 속 병 (적재량 비례) */
-  const hp=L.hop, hn=Math.round(clamp(S.mat.bottle/MAT_CAP.bottle,0,1)*26);
+  /* 벌크 호퍼 속 병 (적재량 비례 · 경사 바닥 위에 눕힘) */
+  const hp=L.hop, hn=Math.round(clamp(S.mat.bottle/MAT_CAP.bottle,0,1)*30);
   for(let i=0;i<hn;i++){
-    const layer=Math.floor(i/9), k=i%9;
-    const x=hp.x0+60+(k%3)*((hp.x1-hp.x0-120)/2)+hash1(i)*30, z=hp.z0+70+Math.floor(k/3)*((hp.z1-hp.z0-140)/2)+hash1(i+9)*30;
-    const yb=1100-(x-hp.x0)/(hp.x1-hp.x0)*240+b.d/2+layer*(b.d-6);
-    drawBottle(x,yb,z,{yaw:hash1(i*5)*3,tilt:Math.PI/2});
+    const layer=Math.floor(i/10), k=i%10;
+    const u=(k%5+0.5)/5, v=(Math.floor(k/5)+0.5)/2;
+    const x=lerp(hp.x0+b.h*0.5+20,hp.x1-40,u)+hash1(i)*20, z=lerp(hp.z0+b.d,hp.z1-b.d,v)+hash1(i+9)*30;
+    const yf=hp.y0+60+(x-hp.x0)/(hp.x1-hp.x0)*180;
+    drawBottle(x,yf+b.d/2+layer*(b.d-8),z,{yaw:hash1(i*5)*3,tilt:Math.PI/2});
   }
-  /* 엘리베이터 클리트 · 병 */
-  const e0=[hp.x1-20,860,20], e1=[tt.x-150,CH+470,tt.z-80];
+  /* 엘리베이터 녹색 클리트 벨트 · 병 */
+  const e0=UA_EL[0], e1=UA_EL[1];
   mPush(); const len=mAlong(e0,e1);
-  for(let y=(LN.elev%160);y<len;y+=160){ box(-104,104,y,y+5,-36,-8,C.dark,C.dark,0); if(S.ua.elev&&!far&&Math.floor((y+LN.elev)/160)%2===0&&y>60&&y<len-60){ drawBottle(0,y+b.d/2+5,-36+b.h/2,{tilt:Math.PI/2,yaw:Math.PI/2}); } }
+  box(-110,110,0,len,-44,-36,[0.12,0.46,0.32,0.05],null,0);
+  for(let y=(LN.elev%160);y<len;y+=160){ box(-104,104,y,y+5,-36,-8,[0.10,0.38,0.26,0.05],null,0);
+    if(S.ua.elev&&!far&&Math.floor((y+LN.elev)/160)%2===0&&y>60&&y<len-60){ drawBottle(0,y+b.d/2+5,-36+b.h/2,{tilt:Math.PI/2,yaw:Math.PI/2}); } }
   mPop();
   /* 반전 사이드 벨트 (병과 함께 비틀림) */
   const ym=CH+b.h/2, w=b.d/2+7, bw=Math.min(62,b.h*0.55);
   for(const side of [-1,1]){
-    const Lp=[],Rp=[];
-    for(let x=L.belt0;x<=L.belt1+0.1;x+=35){
-      const th=uaRoll(x), c=Math.cos(th), s=Math.sin(th);
-      const py=ym-side*w*s, pz=side*w*c;
-      Lp.push([x,py-bw/2*c,pz-bw/2*s]); Rp.push([x,py+bw/2*c,pz+bw/2*s]);
-    }
     const bc=[0.16,0.46,0.34,0.05], lug=[0.09,0.30,0.21,0.05], ph=LN.sbelt%40;
     for(let x=L.belt0;x<L.belt1-1;x+=40){
       const xm=x+20, th=uaRoll(xm), c=Math.cos(th), s=Math.sin(th), py=ym-side*w*s, pz=side*w*c;
@@ -2579,83 +2848,87 @@ function dUA(){
   }
 }
 
-/* ── SG-120 · HPE-100 (피드 · 커터 · 플런저 공용) ── */
-function dInserter(k){
-  const I=insCfg(k), x=I.x, st=LN.st[k], b=BD(), H=sgHeadY(), far=FAR();
-  const gel=k==="sg";
-  const stock=gel?S.mat.gel/MAT_CAP.gel:S.mat.film/MAT_CAP.film;
-  const r0=I.r0, rF=I.rF, rr=r0+(rF-r0)*Math.sqrt(clamp(stock,0,1));
-  const wd=I.wd, rz=I.rz;
-  const fed=(gel?S.sg.fed:S.pe.fed)+(st?st.kin.feed:0);
-  const travel=fed*(gel?S.sg.pitch:S.pe.len);
-  /* 릴 : 플랜지 · 코어 · 감긴 자재 */
-  mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));
-  for(const z of [-wd/2-6,wd/2+2]) { mPush(); mRX(Math.PI/2); mT(0,z,0); disc(0,0,r0+14,C.ssD,20); disc(4,0,r0+14,C.ssD,20); mPop(); }
-  if(!far){ const g=gAlpha; gAlpha=0.16; mPush(); mRX(Math.PI/2); mT(0,wd/2+4,0); disc(0,r0+14,rF+14,C.acryl,32); mPop(); gAlpha=g; }
-  if(!far){ mPush(); mRX(Math.PI/2); mT(0,-wd/2-8,0); disc(0,r0+14,rF+14,C.ssL,32); mPop(); }
-  cylZ(0,0,-wd/2-4,wd/2+4,r0-6,C.dark,18);
-  if(stock>0.005){
-    cylZ(0,0,-wd/2,wd/2,rr,gel?C.gel:[0.80,0.90,0.95,0.15],28);
-    if(gel&&!far) for(let i=0;i<6;i++){ const a=i*Math.PI/3; box(rr*0.3*Math.cos(a)-2,rr*0.3*Math.cos(a)+2,rr*0.3*Math.sin(a)-2,rr*0.3*Math.sin(a)+2,wd/2,wd/2+0.6,C.gelPrint,null,0); }
-  }
-  for(let i=0;i<3;i++){ const a=i*Math.PI*2/3; box(Math.cos(a)*14-3,Math.cos(a)*14+3,Math.sin(a)*14-3,Math.sin(a)*14+3,-wd/2-8,wd/2+6,C.ss,null,0); }
-  mPop();
-  /* 댄서 암 */
-  const dAng=0.25+0.15*Math.sin((st&&st.kin.feed)?st.kin.feed*Math.PI:0);
-  const dp=I.dp, dr=[dp[0]+Math.cos(dAng+I.da)*150,dp[1]+Math.sin(dAng+I.da)*150,dp[2]];
-  tube([dp[0],dp[1],rz-wd/2-8],[dr[0],dr[1],rz-wd/2-8],9,C.ss,8); cylZ(dr[0],dr[1],rz-wd/2-6,rz+wd/2+6,18,C.ssL,14);
-  /* 띠 경로 : 릴 → 댄서 롤러 → 입구 롤러 → (가이드 롤러) → 헤드 */
-  if(stock>0.005){
-    const pts=[[I.rx+rr*0.2,I.ry-rr,rz],[dr[0],dr[1]-18,rz],[I.in[0],I.in[1]-12,rz]];
-    if(I.g) pts.push([I.g[0],I.g[1]-9,0]);
-    pts.push([x,H.y1-4,0],[x,H.y0+46,0]);
-    const col=gel?C.gel:[0.80,0.90,0.95,0.15];
-    const g=gAlpha; if(!gel) gAlpha=0.7;
-    for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1];
-      quad([a[0],a[1],a[2]-wd/2],[c[0],c[1],c[2]-wd/2],[c[0],c[1],c[2]+wd/2],[a[0],a[1],a[2]+wd/2],col); }
-    gAlpha=g;
-    if(gel&&!far){ /* 파우치 경계 (피치마다 실링선) */
-      const ph=travel%S.sg.pitch;
-      for(let y=H.y1-4-ph;y>H.y0+46;y-=S.sg.pitch) box(x-1,x+1,y-1.5,y+1.5,-wd/2-0.5,wd/2+0.5,[0.72,0.74,0.76,0.05],null,0);
-    }
-  }
-  /* 피드 롤러 (회전 표시) */
-  for(const sx of [-15,15]){ mPush(); mT(x+sx,H.y1-40,0); mRZ((sx>0?-1:1)*travel/14); cylZ(0,0,-wd/2-6,wd/2+6,13,C.rubber,12); box(-2,2,-13,13,wd/2+6,wd/2+7,C.ss,null,0); mPop(); }
-  /* 커터 : 왕복 / 가열 커터 발광 */
-  const cut=st?st.kin.cut:0;
-  box(x-100+cut*80,x-40+cut*80,H.y0+30,H.y0+44,-wd/2-6,wd/2+6,gel?C.brushed:(S.pe.heat&&S.pe.pv>60?E.heat:[0.55,0.30,0.20,0.3]),null,0);
-  /* 잘린 조각 → 튜브 → 병 */
-  if(st&&st.ph==="proc"&&st.kin.drop>0&&st.b){
-    const t=st.kin.drop, y=lerp(H.y0+30,CH+b.h-6,Math.min(1,t*1.2));
-    if(gel) box(x-15,x+15,y-20,y+20,-4,4,C.gel,C.gel,0);
-    else { const g=gAlpha; gAlpha=0.7; mPush(); mT(x,y,0); lathe([[b.nk/2-3,0],[b.nk/2-6,8],[0,12]],C.film,12); mPop(); gAlpha=g; }
-  }
-  /* 플런저 로드 */
-  const plg=st?st.kin.plg:0, tip=lerp(H.y1-24,CH+b.h+4,plg);
-  tube([x,H.y1+20,0],[x,tip,0],6,C.rodC,10); cylY(x,0,tip-6,tip,Math.max(8,b.nk/2-6),C.ss,12);
-  /* 스토퍼 핀 · 클램프 */
-  if(st) stopperPins(x,b,st.pin,st.clamp);
-}
+/* ── 앞쪽 스토퍼 핀 · 클램프 패드 (SG · HPE 공용) ── */
 function stopperPins(x,b,pin,clampV){
-  const y=CH+b.h*0.42;
-  tube([x+b.d/2+7,y,-78],[x+b.d/2+7,y,-78+pin*74],4.5,C.rodC,8);
-  const cx=x-b.d/2-5-b.d/2, cz=-78+clampV*(78-b.d/2-3);
-  tube([cx,y,-78],[cx,y,cz],4.5,C.rodC,8); box(cx-9,cx+9,y-10,y+10,cz-2,cz+1,C.rubber,C.rubber,0);
+  pinFront(x+b.d/2+7,pin);
+  const y=CH+b.h*0.42, cx=x-b.d-5, zr=b.d/2+34, cz=lerp(zr-6,b.d/2+3,clampV);
+  tube([cx,y,zr],[cx,y,cz],4.5,C.rodC,8); box(cx-10,cx+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
 }
 
-/* ── 로드셀 ── */
-function dLoadCell(k,x){
-  const st=LN.st[k], b=BD(), w=L.lcW;
-  const run=S.running;
-  box(x-w/2+14,x+w/2-14,CH-8,CH,-44,44,[0.93,0.94,0.92,0.05],null,0);
-  if(!FAR()) for(let u=(LN.conv%50)-w/2;u<w/2-10;u+=50) if(u>-w/2+14) box(x+u-1,x+u+1,CH,CH+0.4,-44,44,[0.80,0.82,0.80,0.05],null,0);
-  if(st){
-    const y=CH+b.h*0.42;
-    tube([x+b.d/2+5,y,-80],[x+b.d/2+5,y,-80+st.pin*76],4.2,C.rodC,8);
+/* ── SG-120 : 릴 · 띠 경로 · 트윈 벨트 · 커터 · 낙하 ── */
+function dSG(){
+  const I=insCfg("sg"), x=I.x, st=LN.st.sg, b=BD(), H=sgHeadY(), far=FAR();
+  const stock=S.mat.gel/MAT_CAP.gel, rr=I.r0+(I.rF-I.r0)*Math.sqrt(clamp(stock,0,1)), wd=I.wd, rz=I.rz;
+  const fed=S.sg.fed+(st?st.kin.feed:0), travel=fed*S.sg.pitch;
+  /* 릴 (커버 창 안) */
+  mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));
+  cylZ(0,0,-wd/2-8,wd/2+8,I.r0-6,C.dark,18);
+  if(stock>0.005) cylZ(0,0,-wd/2,wd/2,rr,C.gel,28);
+  for(const z of [-wd/2-6,wd/2+4]){ mPush(); mT(0,0,z); mRX(Math.PI/2); disc(0,I.r0-6,I.rF+6,C.ssD,24); mPop(); }
+  for(let i=0;i<3;i++){ const a=i*Math.PI*2/3; box(Math.cos(a)*14-3,Math.cos(a)*14+3,Math.sin(a)*14-3,Math.sin(a)*14+3,-wd/2-10,wd/2+8,C.ss,null,0); }
+  mPop();
+  /* 릴 커버 앞 뚜껑 (짙은 투명창) : 왼쪽 경첩 · 릴 교체 때 열린다 */
+  { const o=smooth(DOOR_OPEN.sgLid||0), Rr=I.R;
+    mPush(); mT(I.rx-Rr,I.ry,70); mRY(-o*1.9); mT(Rr,0,0);
+    mPush(); mRX(-Math.PI/2); disc(0,Rr-22,Rr,C.ssL,40); mPop();
+    { const g2=gAlpha; gAlpha=0.45; mPush(); mRX(-Math.PI/2); disc(0,0,Rr-22,[0.12,0.13,0.15,0.4],40); mPop(); gAlpha=g2; }
+    cylZ(0,0,0,14,16,C.ssL,12); cylZ(Rr*0.7,Rr*0.7,0,10,8,C.ssD,10); cylZ(-Rr*0.7,-Rr*0.7,0,10,8,C.ssD,10);
+    box(Rr-30,Rr-8,-40,40,6,22,C.dark,C.dark,0);
+    mPop(); }
+  /* 띠 경로 : 릴 → 커버 출구 → 윗면 롤러 2 → 슬롯 → 트윈 벨트 사이 → 커터 */
+  const by0=H.y0+50, by1=H.y0+290, [r1,r2]=I.top, top=SGH.yT;
+  if(stock>0.005){
+    const pts=[[I.rx+rr*0.6,I.ry-rr*0.8,rz],[I.rx+I.R*0.75,I.ry-I.R+6,rz],[r1[0]-26,r1[1]-4,0],[r1[0]-18,r1[1]+19,0],[r1[0],r1[1]+26,0],
+      [r2[0],r2[1]+26,0],[r2[0]-19,r2[1]+18,0],[x,top-10,0],[x,H.y0+40,0]];
+    for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1];
+      quad([a[0],a[1],a[2]-wd/2],[c[0],c[1],c[2]-wd/2],[c[0],c[1],c[2]+wd/2],[a[0],a[1],a[2]+wd/2],C.gel); }
+    if(!far){ const ph=travel%S.sg.pitch;
+      for(let y=top-10-ph;y>H.y0+46;y-=S.sg.pitch) box(x-1.2,x+1.2,y-1.5,y+1.5,-wd/2-0.5,wd/2+0.5,[0.72,0.74,0.76,0.05],null,0);
+      for(let y=top-10-ph+S.sg.pitch*0.5;y>H.y0+46;y-=S.sg.pitch) box(x-1.3,x+1.3,y-4,y+4,-8,8,C.gelPrint,null,0); }
   }
-  /* 표시기 화면 */
-  box(x-60,x+60,CH+340,CH+382,215,216.5,S.main?[0.06,0.12,0.10,-1]:E.scrDim,null,0);
-  if(S.main) for(let i=0;i<5;i++) box(x-52+i*21,x-38+i*21,CH+348,CH+374,216.5,217.2,E.digit,null,0);
+  /* 롤러 회전 표시 · 트윈 벨트 (노란 타이밍 벨트 : 띠와 같은 속도) */
+  for(const [rx,ry] of I.top){ mPush(); mT(rx,ry,0); mRZ(-travel/26); box(-2,2,-24,24,34,36,C.ssD,null,0); mPop(); }
+  const belt=[0.86,0.66,0.22,0.1], tooth=[0.55,0.40,0.12,0.1];
+  for(const s of [-1,1]){
+    box(x+s*9,x+s*14,by0,by1,-38,38,belt,null,0);
+    if(!far){ const ph=travel%12; for(let y=by1-ph;y>by0;y-=12) box(x+s*8.4,x+s*9.4,y-1.5,y+1.5,-38,38,tooth,null,0); }
+  }
+  /* 커터 (왕복) */
+  const cut=st?st.kin.cut:0;
+  box(x-100+cut*80,x-40+cut*80,H.y0+26,H.y0+36,-wd/2-6,wd/2+6,C.brushed,null,0);
+  /* 잘린 파우치 → 튜브 → 병 */
+  if(st&&st.ph==="proc"&&st.kin.drop>0&&st.b){
+    const t=st.kin.drop, y=lerp(H.y0+24,CH+b.h-6,Math.min(1,t*1.2));
+    box(x-15,x+15,y-20,y+20,-4,4,C.gel,C.gel,0);
+  }
+  if(st) stopperPins(x,b,st.pin,st.clamp);
+}
+
+/* ── 로드셀 스테이션 : 포크(캐리지 · 4 핑거 · 실린더) · 케이블 체인 · 게이트 / IN 핀 · 클램프 ── */
+function dLoadCell(st){
+  if(!st) return;
+  const b=BD(), d=b.d, G=lcGeo(st.X), P=L.lcP, dx=st.car*P, far=FAR();
+  const tipZ=lerp(d/2+16,-(d/2+8),st.fin);
+  const fx=[G.IN-d/2-10,G.A-d/2-10,G.B-d/2-10,G.B+d/2+10].map(v=>v+dx);
+  const cx0=fx[0]-40, cx1=fx[3]+40;
+  box(cx0,cx1,CH-116,CH-88,140,270,[0.78,0.81,0.84,0.6],[0.84,0.86,0.88,0.6]);
+  for(const x of fx){
+    box(x-6,x+6,CH-88,CH+46,150,172,C.ss);                                      /* 세움 암 */
+    box(x-3,x+3,CH+24,CH+46,tipZ,172,C.brushed,null,0);                          /* 핑거 날 */
+    ellipsoid([x,CH+35,tipZ],[3,11,10],C.brushed,8,4);
+    if(!far){ cylZ(x,CH-70,178,262,12,C.cyl,12); cylZ(x,CH-70,262,262+(1-st.fin)*26,5,C.rodC,8); cylZ(x,CH-70,168,178,15,C.ssD,12); }
+  }
+  /* 케이블 체인 (캐리지 끝 → 고정점) */
+  if(!far){ const ax=cx1, fx2=st.X+60, yA=CH-80, yB=CH-150, zc=285, r=(yA-yB)/2, pts=[];
+    const midX=Math.max(ax,fx2)+20;
+    for(let x=ax;x<midX;x+=16) pts.push([x,yA,zc]);
+    for(let i=0;i<=8;i++){ const a=Math.PI/2-i/8*Math.PI; pts.push([midX+r*Math.cos(a),yB+r+r*Math.sin(a),zc]); }
+    for(let x=midX;x>fx2;x-=16) pts.push([x,yB,zc]);
+    for(const p of pts) box(p[0]-7,p[0]+7,p[1]-9,p[1]+9,zc-16,zc+16,C.black,null,0); }
+  /* 핀 · 클램프 */
+  pinFront(G.gateFace+4,st.gate); pinFront(G.inFace+4,st.inPin);
+  const y=CH+b.h*0.42, cxp=G.gateFace-1.5*d, zr=d/2+34, cz=lerp(zr-6,d/2+3,st.clamp);
+  tube([cxp,y,zr],[cxp,y,cz],4.5,C.rodC,8); box(cxp-10,cxp+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
 }
 
 /* ── DMC-60T ── */
@@ -2664,24 +2937,25 @@ function dDMC(){
   if(!D) return;
   const run=S.running;
   const jig=run?Math.sin(D.vibPh*2*Math.PI*23)*1.2:0;
+  mPush(); mT(L.dmcDX,0,0);
   /* 호퍼 속 정제 (적재량 → 높이) */
-  const f=clamp(S.mat.tab/matCap("tab"),0,1);
+  const f=clamp(S.mat.tab/matCap("tab"),0,1), h=DMC.hop;
   if(f>0.002){
-    const y=1660+18+f*300, u=(y-1660)/(2040-1660);
-    const x0=lerp(-900,-1110,u)+6, x1=lerp(-700,-490,u)-6, z0=lerp(-880,-1080,u)+6, z1=lerp(-780,-700,u)-6, cx=(x0+x1)/2, cz=(z0+z1)/2;
+    const y=h.y0+18+f*(h.y1-h.y0-40), u=(y-h.y0)/(h.y1-h.y0);
+    const x0=lerp(h.ox0,h.x0,u)+6, x1=lerp(h.ox1,h.x1,u)-6, z0=lerp(h.oz0,h.z0,u)+6, z1=lerp(h.oz1,h.z1,u)-6, cx=(x0+x1)/2, cz=(z0+z1)/2;
     tri([x0,y,z0],[x1,y,z0],[cx,y+26,cz],col); tri([x1,y,z0],[x1,y,z1],[cx,y+26,cz],col);
     tri([x1,y,z1],[x0,y,z1],[cx,y+26,cz],col); tri([x0,y,z1],[x0,y,z0],[cx,y+26,cz],col);
     if(!far) for(let i=0;i<24;i++){ const px=lerp(x0+10,x1-10,hash1(i*1.7)), pz=lerp(z0+10,z1-10,hash1(i*3.1));
       const e=1-Math.max(Math.abs(px-cx)/((x1-x0)/2),Math.abs(pz-cz)/((z1-z0)/2)); drawTab(px,y+e*26+2,pz,hash1(i)*3,col); }
   }
-  /* 트레이 1 · 2 : 흩어진 정제가 앞으로 흘러간다 */
   if(!far){
-    const tr=[[DMC.t1,D.tray[0],34,0.35],[DMC.t2,D.tray[1],40,0.55]];
-    for(const [t,fill,n,sp] of tr){
-      const m=Math.round(n*fill), Lz=t.z1-t.z0-12;
+    /* 트레이 1 · 2 : 흩어진 정제가 앞으로 흘러간다 */
+    const tr=[[DMC.t1,D.tray[0],22,0.35,4],[DMC.t2,D.tray[1],36,0.55,12]];
+    for(const [t,fill,n,sp,amp] of tr){
+      const m=Math.round(n*fill), Lz=t.z1-t.z0-12, gw=(t.x1-t.x0)/12;
       for(let i=0;i<m;i++){
-        const z=t.z0+6+((hash1(i*2.3)*Lz+D.vibPh*sp*60)%Lz), x=t.x0+10+hash1(i*5.7+1)*(t.x1-t.x0-20);
-        drawTab(x,t.y+S.rc.prod.thk/2+jig,z,hash1(i*9.1)*6,col);
+        const z=t.z0+6+((hash1(i*2.3)*Lz+D.vibPh*sp*60)%Lz), gi=Math.floor(hash1(i*5.7+1)*12), x=t.x0+gi*gw+gw/2+(hash1(i*3.9)-0.5)*gw*0.3;
+        drawTab(x,t.y+S.rc.prod.thk/2+jig+(amp>4?1:0),z,hash1(i*9.1)*6,col);
       }
     }
     /* 트레이 3 : 12 트랙 */
@@ -2695,16 +2969,17 @@ function dDMC(){
         drawTab(xc,DMC.t3y+S.rc.prod.thk/2-2+jig,DMC.t3z1-u,Math.PI/2,col);
       }
     }
-    /* 센서로 떨어지는 정제 */
+    /* 센서로 떨어지는 정제 (센서 박스 윗면 아래로 사라짐) */
     for(const q of D.falls){
       const y=DMC.t3y-4-0.5*9800*q.t*q.t;
-      if(y<1300) continue;
+      if(y<1450) continue;
       drawTab(DMC.x0+q.c*DMC.tw+DMC.tw/2,y,DMC.t3z1+14,Math.PI/2,col);
     }
   }
-  /* 센서 LED (계수 순간 점등) */
+  /* 센서 LED (윗면 점검창 아래 · 계수 순간 점등) */
   for(let c=0;c<12;c++){ const xc=DMC.x0+c*DMC.tw+DMC.tw/2, on=D.led[c]>0.25, dirty=S.dmc.dirt[c]>0.6;
-    box(xc-5,xc+5,1446,1449,-100,-90,on?E.ledG:dirty?E.ledY:(S.main?[0.10,0.40,0.20,-1]:OFF.g),null,0); }
+    box(xc-5,xc+5,1446,1449,-104,-86,on?E.ledG:dirty?E.ledY:(S.main?[0.10,0.40,0.20,-1]:OFF.g),null,0); }
+  mPop();
   /* 게이트 버퍼 · 게이트 날개 · 노즐 흐름 */
   for(const g of [0,1]){
     const nx=g===0?L.n1:L.n2, fill=Math.min(1,D.buf[g]/N);
@@ -2717,34 +2992,95 @@ function dDMC(){
         drawTab(nx+Math.sin(i*2.1)*5,y,Math.cos(i*1.7)*5,i,col); }
     }
   }
-  /* 병 스토퍼 3조 */
-  const y=CH+b.h*0.42;
-  for(const [px,v] of [[L.n2+b.d/2+4,D.exit],[L.n1+b.d/2+4,D.mid],[L.n1-b.d-6,D.entry]])
-    tube([px,y,-80],[px,y,-80+v*76],4.5,C.rodC,8);
-  if(D.clampB){ const cx=L.n1-b.d-6-b.d/2-4; tube([cx,y+18,-80],[cx,y+18,-b.d/2-3],4,C.rodC,8); }
+  /* 병 스토퍼 3조 · 입구 클램프 (앞) */
+  for(const [px,v] of [[L.n2+b.d/2+4,D.exit],[L.n1+b.d/2+4,D.mid],[L.n1-b.d-6,D.entry]]) pinFront(px,v);
+  const y=CH+b.h*0.42, cxp=L.n1-b.d*1.5-10, zr=b.d/2+34, cz=lerp(zr-6,b.d/2+3,D.clampB?1:0);
+  tube([cxp,y,zr],[cxp,y,cz],4.5,C.rodC,8); box(cxp-10,cxp+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
 }
 
-/* ── 리젝트 ── */
+/* ── 리젝트 : 푸셔 · 트레이로 미끄러지는 병 · 트레이 속 불합격 병 ── */
+const REJT={tw:150, zA:60, zB:460, yA:CH-12, yB:CH-190};
+const rejFloorY=z=>REJT.yA+(clamp(z,REJT.zA,REJT.zB)-REJT.zA)*(REJT.yB-REJT.yA)/(REJT.zB-REJT.zA);
+function rejSlot(i){
+  const b=BD(), nc=Math.max(1,Math.floor((2*REJT.tw-20)/(b.h+8))), nr=Math.max(1,Math.floor((REJT.zB-REJT.zA-30)/(b.d+4)));
+  const col=i%nc, row=Math.floor(i/nc)%nr, layer=Math.floor(i/(nc*nr));
+  const z=REJT.zB+REJT.tw*0.35-b.d/2-row*(b.d+4), x=L.rej-REJT.tw+14+col*(b.h+8)+b.h;
+  return {x, y:rejFloorY(z)+b.d/2-2+layer*b.d*0.85, z};
+}
 function dReject(){
   const R=LN.rej, b=BD(), x=L.rej, y=CH+b.h*0.42;
   const pz=-(b.d/2+40)+R.ext*(b.d+70);
-  tube([x,y,-300],[x,y,pz],6,C.rodC,10); box(x-24,x+24,y-22,y+22,pz-6,pz,C.rubber,C.rubber,0);
-  /* 밀려나는 병 → 슈트 → 리젝트함 */
+  tube([x,y,-330],[x,y,pz],6,C.rodC,10); box(x-26,x+26,y-24,y+24,pz-6,pz,C.rubber,C.rubber,0);
   for(const q of LN.pushing){
-    const t=q.pt;
-    let bx=x, by=CH, bz=0, tilt=0;
-    if(t<0.22){ bz=(t/0.22)*(b.d/2+70); }
-    else { const u=Math.min(1,(t-0.22)/0.5); bz=b.d/2+70+u*300; by=CH-u*170; tilt=u*1.2; }
-    drawBottle(bx,by,bz,{fill:q.fill,gel:q.gel,ng:true,tilt:-tilt,yaw:Math.PI/2});
+    const t=q.pt, sl=rejSlot(LN.rejBin.length);
+    if(t<0.22){ drawBottle(x,CH-1,(t/0.22)*(b.d/2+62),{fill:q.fill,gel:q.gel,ng:true}); continue; }
+    const u=smooth(Math.min(1,(t-0.22)/0.6)), z0=b.d/2+62;
+    const tip=Math.min(1,u*2.2), zz=lerp(z0,sl.z,u), xx=lerp(x+b.h/2*tip,sl.x,u);
+    const yy=lerp(CH-1,rejFloorY(zz)+b.d/2-2,Math.min(1,u*1.6));
+    drawBottle(xx,yy-(1-tip)*0,zz,{fill:q.fill,gel:q.gel,ng:true,tilt:tip*Math.PI/2});
   }
-  const bin=L.rejBin;
-  LN.rejBin.forEach((q,i)=>{ const k=i%12, layer=Math.floor(i/12);
-    drawBottle(bin.x-150+(k%4)*100+hash1(q.seed)*20,140+b.d/2+layer*b.d*0.8,bin.z-150+Math.floor(k/4)*110,{tilt:Math.PI/2,yaw:hash1(q.seed*3)*3,ng:true}); });
+  LN.rejBin.forEach((q,i)=>{ const p=rejSlot(i); drawBottle(p.x,p.y,p.z,{tilt:Math.PI/2,ng:true,fill:1}); });
+}
+
+/* ── HPE-100 : 필름 롤 · 필름 띠 · 톱날 커터 · 인덱싱 디스크 · 튜브 속 필름 · 푸셔 ── */
+function dPE(){
+  const st=LN.st.pe, b=BD(), x=L.pe, yD=peDiscY(), far=FAR(), zc=PED.zc, n=PED.n, r=PED.r;
+  const stock=clamp(S.mat.film/MAT_CAP.film,0,1), I=insCfg("pe");
+  const idx=st&&st.ph==="proc"?st.kin.idx:0, base=Math.PI/2+(S.pe.fed+idx)*2*Math.PI/n;
+  const film=[0.86,0.93,0.97,0.12];
+  /* 필름 롤 2 (가로 축) */
+  const rr=I.r0+(I.rF-I.r0)*Math.sqrt(stock), rot=(S.pe.fed+(st?st.kin.feed:0))*S.pe.len/Math.max(rr,30);
+  for(const sx of [-1,1]){
+    const x0=x+sx*70, x1=x+sx*270, xa=Math.min(x0,x1), xb=Math.max(x0,x1);
+    cylX(xa,xb,1450,-590,I.r0-8,C.dark,16);
+    if(stock>0.005){ const g=gAlpha; gAlpha=0.85; cylX(xa+6,xb-6,1450,-590,rr,film,28); gAlpha=g; }
+    for(const ex of [xa,xb]){ mPush(); mT(ex,1450,-590); mRX(rot*(sx)); box(-2,2,-I.r0+10,I.r0-10,-4,4,C.ss,null,0); box(-2,2,-4,4,-I.r0+10,I.r0-10,C.ss,null,0); mPop(); }
+    /* 필름 띠 : 롤 아래 → 장구 롤러 → 포머 → 뒤 튜브 */
+    if(stock>0.005){
+      const lx=x+sx*106, lz=zc-106, w=26, g=gAlpha; gAlpha=0.7;
+      const pts=[[lx,1450-rr,-590],[lx,yD+330,lz-80],[lx,yD+230,lz-80],[lx,yD+150,lz-40],[lx,yD+18,lz]];
+      for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1]; quad([a[0]-w,a[1],a[2]],[a[0]+w,a[1],a[2]],[c[0]+w,c[1],c[2]],[c[0]-w,c[1],c[2]],film); }
+      gAlpha=g;
+      /* 톱날 커터 (검은 톱니) */
+      const ct=st?st.kin.cut:0, cz=lz-58+ct*44;
+      box(lx-44,lx+44,yD+30,yD+46,cz-8,cz,C.black,C.black,0);
+      if(!far) for(let k=-40;k<=40;k+=8) box(lx+k-2,lx+k+2,yD+30,yD+46,cz,cz+5,C.black,null,0);
+      /* 캐리지 (위아래 이송) */
+      const cy=yD+180+(st?Math.sin((st.kin.feed||0)*Math.PI)*24:0);
+      box(lx-30,lx+30,cy-30,cy+30,lz-84,lz-60,C.ss);
+      cylY(lx,lz-40,cy-40,cy+60,14,C.ssL,12);
+    }
+  }
+  /* 인덱싱 디스크 : 림 · 스포크 · 허브 · 튜브 8 */
+  const g2=gAlpha;
+  mPush(); mT(x,yD,zc); mRY(-(base-Math.PI/2));
+  mPush(); lathe([[r+40,0],[r+40,14],[r+22,14],[r+22,0]],C.alu,40); mPop();
+  cylY(0,0,0,14,56,C.alu,24);
+  for(let k=0;k<n;k++){ const a=k*2*Math.PI/n+Math.PI/n; mPush(); mRY(-a); box(40,r+24,0,14,-7,7,C.alu,C.alu,0); mPop(); }
+  mPop();
+  const tr=Math.max(12,b.nk/2+2);
+  for(let k=0;k<n;k++){
+    const a=base+k*2*Math.PI/n, tx=x+r*Math.cos(a), tz=zc+r*Math.sin(a);
+    cylY(tx,tz,yD-4,yD+18,tr+6,C.ssL,16);
+    tube([tx,yD,tz],[tx,yD-220,tz],tr,C.ss,16,false);
+    cylY(tx,tz,yD-226,yD-214,tr+2,C.ssD,16);
+    /* 튜브 속 필름 : 뒤 레인을 지난 튜브부터 앞 투입 위치 전까지 */
+    let ang=((a-Math.PI/2)%(2*Math.PI)+2*Math.PI)%(2*Math.PI);   /* 0 = 앞 */
+    const loaded=S.mat.film>0&&ang>Math.PI*0.70&&ang<Math.PI*2-0.01;
+    if(loaded&&!far){ gAlpha=0.85; mPush(); mT(tx,yD-30,tz); lathe([[tr-3,0],[tr-6,10],[0,16]],film,12); mPop(); gAlpha=g2; }
+  }
+  /* 앞 푸셔 로드 */
+  const plg=st?st.kin.plg:0, tip=lerp(yD+150,CH+b.h+2,plg);
+  tube([x,yD+170,0],[x,tip,0],6,C.rodC,10); cylY(x,0,tip-4,tip,Math.max(8,tr-3),C.ss,12);
+  if(st&&st.ph==="proc"&&st.kin.drop>0&&st.b){
+    const y=Math.min(yD-30,tip-4); gAlpha=0.8; mPush(); mT(x,y,0); lathe([[tr-3,-4],[tr-6,6],[0,12]],film,12); mPop(); gAlpha=g2;
+  }
+  if(st) stopperPins(x,b,st.pin,st.clamp);
 }
 
 /* ── RCS-120 ── */
 function dRCS(){
-  const R=LN.rc, b=BD(), A=L.A, B=L.B, T=L.T, Y=rcY(), far=FAR(), P=P_PITCH;
+  const R=LN.rc, b=BD(), A=L.A, B=L.B, T=L.T, Y=rcY(), far=FAR();
   const d=b.d;
   /* 타이밍 스크류 (가변 피치 나선) */
   const f=SCREW.fit(d), zs=d/2+32, ys=CH+b.h*0.42, rF=Math.min(30,d/2+6);
@@ -2753,43 +3089,77 @@ function dRCS(){
   for(let u=-f.nS;u<=0;u+=0.04){ const x=XS+screwS(u,d); if(x>L.A.x-24) break;
     const a=2*Math.PI*(u-R.phi)+Math.PI; pts.push([x,ys+rF*Math.sin(a),zs-rF*Math.cos(a)]); }
   tubePath(pts,4.5,C.uhmw,6);
-  /* 스타휠 (A · B) · 터렛 포켓 판 */
+  /* 스타휠 (A · B) · 터렛 포켓 판 (흰 UHMW) */
   const star=(c,base)=>{ for(const yy of [CH+b.h*0.30,CH+b.h*0.70]) starPlate(c,yy,base,d); };
   star(A,Math.PI/2-R.phi*Math.PI/2);
   star(B,PATH.bT-(S_A-S_T1)/L.R-R.phi*Math.PI/2);
   star(T,PATH.tA+(S_A-S_T0)/L.R+R.phi*Math.PI/2);
-  /* 터렛 헤드 캐러셀 */
+  /* 황색 타이밍 벨트 (터렛 바깥 · 병을 포켓에 눌러 잡음) */
+  timingBelt(R.phi*P_PITCH);
+  /* 헤드 캐러셀 */
   const car=R.phi*Math.PI/2;
   mPush(); mT(T.x,0,T.z); mRY(-car);
   cylY(0,0,Y.yc+60,Y.yc+110,L.R+58,C.ss,32); cylY(0,0,Y.yc+110,Y.yc+170,90,C.ssD,20);
-  for(let i=0;i<4;i++){ const a=i*Math.PI/2; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); box(L.R+40,L.R+42,Y.yc+5,Y.yc+50,-24,24,C.orange,C.orange,0); mPop(); }
+  for(let i=0;i<4;i++){ const a=i*Math.PI/2; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); mPop(); }
   mPop();
+  /* 3조 공압 척 헤드 4 */
   for(let j=0;j<4;j++){
     const a=headAngle(j), h=R.heads[j], hx=T.x+L.R*Math.cos(a), hz=T.z+L.R*Math.sin(a);
-    const cup0=CH+b.h-b.capH*0.62+(1-h.y)*112;
-    const drop=h.y;
-    cylY(hx,hz,cup0+b.capH+12,Y.yc,11,C.rodC,12);
-    cylY(hx,hz,cup0+b.capH+30,cup0+b.capH+90,24,C.cyl,14);
+    const cup0=CH+b.h-b.capH*0.62+(1-h.y)*112, ct=cup0+b.capH+12;
+    cylY(hx,hz,ct+70,Y.yc,11,C.rodC,12);
+    cylY(hx,hz,ct+10,ct+74,27,C.ssL,18);
+    cylY(hx,hz,ct+74,ct+84,22,C.ssD,16);
+    cylY(hx,hz,ct,ct+10,24,C.brushed,18);
     mPush(); mT(hx,0,hz); mRY(-h.spin);
-    mPush(); mT(0,cup0,0); lathe([[b.capD/2+2,0],[b.capD/2+7,0],[b.capD/2+7,b.capH+12],[0,b.capH+12]],C.ssD,16); mPop();
-    box(b.capD/2+6,b.capD/2+9,cup0+4,cup0+b.capH,-3,3,C.orange,C.orange,0);
+    const jr=b.capD/2+(h.cap?4:12);
+    for(let k=0;k<3;k++){ mPush(); mRY(-k*2*Math.PI/3); box(jr,jr+16,cup0+2,ct+4,-9,9,C.black,C.black); box(jr-2,jr+30,ct-4,ct+4,-12,12,C.black,C.black,0); mPop(); }
     mPop();
-    if(h.cap){ mPush(); mT(hx,cup0+b.capH+12-(b.h+b.capH)-2,hz); lathe(botProf().cap,C[b.capCol],14); mPop(); }
-    void drop;
+    if(h.cap) drawCap([hx,ct-2,hz],null,14);
   }
-  /* 슈트의 캡 */
-  const cp=capChute(), n=R.chute, dv=[cp.b[0]-cp.a[0],cp.b[1]-cp.a[1],cp.b[2]-cp.a[2]], Lc=Math.hypot(...dv);
-  for(let i=0;i<n;i++){ const t=1-(i*(b.capD+2)+b.capD/2)/Lc; if(t<0) break;
-    mPush(); mT(cp.a[0]+dv[0]*t,cp.a[1]+dv[1]*t-(b.h+b.capH)+b.capH,cp.a[2]+dv[2]*t); lathe(botProf().cap,C[b.capCol],far?8:14); mPop(); }
-  /* 볼 피더 속 캡 */
+  /* 슈트 · 벨트 · 체인의 캡 */
+  const n=R.chute;
+  for(let i=0;i<n;i++){ const q=capAt(i*(b.capD+3)+b.capD/2+4); drawCap(q.p,q.k==="c"?q.n:null,far?8:12); }
+  /* 녹색 캡 벨트 · 검은 포켓 체인 (움직임) */
+  const cp=capPath(), bl=cp.belt, run=S.running&&!S.rcp.jam, mv=R.phi*P_PITCH*(run?1:1);
+  box(bl.x0,bl.x1,bl.y-4,bl.y,bl.z-b.capD/2-3,bl.z+b.capD/2+3,[0.12,0.46,0.30,0.08],null,0);
+  if(!far) for(let x=bl.x0+((mv*0.6)%30);x<bl.x1;x+=30) box(x-1,x+1,bl.y,bl.y+0.4,bl.z-b.capD/2-3,bl.z+b.capD/2+3,[0.08,0.30,0.20,0.08],null,0);
+  const ch=cp.chain, per=4*ch.hl+2*Math.PI*ch.r, np=Math.max(10,Math.floor(per/34));
+  mPush(); mT(ch.cx,ch.y,ch.cz); mRY(-ch.ang);
+  for(let i=0;i<np;i++){ let s=((i/np)*per+mv*0.6)%per, px,pz;
+    if(s<2*ch.hl){ px=-ch.hl+s; pz=-ch.r; }
+    else if(s<2*ch.hl+Math.PI*ch.r){ const a=-Math.PI/2+(s-2*ch.hl)/ch.r; px=ch.hl+ch.r*Math.cos(a); pz=ch.r*Math.sin(a); }
+    else if(s<4*ch.hl+Math.PI*ch.r){ px=ch.hl-(s-2*ch.hl-Math.PI*ch.r); pz=ch.r; }
+    else { const a=Math.PI/2+(s-4*ch.hl-Math.PI*ch.r)/ch.r; px=-ch.hl+ch.r*Math.cos(a); pz=ch.r*Math.sin(a); }
+    box(px-12,px+12,-18,-4,pz-10,pz+10,C.black,null,0);
+  }
+  mPop();
+  /* 볼 피더 속 캡 (나선 트랙을 오른다 · 바닥 더미) */
   if(!far&&S.mat.cap>0){ const bw=RCBOWL;
-    for(let i=0;i<10;i++){ const a=i*0.6+R.bowl*0.9, t=(i/10); mPush(); mT(bw.x+236*Math.cos(a),bw.y-20+t*100-(b.h+b.capH)+b.capH,bw.z+236*Math.sin(a)); lathe(botProf().cap,C[b.capCol],8); mPop(); }
-    for(let i=0;i<Math.min(16,Math.round(S.mat.cap/40));i++){ const a=hash1(i)*6.28, r=hash1(i+3)*150; mPush(); mT(bw.x+r*Math.cos(a),bw.y-38-(b.h+b.capH)+b.capH,bw.z+r*Math.sin(a)); lathe(botProf().cap,C[b.capCol],8); mPop(); }
+    for(let i=0;i<12;i++){ const t=((i/12)+R.bowl*0.08)%1, a=t*Math.PI*3.6, rr=226; drawCap([bw.x+rr*Math.cos(a),bw.y-210+t*205+b.capH,bw.z+rr*Math.sin(a)],null,8); }
+    for(let i=0;i<Math.min(18,Math.round(S.mat.cap/30));i++){ const a=hash1(i)*6.28, rr=60+hash1(i+3)*130; drawCap([bw.x+rr*Math.cos(a),bw.y-212+b.capH+Math.floor(i/9)*b.capH,bw.z+rr*Math.sin(a)],null,8); }
   }
-  /* 캡 호퍼 속 캡 (적재량 비례) */
-  if(!far){ const H=CAPHOP, n=Math.round(clamp(S.mat.cap/MAT_CAP.cap,0,1)*30), cx=(H.x0+H.x1)/2, cz=(H.z0+H.z1)/2;
-    for(let i=0;i<n;i++){ const u=hash1(i*1.9), v=hash1(i*4.3), lay=Math.floor(i/10), yy=H.y0+30+lay*b.capH*1.2, sp=0.35+0.65*(yy-H.y0)/(H.y1-H.y0);
-      mPush(); mT(cx+(u-0.5)*(H.x1-H.x0-60)*sp,yy-b.h,cz+(v-0.5)*(H.z1-H.z0-60)*sp); lathe(botProf().cap,C[b.capCol],8); mPop(); } }
+}
+/* 타이밍 벨트 : 터렛 바깥 원호(병 접촉) + 두 풀리 감김 + 바깥 복귀 원호 */
+function timingBelt(mv){
+  const b=BD(), T=L.T, rb=L.R+b.d/2+8, pr=30, a0=PATH.tA+0.30, a1=PATH.tB-0.30, yB=CH+b.h*0.40, far=FAR();
+  const pts=[];
+  for(let i=0;i<=40;i++){ const a=a0+(a1-a0)*i/40; pts.push([rb*Math.cos(a),rb*Math.sin(a)]); }
+  const wrap=(ac,from)=>{ const cx=(rb+pr)*Math.cos(ac), cz=(rb+pr)*Math.sin(ac), rad=[Math.cos(ac),Math.sin(ac)], tan=[-Math.sin(ac),Math.cos(ac)];
+    for(let i=1;i<=10;i++){ const t=i/10*Math.PI, c=Math.cos(t), s=Math.sin(t);
+      const dir=[-rad[0]*c+from*tan[0]*s, -rad[1]*c+from*tan[1]*s]; pts.push([cx+pr*dir[0],cz+pr*dir[1]]); } };
+  wrap(a1,1);
+  for(let i=0;i<=40;i++){ const a=a1+(a0-a1)*i/40; pts.push([(rb+2*pr)*Math.cos(a),(rb+2*pr)*Math.sin(a)]); }
+  wrap(a0,-1);
+  const col=[0.84,0.66,0.34,0.08], dk=[0.62,0.46,0.20,0.08];
+  let acc=0; const L2=[0];
+  for(let i=1;i<pts.length;i++){ acc+=Math.hypot(pts[i][0]-pts[i-1][0],pts[i][1]-pts[i-1][1]); L2.push(acc); }
+  for(let i=0;i<pts.length-1;i++){
+    const p=pts[i], q=pts[i+1];
+    quad([T.x+p[0],yB-14,T.z+p[1]],[T.x+q[0],yB-14,T.z+q[1]],[T.x+q[0],yB+14,T.z+q[1]],[T.x+p[0],yB+14,T.z+p[1]],col);
+  }
+  if(!far){ const pitch=16, off=mv%pitch;
+    for(let s=off;s<acc;s+=pitch){ let i=1; while(i<L2.length-1&&L2[i]<s) i++; const t=(s-L2[i-1])/((L2[i]-L2[i-1])||1), p=pts[i-1], q=pts[i];
+      const x=T.x+p[0]+(q[0]-p[0])*t, z=T.z+p[1]+(q[1]-p[1])*t; box(x-1.5,x+1.5,yB-14,yB+14,z-1.5,z+1.5,dk,null,0); } }
 }
 /* 포켓 4개 스타 판 (윤곽 : 원 − 포켓 반원) */
 function starPlate(c,y,base,d){
@@ -2826,9 +3196,9 @@ function dTable(){
   }
 }
 
+
 /* ── 라인 위 병 ── */
 function dBottles(){
-  const b=BD();
   for(const q of LN.bottles){
     if(q.zone!=="line") continue;
     const p=pathAt(q.s);
@@ -2840,31 +3210,31 @@ function dBottles(){
 /* ── 경광등 · HMI 화면 ── */
 function dPanels(){
   const on=S.main;
-  for(const k of ["ua","sg","dmc","pe","rc"]){
+  for(const k of ["ua","sg","dmc","wc","pe","rc"]){
     const l=LAMPS[k], h=HMIS[k];
     lampLights(l[0],l[1],l[2],on?lampState(k):"off");
-    hmiFace(h[0],h[1],h[2],h[3],h[4],on,0);
+    hmiFace(h[0],h[1],h[2]+2,h[3],h[4],on,0);
   }
-  hmiFace(120,1420,762,330,250,on,0.05);
 }
 
 /* ═══ 작업자 ═══ */
 const WK=[
   {id:"A", x:-2900, z:AISLE, home:[-2900,AISLE], route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"B", x:2300,  z:AISLE, home:[2300,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0}
+  {id:"B", x:4400,  z:AISLE, home:[4400,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0}
 ];
-/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 확대 시점 */
+/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점
+   서는 위치는 설비 앞면 · 열린 도어와 겹치지 않게 잡았다 (통로 z=AISLE 에서 수직으로 들어온다) */
 const JOBS={
-  bottle:{stand:[-5390,560], reach:[-5390,1280,120], carry:"box",  view:"bottle", dur:2.2},
-  gel:   {stand:[L.sg,430],  reach:[L.sg,1480,40],   carry:"reel", view:"gel", dur:2.4},
-  tab:   {stand:[-1250,420], reach:[-1040,1980,-520],carry:"drum", view:"tab", dur:2.6},
-  film:  {stand:[L.pe,430],  reach:[L.pe,1500,40],   carry:"roll", view:"film", dur:2.4},
-  cap:   {stand:[2110,760],  reach:[2110,1900,60],  carry:"bag",  view:"cap", dur:2.2},
-  reject:{stand:[L.rej,1000],reach:[L.rej,700,560],  carry:null,   view:"reject", dur:2.0},
-  table: {stand:[4800,900],  reach:[4800,1000,330],  carry:null,   view:"table", dur:2.2},
+  bottle:{stand:[-3640,640], reach:[-3640,1560,-300], carry:"box",  view:"bottle", dur:2.8, door:"uaR", pour:true},
+  gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
+  tab:   {stand:[-64,440], reach:[336,1800,-620], carry:"drum", view:"tab", dur:2.9, pour:true},
+  film:  {stand:[3557,710], reach:[3487,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peL"},
+  cap:   {stand:[5128,700], reach:[5028,1530,-300], carry:"bag",  view:"cap", dur:2.7, door:"rcL", pour:true},
+  reject:{stand:[L.rej+40,800], reach:[L.rej,CH-100,380], carry:null, view:"reject", dur:2.0},
+  table: {stand:[L.table.x,900], reach:[L.table.x,1000,330], carry:null, view:"table", dur:2.2},
   look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}
 };
-function wkFor(x){ return x<0?WK[0]:WK[1]; }
+function wkFor(x){ return x<1500?WK[0]:WK[1]; }
 function wkBusy(){ return WK.some(w=>w.job||w.route.length); }
 /* 작업 시작 : 통로를 따라 걸어가서 작업 → 콜백 */
 function startWork(key,cb,opt){
@@ -2873,12 +3243,15 @@ function startWork(key,cb,opt){
   if(w.job){ return false; }
   const rt=[];
   if(Math.abs(w.z-AISLE)>30) rt.push([w.x,AISLE]);
-  rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],j.stand[1]]);
-  w.route=rt; w.job={key,j,cb,phase:"walk",t:0}; w.carry=j.carry;
+  if(j.door){ rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],DOOR_Z]); }     /* 도어 회전 범위 밖에서 대기 */
+  else { rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],j.stand[1]]); }
+  w.route=rt; w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
   if(j.view&&WORKVIEW[j.view]&&R3.gl){ w.job.prevView=cam.view; const v=WORKVIEW[j.view]; cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
   return true;
 }
+const DOOR_Z=AISLE+320;
 function wkTick(dt){
+  doorTick(dt);
   for(const w of WK){
     w.walking=false;
     if(w.route.length){
@@ -2889,13 +3262,17 @@ function wkTick(dt){
     }
     const J=w.job;
     if(J){
+      if(J.phase==="walk0"){ J.phase="door"; J.t=0; }
+      if(J.phase==="door"){ w.face=0; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
+      if(J.phase==="exit"){ w.job=null; w.idle=0; continue; }
       if(J.phase==="walk"){ J.phase="work"; J.t=0; }
       J.t+=dt;
       if(J.j.reach){ const r=J.j.reach; w.face=Math.atan2(-(r[0]-w.x),-(r[2]-w.z)); }
       else w.face=0;
       if(J.t>=J.j.dur){
-        w.job=null; w.carry=null; w.idle=0;
+        w.carry=null; w.idle=0;
         if(J.prevView&&cam.view==="work") camSet(J.prevView==="work"?"all":J.prevView);
+        if(J.j.door){ J.phase="exit"; w.route=[[w.x,DOOR_Z]]; } else w.job=null;
         try{ J.cb&&J.cb(); }catch(e){ console.error(e); }
       }
     }else{
@@ -2940,25 +3317,31 @@ function cuteOperatorShapes(o){
  return SS;
 }
 function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900,e[2]-w.z); if(dd>1500&&(dd>cam.dist*0.8||w.job)) drawWorker(w); } }
+/* 작업 진행 : 도어가 먼저 열리고 (0.45 s) 손을 뻗는다 · 끝나기 0.45 s 전에 손을 거둔다 */
+function reachAmt(J){ const t=J.t-0.15, e=J.j.dur-0.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/0.45):1); }
 function drawWorker(w){
   const scale=1650/488, x=w.x, z=w.z, far=FAR();
   const want=w.face!==undefined?w.face:0;
   if(w.yaw===undefined) w.yaw=want;
   let dl=want-w.yaw; while(dl>Math.PI) dl-=2*Math.PI; while(dl<-Math.PI) dl+=2*Math.PI; w.yaw+=dl*0.2;
   const cy=Math.cos(w.yaw), sy=Math.sin(w.yaw);
-  const J=w.job, work=J&&J.phase==="work"&&J.j.reach, reach=work?Math.min(1,J.t*2.5)*(J.t>J.j.dur-0.35?Math.max(0,(J.j.dur-J.t)/0.35):1):0;
+  const J=w.job, work=J&&J.phase==="work"&&J.j.reach, reach=work?reachAmt(J):0;
   const W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale,z+(-a*sy+c*cy)*scale];
   const Rn=([a,b,c])=>[a*cy+c*sy,b,-a*sy+c*cy];
   const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,g[1]/scale,dx*sy+dz*cy];};
-  const carry=w.carry&&(w.walking||(J&&J.phase==="work"&&J.t<J.j.dur*0.5));
+  /* 들고 있는 물건 : 걷는 동안 가슴 앞 → 작업 중 손으로 (쏟는 물건은 기울였다가 비운다) */
+  const holdEnd=J?(J.j.pour?J.j.dur*0.78:J.j.dur*0.55):0;
+  const walkCarry=w.carry&&w.walking;
+  const handCarry=w.carry&&J&&J.phase==="work"&&J.t<holdEnd;
   const goals=[-1,1].map((s,i)=>{
     const sway=Math.sin((w.gait||0)+s*Math.PI/2)*(w.walking?22:0);
     const idle=[s*64,222,-4+sway];
-    if(carry) return [s*34,300,-86];
+    if(walkCarry||(handCarry&&reach<0.05)) return [s*34,300,-86];
     if(!work) return idle;
-    const tl=toLocal(J.j.reach), osc=Math.sin(J.t*7+i)*5;
-    const tgt=[tl[0]+s*26,Math.min(560,tl[1])+osc,Math.max(-220,Math.min(-60,tl[2]))];
-    return idle.map((v,k)=>v+(tgt[k]-v)*reach);
+    const tl=toLocal(J.j.reach), osc=J.j.pour?0:Math.sin(J.t*7+i)*5;
+    const tgt=[tl[0]+s*(handCarry?34:26),Math.min(560,tl[1])+osc,Math.max(-220,Math.min(-60,tl[2]))];
+    const from=w.carry?[s*34,300,-86]:idle;
+    return from.map((v,k)=>v+(tgt[k]-v)*reach);
   });
   for(const s of cuteOperatorShapes({gait:w.gait||0,walk:w.walking?1:0,crouch:0,goals})){
     const col=WPAL[s.col];
@@ -2966,14 +3349,27 @@ function drawWorker(w){
     const big=Math.max(...s.r)>25, nu=far?8:(big?16:10), nv=far?5:(big?9:6);
     ellipsoidT(s.c,s.r,col,nu,nv,W,Rn);
   }
-  if(carry){ const c=W([0,300,-110]);
-    mPush(); mT(c[0],c[1],c[2]); mRY(w.yaw);
-    if(w.carry==="box") box(-110,110,-70,70,-80,80,C.box,C.box);
-    else if(w.carry==="reel") { cylZ(0,0,-24,24,150,C.gel,20); cylZ(0,0,-26,26,40,C.dark,12); }
-    else if(w.carry==="roll") { cylZ(0,0,-48,48,130,[0.80,0.90,0.95,0.15],20); }
-    else if(w.carry==="drum") { cylY(0,0,-120,120,120,[0.30,0.52,0.82,0.1],18); }
-    else if(w.carry==="bag") { ellipsoid([0,0,0],[120,90,70],[0.85,0.88,0.92,0.05],12,8); }
-    mPop(); }
+  if(walkCarry||handCarry){
+    const mid=[(goals[0][0]+goals[1][0])/2,(goals[0][1]+goals[1][1])/2,(goals[0][2]+goals[1][2])/2-24];
+    const c=W(mid);
+    const tilt=J&&J.j.pour&&handCarry?smooth(clamp((J.t-0.9)/0.5,0,1))*1.05:0;
+    mPush(); mT(c[0],c[1],c[2]); mRY(w.yaw); mRX(tilt);
+    if(w.carry==="box"){ box(-110,110,-70,70,-80,80,C.box,C.box); }
+    else if(w.carry==="reel"){ cylZ(0,0,-17,17,150,C.gel,20); cylZ(0,0,-20,20,40,C.dark,12); }
+    else if(w.carry==="roll"){ cylX(-90,90,0,0,100,[0.86,0.93,0.97,0.15],20); cylX(-96,96,0,0,34,C.dark,12); }
+    else if(w.carry==="drum"){ cylY(0,0,-110,110,110,[0.30,0.52,0.82,0.1],18); cylY(0,0,110,116,112,[0.22,0.40,0.66,0.1],18); }
+    else if(w.carry==="bag"){ ellipsoid([0,0,0],[120,90,70],[0.85,0.88,0.92,0.05],12,8); }
+    mPop();
+    /* 쏟는 흐름 : 용기 입구 → 목표 */
+    if(tilt>0.6&&!far&&J.t<holdEnd-0.1){
+      const r=J.j.reach, lip=W([mid[0],mid[1]+30,mid[2]-70]), k=J.key, b=BD();
+      for(let i=0;i<10;i++){ const t=((J.t*2.2+i/10)%1), px=lerp(lip[0],r[0],t), pz=lerp(lip[2],r[2]-40,t), py=lerp(lip[1],r[1]-40,t)-Math.sin(t*Math.PI)*-30;
+        if(k==="tab") drawTab(px,py,pz,i,tabCol());
+        else if(k==="cap") drawCap([px,py+b.capH,pz],null,8);
+        else if(k==="bottle") drawBottle(px,py,pz,{tilt:Math.PI/2,yaw:i});
+      }
+    }
+  }
 }
 /* 변환 함수를 받는 타원체 (작업자 전용) */
 function ellipsoidT(c,r,col,nu,nv,W,Rn){
@@ -3098,7 +3494,7 @@ const SCREENS={
   set(){ return '<div class="hTitle">⚙ 설정 <s>SG-120 · SETTING</s></div>'+
      row("파우치 피치","POUCH PITCH 30~60 mm",ed(S.sg.pitch+" mm","sg_pitch"))+
      row("투입 개수","POUCH / BOTTLE",pv("1 개"))+
-     row("플런저 스트로크","PLUNGER",pv("자동 (병 높이)")); }
+     row("이송 방식","FEEDER",pv("트윈 타이밍 벨트")); }
  },
  dmc:{
   main(){ const D=LN.dmc, r=dmcRate()*12*60, N=S.rc.n;
@@ -3135,7 +3531,8 @@ const SCREENS={
      row("전단 로드셀 영점 오프셋","PRE ZERO",pv(fmt(w.off[0],3)+" g",Math.abs(w.off[0])>0.02))+
      row("후단 로드셀 영점 오프셋","POST ZERO",pv(fmt(w.off[1],3)+" g",Math.abs(w.off[1])>0.02))+
      row("연속 불합격 정지","CONSECUTIVE NG",pv("3 병"))+
-     row("리젝트함","REJECT BIN",pv(S.reject.n+" / "+S.reject.cap+" 병",S.reject.n>=S.reject.cap))+
+     row("리젝트 트레이","REJECT TRAY",pv(S.reject.n+" / "+S.reject.cap+" 병",S.reject.n>=S.reject.cap))+
+     row("계량 방식","WEIGHING",pv("포크 이송 · 팬 A/B 평균 · 0.01 g"))+
      row("허용오차 규칙","TOLERANCE RULE",pv("≤30T ±0.5 · ≤300T ±1 · ≤500T ±2 · 1000T ±5"))+
      '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">순중량 = 후단 총중량 − 전단 빈병 중량. 두 로드셀의 영점이 틀어지면 정상 병도 불합격될 수 있으므로 생산 전 반드시 영점을 잡습니다.</div>'; },
   log(){ const L2=S.wc.log.slice(0,16);
@@ -3144,28 +3541,28 @@ const SCREENS={
      (L2.map(r=>'<tr class="'+(r.ok?"":"ng")+'"><td>'+r.no+'</td><td>'+fmt(r.tare,2)+'</td><td>'+fmt(r.gross,2)+'</td><td>'+fmt(r.net,3)+'</td><td>'+(r.dev>=0?"+":"")+fmt(r.dev,2)+'</td><td>'+(r.ok?"OK":"NG · "+esc(r.why))+'</td></tr>').join("")||'<tr><td colspan="6">판정 기록 없음</td></tr>')+'</table>'; }
  },
  pe:{
-  main(){ const P=S.pe, pct=clamp((P.pv-20)/(P.sv-20)*100,0,100);
+  main(){ const P=S.pe;
     return '<div class="hTitle">🎞️ 주화면 <s>HPE-100 · MAIN</s>'+mStatus("pe")+'</div>'+
-     '<div class="kpis">'+kc(Math.round(P.pv)+" ℃","커터 온도 PV",P.pv<P.sv-10?"ng":"hi")+kc(P.sv+" ℃","설정 SV")+kc(Math.round(matPct("film"))+"%","필름 잔량",matPct("film")<10?"ng":"")+'</div>'+
-     '<div class="gauge"><i style="width:'+pct+'%"></i></div>'+
-     '<div class="hGrid2">'+btn(P.heat,"가열 커터","HOT CUTTER","🔥","pe_heat")+btn(P.sensor,"필름 센서","FILM SENSOR","👁","pe_sensor")+'</div>'+
-     row("투입 수","INSERTED",pv(P.fed))+
+     '<div class="kpis">'+kc(P.fed,"투입 수","hi")+kc(Math.round(matPct("film"))+"%","필름 잔량",matPct("film")<10?"ng":"")+kc(P.jam?"걸림":"정상","튜브 상태",P.jam?"ng":"")+'</div>'+
+     '<div class="hGrid2">'+btn(P.sensor,"필름 센서","FILM SENSOR","👁","pe_sensor")+btn(false,"디스크 원점","DISC HOME","⟳","pe_home")+'</div>'+
+     row("커터","CUTTER",pv("톱날식 (가열 없음)"))+
+     row("인덱싱 디스크","INDEX DISC",pv("튜브 8 · 좌우 2 레인"))+
      row("필름 길이","FILM LENGTH",pv(P.len+" mm")); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>HPE-100 · SETTING</s></div>'+
-     row("커터 온도 SV","150~190 ℃",ed(S.pe.sv+" ℃","pe_sv"))+
      row("필름 길이","40~80 mm",ed(S.pe.len+" mm","pe_len"))+
-     '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">커터 온도가 SV −10 ℃ 이상이어야 운전됩니다.</div>'; }
+     row("병 규격 (자동 조정)","BOTTLE",pv(BD().ml+" ml · 목 Ø"+BD().nk))+
+     '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">필름 센서가 소진을 감지하면 정지합니다. 튜브 걸림 시 STOP → 도어 열고 제거 → RESET.</div>'; }
  },
  rc:{
   main(){ const r=S.rcp, b=BD();
     return '<div class="hTitle">⚪ 주화면 <s>RCS-120 · MAIN</s>'+mStatus("rc")+'</div>'+
-     '<div class="kpis">'+kc(r.torque+" kgf·cm","체결 토크 설정","hi")+kc(LN.rc.chute,"슈트 캡")+kc(Math.round(matPct("cap"))+"%","캡 호퍼",matPct("cap")<10?"ng":"")+'</div>'+
+     '<div class="kpis">'+kc(r.torque+" kgf·cm","체결 토크 설정","hi")+kc(LN.rc.chute,"슈트 캡")+kc(Math.round(matPct("cap"))+"%","볼 피더 캡",matPct("cap")<10?"ng":"")+'</div>'+
      '<div class="kpis">'+kc(S.table.n+" / "+S.table.cap,"집적 테이블")+kc(S.cnt.good,"캡핑 완료")+kc(b.capD+" mm","캡 규격")+'</div>'+
      '<div class="hGrid2">'+btn(r.feed,"캡 공급","CAP FEED","⚪","rc_feed")+btn(r.checked,"토크 확인","CHECK TORQUE","✔","rc_check")+'</div>'+
      row("권장 토크 ("+b.capD+" mm)","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>RCS-120 · SETTING</s></div>'+
      row("체결 토크","6~25 kgf·cm",ed(S.rcp.torque+" kgf·cm","rc_torque"))+
-     row("헤드 수","HEADS",pv("4 헤드 · 서보"))+
+     row("헤드","HEADS",pv("3조 공압 척 · 서보 터렛"))+
      row("권장 범위","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); }
  }
 };
@@ -3188,16 +3585,16 @@ function hbClick(id){
     case "dmc_check": S.dmc.checked=true; toast("진동 1·2·3단 "+S.dmc.vib.join(" / ")+" % · 게이트 지연 "+S.dmc.gateDelay+" s 확인","good"); break;
     case "dmc_clean":
       if(S.running){ toast("운전 중에는 센서창을 청소할 수 없습니다. 먼저 STOP.","bad"); return; }
-      if(typeof startWork==="function"&&!startWork("tab",()=>{ S.dmc.dirt.fill(0); clearAlarm("DM32"); toast("센서창 12채널 청소 완료","good"); stepCheck(); },{reach:[-800,1400,-120],carry:null,dur:2.6})) toast("작업자가 다른 작업 중입니다.");
+      if(typeof startWork==="function"&&!startWork("tab",()=>{ S.dmc.dirt.fill(0); clearAlarm("DM32"); toast("센서창 12채널 청소 완료","good"); stepCheck(); },{stand:[436,440],reach:[436,1400,-120],carry:null,dur:2.6,pour:false})) toast("작업자가 다른 작업 중입니다.");
       break;
     case "wc_zero1": case "wc_zero2": {
       const i=id==="wc_zero1"?0:1, st=LN.st[i?"lc2":"lc1"];
-      if(st&&st.ph!=="wait"||LN.bottles.some(b=>b.zone==="line"&&Math.abs(pathAt(b.s).x-(i?L.lc2:L.lc1))<L.lcW/2)){ toast("로드셀 위에 병이 없을 때 영점을 잡으세요.","bad"); return; }
+      if(S.running||(st&&st.ph!=="wait"&&st.ph!=="proc")){ toast("운전 · 포크 이송 중에는 영점을 잡을 수 없습니다. 먼저 STOP.","bad"); return; }
       S.wc.off[i]=0.001*gauss(); S.wc.zero[i]=true; if(S.wc.zero[0]&&S.wc.zero[1]) clearAlarm("WC44");
       toast((i?"후단":"전단")+" 로드셀 영점 완료 (0.000 g)","good"); break; }
     case "wc_check": S.wc.checked=true; toast("기준 순중량 "+fmt(S.rc.netStd,3)+" g · 허용 ±"+fmt(S.rc.netTol,3)+" g 확인","good"); break;
-    case "pe_heat": S.pe.heat=!S.pe.heat; toast("가열 커터 "+(S.pe.heat?"ON — 승온 중":"OFF")); break;
-    case "pe_sensor": S.pe.sensor=!S.pe.sensor; break;
+    case "pe_sensor": S.pe.sensor=!S.pe.sensor; toast("필름 센서 "+(S.pe.sensor?"ON":"OFF")); break;
+    case "pe_home": if(S.running){ toast("운전 중에는 할 수 없습니다.","bad"); return; } toast("인덱싱 디스크 원점 복귀 완료"); break;
     case "rc_feed": S.rcp.feed=!S.rcp.feed; toast("캡 공급 "+(S.rcp.feed?"ON":"OFF")); break;
     case "rc_check": { const r=torqueRange(); S.rcp.checked=true; S.flags.torqueRechk=true;
       if(S.rcp.torque<r[0]||S.rcp.torque>r[1]) toast("토크 "+S.rcp.torque+" kgf·cm — 권장 "+r.join("~")+" 범위를 벗어났습니다.","bad");
@@ -3229,7 +3626,6 @@ function edClick(id){
     vib1:["2단 진동 (%)",[10,100],()=>S.dmc.vib[1],v=>S.dmc.vib[1]=v,0],
     vib2:["3단 진동 (%)",[10,100],()=>S.dmc.vib[2],v=>S.dmc.vib[2]=v,0],
     gate:["게이트 지연 (s)",[0.05,0.5],()=>S.dmc.gateDelay,v=>S.dmc.gateDelay=v,2],
-    pe_sv:["커터 온도 SV (℃)",[150,190],()=>S.pe.sv,v=>S.pe.sv=v,0],
     pe_len:["필름 길이 (mm)",[40,80],()=>S.pe.len,v=>S.pe.len=v,0],
     rc_torque:["체결 토크 (kgf·cm)",[6,25],()=>S.rcp.torque,v=>{S.rcp.torque=v; S.rcp.torqueBad=false;},0]
   };
@@ -3273,11 +3669,11 @@ const PASS=80;
 
 /* ── 라인 클리어런스 5항목 ── */
 const CLEAR=[
-  {t:"이전 제품 · 잔류 정제 제거 확인", d:"DMC-60T 호퍼 · 진동 트레이 · 게이트 · 노즐에 이전 품목 정제가 남아 있지 않은지 확인합니다.", at:[-800,AISLE-300], look:[-820,1450,-400]},
+  {t:"이전 제품 · 잔류 정제 제거 확인", d:"DMC-60T 호퍼 · 진동 트레이 · 게이트 · 노즐에 이전 품목 정제가 남아 있지 않은지 확인합니다.", at:[436,AISLE-300], look:[416,1450,-400]},
   {t:"이전 용기 · 캡 · 포장자재 제거 확인", d:"UA-120 호퍼 · 턴테이블, 캡 호퍼, 실리카겔 · PE 필름 릴에 이전 자재가 없는지 확인합니다.", at:[-4600,AISLE-300], look:[-4760,1000,-200]},
-  {t:"접촉부 청소 상태 확인", d:"트레이 · 노즐 · 슈트 · 스타휠 · 컨베이어 가이드의 청소 상태(청소 완료 표시)를 확인합니다.", at:[2900,AISLE-300], look:[2950,1100,-300]},
-  {t:"리젝트함 · 집적 테이블 잔품 확인", d:"잠금식 리젝트함과 집적 테이블에 이전 로트의 병이 남아 있지 않은지 확인합니다.", at:[800,AISLE-200], look:[660,700,560]},
-  {t:"작업지시 · 품목 · 라인 상태 확인", d:"작업지시서의 품목 · 포장단위 · 병 규격과 라인 표시(품목 식별표)가 일치하는지 확인합니다.", at:[120,AISLE-250], look:[120,1400,760]}
+  {t:"접촉부 청소 상태 확인", d:"트레이 · 노즐 · 슈트 · 스타휠 · 컨베이어 가이드의 청소 상태(청소 완료 표시)를 확인합니다.", at:[5688,AISLE-300], look:[5738,1100,-300]},
+  {t:"리젝트 트레이 · 집적 테이블 잔품 확인", d:"리젝트 트레이와 집적 테이블에 이전 로트의 병이 남아 있지 않은지 확인합니다.", at:[L.rej+40,AISLE-200], look:[L.rej,800,380]},
+  {t:"작업지시 · 품목 · 라인 상태 확인", d:"작업지시서의 품목 · 포장단위 · 병 규격과 라인 표시(품목 식별표)가 일치하는지 확인합니다.", at:[L.lc2+420,AISLE-250], look:[L.lc2+420,1650,-150]}
 ];
 
 /* ── 단계 정의 ── */
@@ -3309,10 +3705,10 @@ function stepsOperation(easy){
     A.push(T_("wcStd","중량 기준 확인","중량선별 주화면의 기준 순중량 · 허용오차 · 빈병 기준을 확인하고 [기준 확인] 을 누릅니다.",()=>hmiRoute("wc","main",HB("wc_check")),()=>S.wc.checked,{pts:4,hmi:true}));
     A.push(T_("dmcChk","계수기 진동 · 계수 설정 확인","DMC-60T 주화면의 [진동·계수 확인] 을 누릅니다. 1단 < 2단 < 3단 진동, 게이트 지연을 확인합니다.",()=>hmiRoute("dmc","main",HB("dmc_check")),()=>S.dmc.checked,{pts:4,hmi:true}));
   }
-  A.push(T_("heat","HPE-100 가열 커터 ON","HPE-100 주화면의 [가열 커터] 를 켜고 설정 온도(SV −10 ℃ 이상)에 도달할 때까지 기다립니다.",
-    ()=>S.pe.heat?null:hmiRoute("pe","main",HB("pe_heat")),()=>S.pe.heat&&S.pe.pv>=S.pe.sv-10,{pts:4,hmi:true}));
+  A.push(T_("peSensor","HPE-100 필름 센서 확인","HPE-100 주화면에서 [필름 센서] 가 켜져 있는지 확인합니다. 필름이 떨어지면 센서가 감지해 정지합니다 (톱날 커터 · 가열 없음).",
+    ()=>S.pe.sensor?null:hmiRoute("pe","main",HB("pe_sensor")),()=>S.pe.sensor&&S.user,{pts:3,hmi:true}));
   if(!easy) A.push(T_("torque","캡핑 토크 확인","RCS-120 주화면의 [토크 확인] 을 누릅니다. 캡 규격별 권장 토크 범위인지 확인합니다.",()=>hmiRoute("rc","main",HB("rc_check")),()=>S.rcp.checked,{pts:4,hmi:true}));
-  A.push(T_("start","자동 운전 START","기동 조건(전원 · 공압 · 안전문 · 로그인 · 레시피 · 자재 · 온도)을 확인하고 [START] 를 누릅니다.",()=>"#swStart",()=>S.started,{pts:6}));
+  A.push(T_("start","자동 운전 START","기동 조건(전원 · 공압 · 안전문 · 로그인 · 레시피 · 자재)을 확인하고 [START] 를 누릅니다.",()=>"#swStart",()=>S.started,{pts:6}));
   A.push(T_("watch","운전 감시 · 연속 생산","목표 "+(easy?24:40)+"병을 생산합니다. 중량 불합격 병은 리젝트되고, 알람이 나면 STOP → 원인 판단 → 조치 → RESET → START 로 대응합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target,{pts:14,watch:true}));
   A.push(T_("stop","STOP — 운전 종료","목표 수량을 채웠으면 [STOP] 을 눌러 운전을 마칩니다.",()=>"#swStop",()=>!S.running&&S.cnt.good>=S.cnt.target&&S.flags.stopped,{pts:4}));
@@ -3396,7 +3792,7 @@ const INC={
     q:"턴테이블 출구에서 병이 나오지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린(넘어진) 병을 제거한 뒤 닫는다",
     w:["운전 중에 손을 넣어 병을 뺀다","라인 속도를 최대로 올린다","RESET 만 반복해서 누른다"],
     fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
-         {fix:[-4760,960,-6],t:"턴테이블 출구의 넘어진 병을 제거합니다 (빨간 ! 누르기).",done:()=>!S.ua.jam,act(){ return startWork("bottle",()=>{S.ua.jam=false;},{stand:[-4700,520],reach:[-4760,980,-20],carry:null,view:"bottle",dur:2.2}); }},
+         {fix:[-4760,960,-6],t:"턴테이블 출구의 넘어진 병을 제거합니다 (빨간 ! 누르기).",done:()=>!S.ua.jam,act(){ return startWork("bottle",()=>{S.ua.jam=false;},{stand:[-4700,630],reach:[-4760,980,-20],carry:null,view:"bottle",dur:2.4,door:"uaL",pour:false}); }},
          {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   SG21:{nm:"실리카겔 파우치 소진", mk:"sg", fire(){ S.mat.gel=0; raise("SG21"); },
     q:"SG-120 이 정지했습니다 (파우치 소진). 올바른 조치는?", a:"새 실리카겔 롤을 장착하고 띠를 피드 롤러까지 걸어 준다",
@@ -3405,7 +3801,7 @@ const INC={
   SG22:{nm:"파우치 마크 미검출", mk:"sg", fire(){ S.sg.markBad=true; raise("SG22"); },
     q:"SG-120 마크 센서가 파우치 경계를 읽지 못합니다. 올바른 조치는?", a:"마크 센서 위치를 파우치 실링선에 맞추고 커터 원점을 잡는다",
     w:["센서를 끄고 운전한다","진동 강도를 올린다","로드셀 영점을 잡는다"],
-    fix:[{fix:[-2620,1250,90],t:"마크 센서 위치를 실링선에 맞춥니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{reach:[-2560,1200,80],carry:null}); }},
+    fix:[{fix:[L.sg,1300,170],t:"마크 센서 위치를 실링선에 맞춥니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{stand:[L.sg+60,620],reach:[L.sg+60,1300,170],carry:null}); }},
          {sel:()=>hmiRoute("sg","main",HB("sg_home")),t:"SG-120 주화면에서 [커터 원점] 을 누릅니다.",done:()=>S.flags.sgHome,hmi:true,pre(){S.flags.sgHome=false;}}]},
   DM31:{nm:"정제 호퍼 레벨 부족", mk:"dmc", fire(){ S.mat.tab=Math.min(S.mat.tab,S.rc.n*4); raise("DM31"); },
     q:"DMC-60T 호퍼 레벨 경고입니다. 올바른 조치는?", a:"같은 로트의 정제를 호퍼에 보충한다",
@@ -3420,38 +3816,39 @@ const INC={
     q:"게이트가 열려도 정제가 병에 떨어지지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 노즐의 정제 브리지를 제거한 뒤 닫는다",
     w:["게이트 지연을 0 으로 한다","노즐을 두드리며 운전한다","계수 설정을 줄인다"],
     fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
-         {fix:[-800,1150,60],t:"노즐의 정제 브리지를 제거합니다 (빨간 ! 누르기).",done:()=>!S.dmc.bridge,act(){ return startWork("tab",()=>{S.dmc.bridge=false; clearAlarm("DM33");},{stand:[-800,430],reach:[-800,1150,40],carry:null,dur:2.4}); }},
+         {fix:[436,1150,60],t:"노즐의 정제 브리지를 제거합니다 (빨간 ! 누르기).",done:()=>!S.dmc.bridge,act(){ return startWork("tab",()=>{S.dmc.bridge=false; clearAlarm("DM33");},{stand:[436,440],reach:[436,1150,40],carry:null,dur:2.4,pour:false}); }},
          {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   WC41:{nm:"중량 불합격 연속 3병 (로드셀 영점 틀어짐)", mk:"wc", wait:true, fire(){ S.wc.off[1]+=S.rc.netTol*2.6; S.wc.zero[1]=false; },
     q:"정상 계수인데도 순중량 불합격이 연속으로 발생해 정지했습니다. 원인과 조치는?", a:"후단 로드셀 영점이 틀어짐 → 로드셀 위 병이 없을 때 영점을 다시 잡는다",
     w:["허용오차를 두 배로 넓힌다","불합격 병을 양품으로 옮긴다","진동을 올려 속도를 높인다"],
     fix:[{sel:()=>hmiRoute("wc","main",HB("wc_zero2")),t:"중량선별 주화면에서 [후단 영점] 을 누릅니다.",done:()=>S.wc.zero[1]&&Math.abs(S.wc.off[1])<0.02,hmi:true}]},
-  WC42:{nm:"리젝트함 만량", mk:"wc", fire(){ S.reject.n=S.reject.cap; for(let i=LN.rejBin.length;i<S.reject.cap;i++) LN.rejBin.push({seed:i+900}); raise("WC42"); },
-    q:"리젝트함이 가득 찼습니다. 올바른 조치는?", a:"STOP 후 리젝트함을 열어 불합격 병을 회수 · 기록하고 비운다",
-    w:["리젝트 푸셔를 끈다","불합격 병을 다시 라인에 올린다","리젝트함 없이 운전한다"],
-    fix:[{sel:"#mReject",t:"[리젝트함] 을 눌러 불합격 병을 회수합니다.",done:()=>S.reject.n<S.reject.cap}]},
+  WC42:{nm:"리젝트 트레이 만량", mk:"wc", fire(){ S.reject.n=S.reject.cap; for(let i=LN.rejBin.length;i<S.reject.cap;i++) LN.rejBin.push({seed:i+900}); raise("WC42"); },
+    q:"리젝트 트레이가 가득 찼습니다. 올바른 조치는?", a:"STOP 후 리젝트 트레이의 불합격 병을 회수 · 기록하고 비운다",
+    w:["리젝트 푸셔를 끈다","불합격 병을 다시 라인에 올린다","트레이 없이 운전한다"],
+    fix:[{sel:"#mReject",t:"[리젝트] 를 눌러 불합격 병을 회수합니다.",done:()=>S.reject.n<S.reject.cap}]},
   PE51:{nm:"PE 필름 소진", mk:"pe", fire(){ S.mat.film=0; raise("PE51"); },
     q:"HPE-100 이 정지했습니다 (필름 소진). 올바른 조치는?", a:"새 PE 필름 롤을 장착하고 피드 롤러까지 건다",
-    w:["필름 없이 계속 생산한다","가열 커터를 끈다","실리카겔을 두 개 넣는다"],
+    w:["필름 없이 계속 생산한다","필름 센서를 끈다","실리카겔을 두 개 넣는다"],
     fix:[{sel:"#mFilm",t:"[PE 필름 롤] 을 눌러 새 롤을 장착합니다.",done:()=>S.mat.film>0}]},
-  PE52:{nm:"가열 커터 온도 미달", mk:"pe", fire(){ S.pe.heat=false; S.pe.pv=Math.min(S.pe.pv,S.pe.sv-25); raise("PE52"); },
-    q:"HPE-100 가열 커터 온도가 떨어졌습니다. 올바른 조치는?", a:"가열 커터를 다시 켜고 설정 온도에 도달한 뒤 재가동한다",
-    w:["온도 미달 상태로 운전한다","커터를 손으로 가열한다","SV 를 PV 에 맞춰 낮춘다"],
-    fix:[{sel:()=>hmiRoute("pe","main",HB("pe_heat")),t:"HPE-100 주화면에서 [가열 커터] 를 켭니다.",done:()=>S.pe.heat,hmi:true},
-         {sel:null,t:"커터 온도가 SV −10 ℃ 이상이 될 때까지 기다립니다.",done:()=>S.pe.pv>=S.pe.sv-10}]},
+  PE52:{nm:"필름 이송 불량 (튜브 걸림)", mk:"pe", fire(){ S.pe.jam=true; raise("PE52"); },
+    q:"HPE-100 의 필름이 디스크 튜브에 걸려 투입되지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린 필름을 제거한 뒤 닫는다",
+    w:["운전 중 튜브에 손을 넣는다","필름 없이 계속 생산한다","필름 길이를 최대로 늘린다"],
+    fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
+         {fix:[L.pe,1300,0],t:"튜브에 걸린 필름을 제거합니다 (빨간 ! 누르기).",done:()=>!S.pe.jam,act(){ return startWork("film",()=>{S.pe.jam=false;},{carry:null,dur:2.3}); }},
+         {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   RC61:{nm:"캡 공급 부족", mk:"rc", fire(){ S.mat.cap=0; LN.rc.chute=0; raise("RC61"); },
-    q:"RCS-120 슈트에 캡이 없습니다. 올바른 조치는?", a:"캡 호퍼에 같은 규격 캡을 보충하고 공급을 켠다",
+    q:"RCS-120 슈트에 캡이 없습니다. 올바른 조치는?", a:"진동 볼 피더에 같은 규격 캡을 보충하고 공급을 켠다",
     w:["캡 없이 병을 내보낸다","토크를 올린다","다른 규격 캡을 넣는다"],
     fix:[{sel:"#mCap",t:"[캡 투입] 을 눌러 캡을 보충합니다.",done:()=>S.mat.cap>0}]},
-  RC62:{nm:"캡 슈트 걸림", mk:"rc", fire(){ S.rcp.jam=true; raise("RC62"); },
-    q:"캡 슈트에서 캡이 걸려 내려오지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린(뒤집힌) 캡을 제거한 뒤 닫는다",
+  RC62:{nm:"캡 이송 불량 (슈트 걸림)", mk:"rc", fire(){ S.rcp.jam=true; raise("RC62"); },
+    q:"C 슈트 · 캡 벨트에서 캡이 걸려 내려오지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린(뒤집힌) 캡을 제거한 뒤 닫는다",
     w:["운전 중 슈트를 두드린다","캡 공급을 끄고 계속 운전한다","토크를 낮춘다"],
     fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
-         {fix:[3150,1180,-300],t:"슈트에 걸린 캡을 제거합니다 (빨간 ! 누르기).",done:()=>!S.rcp.jam,act(){ return startWork("cap",()=>{S.rcp.jam=false;},{stand:[3150,520],reach:[3120,1150,-260],carry:null,dur:2.3}); }},
+         {fix:[5088,1200,-170],t:"슈트 · 벨트에 걸린 캡을 제거합니다 (빨간 ! 누르기).",done:()=>!S.rcp.jam,act(){ return startWork("cap",()=>{S.rcp.jam=false;},{stand:[5118,670],reach:[5118,1230,-170],carry:null,dur:2.3,pour:false}); }},
          {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   RC64:{nm:"집적 테이블 만량", mk:"rc", fire(){ while(S.table.n<S.table.cap){ const b=newBottle(S_END); b.cap=true; b.pe=1; b.fill=1; toTable(b); S.cnt.good--; S.table.total--; } },
     q:"집적 테이블이 가득 찼습니다. 올바른 조치는?", a:"STOP 후 완제품을 회수해 다음 공정(라벨 · 포장)으로 보낸다",
-    w:["테이블 속도를 올린다","리젝트함에 담는다","가이드를 떼어 낸다"],
+    w:["테이블 속도를 올린다","리젝트 트레이에 담는다","가이드를 떼어 낸다"],
     fix:[{sel:"#mTable",t:"[완제품 회수] 를 눌러 집적 테이블을 비웁니다.",done:()=>S.table.n<S.table.cap}]},
   E001:{nm:"안전문 열림 (인터락)", mk:"line", fire(){ S.door="open"; raise("E001"); },
     q:"운전 중 안전문이 열려 라인이 비상 정지했습니다. 올바른 조치는?", a:"안전을 확인하고 안전문을 닫은 뒤 RESET → START 한다",
@@ -3467,7 +3864,7 @@ const CASES={
   C_GEL:{nm:"실리카겔 누락 병 발생", mk:"sg", fire(){ S.sg.markBad=true; }, banner:"전단 빈병 중량 이상(WC43)이 반복되고 리젝트가 늘고 있습니다.",
     q:"빈병 중량 이상으로 리젝트가 반복됩니다. 가장 가능성 높은 원인과 조치는?", a:"SG-120 마크 센서가 틀어져 파우치가 투입되지 않음 → 센서 위치 조정 후 커터 원점",
     w:["정제 계수 오차 → 센서창 청소","캡 토크 부족 → 토크 상향","PE 필름 누락 → 필름 교체"],
-    fix:[{fix:[-2620,1250,90],t:"SG-120 마크 센서 위치를 조정합니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{reach:[-2560,1200,80],carry:null}); }},
+    fix:[{fix:[L.sg,1300,170],t:"SG-120 마크 센서 위치를 조정합니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{stand:[L.sg+60,620],reach:[L.sg+60,1300,170],carry:null}); }},
          {sel:()=>hmiRoute("sg","main",HB("sg_home")),t:"SG-120 주화면에서 [커터 원점] 을 누릅니다.",done:()=>S.flags.sgHome,hmi:true,pre(){S.flags.sgHome=false;}}]},
   C_DIRT:{nm:"순중량 편차 증가 (계수 오차)", mk:"dmc", fire(){ for(let c=0;c<12;c++) S.dmc.dirt[c]=Math.max(S.dmc.dirt[c],0.62+0.3*hash1(c)); S.dust=false; }, banner:"순중량 불합격(±1정 이상)이 늘고 채널 막대가 주황색으로 바뀌었습니다.",
     q:"순중량 불합격이 늘고 채널 표시가 주황색입니다. 원인과 조치는?", a:"집진기 정지로 센서창이 오염됨 → STOP 후 센서창 청소 · 집진기 가동",
@@ -3597,7 +3994,7 @@ function bindTiles(){
   mat("#mTab","tab","tab",()=>{ S.mat.tab=matCap("tab"); LN.dmc&&(LN.dmc.tray=[1,1,1]); },"정제 투입 — 호퍼 가득");
   mat("#mFilm","film","film",()=>{ S.mat.film=MAT_CAP.film; clearAlarm("PE51"); },"PE 필름 롤 장착");
   mat("#mCap","cap","cap",()=>{ S.mat.cap=MAT_CAP.cap; },"캡 투입 ("+MAT_CAP.cap+"개)");
-  mat("#mReject","reject","reject",()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); },"리젝트함 회수 · 기록 완료");
+  mat("#mReject","reject","reject",()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); },"리젝트 트레이 회수 · 기록 완료");
   mat("#mTable","table","table",()=>{ unloadTable(); },"완제품 회수 — 다음 공정으로 이송");
 }
 function after(){ renderTiles(); drawHMI(); stepCheck(); }
@@ -3739,7 +4136,7 @@ function drawRoom(){
   const g=R3.ctx, W=R3.W, H=R3.H;
   const bg=g.createLinearGradient(0,0,0,H); bg.addColorStop(0,"#ffffff"); bg.addColorStop(.5,"#f4f6f5"); bg.addColorStop(1,"#e4e8e6");
   g.fillStyle=bg; g.fillRect(0,0,W,H);
-  const WZ=-2700, TY=3900, RX=9500, FZ=5200;
+  const WZ=-2700, TY=3900, RX=11000, FZ=5200;
   const poly=(pts,fill)=>{ const P=pts.map(q=>prj(q[0],q[1],q[2])); if(P.some(q=>!q)) return null;
     g.beginPath(); g.moveTo(P[0].x,P[0].y); for(let i=1;i<P.length;i++) g.lineTo(P[i].x,P[i].y); g.closePath(); if(fill){ g.fillStyle=fill; g.fill(); } return P; };
   { const P=poly([[-RX,0,WZ],[RX,0,WZ],[RX,TY,WZ],[-RX,TY,WZ]],null);
@@ -3755,8 +4152,8 @@ function drawRoom(){
   /* 작업 통로 표시선 (노란 안전선) */
   for(const z of [700,1850]) poly([[-RX,1,z-25],[RX,1,z-25],[RX,1,z+25],[-RX,1,z+25]],"rgba(228,184,40,.55)");
   poly([[-RX,TY,WZ],[RX,TY,WZ],[RX,TY,FZ],[-RX,TY,FZ]],"#eceeef");
-  for(const z of [-1200,1400]){ poly([[-7000,TY-5,z-320],[7000,TY-5,z-320],[7000,TY-5,z+320],[-7000,TY-5,z+320]],"#d8e2ec");
-    poly([[-6800,TY-10,z-260],[6800,TY-10,z-260],[6800,TY-10,z+260],[-6800,TY-10,z+260]],"#ffffff"); }
+  for(const z of [-1200,1400]){ poly([[-7500,TY-5,z-320],[9500,TY-5,z-320],[9500,TY-5,z+320],[-7500,TY-5,z+320]],"#d8e2ec");
+    poly([[-7300,TY-10,z-260],[9300,TY-10,z-260],[9300,TY-10,z+260],[-7300,TY-10,z+260]],"#ffffff"); }
 }
 let HOT=[];
 function drawOverlay(){
@@ -3764,8 +4161,8 @@ function drawOverlay(){
   HOT.length=0;
   g.textAlign="center"; g.textBaseline="middle";
   if(VIEW3.label){
-    const LBL=[[-4200,2150,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2200,-300,"② SG-120 실리카겔"],[L.lc1,1480,190,"전단 로드셀"],
-      [-820,2330,-800,"③ DMC-60T 정제 계수기"],[L.lc2,1480,190,"후단 로드셀 · 리젝트"],[L.pe,2100,-300,"④ HPE-100 PE 필름"],[2940,2620,-379,"⑤ RCS-120 로타리 캡핑기"],[4800,1450,-10,"집적 테이블"],[120,1720,760,"중량선별 PLC"]];
+    const LBL=[[-4200,2100,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2150,-300,"② SG-120 실리카겔"],[L.lc1,1500,0,"전단 계량"],
+      [416,2050,-700,"③ DMC-60T 정제 계수기"],[L.lc2,1500,0,"후단 계량 · 리젝트"],[L.pe,2050,-300,"④ HPE-100 PE 필름"],[L.T.x,2560,-379,"⑤ RCS-120 로타리 캡핑기"],[L.table.x,1450,-10,"집적 테이블"],[L.lc2+420,2080,-150,"중량선별 PLC"]];
     g.font="800 "+(12*K).toFixed(0)+"px "+'"Malgun Gothic",sans-serif';
     for(const [x,y,z,t] of LBL){ if(cam.dist>7000&&/로드셀|PLC/.test(t)) continue; const p=prj(x,y,z); if(!p||p.x<0||p.x>W||p.y<0||p.y>H) continue;
       const w=g.measureText(t).width+16*K, h=21*K;

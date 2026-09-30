@@ -104,7 +104,7 @@ const SCREENS={
   set(){ return '<div class="hTitle">⚙ 설정 <s>SG-120 · SETTING</s></div>'+
      row("파우치 피치","POUCH PITCH 30~60 mm",ed(S.sg.pitch+" mm","sg_pitch"))+
      row("투입 개수","POUCH / BOTTLE",pv("1 개"))+
-     row("플런저 스트로크","PLUNGER",pv("자동 (병 높이)")); }
+     row("이송 방식","FEEDER",pv("트윈 타이밍 벨트")); }
  },
  dmc:{
   main(){ const D=LN.dmc, r=dmcRate()*12*60, N=S.rc.n;
@@ -141,7 +141,8 @@ const SCREENS={
      row("전단 로드셀 영점 오프셋","PRE ZERO",pv(fmt(w.off[0],3)+" g",Math.abs(w.off[0])>0.02))+
      row("후단 로드셀 영점 오프셋","POST ZERO",pv(fmt(w.off[1],3)+" g",Math.abs(w.off[1])>0.02))+
      row("연속 불합격 정지","CONSECUTIVE NG",pv("3 병"))+
-     row("리젝트함","REJECT BIN",pv(S.reject.n+" / "+S.reject.cap+" 병",S.reject.n>=S.reject.cap))+
+     row("리젝트 트레이","REJECT TRAY",pv(S.reject.n+" / "+S.reject.cap+" 병",S.reject.n>=S.reject.cap))+
+     row("계량 방식","WEIGHING",pv("포크 이송 · 팬 A/B 평균 · 0.01 g"))+
      row("허용오차 규칙","TOLERANCE RULE",pv("≤30T ±0.5 · ≤300T ±1 · ≤500T ±2 · 1000T ±5"))+
      '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">순중량 = 후단 총중량 − 전단 빈병 중량. 두 로드셀의 영점이 틀어지면 정상 병도 불합격될 수 있으므로 생산 전 반드시 영점을 잡습니다.</div>'; },
   log(){ const L2=S.wc.log.slice(0,16);
@@ -150,28 +151,28 @@ const SCREENS={
      (L2.map(r=>'<tr class="'+(r.ok?"":"ng")+'"><td>'+r.no+'</td><td>'+fmt(r.tare,2)+'</td><td>'+fmt(r.gross,2)+'</td><td>'+fmt(r.net,3)+'</td><td>'+(r.dev>=0?"+":"")+fmt(r.dev,2)+'</td><td>'+(r.ok?"OK":"NG · "+esc(r.why))+'</td></tr>').join("")||'<tr><td colspan="6">판정 기록 없음</td></tr>')+'</table>'; }
  },
  pe:{
-  main(){ const P=S.pe, pct=clamp((P.pv-20)/(P.sv-20)*100,0,100);
+  main(){ const P=S.pe;
     return '<div class="hTitle">🎞️ 주화면 <s>HPE-100 · MAIN</s>'+mStatus("pe")+'</div>'+
-     '<div class="kpis">'+kc(Math.round(P.pv)+" ℃","커터 온도 PV",P.pv<P.sv-10?"ng":"hi")+kc(P.sv+" ℃","설정 SV")+kc(Math.round(matPct("film"))+"%","필름 잔량",matPct("film")<10?"ng":"")+'</div>'+
-     '<div class="gauge"><i style="width:'+pct+'%"></i></div>'+
-     '<div class="hGrid2">'+btn(P.heat,"가열 커터","HOT CUTTER","🔥","pe_heat")+btn(P.sensor,"필름 센서","FILM SENSOR","👁","pe_sensor")+'</div>'+
-     row("투입 수","INSERTED",pv(P.fed))+
+     '<div class="kpis">'+kc(P.fed,"투입 수","hi")+kc(Math.round(matPct("film"))+"%","필름 잔량",matPct("film")<10?"ng":"")+kc(P.jam?"걸림":"정상","튜브 상태",P.jam?"ng":"")+'</div>'+
+     '<div class="hGrid2">'+btn(P.sensor,"필름 센서","FILM SENSOR","👁","pe_sensor")+btn(false,"디스크 원점","DISC HOME","⟳","pe_home")+'</div>'+
+     row("커터","CUTTER",pv("톱날식 (가열 없음)"))+
+     row("인덱싱 디스크","INDEX DISC",pv("튜브 8 · 좌우 2 레인"))+
      row("필름 길이","FILM LENGTH",pv(P.len+" mm")); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>HPE-100 · SETTING</s></div>'+
-     row("커터 온도 SV","150~190 ℃",ed(S.pe.sv+" ℃","pe_sv"))+
      row("필름 길이","40~80 mm",ed(S.pe.len+" mm","pe_len"))+
-     '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">커터 온도가 SV −10 ℃ 이상이어야 운전됩니다.</div>'; }
+     row("병 규격 (자동 조정)","BOTTLE",pv(BD().ml+" ml · 목 Ø"+BD().nk))+
+     '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">필름 센서가 소진을 감지하면 정지합니다. 튜브 걸림 시 STOP → 도어 열고 제거 → RESET.</div>'; }
  },
  rc:{
   main(){ const r=S.rcp, b=BD();
     return '<div class="hTitle">⚪ 주화면 <s>RCS-120 · MAIN</s>'+mStatus("rc")+'</div>'+
-     '<div class="kpis">'+kc(r.torque+" kgf·cm","체결 토크 설정","hi")+kc(LN.rc.chute,"슈트 캡")+kc(Math.round(matPct("cap"))+"%","캡 호퍼",matPct("cap")<10?"ng":"")+'</div>'+
+     '<div class="kpis">'+kc(r.torque+" kgf·cm","체결 토크 설정","hi")+kc(LN.rc.chute,"슈트 캡")+kc(Math.round(matPct("cap"))+"%","볼 피더 캡",matPct("cap")<10?"ng":"")+'</div>'+
      '<div class="kpis">'+kc(S.table.n+" / "+S.table.cap,"집적 테이블")+kc(S.cnt.good,"캡핑 완료")+kc(b.capD+" mm","캡 규격")+'</div>'+
      '<div class="hGrid2">'+btn(r.feed,"캡 공급","CAP FEED","⚪","rc_feed")+btn(r.checked,"토크 확인","CHECK TORQUE","✔","rc_check")+'</div>'+
      row("권장 토크 ("+b.capD+" mm)","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>RCS-120 · SETTING</s></div>'+
      row("체결 토크","6~25 kgf·cm",ed(S.rcp.torque+" kgf·cm","rc_torque"))+
-     row("헤드 수","HEADS",pv("4 헤드 · 서보"))+
+     row("헤드","HEADS",pv("3조 공압 척 · 서보 터렛"))+
      row("권장 범위","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); }
  }
 };
@@ -194,16 +195,16 @@ function hbClick(id){
     case "dmc_check": S.dmc.checked=true; toast("진동 1·2·3단 "+S.dmc.vib.join(" / ")+" % · 게이트 지연 "+S.dmc.gateDelay+" s 확인","good"); break;
     case "dmc_clean":
       if(S.running){ toast("운전 중에는 센서창을 청소할 수 없습니다. 먼저 STOP.","bad"); return; }
-      if(typeof startWork==="function"&&!startWork("tab",()=>{ S.dmc.dirt.fill(0); clearAlarm("DM32"); toast("센서창 12채널 청소 완료","good"); stepCheck(); },{reach:[-800,1400,-120],carry:null,dur:2.6})) toast("작업자가 다른 작업 중입니다.");
+      if(typeof startWork==="function"&&!startWork("tab",()=>{ S.dmc.dirt.fill(0); clearAlarm("DM32"); toast("센서창 12채널 청소 완료","good"); stepCheck(); },{stand:[436,440],reach:[436,1400,-120],carry:null,dur:2.6,pour:false})) toast("작업자가 다른 작업 중입니다.");
       break;
     case "wc_zero1": case "wc_zero2": {
       const i=id==="wc_zero1"?0:1, st=LN.st[i?"lc2":"lc1"];
-      if(st&&st.ph!=="wait"||LN.bottles.some(b=>b.zone==="line"&&Math.abs(pathAt(b.s).x-(i?L.lc2:L.lc1))<L.lcW/2)){ toast("로드셀 위에 병이 없을 때 영점을 잡으세요.","bad"); return; }
+      if(S.running||(st&&st.ph!=="wait"&&st.ph!=="proc")){ toast("운전 · 포크 이송 중에는 영점을 잡을 수 없습니다. 먼저 STOP.","bad"); return; }
       S.wc.off[i]=0.001*gauss(); S.wc.zero[i]=true; if(S.wc.zero[0]&&S.wc.zero[1]) clearAlarm("WC44");
       toast((i?"후단":"전단")+" 로드셀 영점 완료 (0.000 g)","good"); break; }
     case "wc_check": S.wc.checked=true; toast("기준 순중량 "+fmt(S.rc.netStd,3)+" g · 허용 ±"+fmt(S.rc.netTol,3)+" g 확인","good"); break;
-    case "pe_heat": S.pe.heat=!S.pe.heat; toast("가열 커터 "+(S.pe.heat?"ON — 승온 중":"OFF")); break;
-    case "pe_sensor": S.pe.sensor=!S.pe.sensor; break;
+    case "pe_sensor": S.pe.sensor=!S.pe.sensor; toast("필름 센서 "+(S.pe.sensor?"ON":"OFF")); break;
+    case "pe_home": if(S.running){ toast("운전 중에는 할 수 없습니다.","bad"); return; } toast("인덱싱 디스크 원점 복귀 완료"); break;
     case "rc_feed": S.rcp.feed=!S.rcp.feed; toast("캡 공급 "+(S.rcp.feed?"ON":"OFF")); break;
     case "rc_check": { const r=torqueRange(); S.rcp.checked=true; S.flags.torqueRechk=true;
       if(S.rcp.torque<r[0]||S.rcp.torque>r[1]) toast("토크 "+S.rcp.torque+" kgf·cm — 권장 "+r.join("~")+" 범위를 벗어났습니다.","bad");
@@ -235,7 +236,6 @@ function edClick(id){
     vib1:["2단 진동 (%)",[10,100],()=>S.dmc.vib[1],v=>S.dmc.vib[1]=v,0],
     vib2:["3단 진동 (%)",[10,100],()=>S.dmc.vib[2],v=>S.dmc.vib[2]=v,0],
     gate:["게이트 지연 (s)",[0.05,0.5],()=>S.dmc.gateDelay,v=>S.dmc.gateDelay=v,2],
-    pe_sv:["커터 온도 SV (℃)",[150,190],()=>S.pe.sv,v=>S.pe.sv=v,0],
     pe_len:["필름 길이 (mm)",[40,80],()=>S.pe.len,v=>S.pe.len=v,0],
     rc_torque:["체결 토크 (kgf·cm)",[6,25],()=>S.rcp.torque,v=>{S.rcp.torque=v; S.rcp.torqueBad=false;},0]
   };

@@ -1,7 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
    라인 물류 · 공정 로직
    · 병은 경로 좌표 s 를 따라 움직이고, 앞 병 · 스토퍼 핀 · 클램프 · 스크류 입구에서 멈춘다
-   · 공정(SG · 로드셀 · DMC 쌍 · HPE)은 "도착 → 처리 → 해제" 사이클
+   · 공정(SG · HPE)은 "도착 → 처리 → 해제" 사이클 · DMC 는 쌍 인덱싱
+   · 로드셀(전단 · 후단)은 게이트로 1병씩 떼어 IN 에 세운 뒤 포크가 IN → A 팬 → B 팬 → OUT 으로 한 칸씩 옮긴다
    · 캡핑기는 가상 포켓 체인(타이밍 스크류 → 스타휠 A → 터렛 → 스타휠 B)으로 이동
    ═══════════════════════════════════════════════════════════════════ */
 const LN={
@@ -38,13 +39,14 @@ function makeStations(){
   const d=BD().d;
   LN.st={
     sg:{k:"sg", x:L.sg, ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.52*cycK(), kin:{feed:0,cut:0,plg:0,sachet:null}},
-    lc1:{k:"lc1",x:L.lc1,ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.34*cycK(), read:null},
-    lc2:{k:"lc2",x:L.lc2,ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.34*cycK(), read:null},
-    pe:{k:"pe", x:L.pe, ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.56*cycK(), kin:{feed:0,cut:0,plg:0,piece:null}}
+    lc1:lcStation("lc1",L.lc1,0), lc2:lcStation("lc2",L.lc2,1),
+    pe:{k:"pe", x:L.pe, ph:"wait", t:0, b:null, pin:1, clamp:0, clampB:null, dur:()=>0.56*cycK(), kin:{feed:0,cut:0,plg:0,idx:0,piece:null}}
   };
   LN.dmc={ph:"rA", t:0, A:null, B:null, entry:1, clamp:0, clampB:null, mid:0, exit:1, gate:[0,0], gateT:[0,0], buf:[0,0], hold:[false,false],
     chPh:new Array(12).fill(0), led:new Array(12).fill(0), falls:[], vibPh:0, tray:[1,1,1], single:false, waitT:0, dump:[null,null]};
 }
+function lcStation(k,X,i){ return {k, X, i, lc:true, ph:"wait", t:0, fin:0, car:0, gate:1, inPin:1, meter:"closed", gb:null, clampB:null, clamp:0,
+  IN:null, A:null, B:null, OUT:null, read:null, rA:null, rB:null, idleT:0}; }
 function pinFace(st){ return sOfX(st.x)+BD().d/2; }
 
 /* ═══ 한 스텝 ═══ */
@@ -62,7 +64,6 @@ function simTick(dt){
   moveBottles(dt,v,run);
   rejectTick(dt,run);
   tableTick(dt,run);
-  peHeat(dt);
   dirtTick(dt,run);
   if(run) prodCheck();
   if(S.jog>0){ S.jog-=dt; if(S.jog<=0){ S.jog=0; S.running=false; } }
@@ -114,7 +115,8 @@ function needFeed(){
 /* 뒤 병 (맞닿아 있는 바로 다음 병) */
 function behindOf(b){ const d=BD().d; return LN.bottles.filter(x=>x.zone==="line"&&x.pocket==null&&x.s<b.s&&b.s-x.s<d+8).sort((a,c)=>c.s-a.s)[0]||null; }
 function stationsTick(dt,run){
-  for(const k of ["sg","lc1","lc2","pe"]){
+  lcTick(LN.st.lc1,dt,run); lcTick(LN.st.lc2,dt,run);
+  for(const k of ["sg","pe"]){
     const st=LN.st[k], d=BD().d, face=pinFace(st);
     if(st.ph==="wait"){
       st.pin=Math.min(1,st.pin+dt*14);
@@ -140,19 +142,26 @@ function stationsTick(dt,run){
 }
 function stationReady(k){
   if(k==="sg"){ if(S.mat.gel<=0){ raise("SG21"); return false; } if(S.sg.markBad&&!S.activeTrouble){ return true; } }
-  if(k==="pe"){ if(S.mat.film<=0){ raise("PE51"); return false; } if(S.pe.pv<S.pe.sv-10){ raise("PE52"); return false; } }
+  if(k==="pe"){ if(S.mat.film<=0){ raise("PE51"); return false; } if(S.pe.jam){ raise("PE52"); return false; } }
   return true;
 }
 /* 공정별 동작 진행 (0→1 구간) */
 function procKin(st,dt){
   const u=st.t/st.dur();
+  if(st.k==="pe"){  /* 디스크 인덱싱 → 뒤 레인 필름 공급 · 톱날 절단 → 앞 푸셔 투입 */
+    st.kin.idx=smooth(clamp(u/0.30,0,1));
+    st.kin.feed=clamp((u-0.05)/0.30,0,1);
+    st.kin.cut=u>0.30&&u<0.42?Math.sin((u-0.30)/0.12*Math.PI):0;
+    st.kin.plg=u>0.36?Math.sin(clamp((u-0.36)/0.58,0,1)*Math.PI):0;
+    st.kin.drop=clamp((u-0.40)/0.30,0,1);
+    return;
+  }
   if(st.kin){
     st.kin.feed=clamp(u/0.34,0,1);
     st.kin.cut=u>0.34&&u<0.52?Math.sin((u-0.34)/0.18*Math.PI):0;
     st.kin.plg=u>0.50?Math.sin(clamp((u-0.50)/0.46,0,1)*Math.PI):0;
     st.kin.drop=clamp((u-0.52)/0.3,0,1);
   }
-  if(st.k==="lc1"||st.k==="lc2"){ st.read=weigh(st.b,st.k==="lc1"?0:1)*(u<0.5?u*2:1); }
 }
 function procDone(st){
   const b=st.b, bd=BD();
@@ -160,14 +169,75 @@ function procDone(st){
     S.mat.gel=Math.max(0,S.mat.gel-1); S.sg.fed++;
     if(S.sg.markBad){ b.gel=0; b.gelW=0; }            /* 마크 센서 틀어짐 : 절단 위치 이상 → 파우치 미투입 */
     else { b.gel=1; b.gelW=bd.gel*(1+0.03*gauss()); }
-  }else if(st.k==="lc1"){
-    const r=weigh(b,0); b.tare=r; st.read=r; S.wc.tare=r; S.wc.lastTare=r;
-    if(Math.abs(r-S.rc.tareStd)>S.rc.tareTol){ b.tareNG=true; raise("WC43"); }
-  }else if(st.k==="lc2"){
-    const r=weigh(b,1); b.gross=r; st.read=r; judge(b);
   }else if(st.k==="pe"){
-    S.mat.film=Math.max(0,S.mat.film-1); b.pe=1; S.pe.fed++;
+    S.mat.film=Math.max(0,S.mat.film-1); b.pe=1; S.pe.fed++; st.kin.idx=0;
   }
+}
+/* ═══ 로드셀 스테이션 : 게이트(1병 분리) → IN 스토퍼 → 포크(4 핑거) 한 칸 이송 → A · B 팬 계량 ═══ */
+function lcTick(st,dt,run){
+  const d=BD().d, G=lcGeo(st.X), P=L.lcP, K=cycK();
+  const sIN=sOfX(G.IN), sGate=sOfX(G.gateFace), sOut=sOfX(G.OUT);
+  const free=b=>b.zone==="line"&&!b.held&&b.pocket==null;
+  const line=LN.bottles.filter(free);
+  const inB=line.find(b=>Math.abs(b.s-sIN)<1.5);
+  const gb=line.find(b=>Math.abs(b.s-(sGate-d/2))<1.5);
+  const between=line.some(b=>b.s>sGate-d/2+2&&b.s<sIN-1);
+  /* 게이트 : IN 이 비면 한 병만 보낸다 (뒤 병 클램프) */
+  if(st.meter==="closed"){
+    st.gate=Math.min(1,st.gate+dt*14);
+    if(st.clampB&&st.gate>=1) st.clampB=null;
+    if(run&&gb&&!inB&&!between&&st.gate>=1&&st.inPin>=1&&!st.clampB&&(st.ph==="wait"||st.ph==="back"||st.ph==="proc")){
+      st.meter="open"; st.gb=gb; st.clampB=behindOf(gb);
+    }
+  }else{
+    st.gate=Math.max(0,st.gate-dt*14);
+    if(!st.gb||st.gb.zone!=="line"||st.gb.s>sGate+d/2+4){ st.meter="closed"; st.gb=null; }
+  }
+  st.clamp+=((st.clampB?1:0)-st.clamp)*Math.min(1,dt*16);
+  const hold=b=>{ if(b){ b.held=true; } };
+  const outClear=!line.some(b=>b.s>sOut-d-6&&b.s<sOut+d+6);
+  const upstream=line.some(b=>b.s<sIN-1&&b.s>sIN-2600&&!b.done[st.k]);
+  if(run) st.t+=dt;
+  switch(st.ph){
+    case "wait": {
+      st.fin=Math.max(0,st.fin-dt*10); st.car=0; st.inPin=Math.min(1,st.inPin+dt*14);
+      if(run) st.idleT+=dt;
+      const go=run&&outClear&&st.meter==="closed"&&!between&&(inB||((st.A||st.B)&&!upstream&&!gb&&st.idleT>1.2));
+      if(go){ st.IN=inB||null; hold(st.IN); hold(st.A); hold(st.B); st.ph="grip"; st.t=0; st.idleT=0; }
+      break; }
+    case "grip": {
+      st.fin=clamp(st.t/(0.10*K),0,1); if(st.fin>0.5) st.inPin=Math.max(0,st.inPin-dt*16);
+      if(st.fin>=1&&st.inPin<=0.05){ st.inPin=0; st.ph="move"; st.t=0; }
+      break; }
+    case "move": {
+      const u=smooth(clamp(st.t/(0.26*K),0,1)); st.car=u;
+      if(st.IN) st.IN.s=sIN+u*P; if(st.A) st.A.s=sOfX(G.A)+u*P; if(st.B) st.B.s=sOfX(G.B)+u*P;
+      st.read=null;
+      if(st.t>=0.26*K){ st.OUT=st.B; st.B=st.A; st.A=st.IN; st.IN=null; st.rB=st.rA; st.rA=null; st.ph="rel"; st.t=0; }
+      break; }
+    case "rel": {
+      st.fin=Math.max(0,1-st.t/(0.08*K));
+      if(st.fin<=0){ if(st.OUT){ st.OUT.held=false; st.OUT.s=sOut; } st.OUT=null; st.ph="back"; st.t=0; }
+      break; }
+    case "back": {
+      st.car=1-smooth(clamp(st.t/(0.18*K),0,1)); st.inPin=Math.min(1,st.inPin+dt*14);
+      if(st.t>=0.18*K){ st.car=0; st.ph="proc"; st.t=0; }
+      break; }
+    case "proc": {   /* 계량 안정 → A · B 판독 */
+      st.inPin=Math.min(1,st.inPin+dt*14);
+      const tw=0.22*K, u=clamp(st.t/tw,0,1), i=st.i, tgt=st.B||st.A;
+      if(tgt) st.read=weigh(tgt,i)+(u<0.7?0.35*Math.sin(st.t*38)*(1-u/0.7):0);
+      if(st.t>=tw){
+        if(st.A){ st.A.wA=weigh(st.A,i); }
+        if(st.B){ const r=((st.B.wA!=null?st.B.wA:weigh(st.B,i))+weigh(st.B,i))/2; st.B.wA=null; lcDone(st,st.B,r); st.B.done[st.k]=true; st.read=r; }
+        st.ph="wait"; st.t=0;
+      }
+      break; }
+  }
+}
+function lcDone(st,b,r){
+  if(st.k==="lc1"){ b.tare=r; S.wc.tare=r; S.wc.lastTare=r; if(Math.abs(r-S.rc.tareStd)>S.rc.tareTol){ b.tareNG=true; raise("WC43"); } }
+  else { b.gross=r; judge(b); }
 }
 /* 로드셀 측정값 (g) : 참값 + 영점 오프셋 + 잡음 */
 function weigh(b,i){
@@ -302,7 +372,9 @@ function moveBottles(dt,v,run){
   const d=BD().d;
   /* 정지 조건 : 스토퍼 핀 · 클램프 */
   const stops=[], clamped=new Set();
-  for(const k in LN.st){ const st=LN.st[k]; if(st.pin>0.5) stops.push(pinFace(st)); if(st.clampB) clamped.add(st.clampB); }
+  for(const k in LN.st){ const st=LN.st[k];
+    if(st.lc){ const G=lcGeo(st.X); if(st.gate>0.5) stops.push(sOfX(G.gateFace)); if(st.inPin>0.5) stops.push(sOfX(G.inFace)); if(st.clampB) clamped.add(st.clampB); continue; }
+    if(st.pin>0.5) stops.push(pinFace(st)); if(st.clampB) clamped.add(st.clampB); }
   const D=LN.dmc;
   if(D){
     if(D.exit>0.5) stops.push(sOfX(L.n2)+d/2);
@@ -314,7 +386,7 @@ function moveBottles(dt,v,run){
   const line=LN.bottles.filter(b=>b.zone==="line").sort((a,b)=>b.s-a.s);
   let prev=null;
   for(const b of line){
-    if(b.pocket!==null&&b.pocket!==undefined){ prev=b; continue; }
+    if((b.pocket!==null&&b.pocket!==undefined)||b.held){ prev=b; continue; }
     let ns=b.s+v*dt;
     if(clamped.has(b)) ns=b.s;
     if(prev){ const lim=prev.s-d; if(ns>lim) ns=Math.max(b.s,Math.min(ns,lim)); if(ns>lim) ns=lim; }
@@ -355,7 +427,7 @@ function capperTick(dt,run){
   R.phi+=dPhi;
   /* 캡 공급 : 볼 피더 → 슈트 (최대 7개) */
   R.bowl+=dt*(run?1:0);
-  if(run&&rc.feed&&S.mat.cap>0&&R.chute<7){ R.chuteFeed+=dt*2.6; if(R.chuteFeed>=1){ R.chuteFeed=0; R.chute++; S.mat.cap--; } }
+  if(run&&rc.feed&&S.mat.cap>0&&R.chute<capSlots()){ R.chuteFeed+=dt*2.6; if(R.chuteFeed>=1){ R.chuteFeed=0; R.chute++; S.mat.cap--; } }
   if(run) R.elev+=dt*200;
   if(rc.jam) raise("RC62");
   /* 스크류 입구의 병을 새 포켓에 배정 */
@@ -388,6 +460,8 @@ function capperTick(dt,run){
     if(soon) raise("RC61");
   }
 }
+/* 슈트 · 벨트 · 체인에 줄 서는 캡 수 */
+function capSlots(){ const b=BD(); return Math.max(6,Math.min(16,Math.floor(capPath().total/(b.capD+3))-1)); }
 /* 헤드 j 의 터렛 각 (rad) : 포켓 체인과 같은 위상 */
 function headAngle(j){
   const R=LN.rc, base=PATH.tA-(S_T0-S_A)/L.R;
@@ -428,12 +502,7 @@ function unloadTable(){
   const T=LN.table; T.list=[]; S.table.n=0; clearAlarm("RC64");
 }
 
-/* ── HPE 가열 커터 · 센서 오염 ── */
-function peHeat(dt){
-  const P=S.pe, want=(S.main&&P.heat)?P.sv:24;
-  P.pv+=(want-P.pv)*Math.min(1,dt*(P.heat?0.10:0.05));
-  if(P.pv>=P.sv-10) clearAlarm("PE52");
-}
+/* ── 센서 오염 ── */
 function dirtTick(dt,run){
   if(!run) return;
   const k=S.dust?0.0008:0.012;
@@ -472,14 +541,14 @@ function startBlockers(){
   if(!S.user) r.push("HMI 에 로그인하지 않았습니다.");
   if(!S.recipeApplied) r.push("생산 품목(레시피)이 적용되지 않았습니다.");
   if(tripAlarms().length) r.push("해제되지 않은 알람이 있습니다 — RESET.");
-  if(S.pe.pv<S.pe.sv-10) r.push("HPE-100 가열 커터 온도가 낮습니다 ("+Math.round(S.pe.pv)+" / "+S.pe.sv+" ℃).");
+  if(S.pe.jam) r.push("HPE-100 필름 이송 불량이 해제되지 않았습니다.");
   if(S.mat.bottle<=0&&LN.tt.n<=0) r.push("빈 병이 없습니다.");
   if(S.mat.gel<=0) r.push("실리카겔 롤이 없습니다.");
   if(S.mat.tab<=0) r.push("정제가 없습니다.");
   if(S.mat.film<=0) r.push("PE 필름이 없습니다.");
   if(S.mat.cap<=0&&LN.rc.chute<=0) r.push("캡이 없습니다.");
   if(S.table.n>=S.table.cap) r.push("집적 테이블이 가득 찼습니다.");
-  if(S.reject.n>=S.reject.cap) r.push("리젝트함이 가득 찼습니다.");
+  if(S.reject.n>=S.reject.cap) r.push("리젝트 트레이가 가득 찼습니다.");
   return r;
 }
 function lineStart(){
@@ -508,7 +577,7 @@ function lineReset(){
     if(k==="WC42") return S.reject.n>=S.reject.cap;
     if(k==="WC44") return !(S.wc.zero[0]&&S.wc.zero[1]);
     if(k==="PE51") return S.mat.film<=0;
-    if(k==="PE52") return S.pe.pv<S.pe.sv-10;
+    if(k==="PE52") return S.pe.jam;
     if(k==="RC61") return S.mat.cap<=0&&LN.rc.chute<=0;
     if(k==="RC62") return S.rcp.jam;
     if(k==="RC63") return S.rcp.torqueBad;
@@ -521,7 +590,7 @@ function lineReset(){
 }
 /* 라인 초기화 (새 세션) */
 function lineInit(){
-  LN.bottles=[]; LN.pushing=[]; LN.rejBin=[]; LN.table.list=[]; LN.fed=0; LN.feedT=0; LN.tt.n=18;
+  LN.bottles=[]; LN.pushing=[]; LN.rejBin=[]; LN.table.list=[]; LN.fed=0; LN.feedT=0; LN.tt.n=18; CAP_CACHE={ml:-1};
   LN.rc.captured=new Map(); LN.rc.chute=0; LN.rc.heads.forEach(h=>{h.cap=false;});
   makeStations();
 }

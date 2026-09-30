@@ -8,11 +8,11 @@ const PASS=80;
 
 /* ── 라인 클리어런스 5항목 ── */
 const CLEAR=[
-  {t:"이전 제품 · 잔류 정제 제거 확인", d:"DMC-60T 호퍼 · 진동 트레이 · 게이트 · 노즐에 이전 품목 정제가 남아 있지 않은지 확인합니다.", at:[-800,AISLE-300], look:[-820,1450,-400]},
+  {t:"이전 제품 · 잔류 정제 제거 확인", d:"DMC-60T 호퍼 · 진동 트레이 · 게이트 · 노즐에 이전 품목 정제가 남아 있지 않은지 확인합니다.", at:[436,AISLE-300], look:[416,1450,-400]},
   {t:"이전 용기 · 캡 · 포장자재 제거 확인", d:"UA-120 호퍼 · 턴테이블, 캡 호퍼, 실리카겔 · PE 필름 릴에 이전 자재가 없는지 확인합니다.", at:[-4600,AISLE-300], look:[-4760,1000,-200]},
-  {t:"접촉부 청소 상태 확인", d:"트레이 · 노즐 · 슈트 · 스타휠 · 컨베이어 가이드의 청소 상태(청소 완료 표시)를 확인합니다.", at:[2900,AISLE-300], look:[2950,1100,-300]},
-  {t:"리젝트함 · 집적 테이블 잔품 확인", d:"잠금식 리젝트함과 집적 테이블에 이전 로트의 병이 남아 있지 않은지 확인합니다.", at:[800,AISLE-200], look:[660,700,560]},
-  {t:"작업지시 · 품목 · 라인 상태 확인", d:"작업지시서의 품목 · 포장단위 · 병 규격과 라인 표시(품목 식별표)가 일치하는지 확인합니다.", at:[120,AISLE-250], look:[120,1400,760]}
+  {t:"접촉부 청소 상태 확인", d:"트레이 · 노즐 · 슈트 · 스타휠 · 컨베이어 가이드의 청소 상태(청소 완료 표시)를 확인합니다.", at:[5688,AISLE-300], look:[5738,1100,-300]},
+  {t:"리젝트 트레이 · 집적 테이블 잔품 확인", d:"리젝트 트레이와 집적 테이블에 이전 로트의 병이 남아 있지 않은지 확인합니다.", at:[L.rej+40,AISLE-200], look:[L.rej,800,380]},
+  {t:"작업지시 · 품목 · 라인 상태 확인", d:"작업지시서의 품목 · 포장단위 · 병 규격과 라인 표시(품목 식별표)가 일치하는지 확인합니다.", at:[L.lc2+420,AISLE-250], look:[L.lc2+420,1650,-150]}
 ];
 
 /* ── 단계 정의 ── */
@@ -44,10 +44,10 @@ function stepsOperation(easy){
     A.push(T_("wcStd","중량 기준 확인","중량선별 주화면의 기준 순중량 · 허용오차 · 빈병 기준을 확인하고 [기준 확인] 을 누릅니다.",()=>hmiRoute("wc","main",HB("wc_check")),()=>S.wc.checked,{pts:4,hmi:true}));
     A.push(T_("dmcChk","계수기 진동 · 계수 설정 확인","DMC-60T 주화면의 [진동·계수 확인] 을 누릅니다. 1단 < 2단 < 3단 진동, 게이트 지연을 확인합니다.",()=>hmiRoute("dmc","main",HB("dmc_check")),()=>S.dmc.checked,{pts:4,hmi:true}));
   }
-  A.push(T_("heat","HPE-100 가열 커터 ON","HPE-100 주화면의 [가열 커터] 를 켜고 설정 온도(SV −10 ℃ 이상)에 도달할 때까지 기다립니다.",
-    ()=>S.pe.heat?null:hmiRoute("pe","main",HB("pe_heat")),()=>S.pe.heat&&S.pe.pv>=S.pe.sv-10,{pts:4,hmi:true}));
+  A.push(T_("peSensor","HPE-100 필름 센서 확인","HPE-100 주화면에서 [필름 센서] 가 켜져 있는지 확인합니다. 필름이 떨어지면 센서가 감지해 정지합니다 (톱날 커터 · 가열 없음).",
+    ()=>S.pe.sensor?null:hmiRoute("pe","main",HB("pe_sensor")),()=>S.pe.sensor&&S.user,{pts:3,hmi:true}));
   if(!easy) A.push(T_("torque","캡핑 토크 확인","RCS-120 주화면의 [토크 확인] 을 누릅니다. 캡 규격별 권장 토크 범위인지 확인합니다.",()=>hmiRoute("rc","main",HB("rc_check")),()=>S.rcp.checked,{pts:4,hmi:true}));
-  A.push(T_("start","자동 운전 START","기동 조건(전원 · 공압 · 안전문 · 로그인 · 레시피 · 자재 · 온도)을 확인하고 [START] 를 누릅니다.",()=>"#swStart",()=>S.started,{pts:6}));
+  A.push(T_("start","자동 운전 START","기동 조건(전원 · 공압 · 안전문 · 로그인 · 레시피 · 자재)을 확인하고 [START] 를 누릅니다.",()=>"#swStart",()=>S.started,{pts:6}));
   A.push(T_("watch","운전 감시 · 연속 생산","목표 "+(easy?24:40)+"병을 생산합니다. 중량 불합격 병은 리젝트되고, 알람이 나면 STOP → 원인 판단 → 조치 → RESET → START 로 대응합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target,{pts:14,watch:true}));
   A.push(T_("stop","STOP — 운전 종료","목표 수량을 채웠으면 [STOP] 을 눌러 운전을 마칩니다.",()=>"#swStop",()=>!S.running&&S.cnt.good>=S.cnt.target&&S.flags.stopped,{pts:4}));
@@ -131,7 +131,7 @@ const INC={
     q:"턴테이블 출구에서 병이 나오지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린(넘어진) 병을 제거한 뒤 닫는다",
     w:["운전 중에 손을 넣어 병을 뺀다","라인 속도를 최대로 올린다","RESET 만 반복해서 누른다"],
     fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
-         {fix:[-4760,960,-6],t:"턴테이블 출구의 넘어진 병을 제거합니다 (빨간 ! 누르기).",done:()=>!S.ua.jam,act(){ return startWork("bottle",()=>{S.ua.jam=false;},{stand:[-4700,520],reach:[-4760,980,-20],carry:null,view:"bottle",dur:2.2}); }},
+         {fix:[-4760,960,-6],t:"턴테이블 출구의 넘어진 병을 제거합니다 (빨간 ! 누르기).",done:()=>!S.ua.jam,act(){ return startWork("bottle",()=>{S.ua.jam=false;},{stand:[-4700,630],reach:[-4760,980,-20],carry:null,view:"bottle",dur:2.4,door:"uaL",pour:false}); }},
          {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   SG21:{nm:"실리카겔 파우치 소진", mk:"sg", fire(){ S.mat.gel=0; raise("SG21"); },
     q:"SG-120 이 정지했습니다 (파우치 소진). 올바른 조치는?", a:"새 실리카겔 롤을 장착하고 띠를 피드 롤러까지 걸어 준다",
@@ -140,7 +140,7 @@ const INC={
   SG22:{nm:"파우치 마크 미검출", mk:"sg", fire(){ S.sg.markBad=true; raise("SG22"); },
     q:"SG-120 마크 센서가 파우치 경계를 읽지 못합니다. 올바른 조치는?", a:"마크 센서 위치를 파우치 실링선에 맞추고 커터 원점을 잡는다",
     w:["센서를 끄고 운전한다","진동 강도를 올린다","로드셀 영점을 잡는다"],
-    fix:[{fix:[-2620,1250,90],t:"마크 센서 위치를 실링선에 맞춥니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{reach:[-2560,1200,80],carry:null}); }},
+    fix:[{fix:[L.sg,1300,170],t:"마크 센서 위치를 실링선에 맞춥니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{stand:[L.sg+60,620],reach:[L.sg+60,1300,170],carry:null}); }},
          {sel:()=>hmiRoute("sg","main",HB("sg_home")),t:"SG-120 주화면에서 [커터 원점] 을 누릅니다.",done:()=>S.flags.sgHome,hmi:true,pre(){S.flags.sgHome=false;}}]},
   DM31:{nm:"정제 호퍼 레벨 부족", mk:"dmc", fire(){ S.mat.tab=Math.min(S.mat.tab,S.rc.n*4); raise("DM31"); },
     q:"DMC-60T 호퍼 레벨 경고입니다. 올바른 조치는?", a:"같은 로트의 정제를 호퍼에 보충한다",
@@ -155,38 +155,39 @@ const INC={
     q:"게이트가 열려도 정제가 병에 떨어지지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 노즐의 정제 브리지를 제거한 뒤 닫는다",
     w:["게이트 지연을 0 으로 한다","노즐을 두드리며 운전한다","계수 설정을 줄인다"],
     fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
-         {fix:[-800,1150,60],t:"노즐의 정제 브리지를 제거합니다 (빨간 ! 누르기).",done:()=>!S.dmc.bridge,act(){ return startWork("tab",()=>{S.dmc.bridge=false; clearAlarm("DM33");},{stand:[-800,430],reach:[-800,1150,40],carry:null,dur:2.4}); }},
+         {fix:[436,1150,60],t:"노즐의 정제 브리지를 제거합니다 (빨간 ! 누르기).",done:()=>!S.dmc.bridge,act(){ return startWork("tab",()=>{S.dmc.bridge=false; clearAlarm("DM33");},{stand:[436,440],reach:[436,1150,40],carry:null,dur:2.4,pour:false}); }},
          {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   WC41:{nm:"중량 불합격 연속 3병 (로드셀 영점 틀어짐)", mk:"wc", wait:true, fire(){ S.wc.off[1]+=S.rc.netTol*2.6; S.wc.zero[1]=false; },
     q:"정상 계수인데도 순중량 불합격이 연속으로 발생해 정지했습니다. 원인과 조치는?", a:"후단 로드셀 영점이 틀어짐 → 로드셀 위 병이 없을 때 영점을 다시 잡는다",
     w:["허용오차를 두 배로 넓힌다","불합격 병을 양품으로 옮긴다","진동을 올려 속도를 높인다"],
     fix:[{sel:()=>hmiRoute("wc","main",HB("wc_zero2")),t:"중량선별 주화면에서 [후단 영점] 을 누릅니다.",done:()=>S.wc.zero[1]&&Math.abs(S.wc.off[1])<0.02,hmi:true}]},
-  WC42:{nm:"리젝트함 만량", mk:"wc", fire(){ S.reject.n=S.reject.cap; for(let i=LN.rejBin.length;i<S.reject.cap;i++) LN.rejBin.push({seed:i+900}); raise("WC42"); },
-    q:"리젝트함이 가득 찼습니다. 올바른 조치는?", a:"STOP 후 리젝트함을 열어 불합격 병을 회수 · 기록하고 비운다",
-    w:["리젝트 푸셔를 끈다","불합격 병을 다시 라인에 올린다","리젝트함 없이 운전한다"],
-    fix:[{sel:"#mReject",t:"[리젝트함] 을 눌러 불합격 병을 회수합니다.",done:()=>S.reject.n<S.reject.cap}]},
+  WC42:{nm:"리젝트 트레이 만량", mk:"wc", fire(){ S.reject.n=S.reject.cap; for(let i=LN.rejBin.length;i<S.reject.cap;i++) LN.rejBin.push({seed:i+900}); raise("WC42"); },
+    q:"리젝트 트레이가 가득 찼습니다. 올바른 조치는?", a:"STOP 후 리젝트 트레이의 불합격 병을 회수 · 기록하고 비운다",
+    w:["리젝트 푸셔를 끈다","불합격 병을 다시 라인에 올린다","트레이 없이 운전한다"],
+    fix:[{sel:"#mReject",t:"[리젝트] 를 눌러 불합격 병을 회수합니다.",done:()=>S.reject.n<S.reject.cap}]},
   PE51:{nm:"PE 필름 소진", mk:"pe", fire(){ S.mat.film=0; raise("PE51"); },
     q:"HPE-100 이 정지했습니다 (필름 소진). 올바른 조치는?", a:"새 PE 필름 롤을 장착하고 피드 롤러까지 건다",
-    w:["필름 없이 계속 생산한다","가열 커터를 끈다","실리카겔을 두 개 넣는다"],
+    w:["필름 없이 계속 생산한다","필름 센서를 끈다","실리카겔을 두 개 넣는다"],
     fix:[{sel:"#mFilm",t:"[PE 필름 롤] 을 눌러 새 롤을 장착합니다.",done:()=>S.mat.film>0}]},
-  PE52:{nm:"가열 커터 온도 미달", mk:"pe", fire(){ S.pe.heat=false; S.pe.pv=Math.min(S.pe.pv,S.pe.sv-25); raise("PE52"); },
-    q:"HPE-100 가열 커터 온도가 떨어졌습니다. 올바른 조치는?", a:"가열 커터를 다시 켜고 설정 온도에 도달한 뒤 재가동한다",
-    w:["온도 미달 상태로 운전한다","커터를 손으로 가열한다","SV 를 PV 에 맞춰 낮춘다"],
-    fix:[{sel:()=>hmiRoute("pe","main",HB("pe_heat")),t:"HPE-100 주화면에서 [가열 커터] 를 켭니다.",done:()=>S.pe.heat,hmi:true},
-         {sel:null,t:"커터 온도가 SV −10 ℃ 이상이 될 때까지 기다립니다.",done:()=>S.pe.pv>=S.pe.sv-10}]},
+  PE52:{nm:"필름 이송 불량 (튜브 걸림)", mk:"pe", fire(){ S.pe.jam=true; raise("PE52"); },
+    q:"HPE-100 의 필름이 디스크 튜브에 걸려 투입되지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린 필름을 제거한 뒤 닫는다",
+    w:["운전 중 튜브에 손을 넣는다","필름 없이 계속 생산한다","필름 길이를 최대로 늘린다"],
+    fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
+         {fix:[L.pe,1300,0],t:"튜브에 걸린 필름을 제거합니다 (빨간 ! 누르기).",done:()=>!S.pe.jam,act(){ return startWork("film",()=>{S.pe.jam=false;},{carry:null,dur:2.3}); }},
+         {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   RC61:{nm:"캡 공급 부족", mk:"rc", fire(){ S.mat.cap=0; LN.rc.chute=0; raise("RC61"); },
-    q:"RCS-120 슈트에 캡이 없습니다. 올바른 조치는?", a:"캡 호퍼에 같은 규격 캡을 보충하고 공급을 켠다",
+    q:"RCS-120 슈트에 캡이 없습니다. 올바른 조치는?", a:"진동 볼 피더에 같은 규격 캡을 보충하고 공급을 켠다",
     w:["캡 없이 병을 내보낸다","토크를 올린다","다른 규격 캡을 넣는다"],
     fix:[{sel:"#mCap",t:"[캡 투입] 을 눌러 캡을 보충합니다.",done:()=>S.mat.cap>0}]},
-  RC62:{nm:"캡 슈트 걸림", mk:"rc", fire(){ S.rcp.jam=true; raise("RC62"); },
-    q:"캡 슈트에서 캡이 걸려 내려오지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린(뒤집힌) 캡을 제거한 뒤 닫는다",
+  RC62:{nm:"캡 이송 불량 (슈트 걸림)", mk:"rc", fire(){ S.rcp.jam=true; raise("RC62"); },
+    q:"C 슈트 · 캡 벨트에서 캡이 걸려 내려오지 않습니다. 올바른 조치는?", a:"STOP 후 안전문을 열고 걸린(뒤집힌) 캡을 제거한 뒤 닫는다",
     w:["운전 중 슈트를 두드린다","캡 공급을 끄고 계속 운전한다","토크를 낮춘다"],
     fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
-         {fix:[3150,1180,-300],t:"슈트에 걸린 캡을 제거합니다 (빨간 ! 누르기).",done:()=>!S.rcp.jam,act(){ return startWork("cap",()=>{S.rcp.jam=false;},{stand:[3150,520],reach:[3120,1150,-260],carry:null,dur:2.3}); }},
+         {fix:[5088,1200,-170],t:"슈트 · 벨트에 걸린 캡을 제거합니다 (빨간 ! 누르기).",done:()=>!S.rcp.jam,act(){ return startWork("cap",()=>{S.rcp.jam=false;},{stand:[5118,670],reach:[5118,1230,-170],carry:null,dur:2.3,pour:false}); }},
          {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"}]},
   RC64:{nm:"집적 테이블 만량", mk:"rc", fire(){ while(S.table.n<S.table.cap){ const b=newBottle(S_END); b.cap=true; b.pe=1; b.fill=1; toTable(b); S.cnt.good--; S.table.total--; } },
     q:"집적 테이블이 가득 찼습니다. 올바른 조치는?", a:"STOP 후 완제품을 회수해 다음 공정(라벨 · 포장)으로 보낸다",
-    w:["테이블 속도를 올린다","리젝트함에 담는다","가이드를 떼어 낸다"],
+    w:["테이블 속도를 올린다","리젝트 트레이에 담는다","가이드를 떼어 낸다"],
     fix:[{sel:"#mTable",t:"[완제품 회수] 를 눌러 집적 테이블을 비웁니다.",done:()=>S.table.n<S.table.cap}]},
   E001:{nm:"안전문 열림 (인터락)", mk:"line", fire(){ S.door="open"; raise("E001"); },
     q:"운전 중 안전문이 열려 라인이 비상 정지했습니다. 올바른 조치는?", a:"안전을 확인하고 안전문을 닫은 뒤 RESET → START 한다",
@@ -202,7 +203,7 @@ const CASES={
   C_GEL:{nm:"실리카겔 누락 병 발생", mk:"sg", fire(){ S.sg.markBad=true; }, banner:"전단 빈병 중량 이상(WC43)이 반복되고 리젝트가 늘고 있습니다.",
     q:"빈병 중량 이상으로 리젝트가 반복됩니다. 가장 가능성 높은 원인과 조치는?", a:"SG-120 마크 센서가 틀어져 파우치가 투입되지 않음 → 센서 위치 조정 후 커터 원점",
     w:["정제 계수 오차 → 센서창 청소","캡 토크 부족 → 토크 상향","PE 필름 누락 → 필름 교체"],
-    fix:[{fix:[-2620,1250,90],t:"SG-120 마크 센서 위치를 조정합니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{reach:[-2560,1200,80],carry:null}); }},
+    fix:[{fix:[L.sg,1300,170],t:"SG-120 마크 센서 위치를 조정합니다 (빨간 ! 누르기).",done:()=>!S.sg.markBad,act(){ return startWork("gel",()=>{S.sg.markBad=false;},{stand:[L.sg+60,620],reach:[L.sg+60,1300,170],carry:null}); }},
          {sel:()=>hmiRoute("sg","main",HB("sg_home")),t:"SG-120 주화면에서 [커터 원점] 을 누릅니다.",done:()=>S.flags.sgHome,hmi:true,pre(){S.flags.sgHome=false;}}]},
   C_DIRT:{nm:"순중량 편차 증가 (계수 오차)", mk:"dmc", fire(){ for(let c=0;c<12;c++) S.dmc.dirt[c]=Math.max(S.dmc.dirt[c],0.62+0.3*hash1(c)); S.dust=false; }, banner:"순중량 불합격(±1정 이상)이 늘고 채널 막대가 주황색으로 바뀌었습니다.",
     q:"순중량 불합격이 늘고 채널 표시가 주황색입니다. 원인과 조치는?", a:"집진기 정지로 센서창이 오염됨 → STOP 후 센서창 청소 · 집진기 가동",

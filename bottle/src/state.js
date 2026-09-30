@@ -33,7 +33,7 @@ function initState(){
     dmc:{vib:[55,65,78], gateDelay:0.15, dirt:new Array(12).fill(0), bridge:false, checked:false, buf:[0,0], cnt:new Array(12).fill(0), total:0, err:0},
     wc:{zero:[false,false], off:[0.62,-0.48], drift:[0.0009,-0.0007], checked:false, log:[], consec:0, tare:null, gross:null, net:null, judge:null,
         nOK:0, nNG:0, sumNet:0, nNet:0, lastTare:null},
-    pe:{heat:false, sv:165, pv:24, len:60, sensor:true, fed:0},
+    pe:{len:60, sensor:true, fed:0, jam:false},
     rcp:{torque:12, feed:true, checked:false, jam:false, torqueBad:false},
     /* 생산 */
     cnt:{good:0, reject:0, target:40, filled:0, tabs:0, bottlesIn:0},

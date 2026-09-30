@@ -26,7 +26,7 @@ function bindTiles(){
   mat("#mTab","tab","tab",()=>{ S.mat.tab=matCap("tab"); LN.dmc&&(LN.dmc.tray=[1,1,1]); },"정제 투입 — 호퍼 가득");
   mat("#mFilm","film","film",()=>{ S.mat.film=MAT_CAP.film; clearAlarm("PE51"); },"PE 필름 롤 장착");
   mat("#mCap","cap","cap",()=>{ S.mat.cap=MAT_CAP.cap; },"캡 투입 ("+MAT_CAP.cap+"개)");
-  mat("#mReject","reject","reject",()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); },"리젝트함 회수 · 기록 완료");
+  mat("#mReject","reject","reject",()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); },"리젝트 트레이 회수 · 기록 완료");
   mat("#mTable","table","table",()=>{ unloadTable(); },"완제품 회수 — 다음 공정으로 이송");
 }
 function after(){ renderTiles(); drawHMI(); stepCheck(); }
@@ -168,7 +168,7 @@ function drawRoom(){
   const g=R3.ctx, W=R3.W, H=R3.H;
   const bg=g.createLinearGradient(0,0,0,H); bg.addColorStop(0,"#ffffff"); bg.addColorStop(.5,"#f4f6f5"); bg.addColorStop(1,"#e4e8e6");
   g.fillStyle=bg; g.fillRect(0,0,W,H);
-  const WZ=-2700, TY=3900, RX=9500, FZ=5200;
+  const WZ=-2700, TY=3900, RX=11000, FZ=5200;
   const poly=(pts,fill)=>{ const P=pts.map(q=>prj(q[0],q[1],q[2])); if(P.some(q=>!q)) return null;
     g.beginPath(); g.moveTo(P[0].x,P[0].y); for(let i=1;i<P.length;i++) g.lineTo(P[i].x,P[i].y); g.closePath(); if(fill){ g.fillStyle=fill; g.fill(); } return P; };
   { const P=poly([[-RX,0,WZ],[RX,0,WZ],[RX,TY,WZ],[-RX,TY,WZ]],null);
@@ -184,8 +184,8 @@ function drawRoom(){
   /* 작업 통로 표시선 (노란 안전선) */
   for(const z of [700,1850]) poly([[-RX,1,z-25],[RX,1,z-25],[RX,1,z+25],[-RX,1,z+25]],"rgba(228,184,40,.55)");
   poly([[-RX,TY,WZ],[RX,TY,WZ],[RX,TY,FZ],[-RX,TY,FZ]],"#eceeef");
-  for(const z of [-1200,1400]){ poly([[-7000,TY-5,z-320],[7000,TY-5,z-320],[7000,TY-5,z+320],[-7000,TY-5,z+320]],"#d8e2ec");
-    poly([[-6800,TY-10,z-260],[6800,TY-10,z-260],[6800,TY-10,z+260],[-6800,TY-10,z+260]],"#ffffff"); }
+  for(const z of [-1200,1400]){ poly([[-7500,TY-5,z-320],[9500,TY-5,z-320],[9500,TY-5,z+320],[-7500,TY-5,z+320]],"#d8e2ec");
+    poly([[-7300,TY-10,z-260],[9300,TY-10,z-260],[9300,TY-10,z+260],[-7300,TY-10,z+260]],"#ffffff"); }
 }
 let HOT=[];
 function drawOverlay(){
@@ -193,8 +193,8 @@ function drawOverlay(){
   HOT.length=0;
   g.textAlign="center"; g.textBaseline="middle";
   if(VIEW3.label){
-    const LBL=[[-4200,2150,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2200,-300,"② SG-120 실리카겔"],[L.lc1,1480,190,"전단 로드셀"],
-      [-820,2330,-800,"③ DMC-60T 정제 계수기"],[L.lc2,1480,190,"후단 로드셀 · 리젝트"],[L.pe,2100,-300,"④ HPE-100 PE 필름"],[2940,2620,-379,"⑤ RCS-120 로타리 캡핑기"],[4800,1450,-10,"집적 테이블"],[120,1720,760,"중량선별 PLC"]];
+    const LBL=[[-4200,2100,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2150,-300,"② SG-120 실리카겔"],[L.lc1,1500,0,"전단 계량"],
+      [416,2050,-700,"③ DMC-60T 정제 계수기"],[L.lc2,1500,0,"후단 계량 · 리젝트"],[L.pe,2050,-300,"④ HPE-100 PE 필름"],[L.T.x,2560,-379,"⑤ RCS-120 로타리 캡핑기"],[L.table.x,1450,-10,"집적 테이블"],[L.lc2+420,2080,-150,"중량선별 PLC"]];
     g.font="800 "+(12*K).toFixed(0)+"px "+'"Malgun Gothic",sans-serif';
     for(const [x,y,z,t] of LBL){ if(cam.dist>7000&&/로드셀|PLC/.test(t)) continue; const p=prj(x,y,z); if(!p||p.x<0||p.x>W||p.y<0||p.y>H) continue;
       const w=g.measureText(t).width+16*K, h=21*K;
