@@ -48,7 +48,7 @@ function makeStations(){
     pe:gen("pe",L.pe,0,()=>0.56*cycK(),{feed:0,cut:0,plg:0,idx:0,piece:null})
   };
   LN.dmc={gate:[0,0], gateT:[0,0], buf:[0,0], hold:[false,false],
-    chPh:new Array(12).fill(0), led:new Array(12).fill(0), falls:[], vibPh:0, tray:[0,0,0], dump:[null,null]};   /* 트레이는 비어서 시작 : 운전 중 호퍼 → 1 → 2 → 3단으로 채워진다 */
+    chPh:new Array(12).fill(0), led:new Array(12).fill(0), falls:[], vibPh:0, flow:0, flowPh:0, sf:[0,0], tray:[0,0,0], dump:[null,null]};   /* 트레이는 비어서 시작 : 운전 중 호퍼 → 1 → 2 → 3단으로 채워진다 */
 }
 const laneQ=()=>({gate:1, inPin:1, meter:"closed", gb:null, clampB:null, clamp:0, IN:null, PAN:null, OUT:null});
 function lcStation(k,X,i){ return {k, X, i, lc:true, ph:"wait", t:0, fin:0, car:0, read:null, idleT:0, ln:{"-1":laneQ(),"1":laneQ()}}; }
@@ -155,13 +155,13 @@ function dmcFill(st,dt,run){
   if(!st.dump){
     if(D.buf[g]>=N){
       if(S.dmc.bridge){ raise("DM33"); return; }
-      st.dump=true; st.t=0; D.gateT[g]=0.30; D.dump[g]={b:st.b,n:D.buf[g],t:0};
+      st.dump=true; st.t=0; D.gateT[g]=0.30; D.dump[g]={b:st.b,n:N,t:0};
     }
     return;
   }
   st.t+=dt; const q=D.dump[g]; q.t+=dt; st.b.fill=Math.min(1,q.t/0.26);
   if(st.t>0.30+S.dmc.gateDelay){
-    fillBottle(st.b,q.n,g); D.buf[g]=0; D.hold[g]=false; D.dump[g]=null;
+    fillBottle(st.b,q.n,g); D.buf[g]=Math.max(0,D.buf[g]-q.n); D.hold[g]=false; D.dump[g]=null;
     st.dump=false; st.b.done[st.k]=true; st.ph="rel"; st.t=0;
   }
 }
@@ -312,26 +312,37 @@ function dmcTick(dt,run){
   D.vibPh+=dt*(run?1:0);
   const tabsLeft=S.mat.tab>0;
   /* 트레이 공급 상태 (호퍼가 비면 1→2→3단 차례로 빈다) */
-  if(run){
-    if(!tabsLeft){ D.tray[0]=Math.max(0,D.tray[0]-dt*0.22); } else D.tray[0]=Math.min(1,D.tray[0]+dt*0.5);
-    D.tray[1]+=((D.tray[0]>0.05?1:0)-D.tray[1])*dt*0.35; D.tray[2]+=((D.tray[1]>0.05?1:0)-D.tray[2])*dt*0.35;
+  if(run){   /* 호퍼 → 1단 → 2단 → 3단(트랙) 순서로 채워짐 (앞 단이 어느 정도 차야 다음 단으로 넘어감) */
+    if(!tabsLeft){ D.tray[0]=Math.max(0,D.tray[0]-dt*0.18); } else D.tray[0]=Math.min(1,D.tray[0]+dt*0.30);
+    D.tray[1]=clamp(D.tray[1]+dt*(D.tray[0]>0.45?0.30:-0.10),0,1); D.tray[2]=clamp(D.tray[2]+dt*(D.tray[1]>0.45?0.30:-0.10),0,1);
     if(S.mat.tab<N*6) raise("DM31"); else clearAlarm("DM31");
   }
   /* 채널 계수 */
   const r=dmcRate(), vt=trackSpeed(), sp=vt/Math.max(0.1,r);
   D.spacing=Math.max(S.rc.prod.len+1.5,sp); D.vt=vt;
+  /* 진동 속도 제어 : 멈췄다 한꺼번에 흐르지 않도록, 병 공급 속도에 맞춘 일정한 흐름 (게이트 버퍼 = 현재 병 N + 다음 병 N)
+     · 필요 속도 = N 정 × (레인당 병/초) · 여유 35 % · 다음 병 분량이 차 가면 서서히 감속 */
+  const reqCh=N*Math.max(2,S.bpm)/120/6;
+  for(const g of [0,1]){
+    const b=D.buf[g], base=clamp(reqCh/Math.max(0.05,r),0.06,1);
+    /* 버퍼를 약 1.4 N 으로 유지하는 비례 제어 : 수요 속도 × (0.3 ~ 1.8) */
+    const fT=(!run||D.tray[2]<0.2||S.mat.tab<=0)?0:Math.min(1,base*clamp(1+(1.4*N-b)/(0.5*N),0.3,1.8));
+    D.sf[g]+=(fT-D.sf[g])*Math.min(1,dt*1.6);
+    if(b>=2*N) D.sf[g]=Math.min(D.sf[g],0.02);
+  }
+  D.flow+=(((D.sf[0]+D.sf[1])/2)-D.flow)*Math.min(1,dt*1.2);
+  D.flowPh+=dt*D.flow;
   for(let c=0;c<12;c++){
     D.led[c]=Math.max(0,D.led[c]-dt*9);
     const g=c<6?0:1;
-    if(!run||D.hold[g]||D.tray[2]<0.2||S.mat.tab<=0) continue;
+    if(D.sf[g]<0.005) continue;
     const before=Math.floor(D.chPh[c]/D.spacing);
-    D.chPh[c]+=vt*dt;
+    D.chPh[c]+=vt*D.sf[g]*dt;
     const after=Math.floor(D.chPh[c]/D.spacing);
     for(let k=before;k<after;k++){
-      if(D.buf[g]>=N){ D.hold[g]=true; D.chPh[c]=after*D.spacing-0.01; break; }
+      if(D.buf[g]>=2*N){ D.chPh[c]=after*D.spacing-0.01; break; }
       D.buf[g]++; S.dmc.cnt[c]++; S.dmc.total++; S.mat.tab=Math.max(0,S.mat.tab-1); S.cnt.tabs++;
       D.led[c]=1; D.falls.push({c,t:0});
-      if(D.buf[g]>=N) D.hold[g]=true;
     }
   }
   D.falls=D.falls.filter(f=>(f.t+=dt)<0.32);

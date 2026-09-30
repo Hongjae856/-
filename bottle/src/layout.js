@@ -92,12 +92,12 @@ Object.assign(CAMVIEW,{
 });
 /* 작업 영역 확대 시점 (자재 보충 · 조치) */
 const WORKVIEW={
-  /* 병 · 정제 · 필름 · 캡은 라인 뒤에서 투입 → 앞 위에서 설비 너머로 내려다본다 */
-  bottle:{yaw:-0.45,pitch:0.40,dist:3900,tx:-3640,ty:1250,tz:-800},
+  /* 병 · 정제 · 필름 · 캡은 라인 뒤에서 투입 → 카메라도 라인 뒤쪽에서 본다 (가드 너머로 흐리게 보이지 않도록) */
+  bottle:{yaw:2.30,pitch:0.34,dist:3000,tx:-3640,ty:1300,tz:-650},
   gel:   {yaw:-0.40,pitch:0.14,dist:2600,tx:-2390,ty:1250,tz:150},
-  tab:   {yaw:-0.50,pitch:0.42,dist:3700,tx:436,ty:1350,tz:-900},
-  film:  {yaw:-0.40,pitch:0.40,dist:3500,tx:3617,ty:1200,tz:-850},
-  cap:   {yaw:-0.40,pitch:0.42,dist:3900,tx:5018,ty:1250,tz:-950},
+  tab:   {yaw:2.25,pitch:0.34,dist:3100,tx:436,ty:1550,tz:-650},
+  film:  {yaw:2.30,pitch:0.30,dist:3000,tx:3617,ty:1300,tz:-650},
+  cap:   {yaw:2.25,pitch:0.34,dist:3100,tx:5018,ty:1500,tz:-650},
   reject:{yaw:-0.30,pitch:0.26,dist:2600,tx:2600,ty:900,tz:250},
   table: {yaw:-0.55,pitch:0.34,dist:2800,tx:7725,ty:900,tz:250},
   rcHead:{yaw:-0.20,pitch:0.14,dist:2600,tx:L.T.x,ty:1250,tz:-100}
