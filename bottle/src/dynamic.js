@@ -513,7 +513,7 @@ function floorY(x,z){
 }
 /* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점 */
 const JOBS={
-  bottle:{stand:[-3740,-1400], reach:[-3740,760,-950], carry:"box",  view:"bottle", dur:2.8, pour:true},
+  bottle:{stand:[-3740,-1470], reach:[-3740,700,-640], carry:"box",  view:"bottle", dur:2.8, door:"uaFeed", pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
   tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},
   film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},

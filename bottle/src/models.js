@@ -8,7 +8,12 @@ const BD=()=>S.rc.bottle;                    /* 현재 병 규격 */
 function foot(x,z,top){ cylY(x,z,0,14,30,C.rubber,12); cylY(x,z,14,top||110,11,C.ss,10); }
 function cabinet(x0,x1,y0,y1,z0,z1,o){
   o=o||{};
-  box(x0,x1,y0,y1,z0,z1,o.col||C.cab,o.top||C.ssL);
+  const P=o.pocket;   /* [px0,px1,py0,py1,pz1] : 뒤판(z0)에서 pz1 까지 파인 공간 (호퍼 수납부) */
+  if(!P) box(x0,x1,y0,y1,z0,z1,o.col||C.cab,o.top||C.ssL);
+  else { const [a,b,c,d,e]=P, col=o.col||C.cab, top=o.top||C.ssL;
+    box(x0,a,y0,y1,z0,z1,col,top); box(b,x1,y0,y1,z0,z1,col,top);
+    box(a,b,y0,c,z0,z1,col,top); box(a,b,d,y1,z0,z1,col,top); box(a,b,c,d,e,z1,col,top);
+    box(a,b,c-4,c,z0,e,C.ssD,C.ssD,0); }
   for(const x of [x0+45,x1-45]) for(const z of [z0+45,z1-45]) foot(x,z,y0);
   box(x0+6,x1-6,y0-18,y0,z0+6,z1-6,C.ssD,C.ssD,0);            /* 걸레받이 */
   if(o.doors) doorsZ(x0,x1,y0+20,y1-20,o.front===undefined?z1:o.front,o.doors,o.dir||1);
@@ -329,13 +334,14 @@ let DIV_TIP=0;
       왼칸 = 레벨 디스크 소터 · 가운데 기둥 = HMI · 경광등 · 오른칸 = 사이드 벨트(앞) + 벌크 호퍼(뒤) ── */
 function sUA(){
   const b=BD(), tt=L.tt, U=UAB, hp=L.hop;
-  cabinet(U.x0,U.x1,110,CH-100,U.z0,U.z1,{doors:3});
+  const hp0=L.hop;
+  cabinet(U.x0,U.x1,110,CH-100,U.z0,U.z1,{doors:3,pocket:[hp0.x0-30,hp0.x1+30,hp0.y0-20,hp0.y1+10,hp0.z1+20]});
   box(U.x0-10,U.x1+10,CH-100,CH-86,U.z0-10,U.z1+10,C.ssL,C.ssL);           /* 상판 */
   handWheel(U.x1-230,600,U.z1+1,95);                                      /* 사이드 벨트 높이 조정 */
   mainSwitch(U.x0+200,640,U.z1+1);
   /* 상부 가드 : 왼칸(디스크) · 가운데 기둥 · 오른칸(벨트 · 호퍼) — 앞 도어는 위로 여는 방식 */
   alFrame(U.x0,U.x1,CH-86,U.yT,U.z0,U.z1,{mx:[U.col0,U.col1], fskip:[1],
-    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"double"}},
+    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"top"}},
     hole:{r:[-110,110,CH-90,CH+b.h+60]}});
   /* 가운데 기둥 : 조작 패널 (위) · 점검창 (아래) */
   const H=HMIS.ua;
@@ -361,11 +367,13 @@ function sUA(){
   const y0=hp.y0, y1=hp.y1;
   box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
-  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss);
+  box(hp.x0,hp.x1,y0,y1-160,hp.z0,hp.z0+4,C.ss);                                      /* 뒤 벽 (윗부분은 투입구) */
+  box(hp.x0,hp.x1,y0,y1,hp.z1-4,hp.z1,C.ss);
+  /* 병 공급 가드 (뒤판 · 위로 열림 · 인터락 제외) */
+  DOORS.push({id:"uaFeed",hinge:"top",x0:hp.x0-26,x1:hp.x1+26,y0:hp.y0-16,y1:hp.y1+6,z:U.z0-12,back:true});
+  box(hp.x0-30,hp.x1+30,hp.y1+6,hp.y1+14,U.z0-18,U.z0,C.ss,C.ss,0);                  /* 경첩 레일 */
   for(const [a,b2,c,d] of [[hp.x0-6,hp.x1+6,hp.z0-6,hp.z0+8],[hp.x0-6,hp.x0+8,hp.z0-6,hp.z1],[hp.x1-8,hp.x1+6,hp.z0-6,hp.z1]]) box(a,b2,y1-4,y1+6,c,d,C.ssL,C.ssL,0);   /* 투입구 테두리 */
   quad([hp.x0+4,y0+40,hp.z0+4],[hp.x0+4,y0+40,hp.z1-4],[hp.x1-4,y0+160,hp.z1-4],[hp.x1-4,y0+160,hp.z0+4],[0.36,0.25,0.19,0.08]);
-  for(const x of [hp.x0+40,hp.x1-40]) cylY(x,hp.z0+40,0,y0,16,C.ss,10), foot(x,hp.z0+40,20);
-  box(hp.x0+20,hp.x1-20,y0+40,y1-10,U.z0-2,U.z0,C.black,C.black,0);                  /* 캐비닛 뒤판 개구부 */
   cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
   /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
   const e0=UA_EL[0], e1=UA_EL[1];
