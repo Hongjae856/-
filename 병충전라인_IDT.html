@@ -2769,6 +2769,7 @@ function unloadTable(){
 /* ── 센서 오염 ── */
 function dirtTick(dt,run){
   if(!run) return;
+  if(S.mode==="demo"||(typeof AP!=="undefined"&&AP.video&&AP.dir==="done")) return;   /* 시연 : 알람 1건 뒤 이상 없이 연속 생산 */
   const k=S.dust?0.0008:0.012;
   for(let c=0;c<12;c++) S.dmc.dirt[c]=Math.min(1,S.dmc.dirt[c]+dt*k*(0.6+0.8*hash1(c*7.1)));
   if(Math.max(...S.dmc.dirt)>0.6) raise("DM32");
