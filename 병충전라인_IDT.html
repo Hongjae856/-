@@ -1283,7 +1283,7 @@ const L={
   /* UA-120 */
   uaX0:-5200, uaX1:-3230,
   tt:{x:-4760, z:-372, r:370},                       /* 언스크램블 턴테이블 (가장자리가 z=0 에 닿음) */
-  hop:{x0:-3900, x1:-3380, z0:-760, z1:-280, y0:880, y1:1250},   /* 벌크 호퍼 (가드 안 뒤쪽 오른칸) */
+  hop:{x0:-4000, x1:-3480, z0:-1090, z1:-802, y0:380, y1:780},   /* 벌크 호퍼 (하부 캐비닛 뒤쪽 · 허리 아래 투입구) */
   belt0:-4560, inv0:-4460, inv1:-4160, flat1:-3700, inv2:-3700, inv3:-3400, belt1:-3330,
   air:[-4080,-3890], vac:[-3990,-3800],               /* 1차·2차 이온 에어 / 진공 */
   /* SG-120 */
@@ -1366,7 +1366,7 @@ Object.assign(CAMVIEW,{
 /* 작업 영역 확대 시점 (자재 보충 · 조치) */
 const WORKVIEW={
   /* 병 · 정제 · 필름 · 캡은 라인 뒤에서 투입 → 카메라도 라인 뒤쪽에서 본다 (가드 너머로 흐리게 보이지 않도록) */
-  bottle:{yaw:2.30,pitch:0.34,dist:3000,tx:-3640,ty:1300,tz:-650},
+  bottle:{yaw:2.30,pitch:0.30,dist:3000,tx:-3900,ty:900,tz:-900},
   gel:   {yaw:-0.40,pitch:0.14,dist:2600,tx:-2390,ty:1250,tz:150},
   tab:   {yaw:2.25,pitch:0.34,dist:3100,tx:436,ty:1550,tz:-650},
   film:  {yaw:2.30,pitch:0.30,dist:3000,tx:3617,ty:1300,tz:-650},
@@ -1378,7 +1378,7 @@ const WORKVIEW={
 
 /* ── 장치 핫스팟 위치 (월드 mm) ── */
 const DEVPOS={
-  1:[-3640,1500,-500], 2:[-4760,1020,-372], 3:[-4000,1080,0], 4:[-3900,880,60],
+  1:[-3740,800,-950], 2:[-4760,1020,-372], 3:[-4000,1080,0], 4:[-3900,880,60],
   5:[L.sg-440,1700,80], 6:[L.sg,1400,160], 7:[L.sg,1180,160],
   8:[L.lc1,960,120], 9:[436,1850,-700], 10:[436,1560,-450], 11:[436,1420,20], 12:[436,1200,60], 13:[436,960,120],
   14:[L.lc2,960,120], 15:[L.rej,780,330], 16:[L.lc2+420,1650,-230],
@@ -1745,13 +1745,16 @@ function sUA(){
   cylY(px,(tt.z-230+tt.z+130)/2,1450,1520,16,C.ssL,12);
   /* 출구 안내 가이드 (디스크 → 사이드 벨트) */
   for(const s of [-1,1]) box(tt.x-20,tt.x+90,CH+2,CH+b.h*0.6,s*(b.d/2+5),s*(b.d/2+11),C.guide,C.guide,0);
-  /* 벌크 호퍼 (가드 안 뒤쪽) : 스테인리스 통 + 경사 바닥 브라운 체인 벨트 + 레벨 센서 */
+  /* 벌크 호퍼 (하부 캐비닛 뒤쪽 · 허리 아래 투입구) : 스테인리스 통 + 경사 바닥 브라운 체인 벨트 + 레벨 센서
+     → 캐비닛 뒤판의 개구부를 통해 상승 컨베이어로 이어진다 */
   const y0=hp.y0, y1=hp.y1;
   box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
-  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,y0,y1-120,hp.z1-4,hp.z1,C.ss);
+  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss);
+  for(const [a,b2,c,d] of [[hp.x0-6,hp.x1+6,hp.z0-6,hp.z0+8],[hp.x0-6,hp.x0+8,hp.z0-6,hp.z1],[hp.x1-8,hp.x1+6,hp.z0-6,hp.z1]]) box(a,b2,y1-4,y1+6,c,d,C.ssL,C.ssL,0);   /* 투입구 테두리 */
   quad([hp.x0+4,y0+40,hp.z0+4],[hp.x0+4,y0+40,hp.z1-4],[hp.x1-4,y0+160,hp.z1-4],[hp.x1-4,y0+160,hp.z0+4],[0.36,0.25,0.19,0.08]);
-  for(const x of [hp.x0+40,hp.x1-40]) for(const z of [hp.z0+40,hp.z1-40]) cylY(x,z,CH-86,y0,16,C.ss,10);
+  for(const x of [hp.x0+40,hp.x1-40]) cylY(x,hp.z0+40,0,y0,16,C.ss,10), foot(x,hp.z0+40,20);
+  box(hp.x0+20,hp.x1-20,y0+40,y1-10,U.z0-2,U.z0,C.black,C.black,0);                  /* 캐비닛 뒤판 개구부 */
   cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
   /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
   const e0=UA_EL[0], e1=UA_EL[1];
@@ -1759,9 +1762,7 @@ function sUA(){
   box(-120,-110,0,len,-50,40,C.ss); box(110,120,0,len,-50,40,C.ss); box(-110,110,0,len,-70,-44,C.ss);
   cylZ(0,30,-38,60,26,C.ssD,14); cylZ(0,len-30,-38,60,26,C.ssD,14);
   mPop();
-  cylY(e1[0],e1[2],CH-86,e1[1]-40,20,C.ss,10); cylY(e0[0]-40,e0[2],CH-86,e0[1],20,C.ss,10);
-  /* 배출 슈트 (엘리베이터 → 디스크) */
-  quad([e1[0]-70,e1[1]-20,e1[2]-60],[e1[0]+70,e1[1]-20,e1[2]-60],[tt.x+20,CH+150,tt.z-40],[tt.x-140,CH+150,tt.z-40],C.ss);
+  cylY(e1[0]+60,e1[2]-60,CH-86,e1[1]-60,20,C.ss,10);                               /* 머리부 받침 (디스크 바깥) */
   /* 반전 사이드 벨트 : 흰 풀리 · 폭 조정 브래킷 · 눈금 */
   const zb=b.d/2+8, ym=CH+b.h/2;
   for(const x of [L.belt0,L.belt1]) for(const s of [-1,1]){
@@ -1789,7 +1790,8 @@ function sUA(){
   box(U.x1-420,U.x1-320,560,760,U.z1,U.z1+40,C.dark); cylZ(U.x1-370,720,U.z1+40,U.z1+50,26,C.white,20); cylY(U.x1-370,U.z1+20,560,600,20,[0.75,0.82,0.9,0.1],14);
 }
 /* UA 엘리베이터 : 호퍼 바닥 → 디스크 위 */
-const UA_EL=[[L.hop.x0-40,L.hop.y0+40,-520],[L.tt.x+180,1560,-600]];
+/* 상승 컨베이어 : 뒤 호퍼 바닥 → 캐비닛 속 → 디스크 위 (끝에서 병이 그대로 디스크로 떨어진다) */
+const UA_EL=[[L.hop.x0+60,L.hop.y0+80,-690],[L.tt.x+190,CH+330,L.tt.z-190]];
 /* 호스 (3점 곡선) */
 function hoseTo(a,m,e,r,col){ const pts=[]; for(let i=0;i<=10;i++){ const t=i/10,u=1-t; pts.push([u*u*a[0]+2*u*t*m[0]+t*t*e[0],u*u*a[1]+2*u*t*m[1]+t*t*e[1],u*u*a[2]+2*u*t*m[2]+t*t*e[2]]); } tubePath(pts,r,col,10); }
 
@@ -2958,6 +2960,9 @@ function dUA(){
   for(let y=(LN.elev%160);y<len;y+=160){ box(-104,104,y,y+5,-36,-8,[0.10,0.38,0.26,0.05],null,0);
     if(S.ua.elev&&!far&&Math.floor((y+LN.elev)/160)%2===0&&y>60&&y<len-60){ drawBottle(0,y+b.d/2+5,-36+b.h/2,{tilt:Math.PI/2,yaw:Math.PI/2}); } }
   mPop();
+  /* 머리부에서 디스크로 떨어지는 병 */
+  if(S.ua.elev&&!far){ const u=(LN.elev%320)/320, t=Math.min(1,u*1.6);
+    drawBottle(lerp(e1[0],e1[0]-40,t),lerp(e1[1]+20,CH+b.d/2-2,t*t),lerp(e1[2],e1[2]+40,t),{tilt:Math.PI/2,yaw:0.6+t*1.2}); }
   /* 반전 사이드 벨트 (병과 함께 비틀림) */
   const ym=CH+b.h/2, w=b.d/2+7, bw=Math.min(62,b.h*0.55);
   for(const side of [-1,1]){
@@ -3386,7 +3391,7 @@ function floorY(x,z){
 }
 /* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점 */
 const JOBS={
-  bottle:{stand:[-3640,-1080], reach:[-3640,1200,-560], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
+  bottle:{stand:[-3740,-1400], reach:[-3740,760,-950], carry:"box",  view:"bottle", dur:2.8, pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
   tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},
   film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},

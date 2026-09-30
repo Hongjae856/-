@@ -82,6 +82,9 @@ function dUA(){
   for(let y=(LN.elev%160);y<len;y+=160){ box(-104,104,y,y+5,-36,-8,[0.10,0.38,0.26,0.05],null,0);
     if(S.ua.elev&&!far&&Math.floor((y+LN.elev)/160)%2===0&&y>60&&y<len-60){ drawBottle(0,y+b.d/2+5,-36+b.h/2,{tilt:Math.PI/2,yaw:Math.PI/2}); } }
   mPop();
+  /* 머리부에서 디스크로 떨어지는 병 */
+  if(S.ua.elev&&!far){ const u=(LN.elev%320)/320, t=Math.min(1,u*1.6);
+    drawBottle(lerp(e1[0],e1[0]-40,t),lerp(e1[1]+20,CH+b.d/2-2,t*t),lerp(e1[2],e1[2]+40,t),{tilt:Math.PI/2,yaw:0.6+t*1.2}); }
   /* 반전 사이드 벨트 (병과 함께 비틀림) */
   const ym=CH+b.h/2, w=b.d/2+7, bw=Math.min(62,b.h*0.55);
   for(const side of [-1,1]){
@@ -510,7 +513,7 @@ function floorY(x,z){
 }
 /* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점 */
 const JOBS={
-  bottle:{stand:[-3640,-1080], reach:[-3640,1200,-560], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
+  bottle:{stand:[-3740,-1400], reach:[-3740,760,-950], carry:"box",  view:"bottle", dur:2.8, pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
   tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},
   film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},

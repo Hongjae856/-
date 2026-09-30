@@ -356,13 +356,16 @@ function sUA(){
   cylY(px,(tt.z-230+tt.z+130)/2,1450,1520,16,C.ssL,12);
   /* 출구 안내 가이드 (디스크 → 사이드 벨트) */
   for(const s of [-1,1]) box(tt.x-20,tt.x+90,CH+2,CH+b.h*0.6,s*(b.d/2+5),s*(b.d/2+11),C.guide,C.guide,0);
-  /* 벌크 호퍼 (가드 안 뒤쪽) : 스테인리스 통 + 경사 바닥 브라운 체인 벨트 + 레벨 센서 */
+  /* 벌크 호퍼 (하부 캐비닛 뒤쪽 · 허리 아래 투입구) : 스테인리스 통 + 경사 바닥 브라운 체인 벨트 + 레벨 센서
+     → 캐비닛 뒤판의 개구부를 통해 상승 컨베이어로 이어진다 */
   const y0=hp.y0, y1=hp.y1;
   box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
-  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,y0,y1-120,hp.z1-4,hp.z1,C.ss);
+  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss);
+  for(const [a,b2,c,d] of [[hp.x0-6,hp.x1+6,hp.z0-6,hp.z0+8],[hp.x0-6,hp.x0+8,hp.z0-6,hp.z1],[hp.x1-8,hp.x1+6,hp.z0-6,hp.z1]]) box(a,b2,y1-4,y1+6,c,d,C.ssL,C.ssL,0);   /* 투입구 테두리 */
   quad([hp.x0+4,y0+40,hp.z0+4],[hp.x0+4,y0+40,hp.z1-4],[hp.x1-4,y0+160,hp.z1-4],[hp.x1-4,y0+160,hp.z0+4],[0.36,0.25,0.19,0.08]);
-  for(const x of [hp.x0+40,hp.x1-40]) for(const z of [hp.z0+40,hp.z1-40]) cylY(x,z,CH-86,y0,16,C.ss,10);
+  for(const x of [hp.x0+40,hp.x1-40]) cylY(x,hp.z0+40,0,y0,16,C.ss,10), foot(x,hp.z0+40,20);
+  box(hp.x0+20,hp.x1-20,y0+40,y1-10,U.z0-2,U.z0,C.black,C.black,0);                  /* 캐비닛 뒤판 개구부 */
   cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
   /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
   const e0=UA_EL[0], e1=UA_EL[1];
@@ -370,9 +373,7 @@ function sUA(){
   box(-120,-110,0,len,-50,40,C.ss); box(110,120,0,len,-50,40,C.ss); box(-110,110,0,len,-70,-44,C.ss);
   cylZ(0,30,-38,60,26,C.ssD,14); cylZ(0,len-30,-38,60,26,C.ssD,14);
   mPop();
-  cylY(e1[0],e1[2],CH-86,e1[1]-40,20,C.ss,10); cylY(e0[0]-40,e0[2],CH-86,e0[1],20,C.ss,10);
-  /* 배출 슈트 (엘리베이터 → 디스크) */
-  quad([e1[0]-70,e1[1]-20,e1[2]-60],[e1[0]+70,e1[1]-20,e1[2]-60],[tt.x+20,CH+150,tt.z-40],[tt.x-140,CH+150,tt.z-40],C.ss);
+  cylY(e1[0]+60,e1[2]-60,CH-86,e1[1]-60,20,C.ss,10);                               /* 머리부 받침 (디스크 바깥) */
   /* 반전 사이드 벨트 : 흰 풀리 · 폭 조정 브래킷 · 눈금 */
   const zb=b.d/2+8, ym=CH+b.h/2;
   for(const x of [L.belt0,L.belt1]) for(const s of [-1,1]){
@@ -400,7 +401,8 @@ function sUA(){
   box(U.x1-420,U.x1-320,560,760,U.z1,U.z1+40,C.dark); cylZ(U.x1-370,720,U.z1+40,U.z1+50,26,C.white,20); cylY(U.x1-370,U.z1+20,560,600,20,[0.75,0.82,0.9,0.1],14);
 }
 /* UA 엘리베이터 : 호퍼 바닥 → 디스크 위 */
-const UA_EL=[[L.hop.x0-40,L.hop.y0+40,-520],[L.tt.x+180,1560,-600]];
+/* 상승 컨베이어 : 뒤 호퍼 바닥 → 캐비닛 속 → 디스크 위 (끝에서 병이 그대로 디스크로 떨어진다) */
+const UA_EL=[[L.hop.x0+60,L.hop.y0+80,-690],[L.tt.x+190,CH+330,L.tt.z-190]];
 /* 호스 (3점 곡선) */
 function hoseTo(a,m,e,r,col){ const pts=[]; for(let i=0;i<=10;i++){ const t=i/10,u=1-t; pts.push([u*u*a[0]+2*u*t*m[0]+t*t*e[0],u*u*a[1]+2*u*t*m[1]+t*t*e[1],u*u*a[2]+2*u*t*m[2]+t*t*e[2]]); } tubePath(pts,r,col,10); }
 
