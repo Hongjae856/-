@@ -172,7 +172,7 @@ const SCREENS={
      row("권장 토크 ("+b.capD+" mm)","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>RCS-120 · SETTING</s></div>'+
      row("체결 토크","6~25 kgf·cm",ed(S.rcp.torque+" kgf·cm","rc_torque"))+
-     row("헤드","HEADS",pv("3조 공압 척 · 서보 터렛"))+
+     row("헤드","HEADS",pv("3 헤드 · 3조 공압 척 · 서보 터렛"))+
      row("권장 범위","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); }
  }
 };

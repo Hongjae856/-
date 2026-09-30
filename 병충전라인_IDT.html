@@ -1091,7 +1091,7 @@ function bindOrbit(cv,onClick,onHover){
           · SG-120 : 롤 형태 실리카겔 파우치를 피딩 → 왕복 커터 절단 → 플런저로 병 투입, 최대 120병/분
           · DMC-60T: 12트랙 계수 트레이 · 트윈 노즐, 최대 6,000정/분, IR/LED 센서 · 먼지 감지창 · 파손/겹침 검출
           · HPE-100: PE 필름 조각을 병에 투입해 운반 중 정제 파손 방지, 병 자동 조정(교체부품 불필요)
-          · RCS-120: 서보 로타리 4헤드, 스타휠로 터렛 이송, 헤드가 내려오며 회전해 설정 토크로 체결,
+          · RCS-120: 서보 로타리 3헤드, 스타휠로 터렛 이송, 헤드가 내려오며 회전해 설정 토크로 체결,
                      벌크 캡 공급 · 진동 피더 정렬, 최대 120병/분
    · 외형 · 기구 배치는 현장 사진(2026-09) · Key International 브로셔(CT-AU-120 · DMC-60S/60T · CT-PE-60 · CT-RC-120) 기준
    ※ 세부 치수는 사진 비율로 추정 (실측 아님)
@@ -1108,7 +1108,7 @@ const MACH=[
  {k:"pe", md:"HPE-100", nm:"비닐(PE 필름) 투입기", en:"High Speed PE Inserter", max:120,
   d:"뒤쪽 필름 롤 2군에서 풀린 PE 필름을 캐리지가 내려 보내고 톱날 커터가 한 장 길이로 자릅니다. 잘린 필름은 스포크 인덱싱 디스크의 튜브(8개)에 들어가고, 디스크가 돌아 필름이 든 튜브가 병 위에 오면 앞쪽 수직 푸셔가 병 입구로 밀어 넣습니다. 필름이 정제 위를 덮어 운반 중 파손을 막습니다."},
  {k:"rc", md:"RCS-120", nm:"로타리 캡핑기", en:"Rotary Screw Capper", max:120,
-  d:"왼쪽 칸의 진동 볼 피더가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 병은 타이밍 스크류와 흰 스타휠로 터렛에 들어가 황색 타이밍 벨트에 눌려 고정되고, 3조 공압 척 헤드가 캡을 집어 내려오며 회전해 설정 토크로 체결한 뒤 아웃피드 스타휠로 컨베이어에 놓습니다."}
+  d:"왼쪽 칸의 진동 볼 피더가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 병은 타이밍 스크류와 흰 스타휠로 터렛에 들어가 황색 타이밍 벨트에 눌려 고정되고, 3개의 3조 공압 척 헤드가 캡을 집어 내려오며 회전해 설정 토크로 체결한 뒤 아웃피드 스타휠로 컨베이어에 놓습니다."}
 ];
 const machOf=k=>MACH.find(m=>m.k===k);
 
@@ -1193,7 +1193,7 @@ const DEVICES=[
  {n:18,k:"pe", nm:"인덱싱 디스크 · 톱날 커터 · 푸셔", en:"Index Disc, Saw Cutter & Pusher", d:"톱날 커터가 필름을 한 장 길이로 자르면 스포크 디스크의 튜브에 들어가고, 디스크가 돌아 병 위에 온 튜브의 필름을 앞쪽 수직 푸셔가 병 입구로 밀어 넣습니다. (톱날식 · 가열 없음)"},
  {n:19,k:"rc", nm:"진동 볼 피더 · C 슈트 · 캡 벨트", en:"Cap Feeder", d:"왼쪽 칸의 진동 볼 피더(레벨 센서 봉)가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 왼칸 도어를 열어 볼에 캡을 보충합니다."},
  {n:20,k:"rc", nm:"타이밍 스크류 · 스타휠", en:"Timing Screw & Star Wheels", d:"타이밍 스크류가 병 간격을 터렛 피치에 맞추고, 흰 UHMW 인피드 스타휠(교체부품)이 터렛으로, 아웃피드 스타휠이 컨베이어로 옮깁니다."},
- {n:21,k:"rc", nm:"캡핑 터렛 · 타이밍 벨트", en:"Capping Turret", d:"2단 원통 드럼 아래 3조 공압 척 헤드가 캡을 집어 캠을 따라 내려와 회전해 설정 토크로 체결합니다. 병은 황색 타이밍 벨트가 터렛 포켓에 눌러 잡습니다."},
+ {n:21,k:"rc", nm:"캡핑 터렛 · 타이밍 벨트", en:"Capping Turret", d:"2단 원통 드럼 아래 3조 공압 척 헤드 3개가 캡을 집어 캠을 따라 내려와 회전해 설정 토크로 체결합니다. 병은 황색 타이밍 벨트가 터렛 포켓에 눌러 잡습니다."},
  {n:22,k:"rc", nm:"집적 테이블", en:"Accumulation Table", d:"캡핑이 끝난 병을 모으는 회전 테이블입니다. 가득 차면 작업자가 완제품을 회수합니다."}
 ];
 const devOf=n=>DEVICES.find(d=>d.n===n);
@@ -2161,10 +2161,11 @@ const LN={
   tt:{ang:0, n:18, exitT:0, list:[]}, elev:0, sbelt:0,
   blowT:0, vacT:0,
   st:{}, dmc:null, rej:{ext:0,t:0,active:null}, pushing:[],
-  rc:{phi:0, rate:0, heads:[{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0}], chute:0, chuteFeed:0, bowl:0, elev:0, captured:new Map()},
+  rc:{phi:0, rate:0, heads:[{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0}], chute:0, chuteFeed:0, bowl:0, elev:0, captured:new Map()},
   table:{ang:0, list:[]}, rejBin:[], alarmT:0, dirtT:0
 };
-const P_PITCH=2*Math.PI*L.R/4;                        /* 포켓 피치 (호 길이) */
+const NPK=3;                                          /* 터렛 헤드 · 스타휠 포켓 수 (RCS-120 : 3 헤드) */
+const P_PITCH=2*Math.PI*L.R/NPK;                      /* 포켓 피치 (호 길이) */
 function convSpeed(){ return 120+2.8*S.bpm; }        /* mm/s */
 function cycK(){ return 60/Math.max(20,S.bpm); }      /* 공정 시간 배율 (60병/분 = 1) */
 
@@ -2594,14 +2595,14 @@ function capperTick(dt,run){
     b.s=u<0?screwS(u,d):S_A+u*P_PITCH;
     if(b.s>=S_T0&&b.s<=S_T1){
       const a=PATH.tA+(b.s-S_T0)/L.R, deg=((a*180/Math.PI)%360+360)%360;
-      const h=R.heads[((k%4)+4)%4];
+      const h=R.heads[((k%NPK)+NPK)%NPK];
       if(deg>=165&&deg<205&&h.cap){ b.cap=true; b.capY=Math.max(0,(205-deg)/40*BD().capH*0.9); h.cap=false; b.spin=0; b.capping=true; }
       if(b.capping){ b.capY=Math.max(0,b.capY-dt*30); b.spin+=dt*(deg<310?28:0); if(deg>=310){ b.capping=false; b.torque=rc.torqueBad?rc.torque*0.45:rc.torque*(1+0.03*gauss()); } }
     }
     if(b.s>=S_B1){ b.pocket=null; R.captured.delete(k); b.s=S_B1+0.01; b.zone="line"; if(!b.cap){ raise("RC61"); } }
   }
   /* 헤드 : φ≈CAP_PICK(130°)±11° 에서 슈트 끝 캡을 집는다 */
-  for(let j=0;j<4;j++){
+  for(let j=0;j<NPK;j++){
     const a=headAngle(j), deg=((a*180/Math.PI)%360+360)%360, h=R.heads[j];
     if(Math.abs(deg-CAP_PICK)<11&&!h.cap&&R.chute>0&&on){ h.cap=true; R.chute--; }
     h.y=headDrop(deg); h.spin+=(deg>=205&&deg<310&&on)?dt*28:0;
@@ -2616,7 +2617,7 @@ function capSlots(){ const b=BD(); return Math.max(6,Math.min(16,Math.floor(capP
 /* 헤드 j 의 터렛 각 (rad) : 포켓 체인과 같은 위상 */
 function headAngle(j){
   const R=LN.rc, base=PATH.tA-(S_T0-S_A)/L.R;
-  return base+(R.phi-j)*Math.PI/2;
+  return base+(R.phi-j)*2*Math.PI/NPK;
 }
 /* 헤드 하강량 (0~1) : 픽업 · 체결 구간 */
 function headDrop(deg){
@@ -3091,19 +3092,20 @@ function dRCS(){
   tubePath(pts,4.5,C.uhmw,6);
   /* 스타휠 (A · B) · 터렛 포켓 판 (흰 UHMW) */
   const star=(c,base)=>{ for(const yy of [CH+b.h*0.30,CH+b.h*0.70]) starPlate(c,yy,base,d); };
-  star(A,Math.PI/2-R.phi*Math.PI/2);
-  star(B,PATH.bT-(S_A-S_T1)/L.R-R.phi*Math.PI/2);
-  star(T,PATH.tA+(S_A-S_T0)/L.R+R.phi*Math.PI/2);
+  const stp=2*Math.PI/NPK;
+  star(A,Math.PI/2-R.phi*stp);
+  star(B,PATH.bT-(S_A-S_T1)/L.R-R.phi*stp);
+  star(T,PATH.tA+(S_A-S_T0)/L.R+R.phi*stp);
   /* 황색 타이밍 벨트 (터렛 바깥 · 병을 포켓에 눌러 잡음) */
   timingBelt(R.phi*P_PITCH);
   /* 헤드 캐러셀 */
-  const car=R.phi*Math.PI/2;
+  const car=R.phi*stp;
   mPush(); mT(T.x,0,T.z); mRY(-car);
   cylY(0,0,Y.yc+60,Y.yc+110,L.R+58,C.ss,32); cylY(0,0,Y.yc+110,Y.yc+170,90,C.ssD,20);
-  for(let i=0;i<4;i++){ const a=i*Math.PI/2; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); mPop(); }
+  for(let i=0;i<NPK;i++){ const a=i*stp; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); mPop(); }
   mPop();
-  /* 3조 공압 척 헤드 4 */
-  for(let j=0;j<4;j++){
+  /* 3조 공압 척 헤드 3 */
+  for(let j=0;j<NPK;j++){
     const a=headAngle(j), h=R.heads[j], hx=T.x+L.R*Math.cos(a), hz=T.z+L.R*Math.sin(a);
     const cup0=CH+b.h-b.capH*0.62+(1-h.y)*112, ct=cup0+b.capH+12;
     cylY(hx,hz,ct+70,Y.yc,11,C.rodC,12);
@@ -3161,12 +3163,12 @@ function timingBelt(mv){
     for(let s=off;s<acc;s+=pitch){ let i=1; while(i<L2.length-1&&L2[i]<s) i++; const t=(s-L2[i-1])/((L2[i]-L2[i-1])||1), p=pts[i-1], q=pts[i];
       const x=T.x+p[0]+(q[0]-p[0])*t, z=T.z+p[1]+(q[1]-p[1])*t; box(x-1.5,x+1.5,yB-14,yB+14,z-1.5,z+1.5,dk,null,0); } }
 }
-/* 포켓 4개 스타 판 (윤곽 : 원 − 포켓 반원) */
+/* 포켓 NPK 개 스타 판 (윤곽 : 원 − 포켓 반원) */
 function starPlate(c,y,base,d){
   const R=L.R, rp=d/2+2, fw=rp+16, Ro=R+rp*0.55, Rh=Math.max(60,R-rp-26), pts=[];
   for(let i=0;i<=128;i++){
     const t=i/128*Math.PI*2; let r=Rh;
-    for(let k=0;k<4;k++){ let dl=t-(base+k*Math.PI/2); dl=Math.atan2(Math.sin(dl),Math.cos(dl));
+    for(let k=0;k<NPK;k++){ let dl=t-(base+k*2*Math.PI/NPK); dl=Math.atan2(Math.sin(dl),Math.cos(dl));
       const q=R*Math.sin(dl); if(Math.abs(q)<fw&&Math.cos(dl)>0){
         let ro=Ro; if(Math.abs(q)<rp) ro=R*Math.cos(dl)-Math.sqrt(rp*rp-q*q);
         r=Math.max(r,Math.max(Rh,ro)); } }
@@ -3562,7 +3564,7 @@ const SCREENS={
      row("권장 토크 ("+b.capD+" mm)","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>RCS-120 · SETTING</s></div>'+
      row("체결 토크","6~25 kgf·cm",ed(S.rcp.torque+" kgf·cm","rc_torque"))+
-     row("헤드","HEADS",pv("3조 공압 척 · 서보 터렛"))+
+     row("헤드","HEADS",pv("3 헤드 · 3조 공압 척 · 서보 터렛"))+
      row("권장 범위","RECOMMENDED",pv(torqueRange().join(" ~ ")+" kgf·cm")); }
  }
 };

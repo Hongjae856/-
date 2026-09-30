@@ -342,19 +342,20 @@ function dRCS(){
   tubePath(pts,4.5,C.uhmw,6);
   /* 스타휠 (A · B) · 터렛 포켓 판 (흰 UHMW) */
   const star=(c,base)=>{ for(const yy of [CH+b.h*0.30,CH+b.h*0.70]) starPlate(c,yy,base,d); };
-  star(A,Math.PI/2-R.phi*Math.PI/2);
-  star(B,PATH.bT-(S_A-S_T1)/L.R-R.phi*Math.PI/2);
-  star(T,PATH.tA+(S_A-S_T0)/L.R+R.phi*Math.PI/2);
+  const stp=2*Math.PI/NPK;
+  star(A,Math.PI/2-R.phi*stp);
+  star(B,PATH.bT-(S_A-S_T1)/L.R-R.phi*stp);
+  star(T,PATH.tA+(S_A-S_T0)/L.R+R.phi*stp);
   /* 황색 타이밍 벨트 (터렛 바깥 · 병을 포켓에 눌러 잡음) */
   timingBelt(R.phi*P_PITCH);
   /* 헤드 캐러셀 */
-  const car=R.phi*Math.PI/2;
+  const car=R.phi*stp;
   mPush(); mT(T.x,0,T.z); mRY(-car);
   cylY(0,0,Y.yc+60,Y.yc+110,L.R+58,C.ss,32); cylY(0,0,Y.yc+110,Y.yc+170,90,C.ssD,20);
-  for(let i=0;i<4;i++){ const a=i*Math.PI/2; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); mPop(); }
+  for(let i=0;i<NPK;i++){ const a=i*stp; mPush(); mRY(-a); box(L.R-40,L.R+40,Y.yc-10,Y.yc+62,-40,40,C.cab,C.ssL); mPop(); }
   mPop();
-  /* 3조 공압 척 헤드 4 */
-  for(let j=0;j<4;j++){
+  /* 3조 공압 척 헤드 3 */
+  for(let j=0;j<NPK;j++){
     const a=headAngle(j), h=R.heads[j], hx=T.x+L.R*Math.cos(a), hz=T.z+L.R*Math.sin(a);
     const cup0=CH+b.h-b.capH*0.62+(1-h.y)*112, ct=cup0+b.capH+12;
     cylY(hx,hz,ct+70,Y.yc,11,C.rodC,12);
@@ -412,12 +413,12 @@ function timingBelt(mv){
     for(let s=off;s<acc;s+=pitch){ let i=1; while(i<L2.length-1&&L2[i]<s) i++; const t=(s-L2[i-1])/((L2[i]-L2[i-1])||1), p=pts[i-1], q=pts[i];
       const x=T.x+p[0]+(q[0]-p[0])*t, z=T.z+p[1]+(q[1]-p[1])*t; box(x-1.5,x+1.5,yB-14,yB+14,z-1.5,z+1.5,dk,null,0); } }
 }
-/* 포켓 4개 스타 판 (윤곽 : 원 − 포켓 반원) */
+/* 포켓 NPK 개 스타 판 (윤곽 : 원 − 포켓 반원) */
 function starPlate(c,y,base,d){
   const R=L.R, rp=d/2+2, fw=rp+16, Ro=R+rp*0.55, Rh=Math.max(60,R-rp-26), pts=[];
   for(let i=0;i<=128;i++){
     const t=i/128*Math.PI*2; let r=Rh;
-    for(let k=0;k<4;k++){ let dl=t-(base+k*Math.PI/2); dl=Math.atan2(Math.sin(dl),Math.cos(dl));
+    for(let k=0;k<NPK;k++){ let dl=t-(base+k*2*Math.PI/NPK); dl=Math.atan2(Math.sin(dl),Math.cos(dl));
       const q=R*Math.sin(dl); if(Math.abs(q)<fw&&Math.cos(dl)>0){
         let ro=Ro; if(Math.abs(q)<rp) ro=R*Math.cos(dl)-Math.sqrt(rp*rp-q*q);
         r=Math.max(r,Math.max(Rh,ro)); } }

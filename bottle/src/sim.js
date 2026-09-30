@@ -10,10 +10,11 @@ const LN={
   tt:{ang:0, n:18, exitT:0, list:[]}, elev:0, sbelt:0,
   blowT:0, vacT:0,
   st:{}, dmc:null, rej:{ext:0,t:0,active:null}, pushing:[],
-  rc:{phi:0, rate:0, heads:[{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0}], chute:0, chuteFeed:0, bowl:0, elev:0, captured:new Map()},
+  rc:{phi:0, rate:0, heads:[{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0}], chute:0, chuteFeed:0, bowl:0, elev:0, captured:new Map()},
   table:{ang:0, list:[]}, rejBin:[], alarmT:0, dirtT:0
 };
-const P_PITCH=2*Math.PI*L.R/4;                        /* 포켓 피치 (호 길이) */
+const NPK=3;                                          /* 터렛 헤드 · 스타휠 포켓 수 (RCS-120 : 3 헤드) */
+const P_PITCH=2*Math.PI*L.R/NPK;                      /* 포켓 피치 (호 길이) */
 function convSpeed(){ return 120+2.8*S.bpm; }        /* mm/s */
 function cycK(){ return 60/Math.max(20,S.bpm); }      /* 공정 시간 배율 (60병/분 = 1) */
 
@@ -443,14 +444,14 @@ function capperTick(dt,run){
     b.s=u<0?screwS(u,d):S_A+u*P_PITCH;
     if(b.s>=S_T0&&b.s<=S_T1){
       const a=PATH.tA+(b.s-S_T0)/L.R, deg=((a*180/Math.PI)%360+360)%360;
-      const h=R.heads[((k%4)+4)%4];
+      const h=R.heads[((k%NPK)+NPK)%NPK];
       if(deg>=165&&deg<205&&h.cap){ b.cap=true; b.capY=Math.max(0,(205-deg)/40*BD().capH*0.9); h.cap=false; b.spin=0; b.capping=true; }
       if(b.capping){ b.capY=Math.max(0,b.capY-dt*30); b.spin+=dt*(deg<310?28:0); if(deg>=310){ b.capping=false; b.torque=rc.torqueBad?rc.torque*0.45:rc.torque*(1+0.03*gauss()); } }
     }
     if(b.s>=S_B1){ b.pocket=null; R.captured.delete(k); b.s=S_B1+0.01; b.zone="line"; if(!b.cap){ raise("RC61"); } }
   }
   /* 헤드 : φ≈CAP_PICK(130°)±11° 에서 슈트 끝 캡을 집는다 */
-  for(let j=0;j<4;j++){
+  for(let j=0;j<NPK;j++){
     const a=headAngle(j), deg=((a*180/Math.PI)%360+360)%360, h=R.heads[j];
     if(Math.abs(deg-CAP_PICK)<11&&!h.cap&&R.chute>0&&on){ h.cap=true; R.chute--; }
     h.y=headDrop(deg); h.spin+=(deg>=205&&deg<310&&on)?dt*28:0;
@@ -465,7 +466,7 @@ function capSlots(){ const b=BD(); return Math.max(6,Math.min(16,Math.floor(capP
 /* 헤드 j 의 터렛 각 (rad) : 포켓 체인과 같은 위상 */
 function headAngle(j){
   const R=LN.rc, base=PATH.tA-(S_T0-S_A)/L.R;
-  return base+(R.phi-j)*Math.PI/2;
+  return base+(R.phi-j)*2*Math.PI/NPK;
 }
 /* 헤드 하강량 (0~1) : 픽업 · 체결 구간 */
 function headDrop(deg){
