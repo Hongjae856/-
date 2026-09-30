@@ -1,0 +1,172 @@
+<div id="stage"><div id="app">
+  <div id="head">
+    <div class="ttl">병충전 라인 IDT <i>V1</i></div>
+    <div id="bpmCtl">라인 속도 <button class="gbtn" id="bpmDn" aria-label="속도 낮춤">−</button><b id="bpmV">60</b><button class="gbtn" id="bpmUp" aria-label="속도 높임">＋</button> 병/분</div>
+    <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button></div>
+    <button class="gbtn" id="apBtn">▶ 자동재생</button>
+    <button class="gbtn rec" id="vmBtn">🎬 영상 자동재생</button>
+    <div class="sp"></div>
+    <button class="gbtn" id="soundBtn">사운드 OFF</button>
+    <button class="gbtn" id="homeBtn">메인화면</button>
+    <button class="gbtn" id="rubricBtn">채점 관리</button>
+    <button class="gbtn" id="endBtn">학습 종료</button>
+    <button class="gbtn" id="resetBtn">처음부터</button>
+  </div>
+  <div id="main">
+    <!-- ══ 좌측 ══ -->
+    <div class="col">
+      <div class="card" id="cardUtil">
+        <h3><span class="ic a">🔌</span>유틸리티<em>기동 전 준비</em></h3>
+        <div class="tiles">
+          <div class="tile" id="uAir"><div class="e">💨</div><b>압축공기</b><s id="airTxt">0.0 bar</s></div>
+          <div class="tile" id="uMain"><div class="e">⚡</div><b>메인 전원</b><s>라인 MAIN S/W</s></div>
+          <div class="tile" id="uDust"><div class="e">🌪️</div><b>집진기</b><s id="dustTxt">정제 분진 흡입</s></div>
+          <div class="tile" id="uDoor"><div class="e">🚪</div><b>안전문</b><s id="doorTxt">닫힘</s></div>
+        </div>
+      </div>
+      <div class="card" id="cardMat">
+        <h3><span class="ic g">📦</span>자재 투입<em>운전 전 보충</em></h3>
+        <div class="tiles">
+          <div class="tile" id="mBottle"><div class="e">🧴</div><b>빈 병</b><s id="tBottle">UA-120 호퍼</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mGel"><div class="e">🟫</div><b>실리카겔 롤</b><s id="tGel">SG-120 릴</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mTab"><div class="e">💊</div><b>정제 투입</b><s id="tTab">DMC-60T 호퍼</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mFilm"><div class="e">🎞️</div><b>PE 필름 롤</b><s id="tFilm">HPE-100 릴</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mCap"><div class="e">⚪</div><b>캡 투입</b><s id="tCap">RCS-120 호퍼</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mReject"><div class="e">🗑️</div><b>리젝트함</b><s id="tReject">0 병</s><div class="lv"><i></i></div></div>
+          <div class="tile" id="mTable"><div class="e">🛞</div><b>완제품 회수</b><s id="tTable">집적 테이블 0 병</s><div class="lv"><i></i></div></div>
+        </div>
+      </div>
+      <div class="card" id="cardMon">
+        <h3>라인 모니터<em id="monRun">대기</em></h3>
+        <div id="monTop">
+          <div>양품 (캡핑 완료)<strong id="monGood">0</strong></div>
+          <div>리젝트<strong id="monBad" class="r">0</strong></div>
+          <div>라인 속도<strong id="monBpm">0 <small>병/분</small></strong></div>
+          <div>목표 / 진행<strong id="monTarget">- / -</strong></div>
+        </div>
+        <div id="monStats">
+          <div class="st"><div class="k">계수 설정</div><div class="v" id="sCount">-</div></div>
+          <div class="st"><div class="k">허용 오차</div><div class="v" id="sTol">-</div></div>
+          <div class="st"><div class="k">순중량 평균</div><div class="v" id="sNet">- g</div></div>
+          <div class="st"><div class="k">계수 속도</div><div class="v" id="sTpm">0 정/분</div></div>
+          <div class="st"><div class="k">빈병 중량 (전단)</div><div class="v" id="sTare">- g</div></div>
+          <div class="st"><div class="k">라인 인터록</div><div class="v" id="sIlk">-</div></div>
+        </div>
+      </div>
+    </div>
+    <!-- ══ 중앙 ══ -->
+    <div class="col">
+      <div class="card" id="mimicCard">
+        <div id="coach">
+          <div id="cB"><div id="cStep">준비</div><div id="cTitle">과정을 선택하세요</div>
+            <div id="cDesc">가동 과정과 모드를 고르면 절차를 단계별로 안내합니다.</div></div>
+          <div id="autoStatus" role="status" aria-live="polite"></div>
+          <button id="lcCheck" style="display:none">점검 완료 ✓</button>
+          <button id="incAsk" style="display:none">🔎 원인 판단</button>
+          <button id="examHint" style="display:none">💡 힌트 보기 · −5점</button>
+          <div id="stepNav"><button id="stepPrev">← 이전</button><button id="stepCur">1 / 1</button><button id="stepNext">다음 →</button></div>
+        </div>
+        <div id="view3d">
+          <canvas id="cv3d"></canvas>
+          <div class="pill" id="v3Grp">
+            <button data-v="all" class="on">전체 라인</button>
+            <button data-v="ua">UA-120</button><button data-v="sg">SG-120</button><button data-v="dmc">DMC-60T</button>
+            <button data-v="wc">중량선별</button><button data-v="pe">HPE-100</button><button data-v="rc">RCS-120</button>
+            <button data-v="top">평면</button>
+            <button class="tg on" id="tgGuard">가드</button><button class="tg on" id="tgShadow">그림자</button><button class="tg on" id="tgLabel">라벨</button>
+          </div>
+          <div class="pill" id="panGrp"><button id="panL" aria-label="왼쪽으로">◀</button><button id="panC" aria-label="가운데로">⌂</button><button id="panR" aria-label="오른쪽으로">▶</button></div>
+          <div id="weighBadge" hidden></div>
+          <button id="fixBtn" hidden aria-label="현장 조치">!</button>
+        </div>
+        <div id="panel">
+          <div class="psw start" id="swStart"><span class="e">▶</span>START<s>라인 자동 운전</s></div>
+          <div class="psw stop" id="swStop"><span class="e">■</span>STOP<s>사이클 정지</s></div>
+          <div class="psw reset" id="swReset"><span class="e">↺</span>RESET<s>알람 해제</s></div>
+          <div class="psw emg" id="swEmg"><span class="e">⏻</span>EMERGENCY<s>비상 정지</s></div>
+          <div class="psw jog" id="swJog"><span class="e">👆</span>1병 시험<s>단동 1사이클</s></div>
+        </div>
+        <div id="legend">
+          <span><i style="background:#f2f2ee;border:1px solid #bbb"></i>빈 병</span>
+          <span><i style="background:#3a6fd8"></i>실리카겔 투입</span>
+          <span><i style="background:#e0a21a"></i>계수 충전</span>
+          <span><i style="background:#9ad0e8"></i>PE 필름</span>
+          <span><i style="background:#1f7a52"></i>캡핑 완료</span>
+          <span><i style="background:#d33a2a"></i>중량 불합격</span>
+          <span style="margin-left:auto">＋ 표시를 누르면 장치 설명이 나옵니다</span>
+        </div>
+      </div>
+      <div class="card" id="cardFlow">
+        <h3><span class="ic b">🔗</span>라인 공정 순서<em>초록 = 동작 중 · 빨강 = 알람 · 누르면 설명</em></h3>
+        <div id="flow"></div>
+      </div>
+    </div>
+    <!-- ══ 우측 : HMI ══ -->
+    <div class="col">
+      <div id="hmiWrap">
+        <div id="hmi">
+          <div id="hTop">
+            <div class="brand">COUN<u>TEC</u></div>
+            <div id="hMach">UA-120</div>
+            <div id="hAlarmTick"></div>
+            <div class="hIco" id="icInfo" title="장치 정보">ⓘ</div>
+            <div class="hIco lk" id="icLock" title="로그인 / 로그아웃">🔒</div>
+            <div id="hClock">—<br>—</div>
+          </div>
+          <div id="hTabs"></div>
+          <div id="hBody"></div>
+          <div id="hNav"></div>
+          <div id="hMenu"><button id="caseBtn">이상사례</button><button id="faultBtn">알람</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- 모달 -->
+  <div class="modal" id="mNum"><div class="mbox" style="width:360px">
+    <h2 id="numT">값 입력</h2><p id="numR"></p>
+    <input class="inp" id="numV" readonly>
+    <div class="keys" id="numKeys"></div>
+    <div class="mbtn"><button class="pri" id="numOk">확인</button><button id="numNo">취소</button></div>
+  </div></div>
+  <div class="modal" id="mSel"><div class="mbox">
+    <h2>📋 생산 품목 선택</h2>
+    <p>제품과 포장 단위를 고르면 병 규격·계수·허용오차·기준 중량이 함께 설정됩니다.</p>
+    <h3>제품</h3><div class="selRow" id="selProd"></div>
+    <h3>포장 단위</h3><div class="selRow" id="selCount"></div>
+    <h3>병 규격</h3><div class="selRow" id="selBottle"></div>
+    <div class="selSum" id="selSum"></div>
+    <div class="psWarn" id="selWarn"></div>
+    <div class="mbtn"><button class="pri" id="selOk">확인 — 작업 시작</button></div>
+  </div></div>
+  <div class="modal" id="mDev"><div class="mbox" id="devBox"></div></div>
+  <div class="modal" id="mInc"><div class="mbox" id="incBox"></div></div>
+  <div class="modal" id="mList"><div class="mbox" id="listBox"></div></div>
+  <div class="modal" id="mRub"><div class="mbox" id="rubBox" style="width:640px"></div></div>
+  <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
+  <div id="splash">
+    <div class="box">
+      <span class="ver">V1</span>
+      <h1>병충전 라인 IDT<small>Bottle Filling Line · Interactive Digital Tutor</small></h1>
+      <div id="lineStrip"></div>
+      <div id="coursePicker">
+        <button id="chooseChange" disabled><small>01 · CHANGE PART</small><strong>체인지파트 모드</strong><span>교체부품 장착 학습 · 준비 중</span></button>
+        <button id="chooseOperation" class="main"><small>02 · OPERATION</small><strong>가동 모드</strong><span>라인 설정 · 가동 · 알람 대응 학습</span></button>
+      </div>
+      <div class="go" style="display:none">
+        <div class="modeColumn">
+          <button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>
+          <button class="e" id="spExamEasy">기본모드 · 평가</button>
+        </div>
+        <div class="modeColumn">
+          <button class="s" id="spGuide">심화모드 · 학습<small>전체 절차 단계별 안내</small></button>
+          <button class="e" id="spExam">심화모드 · 평가</button>
+        </div>
+      </div>
+      <button id="courseBack" style="display:none">← 과정 다시 선택</button>
+    </div>
+  </div>
+  <div id="banner" role="alert" hidden></div>
+  <div id="toast"></div>
+</div></div>
+<div id="guideArrow" aria-hidden="true">⬇</div>
+<div id="vmCursor"><svg viewBox="0 0 24 24"><path d="M3 2l15 11.2-6.6.9 3.8 7.4-2.9 1.4-3.7-7.5L3 20z" fill="#fff" stroke="#111" stroke-width="1.4" stroke-linejoin="round"/></svg></div>
