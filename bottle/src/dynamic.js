@@ -574,6 +574,7 @@ function wkTick(dt){
       }
     }else{
       w.idle=(w.idle||0)+dt;
+      w.face=w.z>0?0:Math.PI;                                   /* 대기 : 설비를 향해 선다 */
       if(w.idle>2.5&&(Math.abs(w.x-w.home[0])>5||Math.abs(w.z-w.home[1])>5)){ w.route=routeTo(w,w.home,false); w.idle=0; }
     }
   }

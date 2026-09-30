@@ -118,7 +118,7 @@ function needFeed(){
 
 /* ── 일반 공정 (도착 → 처리 → 해제) ── */
 /* 뒤 병 (맞닿아 있는 바로 다음 병) */
-function behindOf(b){ const d=BD().d; return LN.bottles.filter(x=>x.zone==="line"&&x.pocket==null&&!x.held&&x.lane===b.lane&&x.s<b.s&&b.s-x.s<d+8).sort((a,c)=>c.s-a.s)[0]||null; }
+function behindOf(b,span){ const d=BD().d; span=span||d+8; return LN.bottles.filter(x=>x.zone==="line"&&x.pocket==null&&!x.held&&x.lane===b.lane&&x.s<b.s&&b.s-x.s<span).sort((a,c)=>c.s-a.s)[0]||null; }
 function stationsTick(dt,run){
   lcTick(LN.st.lc1,dt,run); lcTick(LN.st.lc2,dt,run);
   for(const k of ["sg","dA","dB","pe"]){
@@ -129,7 +129,7 @@ function stationsTick(dt,run){
       if(st.clampB&&st.pin>=1){ st.clampB=null; }
       const b=LN.bottles.find(x=>x.zone==="line"&&x.lane===st.lane&&!x.done[k]&&Math.abs(x.s-(face-d/2))<1.2);
       if(b&&run&&st.pin>=1&&!st.clampB&&stationReady(k)){
-        st.ph="proc"; st.t=0; st.b=b; st.clampB=behindOf(b);   /* 뒤 병 클램프 (간격 확보) */
+        st.ph="proc"; st.t=0; st.b=b; st.clampB=behindOf(b,d*3.2);   /* 뒤 병 클램프 : 가까이 따라오는 병(합류 후 2병 연속 포함)을 잡아 한 병씩 처리 */
       }
     }else if(st.ph==="proc"){
       if(st.dmc) dmcFill(st,dt,run);

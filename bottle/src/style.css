@@ -114,14 +114,14 @@ button{font-family:var(--ff)}
 #v3Grp .tg.on{background:#1f5fbf;color:#fff}
 #panGrp{position:absolute;right:10px;top:10px;z-index:12;background:rgba(255,255,255,.93)}
 #panGrp button{padding:8px 11px;font-size:15px}
-#weighBadge{flex:0 0 auto;background:#16293b;color:#d9eef8;border-radius:12px;padding:9px 13px;box-shadow:var(--sh);
+#weighBadge{flex:0 0 auto;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:9px 13px;box-shadow:var(--sh);
   display:grid;grid-template-columns:1fr 1fr;gap:3px 16px;font:600 12.5px/1.5 var(--ff)}
-#weighBadge b{grid-column:1/-1;font:800 13.5px var(--ff);color:#fff;margin-bottom:2px}
+#weighBadge b{grid-column:1/-1;font:800 13.5px var(--ff);color:#22384f;margin-bottom:2px}
 #weighBadge .row{display:flex;justify-content:space-between;gap:8px}
-#weighBadge .row span:last-child{font:700 13px var(--mono);color:#86f0cc}
-#weighBadge .row span.ng{color:#ff8a7e}
+#weighBadge .row span:last-child{font:700 13px var(--mono);color:#123a63}
+#weighBadge .row span.ng{color:#c9331f}
 #weighBadge .row.full{grid-column:1/-1}
-#weighBadge .row span:first-child{color:#a8c3d3;white-space:nowrap}
+#weighBadge .row span:first-child{color:var(--sub);white-space:nowrap}
 #weighBadge[hidden]{display:none}
 
 /* 조작반 */
