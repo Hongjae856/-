@@ -22,6 +22,7 @@ SCRIPTS = (
     "course.js",
     "ui.js",
     "autoplay.js",
+    "demo.js",
     "boot.js",
 )
 

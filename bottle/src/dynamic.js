@@ -32,14 +32,21 @@ function drawDynamic(){
   dBottles(); dPanels(); drawDoors(); drawWorkers();
 }
 
-/* ── 컨베이어 슬랫 이동 ── */
+/* ── 컨베이어 슬랫 이동 · 분기 플랩 · 합류 핀 ── */
 function dConveyor(){
+  const b=BD(), LZ=L.LZ, W2=LZ+48;
+  /* 분기 플랩 : 다음 병이 갈 레인 반대쪽을 막는다 */
+  LN.flap=(LN.flap||0)+((LN.divNext*0.30)-(LN.flap||0))*Math.min(1,RDT*SPD*8);
+  { const x=DIV_TIP, y2=CH+b.h*0.62; mPush(); mT(x,0,0); mRY(LN.flap); box(-150,0,CH+6,y2,-4,4,C.uhmw,C.uhmw,0); cylY(0,0,CH+2,y2+10,9,C.ssL,12); mPop(); }
+  for(const ln of [-1,1]) pinFront(L.mrg0+b.d/2+4,LN.mrgPin[ln],ln);
   if(FAR()) return;
   const pitch=38.1, off=LN.conv%pitch;
   const skip=[[L.lc1-L.lcW/2-2,L.lc1+L.lcW/2+2],[L.lc2-L.lcW/2-2,L.lc2+L.lcW/2+2]];
   for(let x=XS+off;x<XE;x+=pitch){
+    if(x<L.div0||x>L.mrg1){ box(x-1.2,x+1.2,CH,CH+0.5,-43,43,C.slatL,C.slatL,0); continue; }
+    if(x<L.div1||x>L.mrg0){ box(x-1.2,x+1.2,CH,CH+0.5,-W2+4,W2-4,C.slatL,C.slatL,0); continue; }
     if(skip.some(s=>x>s[0]&&x<s[1])) continue;
-    box(x-1.2,x+1.2,CH,CH+0.5,-43,43,C.slatL,C.slatL,0);
+    for(const ln of [-1,1]) box(x-1.2,x+1.2,CH,CH+0.5,ln*LZ-43,ln*LZ+43,C.slatL,C.slatL,0);
   }
 }
 
@@ -99,11 +106,10 @@ function dUA(){
   }
 }
 
-/* ── 앞쪽 스토퍼 핀 · 클램프 패드 (SG · HPE 공용) ── */
-function stopperPins(x,b,pin,clampV){
-  pinFront(x+b.d/2+7,pin);
-  const y=CH+b.h*0.42, cx=x-b.d-5, zr=b.d/2+34, cz=lerp(zr-6,b.d/2+3,clampV);
-  tube([cx,y,zr],[cx,y,cz],4.5,C.rodC,8); box(cx-10,cx+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
+/* ── 스토퍼 핀 · 클램프 패드 (SG · HPE · DMC 레인 공용) ── */
+function stopperPins(x,b,pin,clampV,lane){
+  pinFront(x+b.d/2+7,pin,lane);
+  clampPad(x-b.d-5,clampV,lane);
 }
 
 /* ── SG-120 : 릴 · 띠 경로 · 트윈 벨트 · 커터 · 낙하 ── */
@@ -158,28 +164,28 @@ function dSG(){
 /* ── 로드셀 스테이션 : 포크(캐리지 · 4 핑거 · 실린더) · 케이블 체인 · 게이트 / IN 핀 · 클램프 ── */
 function dLoadCell(st){
   if(!st) return;
-  const b=BD(), d=b.d, G=lcGeo(st.X), P=L.lcP, dx=st.car*P, far=FAR();
-  const tipZ=lerp(d/2+16,-(d/2+8),st.fin);
-  const fx=[G.IN-d/2-10,G.A-d/2-10,G.B-d/2-10,G.B+d/2+10].map(v=>v+dx);
-  const cx0=fx[0]-40, cx1=fx[3]+40;
-  box(cx0,cx1,CH-116,CH-88,140,270,[0.78,0.81,0.84,0.6],[0.84,0.86,0.88,0.6]);
+  const b=BD(), d=b.d, G=lcGeo(st.X), P=L.lcP, dx=st.car*P, far=FAR(), LZ=L.LZ;
+  /* 포크 : 캐리지 · 세움 암 · 두 레인을 가로지르는 핑거 날 3 (IN 뒤 · IN/팬 사이 · 팬 앞) */
+  const tipZ=lerp(LZ+d/2+18,-(LZ+d/2+10),st.fin), ya=CH+12, yb=CH+30, za=235;
+  const fx=[G.IN-d/2-10,(G.IN+G.PAN)/2,G.PAN+d/2+10].map(v=>v+dx);
+  const cx0=fx[0]-40, cx1=fx[2]+40;
+  box(cx0,cx1,CH-116,CH-88,200,330,[0.78,0.81,0.84,0.6],[0.84,0.86,0.88,0.6]);
   for(const x of fx){
-    box(x-6,x+6,CH-88,CH+46,150,172,C.ss);                                      /* 세움 암 */
-    box(x-3,x+3,CH+24,CH+46,tipZ,172,C.brushed,null,0);                          /* 핑거 날 */
-    ellipsoid([x,CH+35,tipZ],[3,11,10],C.brushed,8,4);
-    if(!far){ cylZ(x,CH-70,178,262,12,C.cyl,12); cylZ(x,CH-70,262,262+(1-st.fin)*26,5,C.rodC,8); cylZ(x,CH-70,168,178,15,C.ssD,12); }
+    box(x-6,x+6,CH-88,yb,za-10,za+10,C.ss);                                     /* 세움 암 */
+    box(x-3,x+3,ya,yb,tipZ,za,C.brushed,null,0);                                 /* 핑거 날 */
+    ellipsoid([x,(ya+yb)/2,tipZ],[3,9,10],C.brushed,8,4);
+    if(!far){ cylZ(x,CH-70,za+12,za+92,12,C.cyl,12); cylZ(x,CH-70,za+92,za+92+(1-st.fin)*26,5,C.rodC,8); cylZ(x,CH-70,za+2,za+12,15,C.ssD,12); }
   }
   /* 케이블 체인 (캐리지 끝 → 고정점) */
-  if(!far){ const ax=cx1, fx2=st.X+60, yA=CH-80, yB=CH-150, zc=285, r=(yA-yB)/2, pts=[];
+  if(!far){ const ax=cx1, fx2=st.X+60, yA=CH-80, yB=CH-150, zc=355, r=(yA-yB)/2, pts=[];
     const midX=Math.max(ax,fx2)+20;
     for(let x=ax;x<midX;x+=16) pts.push([x,yA,zc]);
     for(let i=0;i<=8;i++){ const a=Math.PI/2-i/8*Math.PI; pts.push([midX+r*Math.cos(a),yB+r+r*Math.sin(a),zc]); }
     for(let x=midX;x>fx2;x-=16) pts.push([x,yB,zc]);
     for(const p of pts) box(p[0]-7,p[0]+7,p[1]-9,p[1]+9,zc-16,zc+16,C.black,null,0); }
-  /* 핀 · 클램프 */
-  pinFront(G.gateFace+4,st.gate); pinFront(G.inFace+4,st.inPin);
-  const y=CH+b.h*0.42, cxp=G.gateFace-1.5*d, zr=d/2+34, cz=lerp(zr-6,d/2+3,st.clamp);
-  tube([cxp,y,zr],[cxp,y,cz],4.5,C.rodC,8); box(cxp-10,cxp+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
+  /* 레인별 게이트 핀 · IN 스토퍼 · 뒤 병 클램프 */
+  for(const ln of [-1,1]){ const Q=st.ln[ln];
+    pinFront(G.gateFace+4,Q.gate,ln); pinFront(G.inFace+4,Q.inPin,ln); clampPad(G.gateFace-1.5*d,Q.clamp,ln); }
 }
 
 /* ── DMC-60T ── */
@@ -233,20 +239,18 @@ function dDMC(){
   mPop();
   /* 게이트 버퍼 · 게이트 날개 · 노즐 흐름 */
   for(const g of [0,1]){
-    const nx=g===0?L.n1:L.n2, fill=Math.min(1,D.buf[g]/N);
-    if(fill>0&&!far){ mPush(); mT(nx,yG-20,0); lathe([[34,0],[30,6+fill*18],[0,10+fill*26]],col,12); mPop(); }
+    const nx=g===0?L.n1:L.n2, nz=(g===0?-1:1)*L.LZ, fill=Math.min(1,D.buf[g]/N);
+    if(fill>0&&!far){ mPush(); mT(nx,yG-20,nz); lathe([[34,0],[30,6+fill*18],[0,10+fill*26]],col,12); mPop(); }
     const a=D.gate[g]*1.25;
-    for(const s of [-1,1]){ mPush(); mT(nx+s*34,yG-22,0); mRZ(-s*a); box(s>0?-34:0,s>0?0:34,-3,0,-30,30,C.ss,C.ss,0); mPop(); }
+    for(const s of [-1,1]){ mPush(); mT(nx+s*34,yG-22,nz); mRZ(-s*a); box(s>0?-34:0,s>0?0:34,-3,0,-30,30,C.ss,C.ss,0); mPop(); }
     const q=D.dump[g];
     if(q&&q.t<0.28&&!far){
       for(let i=0;i<9;i++){ const t=(q.t*3.2+i/9)%1, y=lerp(yG-30,CH+b.h*0.4,t);
-        drawTab(nx+Math.sin(i*2.1)*5,y,Math.cos(i*1.7)*5,i,col); }
+        drawTab(nx+Math.sin(i*2.1)*5,y,nz+Math.cos(i*1.7)*5,i,col); }
     }
   }
-  /* 병 스토퍼 3조 · 입구 클램프 (앞) */
-  for(const [px,v] of [[L.n2+b.d/2+4,D.exit],[L.n1+b.d/2+4,D.mid],[L.n1-b.d-6,D.entry]]) pinFront(px,v);
-  const y=CH+b.h*0.42, cxp=L.n1-b.d*1.5-10, zr=b.d/2+34, cz=lerp(zr-6,b.d/2+3,D.clampB?1:0);
-  tube([cxp,y,zr],[cxp,y,cz],4.5,C.rodC,8); box(cxp-10,cxp+10,y-10,y+10,cz-1,cz+2,C.rubber,C.rubber,0);
+  /* 레인별 병 스토퍼 · 뒤 병 클램프 */
+  for(const k of ["dA","dB"]){ const st=LN.st[k]; if(st) stopperPins(st.x,b,st.pin,st.clamp,st.lane); }
 }
 
 /* ── 리젝트 : 푸셔 · 트레이로 미끄러지는 병 · 트레이 속 불합격 병 ── */
@@ -455,7 +459,7 @@ function dBottles(){
     if(q.zone!=="line") continue;
     const p=pathAt(q.s);
     const roll=(p.x>L.inv0&&p.x<L.inv3)?uaRoll(p.x):0;
-    drawBottle(p.x,CH-1,p.z,{roll, fill:q.fill, gel:q.gel, pe:q.pe, cap:q.cap, capY:q.capY||0, capSpin:q.spin||0, ng:q.ng&&q.gross!=null});
+    drawBottle(p.x,CH-1,p.z+laneZ(q,p.x),{roll, fill:q.fill, gel:q.gel, pe:q.pe, cap:q.cap, capY:q.capY||0, capSpin:q.spin||0, ng:q.ng&&q.gross!=null});
   }
 }
 

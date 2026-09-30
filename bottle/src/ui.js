@@ -77,7 +77,7 @@ const FLOW=[["ua","UA-120","언스크램블 · 에어세척"],["sg","SG-120","�
 function renderFlow(){
   const act=k=>{ if(!S.running) return false;
     if(k==="lc1"||k==="lc2"||k==="sg"||k==="pe") return LN.st[k]&&LN.st[k].ph!=="wait";
-    if(k==="dmc") return LN.dmc&&(LN.dmc.ph==="fill"||LN.dmc.falls.length>0);
+    if(k==="dmc") return LN.dmc&&(LN.dmc.dump.some(x=>x)||LN.dmc.falls.length>0);
     if(k==="rc") return LN.rc.captured.size>0; if(k==="tb") return S.table.n>0; return true; };
   const bad=k=>{ const mk=k==="lc1"||k==="lc2"?"wc":k==="tb"?"rc":k; return alarmOf(mk).length>0; };
   const html=FLOW.map(([k,a,b],i)=>'<div class="fcard'+(act(k)?" act":"")+(bad(k)?" bad":"")+'" data-fl="'+k+'"><b>'+(i+1)+'. '+a+'</b><s>'+b+'</s></div>'+(i<FLOW.length-1?'<div class="farrow">▶</div>':'')).join("");
@@ -138,7 +138,10 @@ function renderCoach(){
   $("#examHint").style.display=ex?"":"none"; $("#examHint").disabled=hintOn;
   $("#examHint").textContent=hintOn?"💡 힌트 표시 중":"💡 힌트 보기 · −5점";
   $("#stepCur").textContent=Math.min(S.tIdx+1,A.length)+" / "+A.length;
-  $("#endBtn").textContent=ex?"평가 종료":"학습 종료";
+  $("#endBtn").textContent=isDemo()?"시연 종료":ex?"평가 종료":"학습 종료";
+  $("#stepNav").style.display=isDemo()?"none":""; demoTourBtn();
+  if(isDemo()&&!rec){ $("#cStep").textContent="시연 모드 · 라인 자동 가동"; $("#cTitle").textContent="생산 "+S.cnt.good+" 병 · 리젝트 "+S.cnt.reject+" 병";
+    $("#cDesc").textContent="UA-120 → SG-120 → 레인 A·B 분기 → 전단 계량 → DMC-60T → 후단 계량 · 리젝트 → 합류 → HPE-100 → RCS-120 → 집적 테이블. 자재 보충 · 완제품 회수는 작업자가 자동으로 합니다."; }
   applyHint();
 }
 /* 현재 눌러야 할 곳 (힌트 · 자동재생 공용) */
@@ -269,6 +272,7 @@ function openList(kind){
 function initSplash(){
   $("#lineStrip").innerHTML=[["UA-120","언스크램블러 · 에어세척"],["SG-120","실리카겔 투입"],["중량선별 (전단)","빈병 중량"],["DMC-60T","정제 계수 · 충전"],["중량선별 (후단)","순중량 판정 · 리젝트"],["HPE-100","PE 필름 투입"],["RCS-120","로타리 캡핑"]]
     .map((x,i)=>'<div class="ls'+(x[0].startsWith("중량선별")?" wc":"")+'"><b>'+x[0]+'</b><s>'+x[1]+'</s></div>'+(i<6?'<div class="ar">›</div>':'')).join("");
+  $("#chooseDemo").onclick=()=>{ $("#splash").classList.add("hide"); hintOn=false; startSession("demo"); toast("시연 모드 시작 · "+S.rc.label+" · 라인 자동 가동"); };
   $("#chooseOperation").onclick=()=>{ $("#coursePicker").style.display="none"; $("#splash .go").style.display="grid"; $("#courseBack").style.display=""; };
   $("#courseBack").onclick=()=>{ $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; };
   for(const [id,mode] of [["#spEasy","easy"],["#spExamEasy","examEasy"],["#spGuide","guide"],["#spExam","exam"]]) $(id).onclick=()=>openSel(mode);
@@ -326,14 +330,14 @@ function bindHeader(){
   $("#bpmDn").onclick=()=>bp(-10); $("#bpmUp").onclick=()=>bp(10);
   $("#soundBtn").onclick=()=>{ SND.on=!SND.on; $("#soundBtn").textContent=SND.on?"사운드 ON":"사운드 OFF"; };
   $("#homeBtn").onclick=goHome;
-  $("#rubricBtn").onclick=()=>{ if(S&&S.session) openRubric(); };
-  $("#endBtn").onclick=()=>{ if(S&&S.session&&!S.session.ended) finishSession(true); };
+  $("#rubricBtn").onclick=()=>{ if(S&&S.session&&!isDemo()) openRubric(); };
+  $("#endBtn").onclick=()=>{ if(S&&S.session&&isDemo()){ goHome(); return; } if(S&&S.session&&!S.session.ended) finishSession(true); };
   $("#resetBtn").onclick=()=>{ if(S&&S.mode){ hintOn=false; startSession(S.mode); toast("처음부터 다시 시작"); } };
   $$("#v3Grp [data-v]").forEach(b=>b.onclick=()=>camSet(b.dataset.v));
   $("#tgGuard").onclick=()=>{ VIEW3.guard=!VIEW3.guard; $("#tgGuard").classList.toggle("on",VIEW3.guard); buildStatic(); };
   $("#tgShadow").onclick=()=>{ R3.shadowOn=!R3.shadowOn; $("#tgShadow").classList.toggle("on",R3.shadowOn); };
   $("#tgLabel").onclick=()=>{ VIEW3.label=!VIEW3.label; $("#tgLabel").classList.toggle("on",VIEW3.label); };
-  const pan=d=>{ cam.txT=clamp(cam.txT+d*Math.max(700,cam.dist*0.25),-6000,6000); };
+  const pan=d=>{ cam.txT=clamp(cam.txT+d*Math.max(700,cam.dist*0.25),-6500,9000); };
   $("#panL").onclick=()=>pan(-1); $("#panR").onclick=()=>pan(1); $("#panC").onclick=()=>camSet(cam.view in CAMVIEW?cam.view:"all");
 }
 function syncBpm(){ $("#bpmV").textContent=S?S.bpm:60; }

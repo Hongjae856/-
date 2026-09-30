@@ -10,7 +10,7 @@ function frame(){
     const sdt=dt*SPD, n=Math.max(1,Math.ceil(sdt/0.02));
     for(let i=0;i<n;i++){ simTick(sdt/n); wkTick(sdt/n); }
     tSim+=sdt;
-    caseTick(); examTroubleTick();
+    caseTick(); examTroubleTick(); demoTick(dt);
     S.session.sec=(now-S.session.start)/1000;
   }else if(S) wkTick(dt);
   camStep(dt);
@@ -32,7 +32,7 @@ function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  initKeypad(); bindTiles(); bindPanel(); bindHeader(); bindAuto(); initSplash();
+  initKeypad(); bindTiles(); bindPanel(); bindHeader(); bindAuto(); bindDemo(); initSplash();
   lineInit(); drawHMI(); syncBpm(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, SEL, apStart, apStop, AP, launchIncident};
   requestAnimationFrame(frame);

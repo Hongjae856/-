@@ -147,8 +147,8 @@ const SCREENS={
      '<div class="hrow" style="display:block;font-size:13px;line-height:1.6;color:#5d7086">순중량 = 후단 총중량 − 전단 빈병 중량. 두 로드셀의 영점이 틀어지면 정상 병도 불합격될 수 있으므로 생산 전 반드시 영점을 잡습니다.</div>'; },
   log(){ const L2=S.wc.log.slice(0,16);
     return '<div class="hTitle">📊 판정 이력 <s>CHECK-WEIGH LOG</s></div>'+
-     '<table class="ht"><tr><th>No</th><th>빈병 g</th><th>총중량 g</th><th>순중량 g</th><th>편차(정)</th><th>판정</th></tr>'+
-     (L2.map(r=>'<tr class="'+(r.ok?"":"ng")+'"><td>'+r.no+'</td><td>'+fmt(r.tare,2)+'</td><td>'+fmt(r.gross,2)+'</td><td>'+fmt(r.net,3)+'</td><td>'+(r.dev>=0?"+":"")+fmt(r.dev,2)+'</td><td>'+(r.ok?"OK":"NG · "+esc(r.why))+'</td></tr>').join("")||'<tr><td colspan="6">판정 기록 없음</td></tr>')+'</table>'; }
+     '<table class="ht"><tr><th>No</th><th>레인</th><th>빈병 g</th><th>총중량 g</th><th>순중량 g</th><th>편차(정)</th><th>판정</th></tr>'+
+     (L2.map(r=>'<tr class="'+(r.ok?"":"ng")+'"><td>'+r.no+'</td><td>'+(r.ln||"-")+'</td><td>'+fmt(r.tare,2)+'</td><td>'+fmt(r.gross,2)+'</td><td>'+fmt(r.net,3)+'</td><td>'+(r.dev>=0?"+":"")+fmt(r.dev,2)+'</td><td>'+(r.ok?"OK":"NG · "+esc(r.why))+'</td></tr>').join("")||'<tr><td colspan="7">판정 기록 없음</td></tr>')+'</table>'; }
  },
  pe:{
   main(){ const P=S.pe;

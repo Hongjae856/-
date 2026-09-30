@@ -17,10 +17,12 @@ const L={
   sg:-2050,
   /* 로드셀 */
   lc1:-898, lc2:1989, lcW:300, lcP:150,              /* 로드셀 스테이션 : 데드 플레이트 폭 · 포크 피치 */
+  /* 트윈 레인 : SG 뒤 분기(div) → 레인 A(뒤 z−) · 레인 B(앞 z+) → 후단 뒤 합류(mrg) */
+  LZ:80, div0:-1660, div1:-1420, mrg0:2330, mrg1:2550,
   /* DMC-60T : 트윈 노즐 (N1 = 상류, N2 = 하류) */
   n1:356, n2:516, dmcDX:1236,                            /* DMC 는 설계 좌표 + dmcDX 로 배치 */
   /* 리젝트 */
-  rej:2489, rejBin:{x:2489, z:330},
+  rej:2700, rejBin:{x:2700, z:330},
   /* HPE-100 */
   pe:3687,
   /* RCS-120 : 인피드 스타휠 A · 터렛 T · 아웃피드 스타휠 B (피치원 반지름 같음) */
@@ -59,9 +61,18 @@ function pathAt(s){
   const dir=Math.sign(g.a1-g.a0);
   return {x:g.c.x+L.R*Math.cos(a), z:g.c.z+L.R*Math.sin(a), h:Math.atan2(Math.cos(a)*dir,-Math.sin(a)*dir), a, seg:g};
 }
-/* 로드셀 스테이션 위치 : IN(컨베이어 끝) → A 팬 → B 팬 → OUT(컨베이어 시작) · 게이트 핀 · IN 스토퍼 */
+/* 로드셀 스테이션 위치 (레인마다 같은 x) : IN(컨베이어 끝) → PAN(계량 팬) → OUT(컨베이어 시작) · 게이트 핀 · IN 스토퍼 */
 function lcGeo(X){ const d=BD().d, p=L.lcP;
-  return {IN:X-1.5*p, A:X-0.5*p, B:X+0.5*p, OUT:X+1.5*p, inFace:X-1.5*p+d/2, gateFace:X-1.5*p-d/2-40}; }
+  return {IN:X-p, PAN:X, OUT:X+p, inFace:X-p+d/2, gateFace:X-p-d/2-40}; }
+/* 레인 분기 · 합류 비율 (0 = 단일 레인 중심 · 1 = 레인 중심) */
+function laneBlend(x){
+  if(x<=L.div0||x>=L.mrg1) return 0;
+  if(x<L.div1) return smooth((x-L.div0)/(L.div1-L.div0));
+  if(x<=L.mrg0) return 1;
+  return 1-smooth((x-L.mrg0)/(L.mrg1-L.mrg0));
+}
+/* 병의 레인 z 오프셋 (lane : −1 = A 뒤 · +1 = B 앞 · 0 = 단일) */
+function laneZ(b,x){ return b.lane?b.lane*L.LZ*laneBlend(x):0; }
 const sOfX=x=>x-XS;                                   /* 직선 구간 (캡핑기 이전) */
 const S_A=PATH.segs[1].s0, S_T0=PATH.segs[2].s0, S_T1=PATH.segs[2].s1, S_B1=PATH.segs[3].s1;
 const S_END=PATH.len;

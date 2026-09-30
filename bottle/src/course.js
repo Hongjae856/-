@@ -3,7 +3,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");
 const isEasy=()=>!!S&&(S.mode==="easy"||S.mode==="examEasy");
-const MODE_NM={easy:"기본모드 · 학습",guide:"심화모드 · 학습",examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};
+const MODE_NM={easy:"기본모드 · 학습",guide:"심화모드 · 학습",examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",demo:"시연 모드"};
 const PASS=80;
 
 /* ── 라인 클리어런스 5항목 ── */
@@ -19,6 +19,7 @@ const CLEAR=[
 const T_=(k,t,d,plan,ok,o)=>Object.assign({k,t,d,plan,ok},o||{});
 function stepsOperation(easy){
   const A=[];
+  if(S&&S.mode==="demo"){ A.push(T_("demo","시연 운전","라인 전체 자동 가동",()=>null,()=>false,{pts:0,watch:true})); return A; }
   CLEAR.forEach((c,i)=>A.push(T_("lc"+i,"라인 클리어런스 ("+(i+1)+"/5) — "+c.t,c.d,()=>"#lcCheck",()=>S.clear.includes(i),{lc:i,pts:2})));
   A.push(T_("air","압축공기 공급","유틸리티의 [압축공기] 를 켜서 라인에 6 bar 를 공급합니다. 5.5 bar 이상이 되면 다음 단계로 넘어갑니다.",()=>S.air?null:"#uAir",()=>S.air&&S.airP>=5.5,{pts:3}));
   A.push(T_("main","메인 전원 투입","[메인 전원] 을 켭니다. 6기종 HMI 가 부팅됩니다.",()=>"#uMain",()=>S.main,{pts:3}));
@@ -71,6 +72,7 @@ function startSession(mode){
   S.rc=recipeOf(SEL.prod,SEL.count,SEL.ml);
   hMach="ua"; hScr="main"; lgOpen=false;
   if(isExam()) scheduleExamTrouble();
+  if(S.mode==="demo") demoSetup();
   buildStatic(); camSet("all"); drawHMI(); renderCoach(); renderTiles();
   S.stepAt=tSim;
 }
@@ -99,6 +101,7 @@ function scoreNow(){
   const A=STEPS(), tot=A.reduce((s,x)=>s+(x.pts||0),0);
   const got=S.stepLog.reduce((s,x)=>s+(x.pts||0),0);
   const minus=S.deducts.reduce((s,x)=>s+x.pts,0);
+  if(!tot) return {base:0, minus, score:0};
   return {base:Math.round(got/tot*100), minus, score:Math.max(0,Math.round(got/tot*100)-minus)};
 }
 function finishSession(manual){
@@ -117,7 +120,7 @@ function scheduleExamTrouble(){
 function examTroubleTick(){
   const f=S.flags.examTrouble;
   if(!f||f.fired||!S.running||S.activeTrouble) return;
-  if(S.cnt.good>=f.at){ f.fired=true; launchIncident(f.key,true); }
+  if(S.cnt.filled>=f.at){ f.fired=true; launchIncident(f.key,true); }   /* 충전 병 수 기준 (후단 계량 전 병이 남아 있을 때) */
 }
 
 /* ═══ 알람 · 이상사례 대응 ═══
@@ -223,7 +226,7 @@ const CASES={
 const incOf=k=>INC[k]||CASES[k];
 /* 알람 발생 시 : 세션 중이고 대응 중인 알람이 없으면 대응 흐름 시작 */
 function onAlarm(key){
-  if(!S.session||!S.session.active||S.activeTrouble||S.flags.casePending) return;
+  if(!S.session||!S.session.active||S.activeTrouble||S.flags.casePending||S.mode==="demo") return;
   if(ALARMS[key].kind!=="trip"&&!["DM32","DM31"].includes(key)) return;
   if(!INC[key]) return;
   beginRecovery(key);
