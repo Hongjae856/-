@@ -193,8 +193,8 @@ function drawOverlay(){
   HOT.length=0;
   g.textAlign="center"; g.textBaseline="middle";
   if(VIEW3.label){
-    const LBL=[[-4200,2050,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2080,-400,"② SG-120 실리카겔"],[L.lc1,1480,190,"전단 로드셀"],
-      [-820,2330,-800,"③ DMC-60T 정제 계수기"],[L.lc2,1480,190,"후단 로드셀 · 리젝트"],[L.pe,1900,-300,"④ HPE-100 PE 필름"],[3150,rcY().top+380,-400,"⑤ RCS-120 로타리 캡핑기"],[4800,1450,-10,"집적 테이블"],[120,1720,760,"중량선별 PLC"]];
+    const LBL=[[-4200,2150,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2200,-300,"② SG-120 실리카겔"],[L.lc1,1480,190,"전단 로드셀"],
+      [-820,2330,-800,"③ DMC-60T 정제 계수기"],[L.lc2,1480,190,"후단 로드셀 · 리젝트"],[L.pe,2100,-300,"④ HPE-100 PE 필름"],[2940,2620,-379,"⑤ RCS-120 로타리 캡핑기"],[4800,1450,-10,"집적 테이블"],[120,1720,760,"중량선별 PLC"]];
     g.font="800 "+(12*K).toFixed(0)+"px "+'"Malgun Gothic",sans-serif';
     for(const [x,y,z,t] of LBL){ if(cam.dist>7000&&/로드셀|PLC/.test(t)) continue; const p=prj(x,y,z); if(!p||p.x<0||p.x>W||p.y<0||p.y>H) continue;
       const w=g.measureText(t).width+16*K, h=21*K;

@@ -96,17 +96,18 @@ function dUA(){
 
 /* ── SG-120 · HPE-100 (피드 · 커터 · 플런저 공용) ── */
 function dInserter(k){
-  const x=k==="sg"?L.sg:L.pe, st=LN.st[k], b=BD(), H=sgHeadY(), far=FAR();
+  const I=insCfg(k), x=I.x, st=LN.st[k], b=BD(), H=sgHeadY(), far=FAR();
   const gel=k==="sg";
   const stock=gel?S.mat.gel/MAT_CAP.gel:S.mat.film/MAT_CAP.film;
-  const r0=gel?48:52, rF=gel?170:150, rr=r0+(rF-r0)*Math.sqrt(clamp(stock,0,1));
-  const ry=gel?1500:1520, wd=gel?34:92;
+  const r0=I.r0, rF=I.rF, rr=r0+(rF-r0)*Math.sqrt(clamp(stock,0,1));
+  const wd=I.wd, rz=I.rz;
   const fed=(gel?S.sg.fed:S.pe.fed)+(st?st.kin.feed:0);
   const travel=fed*(gel?S.sg.pitch:S.pe.len);
   /* 릴 : 플랜지 · 코어 · 감긴 자재 */
-  mPush(); mT(x,ry,0); mRZ(-travel/Math.max(rr,40));
+  mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));
   for(const z of [-wd/2-6,wd/2+2]) { mPush(); mRX(Math.PI/2); mT(0,z,0); disc(0,0,r0+14,C.ssD,20); disc(4,0,r0+14,C.ssD,20); mPop(); }
   if(!far){ const g=gAlpha; gAlpha=0.16; mPush(); mRX(Math.PI/2); mT(0,wd/2+4,0); disc(0,r0+14,rF+14,C.acryl,32); mPop(); gAlpha=g; }
+  if(!far){ mPush(); mRX(Math.PI/2); mT(0,-wd/2-8,0); disc(0,r0+14,rF+14,C.ssL,32); mPop(); }
   cylZ(0,0,-wd/2-4,wd/2+4,r0-6,C.dark,18);
   if(stock>0.005){
     cylZ(0,0,-wd/2,wd/2,rr,gel?C.gel:[0.80,0.90,0.95,0.15],28);
@@ -116,15 +117,17 @@ function dInserter(k){
   mPop();
   /* 댄서 암 */
   const dAng=0.25+0.15*Math.sin((st&&st.kin.feed)?st.kin.feed*Math.PI:0);
-  const dp=[x+195,1330-(gel?0:-30),0], dr=[dp[0]+Math.cos(dAng+Math.PI)*150,dp[1]+Math.sin(dAng+Math.PI)*150,0];
-  tube([dp[0],dp[1],-60],[dr[0],dr[1],-60],9,C.ss,8); cylZ(dr[0],dr[1],-wd/2-6,wd/2+6,18,C.ssL,14);
-  /* 띠 경로 : 릴 → 댄서 롤러 → 가이드 롤러 → 헤드 */
+  const dp=I.dp, dr=[dp[0]+Math.cos(dAng+I.da)*150,dp[1]+Math.sin(dAng+I.da)*150,dp[2]];
+  tube([dp[0],dp[1],rz-wd/2-8],[dr[0],dr[1],rz-wd/2-8],9,C.ss,8); cylZ(dr[0],dr[1],rz-wd/2-6,rz+wd/2+6,18,C.ssL,14);
+  /* 띠 경로 : 릴 → 댄서 롤러 → 입구 롤러 → (가이드 롤러) → 헤드 */
   if(stock>0.005){
-    const pts=[[x+rr*0.2,ry-rr,0],[dr[0],dr[1]-18,0],[x+60,H.y1+70-10,0],[x,H.y1-4,0],[x,H.y0+46,0]];
+    const pts=[[I.rx+rr*0.2,I.ry-rr,rz],[dr[0],dr[1]-18,rz],[I.in[0],I.in[1]-12,rz]];
+    if(I.g) pts.push([I.g[0],I.g[1]-9,0]);
+    pts.push([x,H.y1-4,0],[x,H.y0+46,0]);
     const col=gel?C.gel:[0.80,0.90,0.95,0.15];
     const g=gAlpha; if(!gel) gAlpha=0.7;
     for(let i=0;i<pts.length-1;i++){ const a=pts[i],c=pts[i+1];
-      quad([a[0],a[1],-wd/2],[c[0],c[1],-wd/2],[c[0],c[1],wd/2],[a[0],a[1],wd/2],col); }
+      quad([a[0],a[1],a[2]-wd/2],[c[0],c[1],c[2]-wd/2],[c[0],c[1],c[2]+wd/2],[a[0],a[1],a[2]+wd/2],col); }
     gAlpha=g;
     if(gel&&!far){ /* 파우치 경계 (피치마다 실링선) */
       const ph=travel%S.sg.pitch;
@@ -294,14 +297,14 @@ function dRCS(){
   for(let i=0;i<n;i++){ const t=1-(i*(b.capD+2)+b.capD/2)/Lc; if(t<0) break;
     mPush(); mT(cp.a[0]+dv[0]*t,cp.a[1]+dv[1]*t-(b.h+b.capH)+b.capH,cp.a[2]+dv[2]*t); lathe(botProf().cap,C[b.capCol],far?8:14); mPop(); }
   /* 볼 피더 속 캡 */
-  if(!far&&S.mat.cap>0){ const bw={x:3520,y:1600,z:-930};
+  if(!far&&S.mat.cap>0){ const bw=RCBOWL;
     for(let i=0;i<10;i++){ const a=i*0.6+R.bowl*0.9, t=(i/10); mPush(); mT(bw.x+236*Math.cos(a),bw.y-20+t*100-(b.h+b.capH)+b.capH,bw.z+236*Math.sin(a)); lathe(botProf().cap,C[b.capCol],8); mPop(); }
     for(let i=0;i<Math.min(16,Math.round(S.mat.cap/40));i++){ const a=hash1(i)*6.28, r=hash1(i+3)*150; mPush(); mT(bw.x+r*Math.cos(a),bw.y-38-(b.h+b.capH)+b.capH,bw.z+r*Math.sin(a)); lathe(botProf().cap,C[b.capCol],8); mPop(); }
   }
-  /* 캡 엘리베이터 클리트 */
-  mPush(); const el=mAlong(CAPEL[0],CAPEL[1]);
-  for(let y=(R.elev%150);y<el;y+=150) box(-96,96,y,y+5,-36,-10,C.dark,C.dark,0);
-  mPop();
+  /* 캡 호퍼 속 캡 (적재량 비례) */
+  if(!far){ const H=CAPHOP, n=Math.round(clamp(S.mat.cap/MAT_CAP.cap,0,1)*30), cx=(H.x0+H.x1)/2, cz=(H.z0+H.z1)/2;
+    for(let i=0;i<n;i++){ const u=hash1(i*1.9), v=hash1(i*4.3), lay=Math.floor(i/10), yy=H.y0+30+lay*b.capH*1.2, sp=0.35+0.65*(yy-H.y0)/(H.y1-H.y0);
+      mPush(); mT(cx+(u-0.5)*(H.x1-H.x0-60)*sp,yy-b.h,cz+(v-0.5)*(H.z1-H.z0-60)*sp); lathe(botProf().cap,C[b.capCol],8); mPop(); } }
 }
 /* 포켓 4개 스타 판 (윤곽 : 원 − 포켓 반원) */
 function starPlate(c,y,base,d){
@@ -351,17 +354,12 @@ function dBottles(){
 
 /* ── 경광등 · HMI 화면 ── */
 function dPanels(){
-  const Y=rcY(), on=S.main;
-  lampLights(-3300,-480,1388,S.main?lampState("ua"):"off");
-  lampLights(L.sg-110,-440,1848,S.main?lampState("sg"):"off");
-  lampLights(-520,-1060,2078,S.main?lampState("dmc"):"off");
-  lampLights(L.pe-110,-440,1848,S.main?lampState("pe"):"off");
-  lampLights(L.T.x+460,L.T.z-300,Y.top+58,S.main?lampState("rc"):"off");
-  hmiFace(-3400,1530,482,300,210,on);
-  hmiFace(L.sg+330,1550,-98,260,190,on);
-  hmiFace(-120,1600,344,320,230,on);
-  hmiFace(L.pe+330,1550,-98,260,190,on);
-  hmiFace(3700,1560,274,300,210,on);
+  const on=S.main;
+  for(const k of ["ua","sg","dmc","pe","rc"]){
+    const l=LAMPS[k], h=HMIS[k];
+    lampLights(l[0],l[1],l[2],on?lampState(k):"off");
+    hmiFace(h[0],h[1],h[2],h[3],h[4],on,0);
+  }
   hmiFace(120,1420,762,330,250,on,0.05);
 }
 
@@ -376,7 +374,7 @@ const JOBS={
   gel:   {stand:[L.sg,430],  reach:[L.sg,1480,40],   carry:"reel", view:"gel", dur:2.4},
   tab:   {stand:[-1250,420], reach:[-1040,1980,-520],carry:"drum", view:"tab", dur:2.6},
   film:  {stand:[L.pe,430],  reach:[L.pe,1500,40],   carry:"roll", view:"film", dur:2.4},
-  cap:   {stand:[3890,860],  reach:[3890,1000,430],  carry:"bag",  view:"cap", dur:2.2},
+  cap:   {stand:[2110,760],  reach:[2110,1900,60],  carry:"bag",  view:"cap", dur:2.2},
   reject:{stand:[L.rej,1000],reach:[L.rej,700,560],  carry:null,   view:"reject", dur:2.0},
   table: {stand:[4800,900],  reach:[4800,1000,330],  carry:null,   view:"table", dur:2.2},
   look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}
@@ -456,7 +454,7 @@ function cuteOperatorShapes(o){
  El([0,HY+45,0],[47,13,43],'cap');
  return SS;
 }
-function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900,e[2]-w.z); if(dd>1500) drawWorker(w); } }
+function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900,e[2]-w.z); if(dd>1500&&(dd>cam.dist*0.8||w.job)) drawWorker(w); } }
 function drawWorker(w){
   const scale=1650/488, x=w.x, z=w.z, far=FAR();
   const want=w.face!==undefined?w.face:0;

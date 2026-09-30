@@ -377,10 +377,10 @@ function capperTick(dt,run){
     }
     if(b.s>=S_B1){ b.pocket=null; R.captured.delete(k); b.s=S_B1+0.01; b.zone="line"; if(!b.cap){ raise("RC61"); } }
   }
-  /* 헤드 : φ≈40~62° 에서 슈트 끝 캡을 집는다 */
+  /* 헤드 : φ≈CAP_PICK(130°)±11° 에서 슈트 끝 캡을 집는다 */
   for(let j=0;j<4;j++){
     const a=headAngle(j), deg=((a*180/Math.PI)%360+360)%360, h=R.heads[j];
-    if(deg>=40&&deg<62&&!h.cap&&R.chute>0&&on){ h.cap=true; R.chute--; }
+    if(Math.abs(deg-CAP_PICK)<11&&!h.cap&&R.chute>0&&on){ h.cap=true; R.chute--; }
     h.y=headDrop(deg); h.spin+=(deg>=205&&deg<310&&on)?dt*28:0;
   }
   if(on&&R.chute<=0&&S.mat.cap<=0){
@@ -395,7 +395,7 @@ function headAngle(j){
 }
 /* 헤드 하강량 (0~1) : 픽업 · 체결 구간 */
 function headDrop(deg){
-  if(deg>=38&&deg<64) return Math.sin((deg-38)/26*Math.PI)*0.55;
+  if(Math.abs(deg-CAP_PICK)<13) return Math.sin((deg-CAP_PICK+13)/26*Math.PI)*0.55;
   if(deg>=160&&deg<205) return (deg-160)/45;
   if(deg>=205&&deg<318) return 1;
   if(deg>=318&&deg<345) return 1-(deg-318)/27;
