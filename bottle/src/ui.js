@@ -9,7 +9,7 @@ function bindTiles(){
   $("#uAir").onclick=()=>{ if(!gate("#uAir")) return; S.air=!S.air; toast(S.air?"압축공기 공급 — 압력 상승 중":"압축공기 차단"); after(); };
   $("#uMain").onclick=()=>{ if(!gate("#uMain")) return;
     if(S.main&&S.running){ lineStop(); }
-    S.main=!S.main; if(!S.main){ S.user=null; lgOpen=false; } toast(S.main?"메인 전원 투입 — HMI 부팅":"메인 전원 차단"); after(); };
+    S.main=!S.main; S.dust=S.main; if(!S.main){ S.user=null; lgOpen=false; } toast(S.main?"메인 전원 투입 — HMI 부팅 · 집진기 자동 가동":"메인 전원 차단 · 집진기 정지"); after(); };
   $("#uDust").onclick=()=>{ if(!gate("#uDust")) return; S.dust=!S.dust; toast(S.dust?"집진기 가동":"집진기 정지"); after(); };
   $("#uDoor").onclick=()=>{ if(!gate("#uDoor")) return;
     if(S.door==="closed"){ S.door="open"; S.doorOpens++; if(S.running){ deduct("doorRun"); raise("E001"); } toast("안전문 열림 — 인터락"); }
@@ -21,9 +21,9 @@ function bindTiles(){
     const w=wkFor(JOBS[job].stand); if(w.job){ toast("작업자가 다른 작업 중입니다."); return; }
     startWork(job,()=>{ amt(); toast(msg,"good"); after(); });
     renderTiles(); }; };
-  mat("#mBottle","bottle","bottle",()=>{ S.mat.bottle=MAT_CAP.bottle; LN.tt.n=Math.max(LN.tt.n,14); clearAlarm("UA11"); },"빈 병 "+MAT_CAP.bottle+"개 투입");
+  mat("#mBottle","bottle","bottle",()=>{ S.mat.bottle=MAT_CAP.bottle; clearAlarm("UA11"); },"빈 병 "+MAT_CAP.bottle+"개 투입");
   mat("#mGel","gel","gel",()=>{ S.mat.gel=MAT_CAP.gel; clearAlarm("SG21"); },"실리카겔 롤 장착 ("+MAT_CAP.gel+"개)");
-  mat("#mTab","tab","tab",()=>{ S.mat.tab=matCap("tab"); LN.dmc&&(LN.dmc.tray=[1,1,1]); },"정제 투입 — 호퍼 가득");
+  mat("#mTab","tab","tab",()=>{ S.mat.tab=matCap("tab"); },"정제 투입 — 호퍼 가득");
   mat("#mFilm","film","film",()=>{ S.mat.film=MAT_CAP.film; clearAlarm("PE51"); },"PE 필름 롤 장착");
   mat("#mCap","cap","cap",()=>{ S.mat.cap=MAT_CAP.cap; },"캡 투입 ("+MAT_CAP.cap+"개)");
   mat("#mReject","reject","reject",()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); },"리젝트 트레이 회수 · 기록 완료");

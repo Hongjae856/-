@@ -21,9 +21,9 @@ function demoSetup(){
 function demoTourBtn(){ const b=$("#demoTour"); if(!b) return; b.style.display=isDemo()?"":"none"; b.textContent=DEMO.tour?"🎥 카메라 투어 ON":"🎥 카메라 투어 OFF"; b.classList.toggle("on",DEMO.tour); }
 /* 자재 보충 · 회수 작업 (작업자가 걸어가 수행) */
 const DEMO_JOBS=[
-  ["bottle",()=>S.mat.bottle<MAT_CAP.bottle*0.2,()=>{ S.mat.bottle=MAT_CAP.bottle; LN.tt.n=Math.max(LN.tt.n,14); clearAlarm("UA11"); }],
+  ["bottle",()=>S.mat.bottle<MAT_CAP.bottle*0.2,()=>{ S.mat.bottle=MAT_CAP.bottle; clearAlarm("UA11"); }],
   ["gel",   ()=>S.mat.gel<MAT_CAP.gel*0.15,      ()=>{ S.mat.gel=MAT_CAP.gel; clearAlarm("SG21"); }],
-  ["tab",   ()=>S.mat.tab<matCap("tab")*0.2,     ()=>{ S.mat.tab=matCap("tab"); LN.dmc&&(LN.dmc.tray=[1,1,1]); clearAlarm("DM31"); }],
+  ["tab",   ()=>S.mat.tab<matCap("tab")*0.2,     ()=>{ S.mat.tab=matCap("tab"); clearAlarm("DM31"); }],
   ["film",  ()=>S.mat.film<MAT_CAP.film*0.15,    ()=>{ S.mat.film=MAT_CAP.film; clearAlarm("PE51"); }],
   ["cap",   ()=>S.mat.cap<MAT_CAP.cap*0.2,       ()=>{ S.mat.cap=MAT_CAP.cap; clearAlarm("RC61"); }],
   ["reject",()=>S.reject.n>=S.reject.cap-6,      ()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); }],

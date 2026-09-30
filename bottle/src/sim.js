@@ -9,7 +9,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 const LN={
   conv:0, bottles:[], nextId:1, feedT:0, fed:0,
-  tt:{ang:0, n:18, exitT:0, list:[]}, elev:0, sbelt:0,
+  tt:{ang:0, n:0, exitT:0, list:[]}, elev:0, sbelt:0,
   blowT:0, vacT:0,
   st:{}, dmc:null, divNext:-1, mrgTok:null, mrgLast:1, mrgPin:{"-1":1,"1":1}, rej:{ext:0,t:0,active:null}, pushing:[],
   rc:{phi:0, rate:0, heads:[{cap:false,y:0,spin:0},{cap:false,y:0,spin:0},{cap:false,y:0,spin:0}], chute:0, chuteFeed:0, bowl:0, elev:0, captured:new Map()},
@@ -48,7 +48,7 @@ function makeStations(){
     pe:gen("pe",L.pe,0,()=>0.56*cycK(),{feed:0,cut:0,plg:0,idx:0,piece:null})
   };
   LN.dmc={gate:[0,0], gateT:[0,0], buf:[0,0], hold:[false,false],
-    chPh:new Array(12).fill(0), led:new Array(12).fill(0), falls:[], vibPh:0, tray:[1,1,1], dump:[null,null]};
+    chPh:new Array(12).fill(0), led:new Array(12).fill(0), falls:[], vibPh:0, tray:[0,0,0], dump:[null,null]};   /* 트레이는 비어서 시작 : 운전 중 호퍼 → 1 → 2 → 3단으로 채워진다 */
 }
 const laneQ=()=>({gate:1, inPin:1, meter:"closed", gb:null, clampB:null, clamp:0, IN:null, PAN:null, OUT:null});
 function lcStation(k,X,i){ return {k, X, i, lc:true, ph:"wait", t:0, fin:0, car:0, read:null, idleT:0, ln:{"-1":laneQ(),"1":laneQ()}}; }
@@ -91,7 +91,7 @@ function uaTick(dt,run){
   if(run&&S.main){ LN.tt.ang+=dt*(0.6+S.bpm/120*0.9); S.ua.ttRun=true; } else S.ua.ttRun=false;
   const need=LN.tt.n<22&&S.mat.bottle>0;
   S.ua.elev=run&&need;
-  if(S.ua.elev){ LN.elev+=dt*260; LN.tt.fillAcc=(LN.tt.fillAcc||0)+dt*rate*1.6;
+  if(S.ua.elev){ LN.elev+=dt*260; LN.tt.fillAcc=(LN.tt.fillAcc||0)+dt*Math.max(rate*1.6,LN.tt.n<8?2.2:0);
     while(LN.tt.fillAcc>=1&&S.mat.bottle>0){ LN.tt.fillAcc-=1; LN.tt.n++; S.mat.bottle--; } }
   if(run) LN.sbelt+=convSpeed()*dt;
   /* 세척 에어 · 진공 (분사 표시) */
@@ -590,7 +590,7 @@ function lineReset(){
 }
 /* 라인 초기화 (새 세션) */
 function lineInit(){
-  LN.bottles=[]; LN.pushing=[]; LN.rejBin=[]; LN.table.list=[]; LN.fed=0; LN.feedT=0; LN.tt.n=18; CAP_CACHE={ml:-1};
+  LN.bottles=[]; LN.pushing=[]; LN.rejBin=[]; LN.table.list=[]; LN.fed=0; LN.feedT=0; LN.tt.n=0; CAP_CACHE={ml:-1};
   LN.divNext=-1; LN.mrgTok=null; LN.mrgLast=1; LN.mrgPin={"-1":1,"1":1};
   LN.rc.captured=new Map(); LN.rc.chute=0; LN.rc.heads.forEach(h=>{h.cap=false;});
   makeStations();

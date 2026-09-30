@@ -22,8 +22,7 @@ function stepsOperation(easy){
   if(S&&S.mode==="demo"){ A.push(T_("demo","시연 운전","라인 전체 자동 가동",()=>null,()=>false,{pts:0,watch:true})); return A; }
   CLEAR.forEach((c,i)=>A.push(T_("lc"+i,"라인 클리어런스 ("+(i+1)+"/5) — "+c.t,c.d,()=>"#lcCheck",()=>S.clear.includes(i),{lc:i,pts:2})));
   A.push(T_("air","압축공기 공급","유틸리티의 [압축공기] 를 켜서 라인에 6 bar 를 공급합니다. 5.5 bar 이상이 되면 다음 단계로 넘어갑니다.",()=>S.air?null:"#uAir",()=>S.air&&S.airP>=5.5,{pts:3}));
-  A.push(T_("main","메인 전원 투입","[메인 전원] 을 켭니다. 6기종 HMI 가 부팅됩니다.",()=>"#uMain",()=>S.main,{pts:3}));
-  if(!easy) A.push(T_("dust","집진기 가동","[집진기] 를 켭니다. 계수기의 정제 분진을 흡입해 센서창 오염을 막습니다.",()=>"#uDust",()=>S.dust,{pts:3}));
+  A.push(T_("main","메인 전원 투입","[메인 전원] 을 켭니다. 6기종 HMI 가 부팅되고 집진기가 자동으로 가동됩니다.",()=>"#uMain",()=>S.main,{pts:3}));
   A.push(T_("login","HMI 로그인","HMI 의 열쇠 아이콘을 눌러 로그인합니다. (PK2 / 1234 · SUPERVISOR)",()=>S.user?null:(lgOpen?"#lgOk":"#lgKey"),()=>!!S.user,{pts:4,hmi:true}));
   A.push(T_("recipe","레시피 적용 (DMC-60T)","DMC-60T 주화면의 [레시피 적용] 을 누릅니다. 계수 · 병 규격 · 기준 중량 · 허용오차가 라인 전체에 설정됩니다.",()=>hmiRoute("dmc","main",HB("dmc_recipe")),()=>S.recipeApplied,{pts:5,hmi:true}));
   if(easy){
@@ -67,7 +66,7 @@ function startSession(mode){
   initState(); lineInit(); STEPS_CACHE=null;
   S.mode=mode; S.clear=[]; S.tIdx=0; S.stepLog=[]; S.deducts=[]; S.hintUsed=0;
   S.cnt.target=isEasy()?24:40;
-  if(isEasy()){ S.dust=true; S.ua.air=true; S.ua.vac=true; S.dmc.checked=true; S.wc.checked=true; S.rcp.checked=true; }
+  if(isEasy()){ S.ua.air=true; S.ua.vac=true; S.dmc.checked=true; S.wc.checked=true; S.rcp.checked=true; }
   S.session={active:true, ended:false, start:performance.now(), sec:0};
   S.rc=recipeOf(SEL.prod,SEL.count,SEL.ml); S.bpm=bpmFor(S.rc.n); if(typeof syncBpm==="function") syncBpm();
   hMach="ua"; hScr="main"; lgOpen=false;
