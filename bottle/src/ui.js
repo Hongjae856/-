@@ -64,7 +64,7 @@ function renderTiles(){
   $("#monBpm").innerHTML=(S.running?S.bpm:0)+" <small>병/분</small>";
   $("#monTarget").textContent=S.cnt.good+" / "+S.cnt.target;
   $("#sCount").textContent=rc.count.k+" ("+rc.n+" 정)";
-  $("#sTol").textContent="±"+rc.tol+" 정 · ±"+fmt(rc.netTol,3)+" g";
+  $("#sTol").textContent="±"+rc.tol+"정 ("+fmt(rc.netTol,3)+"g)";
   $("#sNet").textContent=S.wc.nNet?fmt(S.wc.sumNet/S.wc.nNet,3)+" g":"- g";
   $("#sTpm").textContent=(S.running?Math.round(dmcRate()*720):0).toLocaleString()+" 정/분";
   $("#sTare").textContent=S.wc.lastTare!=null?fmt(S.wc.lastTare,2)+" g":"- g";
@@ -194,7 +194,7 @@ function drawOverlay(){
   g.textAlign="center"; g.textBaseline="middle";
   if(VIEW3.label){
     const LBL=[[-4200,2050,-200,"① UA-120 언스크램블러·에어세척기"],[L.sg,2080,-400,"② SG-120 실리카겔"],[L.lc1,1480,190,"전단 로드셀"],
-      [-820,2330,-800,"③ DMC-60T 정제 계수기"],[L.lc2,1480,190,"후단 로드셀 · 리젝트"],[L.pe,2080,-400,"④ HPE-100 PE 필름"],[2950,rcY().top+300,-400,"⑤ RCS-120 로타리 캡핑기"],[4800,1450,-10,"집적 테이블"],[120,1720,760,"중량선별 PLC"]];
+      [-820,2330,-800,"③ DMC-60T 정제 계수기"],[L.lc2,1480,190,"후단 로드셀 · 리젝트"],[L.pe,1900,-300,"④ HPE-100 PE 필름"],[3150,rcY().top+380,-400,"⑤ RCS-120 로타리 캡핑기"],[4800,1450,-10,"집적 테이블"],[120,1720,760,"중량선별 PLC"]];
     g.font="800 "+(12*K).toFixed(0)+"px "+'"Malgun Gothic",sans-serif';
     for(const [x,y,z,t] of LBL){ if(cam.dist>7000&&/로드셀|PLC/.test(t)) continue; const p=prj(x,y,z); if(!p||p.x<0||p.x>W||p.y<0||p.y>H) continue;
       const w=g.measureText(t).width+16*K, h=21*K;

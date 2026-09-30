@@ -73,7 +73,7 @@ button{font-family:var(--ff)}
 #monStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .st{background:#172d3c;border:1px solid #2d485b;border-radius:8px;padding:6px 8px}
 .st .k{font-size:11.5px;color:#a9c8d9;font-weight:700;white-space:nowrap}
-.st .v{font:800 16px/1.3 var(--mono);color:#8eeccd;white-space:nowrap}
+.st .v{font:800 15px/1.3 var(--mono);color:#8eeccd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .st .v.r{color:#ff8277}.st .v.w{color:#ffce68}
 
 /* ══ 코치 ══ */

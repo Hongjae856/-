@@ -126,7 +126,7 @@ const SCREENS={
  },
  wc:{
   main(){ const w=S.wc, rc=S.rc, st1=LN.st.lc1, st2=LN.st.lc2;
-    const tR=st1&&st1.read!=null?st1.read:w.lastTare, gR=st2&&st2.read!=null?st2.read:w.gross;
+    const tR=w.lastTare, gR=w.gross;   /* 안정된 측정값 (계량 중 흔들림 제외) */
     const ng=w.judge==="NG";
     return '<div class="hTitle">⚖ 중량선별 <s>중량선별 PLC · MAIN</s>'+mStatus("wc")+'</div>'+
      '<div class="kpis">'+kc(tR!=null?fmt(tR,2)+" g":"-","전단 (빈병)")+kc(gR!=null?fmt(gR,2)+" g":"-","후단 (총중량)")+kc(w.net!=null?fmt(w.net,3)+" g":"-","순중량",ng?"ng":"hi")+'</div>'+

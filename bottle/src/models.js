@@ -180,6 +180,13 @@ function hoseTo(a,m,e,r,col){ const pts=[]; for(let i=0;i<=10;i++){ const t=i/10
 
 /* ── SG-120 ── */
 function sgHeadY(){ const b=BD(); return {y0:CH+b.h+130, y1:CH+b.h+320}; }
+/* 투입 헤드 : 뒤판 · 옆판 · 상하판 + 앞 투명창 (피드 롤러 · 커터가 보인다) */
+function inserterHead(x,H,hw,hd){
+  box(x-hw,x+hw,H.y0,H.y1,-hd,-hd+14,C.cab,C.ssL);
+  box(x-hw,x-hw+10,H.y0,H.y1,-hd,hd,C.cab,C.ssL); box(x+hw-10,x+hw,H.y0,H.y1,-hd,hd,C.cab,C.ssL);
+  box(x-hw,x+hw,H.y1-12,H.y1,-hd,hd,C.cab,C.ssL); box(x-hw,x+hw,H.y0,H.y0+12,-hd,hd,C.cab,C.ssL);
+  glassBox(x-hw+10,x+hw-10,H.y0+12,H.y1-12,hd-3,hd,C.acryl,0.18);
+}
 function sSG(){
   const x=L.sg, b=BD(), H=sgHeadY();
   cabinet(x-310,x+310,110,1060,-790,-150,{doors:2,front:-150});
@@ -190,8 +197,7 @@ function sSG(){
   cylZ(x+60,H.y1+70,-270,-24,9,C.ss,10);                               /* 가이드 롤러 축 */
   /* 헤드 : 컬럼에서 내민 암 + 피드 · 커터 블록 */
   box(x-70,x+70,H.y1-90,H.y1,-270,-60,C.cab);
-  box(x-86,x+86,H.y0,H.y1,-66,66,C.cab,C.ssL);
-  box(x-60,x+60,H.y0+40,H.y1-30,66,68,[0.06,0.08,0.1,0.2],null,0);   /* 투시창 */
+  inserterHead(x,H,86,66);
   box(x+46,x+70,H.y1-110,H.y1-86,66,80,C.dark);                        /* 마크 센서 */
   /* 가이드 튜브 (투명) · 플런저 실린더 */
   const tr=Math.max(9,b.nk/2-4);
@@ -250,8 +256,9 @@ function sDMC(){
   box(DMC.x0-6,DMC.x1+6,DMC.t3y-14,DMC.t3y-4,DMC.t3z0,DMC.t3z1,C.brushed,C.brushed,0);
   for(let i=0;i<12;i++){
     const x0=DMC.x0+i*DMC.tw, xc=x0+DMC.tw/2;
-    quad([x0+1,DMC.t3y+6,DMC.t3z0],[x0+1,DMC.t3y+6,DMC.t3z1],[xc,DMC.t3y-4,DMC.t3z1],[xc,DMC.t3y-4,DMC.t3z0],C.brushed);
-    quad([xc,DMC.t3y-4,DMC.t3z0],[xc,DMC.t3y-4,DMC.t3z1],[x0+DMC.tw-1,DMC.t3y+6,DMC.t3z1],[x0+DMC.tw-1,DMC.t3y+6,DMC.t3z0],C.ss);
+    const tc=[0.50,0.54,0.58,0.8];
+    quad([x0+1,DMC.t3y+6,DMC.t3z0],[x0+1,DMC.t3y+6,DMC.t3z1],[xc,DMC.t3y-4,DMC.t3z1],[xc,DMC.t3y-4,DMC.t3z0],tc);
+    quad([xc,DMC.t3y-4,DMC.t3z0],[xc,DMC.t3y-4,DMC.t3z1],[x0+DMC.tw-1,DMC.t3y+6,DMC.t3z1],[x0+DMC.tw-1,DMC.t3y+6,DMC.t3z0],tc);
     box(x0-1,x0+1,DMC.t3y,DMC.t3y+16,DMC.t3z0,DMC.t3z1,C.ssL,C.ssL,0);
   }
   box(DMC.x1-1,DMC.x1+1,DMC.t3y,DMC.t3y+16,DMC.t3z0,DMC.t3z1,C.ssL,C.ssL,0);
@@ -299,7 +306,8 @@ function sReject(){
   box(bin.x-230,bin.x+230,110,130,bin.z-230,bin.z+200,C.ss);
   for(const xx of [bin.x-190,bin.x+190]) for(const zz of [bin.z-200,bin.z+170]) foot(xx,zz,110);
   const g=gAlpha; gAlpha=0.24; box(bin.x-210,bin.x+210,130,CH-170,bin.z+196,bin.z+200,C.acryl,C.acryl,0); gAlpha=g;
-  box(bin.x-230,bin.x+230,CH-176,CH-160,bin.z-230,bin.z+200,C.ssL,C.ssL,0);
+  box(bin.x-230,bin.x+230,CH-176,CH-160,bin.z-230,bin.z-150,C.ssL,C.ssL,0);
+  { const g2=gAlpha; gAlpha=0.2; box(bin.x-210,bin.x+230,CH-172,CH-166,bin.z-150,bin.z+200,C.acryl,C.acryl,0); gAlpha=g2; }
   box(bin.x+150,bin.x+190,CH-260,CH-200,bin.z+200,bin.z+214,C.yellow,C.yellow,0);   /* 잠금 */
 }
 /* ── 중량선별 PLC 패널 ── */
@@ -319,8 +327,7 @@ function sPE(){
   cylZ(x+200,1360,-270,-40,10,C.ss,10);
   cylZ(x+60,H.y1+70,-270,-40,9,C.ss,10);
   box(x-70,x+70,H.y1-90,H.y1,-270,-60,C.cab);
-  box(x-96,x+96,H.y0,H.y1,-70,70,C.cab,C.ssL);
-  box(x-66,x+66,H.y0+40,H.y1-30,70,72,[0.06,0.08,0.1,0.2],null,0);
+  inserterHead(x,H,96,70);
   box(x+60,x+92,H.y0+36,H.y0+76,70,90,[0.84,0.30,0.12,0.3]);          /* 가열 커터 표시 */
   const tr=Math.max(10,b.nk/2-3);
   const g=gAlpha; gAlpha=0.28; tube([x,CH+b.h+16,0],[x,H.y0,0],tr+2,C.acryl,16,false); gAlpha=g;
@@ -418,14 +425,13 @@ function botProf(){
 }
 /* 병 1개 : (x,y,z) 바닥 중심 · roll = 진행축 기준 뒤집힘 · yaw = 진행 방향 */
 function drawBottle(x,y,z,o){
-  const b=BD(), P=botProf(), far=cam.dist>7000;
-  const seg=far?8:14;
+  const b=BD(), P=botProf(), far=cam.dist>7000, seg=far?8:cam.dist>4500?10:14;
   mPush(); mT(x,y,z);
   if(o.yaw) mRY(o.yaw);
   if(o.roll){ mT(0,b.h/2,0); mRX(o.roll); mT(0,-b.h/2,0); }
   if(o.tilt){ mRZ(o.tilt); }
   lathe(P.body,o.col||C.hdpe,seg);
-  if(!far) lathe(P.ring,C.hdpeS,seg);
+  if(cam.dist<3000) lathe(P.ring,C.hdpeS,seg);
   if(o.fill>0){   /* 병 속 정제 윗면 (입구로 보인다) */
     const yf=4+(P.hs-4)*Math.min(1,o.fill)*0.82;
     mPush(); disc(yf,0,P.r-2.2,C[S.rc.prod.col==="caps"?"capsR":S.rc.prod.col],far?6:12); mPop();

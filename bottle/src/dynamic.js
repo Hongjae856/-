@@ -73,10 +73,12 @@ function dUA(){
       const py=ym-side*w*s, pz=side*w*c;
       Lp.push([x,py-bw/2*c,pz-bw/2*s]); Rp.push([x,py+bw/2*c,pz+bw/2*s]);
     }
-    ribbon(Lp,Rp,[0.16,0.46,0.34,0.05]);
-    if(!far) for(let x=L.belt0+(LN.sbelt%70);x<L.belt1;x+=70){
-      const th=uaRoll(x), c=Math.cos(th), s=Math.sin(th), py=ym-side*(w-1)*s, pz=side*(w-1)*c;
-      mPush(); mT(x,py,pz); mRX(th); box(-3,3,-bw/2,bw/2,-1.5,1.5,[0.10,0.30,0.22,0.05],null,0); mPop();
+    const bc=[0.16,0.46,0.34,0.05], lug=[0.09,0.30,0.21,0.05], ph=LN.sbelt%40;
+    for(let x=L.belt0;x<L.belt1-1;x+=40){
+      const xm=x+20, th=uaRoll(xm), c=Math.cos(th), s=Math.sin(th), py=ym-side*w*s, pz=side*w*c;
+      mPush(); mT(xm,py,pz); mRX(th); box(-20.5,20.5,-bw/2,bw/2,0,side*6,bc,null,0);
+      if(!far){ const lx=((ph+x)%40)-20; box(lx-2,lx+2,-bw/2,bw/2,side*6,side*7.5,lug,null,0); }
+      mPop();
     }
   }
   /* 이온 에어 분사 · 진공 흡입 (병이 노즐 위에 있을 때) */
