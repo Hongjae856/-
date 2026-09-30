@@ -90,11 +90,12 @@ function doorLeaf(D){
   box(X0,X1,Y0,Y0+p,-p/2,p/2,col,col,3); box(X0,X1,Y1-p,Y1,-p/2,p/2,col,col,3);
   box(X0,X0+p,Y0,Y1,-p/2,p/2,col,col,3); box(X1-p,X1,Y0,Y1,-p/2,p/2,col,col,3);
   /* 손잡이 : 경첩 반대쪽 */
-  if(D.hinge==="top"){ const hx=(X0+X1)/2; box(hx-70,hx+70,Y0+22,Y0+36,p/2,p/2+18,C.dark,C.dark,0); }
-  else { const hx=D.hinge==="left"?X1-30:X0+30; box(hx-7,hx+7,h*0.45-80,h*0.45+80,p/2,p/2+18,C.dark,C.dark,0); }
+  const hz0=D.back?-p/2-18:p/2, hz1=D.back?-p/2:p/2+18;
+  if(D.hinge==="top"){ const hx=(X0+X1)/2; box(hx-70,hx+70,Y0+22,Y0+36,hz0,hz1,C.dark,C.dark,0); }
+  else { const hx=D.hinge==="left"?X1-30:X0+30; box(hx-7,hx+7,h*0.45-80,h*0.45+80,hz0,hz1,C.dark,C.dark,0); }
   glassBox(X0+p,X1-p,Y0+p,Y1-p,-2,2,C.acryl,0.13);
 }
-/* 도어 개폐 : 작업자가 회전 범위 밖(통로 뒤)에서 먼저 열고 들어가며, 나온 뒤 닫힌다 */
+/* 도어 개폐 : 작업자가 회전 범위 밖(통로 쪽)에서 먼저 열고 들어가며, 나온 뒤 닫힌다 · back = 뒤쪽 도어 (−z 로 열림) */
 function doorTick(dt){
   const ids=new Set(DOORS.map(D=>D.id)); ids.add("sgLid");
   for(const id of ids){
@@ -108,9 +109,10 @@ function drawDoors(){
     if(!VIEW3.guard&&o<0.02) continue;
     const a=smooth(o)*(D.hinge==="top"?1.75:1.45);
     mPush();
-    if(D.hinge==="left"){ mT(D.x0,D.y0,D.z); mRY(-a); }
-    else if(D.hinge==="right"){ mT(D.x1,D.y0,D.z); mRY(a); }
-    else { mT(D.x0,D.y1,D.z); mRX(-a); }
+    const k=D.back?-1:1;
+    if(D.hinge==="left"){ mT(D.x0,D.y0,D.z); mRY(-a*k); }
+    else if(D.hinge==="right"){ mT(D.x1,D.y0,D.z); mRY(a*k); }
+    else { mT(D.x0,D.y1,D.z); mRX(-a*k); }
     doorLeaf(D);
     mPop();
   }
@@ -119,7 +121,7 @@ function drawDoors(){
    o.mx : 중간 기둥 x · o.fskip/bskip : 판을 생략할 칸 · o.hole : {f0,b0,t0,l,r} 구멍 · o.top:false 윗판 생략
    o.door : {칸번호:{id,hinge}} 여닫는 도어 (동적) */
 function alFrame(x0,x1,y0,y1,z0,z1,o){
-  o=o||{}; const p=20, col=C.alu, xs=[x0,...(o.mx||[]),x1], H=o.hole||{}, DR=o.door||{};
+  o=o||{}; const p=20, col=C.alu, xs=[x0,...(o.mx||[]),x1], H=o.hole||{}, DR=o.door||{}, BD2=o.bdoor||{};
   for(const x of xs) for(const z of [z0,z1]) box(x-p,x+p,y0,y1,z-p,z+p,col,col,4);
   for(const z of [z0,z1]) for(const y of [y0+p,y1-p]) box(x0-p,x1+p,y-p,y+p,z-p,z+p,col,col,4);
   for(const x of xs) for(const y of [y0+p,y1-p]) box(x-p,x+p,y-p,y+p,z0,z1,col,col,4);
@@ -142,6 +144,10 @@ function alFrame(x0,x1,y0,y1,z0,z1,o){
   if(!VIEW3.guard) return;
   for(let i=0;i<xs.length-1;i++){
     const a=xs[i]+p, c=xs[i+1]-p;
+    if(BD2[i]){ const q={id:BD2[i].id, y0:y0+2*p, y1:y1-2*p, z:z0-p, back:true};
+      if(BD2[i].hinge==="double"){ const m=(a+c)/2; DOORS.push(Object.assign({hinge:"left",x0:a,x1:m-3},q),Object.assign({hinge:"right",x0:m+3,x1:c},q)); }
+      else DOORS.push(Object.assign({hinge:BD2[i].hinge,x0:a,x1:c},q));
+      continue; }
     if(!(o.bskip||[]).includes(i)) panelZ(a,c,y0+2*p,y1-2*p,z0,H["b"+i]);
     if(o.top!==false) panelY(a,c,z0+p,z1-p,y1-p,H["t"+i]);
   }
@@ -329,7 +335,7 @@ function sUA(){
   mainSwitch(U.x0+200,640,U.z1+1);
   /* 상부 가드 : 왼칸(디스크) · 가운데 기둥 · 오른칸(벨트 · 호퍼) — 앞 도어는 위로 여는 방식 */
   alFrame(U.x0,U.x1,CH-86,U.yT,U.z0,U.z1,{mx:[U.col0,U.col1], fskip:[1],
-    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}},
+    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"top"}},
     hole:{r:[-110,110,CH-90,CH+b.h+60]}});
   /* 가운데 기둥 : 조작 패널 (위) · 점검창 (아래) */
   const H=HMIS.ua;
@@ -631,7 +637,7 @@ function sPE(){
   cabinet(P.x0,P.x1,110,CH-110,P.z0,P.z1,{doors:2,front:P.z1});
   mainSwitch(P.x0+130,660,P.z1+1);
   box(P.x0-10,P.x1+10,CH-110,CH-96,P.z0-10,P.z1+10,C.ssL,C.ssL);
-  alFrame(P.x0,P.x1,CH-96,P.yT,P.z0,P.z1,{mx:[mid],door:{0:{id:"peL",hinge:"left"},1:{id:"peR",hinge:"right"}},
+  alFrame(P.x0,P.x1,CH-96,P.yT,P.z0,P.z1,{mx:[mid],door:{0:{id:"peL",hinge:"left"},1:{id:"peR",hinge:"right"}},bdoor:{0:{id:"peB",hinge:"left"},1:{id:"peB",hinge:"right"}},
     hole:{l:[-100,100,CH-100,CH+b.h+60],r:[-100,100,CH-100,CH+b.h+60]}});
   /* 뒤 스테인리스 후드 · 받침 테이블 */
   box(x-300,x+300,yD+120,yD+136,-620,-60,C.ssL,C.ssL);
@@ -680,7 +686,7 @@ function sRCS(){
   cylY(T.x,T.z,CH-2,CH+b.h*0.75+16,40,C.ss,16);
   /* 가드 (드럼 자리 윗판 구멍) */
   const dr=300;
-  alFrame(R.x0,R.x1,CH-96,R.yT,R.z0,R.z1,{mx:[R.mid],door:{0:{id:"rcL",hinge:"double"},1:{id:"rcR",hinge:"double"}},
+  alFrame(R.x0,R.x1,CH-96,R.yT,R.z0,R.z1,{mx:[R.mid],door:{0:{id:"rcL",hinge:"double"},1:{id:"rcR",hinge:"double"}},bdoor:{0:{id:"rcB",hinge:"double"}},
     hole:{t1:[T.x-dr-12,T.x+dr+12,T.z-dr-12,T.z+dr+12], l:[-100,100,CH-100,CH+b.h+60], r:[-100,100,CH-100,CH+b.h+60]}});
   /* 2단 원통 드럼 (위 대경 : 가드 위로 돌출 · 아래 소경) · 기둥 */
   const yu0=1640, yu1=2340, yl0=1400;

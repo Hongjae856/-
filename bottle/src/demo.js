@@ -35,7 +35,7 @@ function demoTick(dt){
   for(const [job,need,act] of DEMO_JOBS){
     if(!need()) continue;
     if(WK.some(w=>w.job&&w.job.key===job)) continue;
-    const w=wkFor(JOBS[job].stand[0]); if(w.job) continue;
+    const w=wkFor(JOBS[job].stand); if(w.job) continue;
     startWork(job,act,DEMO.tour?{}:{view:null});
   }
   /* 알람 자동 복구 (시연 중 정지 방지) */

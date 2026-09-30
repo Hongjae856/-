@@ -108,6 +108,7 @@ function finishSession(manual){
   if(!S.session||S.session.ended) return;
   S.session.ended=true; S.session.active=false; S.running=false;
   S.session.sec=(performance.now()-S.session.start)/1000;
+  if(!manual&&typeof AP!=="undefined"&&AP.video){ apOutro(); return; }
   if(typeof apStop==="function") apStop();
   showResult(manual);
 }
@@ -236,6 +237,7 @@ function launchIncident(k,sched){
   if(S.activeTrouble){ toast("현재 대응 중인 상황을 먼저 해결하세요.","bad"); return; }
   if(!S.running){ toast("라인이 운전 중일 때 발생시킬 수 있습니다.","bad"); return; }
   inc.fire();
+  (S.flags.vmLog=S.flags.vmLog||[]).push(k);
   if(CASES[k]){ S.flags.caseT=tSim; S.flags.casePending=k; showBanner("이상 현상 : "+inc.banner); }
   else if(inc.wait) showBanner("알람 대기 : "+inc.nm+" — 곧 알람이 발생합니다.");
   else if(!S.activeTrouble) beginRecovery(k);

@@ -80,25 +80,26 @@ const S_END=PATH.len;
 
 /* ── 카메라 시점 ── */
 Object.assign(CAMVIEW,{
-  all:{yaw:-0.36,pitch:0.26,dist:14600,tx:1250,ty:1000,tz:-150},
-  ua: {yaw:-0.55,pitch:0.28,dist:3900,tx:-4250,ty:1250,tz:-200},
-  sg: {yaw:-0.42,pitch:0.20,dist:2900,tx:-2290,ty:1400,tz:-150},
-  dmc:{yaw:-0.45,pitch:0.26,dist:3100,tx:560,ty:1350,tz:-300},
-  wc: {yaw:-0.40,pitch:0.30,dist:4800,tx:545,ty:1050,tz:-100},
-  pe: {yaw:-0.42,pitch:0.22,dist:2800,tx:3637,ty:1350,tz:-200},
-  rc: {yaw:-0.45,pitch:0.26,dist:4200,tx:5568,ty:1500,tz:-350},
-  table:{yaw:-0.62,pitch:0.55,dist:2400,tx:7725,ty:950,tz:0},
+  all:{yaw:-0.36,pitch:0.17,dist:14200,tx:1250,ty:900,tz:-150},
+  ua: {yaw:-0.50,pitch:0.13,dist:3700,tx:-4200,ty:1080,tz:-150},
+  sg: {yaw:-0.40,pitch:0.10,dist:2700,tx:-2250,ty:1150,tz:-100},
+  dmc:{yaw:-0.42,pitch:0.12,dist:3000,tx:560,ty:1150,tz:-200},
+  wc: {yaw:-0.38,pitch:0.14,dist:4400,tx:545,ty:1000,tz:-80},
+  pe: {yaw:-0.40,pitch:0.10,dist:2700,tx:3637,ty:1120,tz:-150},
+  rc: {yaw:-0.42,pitch:0.13,dist:4000,tx:5568,ty:1150,tz:-250},
+  table:{yaw:-0.60,pitch:0.32,dist:2400,tx:7725,ty:950,tz:0},
   top:{yaw:-0.0001,pitch:1.42,dist:16500,tx:1400,ty:300,tz:0}
 });
 /* 작업 영역 확대 시점 (자재 보충 · 조치) */
 const WORKVIEW={
-  bottle:{yaw:-0.30,pitch:0.22,dist:3000,tx:-3800,ty:1250,tz:0},
-  gel:   {yaw:-0.40,pitch:0.18,dist:2600,tx:-2390,ty:1400,tz:150},
-  tab:   {yaw:-0.55,pitch:0.30,dist:3000,tx:300,ty:1450,tz:-100},
-  film:  {yaw:-0.35,pitch:0.20,dist:2700,tx:3587,ty:1300,tz:100},
-  cap:   {yaw:-0.35,pitch:0.22,dist:3000,tx:5138,ty:1350,tz:0},
-  reject:{yaw:-0.30,pitch:0.30,dist:2600,tx:2389,ty:900,tz:250},
-  table: {yaw:-0.55,pitch:0.42,dist:2800,tx:7725,ty:900,tz:250}
+  /* 병 · 정제 · 필름 · 캡은 라인 뒤에서 투입 → 앞 위에서 설비 너머로 내려다본다 */
+  bottle:{yaw:-0.45,pitch:0.40,dist:3900,tx:-3640,ty:1250,tz:-800},
+  gel:   {yaw:-0.40,pitch:0.14,dist:2600,tx:-2390,ty:1250,tz:150},
+  tab:   {yaw:-0.50,pitch:0.42,dist:3700,tx:436,ty:1350,tz:-900},
+  film:  {yaw:-0.40,pitch:0.40,dist:3500,tx:3617,ty:1200,tz:-850},
+  cap:   {yaw:-0.40,pitch:0.42,dist:3900,tx:5018,ty:1250,tz:-950},
+  reject:{yaw:-0.30,pitch:0.26,dist:2600,tx:2600,ty:900,tz:250},
+  table: {yaw:-0.55,pitch:0.34,dist:2800,tx:7725,ty:900,tz:250}
 };
 
 /* ── 장치 핫스팟 위치 (월드 mm) ── */

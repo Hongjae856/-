@@ -18,7 +18,7 @@ function bindTiles(){
   const mat=(id,k,job,amt,msg)=>{ $(id).onclick=()=>{
     if(!gate(id)) return;
     if(S.running&&k!=="table"){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }
-    const w=wkFor(JOBS[job].stand[0]); if(w.job){ toast("작업자가 다른 작업 중입니다."); return; }
+    const w=wkFor(JOBS[job].stand); if(w.job){ toast("작업자가 다른 작업 중입니다."); return; }
     startWork(job,()=>{ amt(); toast(msg,"good"); after(); });
     renderTiles(); }; };
   mat("#mBottle","bottle","bottle",()=>{ S.mat.bottle=MAT_CAP.bottle; LN.tt.n=Math.max(LN.tt.n,14); clearAlarm("UA11"); },"빈 병 "+MAT_CAP.bottle+"개 투입");
@@ -62,7 +62,7 @@ function renderTiles(){
   $("#monRun").textContent=S.running?"운전 중":S.alarms.some(a=>ALARMS[a.key].kind==="trip")?"알람 정지":S.started?"정지":"대기";
   $("#monGood").textContent=S.cnt.good; $("#monBad").textContent=S.cnt.reject;
   $("#monBpm").innerHTML=(S.running?S.bpm:0)+" <small>병/분</small>";
-  $("#monTarget").textContent=S.cnt.good+" / "+S.cnt.target;
+  $("#monTarget").textContent=S.mode==="demo"?S.cnt.good+" / 연속":S.cnt.good+" / "+S.cnt.target;
   $("#sCount").textContent=rc.count.k+" ("+rc.n+" 정)";
   $("#sTol").textContent="±"+rc.tol+"정 ("+fmt(rc.netTol,3)+"g)";
   $("#sNet").textContent=S.wc.nNet?fmt(S.wc.sumNet/S.wc.nNet,3)+" g":"- g";
@@ -233,8 +233,9 @@ function drawOverlay(){
     const ng=w.judge==="NG";
     const html='<b>⚖ 중량선별 PLC</b><div class="row"><span>전단 (빈병)</span><span>'+(t!=null?fmt(t,2)+" g":"-")+'</span></div>'+
       '<div class="row"><span>후단 (총중량)</span><span>'+(gr!=null?fmt(gr,2)+" g":"-")+'</span></div>'+
-      '<div class="row"><span>순중량 / 기준</span><span class="'+(ng?"ng":"")+'">'+(w.net!=null?fmt(w.net,3):"-")+" / "+fmt(S.rc.netStd,3)+' g</span></div>'+
-      '<div class="row"><span>판정</span><span class="'+(ng?"ng":"")+'">'+(w.judge?w.judge+(ng&&w.log[0]?" · "+w.log[0].why:""):"-")+'</span></div>';
+      '<div class="row"><span>순중량</span><span class="'+(ng?"ng":"")+'">'+(w.net!=null?fmt(w.net,3)+" g":"-")+'</span></div>'+
+      '<div class="row"><span>기준</span><span>'+fmt(S.rc.netStd,3)+' g</span></div>'+
+      '<div class="row full"><span>판정</span><span class="'+(ng?"ng":"")+'">'+(w.judge?w.judge+(ng&&w.log[0]?" · "+w.log[0].why:""):"-")+'</span></div>';
     if(wb.dataset.h!==html){ wb.innerHTML=html; wb.dataset.h=html; }
     wb.hidden=false;
   }else wb.hidden=true;

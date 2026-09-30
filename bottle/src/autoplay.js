@@ -19,7 +19,7 @@ function apSet(on,video){
 function apStart(video){
   if(!S||!S.session||!S.session.active){ toast("먼저 과정과 모드를 선택해 시작하세요.","bad"); return; }
   if(isExam()){ toast("평가 모드에서는 자동재생을 쓸 수 없습니다.","bad"); return; }
-  if(video){ SPD=5; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==="5")); AP.cx=innerWidth/2; AP.cy=innerHeight/2; }
+  if(video){ SPD=2; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==="2")); AP.cx=innerWidth/2; AP.cy=innerHeight/2; }
   apSet(true,video);
 }
 function apStop(){ apSet(false,false); }
@@ -42,11 +42,12 @@ function directorTarget(){
   const inList=$("#mList").classList.contains("on");
   if(AP.dir==="wait"&&S.cnt.good>=4) AP.dir="case";
   if(AP.dir==="case"){ if(!inList) return "#caseBtn"; return '#listBox [data-k="C_DIRT"]'; }
-  if(AP.dir==="caseDone"&&S.cnt.good>=Math.min(12,S.cnt.target-8)) AP.dir="fault";
+  if(AP.dir==="caseDone"&&S.cnt.good>=Math.round(S.cnt.target*0.45)) AP.dir="fault";
   if(AP.dir==="fault"){ if(!inList) return "#faultBtn"; return '#listBox [data-k="DM33"]'; }
   return null;
 }
 function apTick(now){
+  if(AP.outro){ outroTick(now); return; }
   if(!AP.on) return;
   if(!S||!S.session||!S.session.active||S.session.ended){ apStop(); return; }
   if(AP.dir==="case"&&(S.flags.casePending||S.activeTrouble)) AP.dir="caseRun";
@@ -89,4 +90,24 @@ function moveCursor(el,now){
 function tap(){
   const r=document.createElement("div"); r.className="vmRipple"; r.style.left=AP.cx+"px"; r.style.top=AP.cy+"px"; document.body.appendChild(r);
   setTimeout(()=>r.remove(),600); const c=$("#vmCursor"); c.classList.add("press"); setTimeout(()=>c.classList.remove("press"),160);
+}
+
+/* ═══ 영상 자동재생 마무리 : 라인 전체를 천천히 둘러보며 요약 카드 → 결과 ═══ */
+const OUTRO_MS=9000;
+function apOutro(){
+  AP.outro={t0:performance.now(), y0:-0.75};
+  $("#vmCursor").style.display="none";
+  camSet("all"); cam.yawT=AP.outro.y0;
+  const hist=(S.flags.vmLog||[]).map(k=>{ const i=(CASES[k]||INC[k]); return i?esc(i.nm):k; });
+  const o=$("#vmOutro");
+  o.innerHTML='<small>영상 자동재생 완료</small><h2>병충전 라인 IDT · '+esc(MODE_NM[S.mode])+'</h2>'+
+    '<div class="row"><div><b>'+S.cnt.good+'</b>양품 (캡핑 완료)</div><div><b>'+S.cnt.reject+'</b>리젝트</div><div><b>'+(S.wc.nNet?fmt(S.wc.sumNet/S.wc.nNet,3):"-")+'</b>순중량 평균 (g)</div></div>'+
+    '<p>'+esc(S.rc.label)+'</p>'+(hist.length?'<p class="h">대응한 상황 : '+hist.join(" → ")+'</p>':'')+
+    '<p class="h">설정 → 가동 → 이상 대응 → 정지 까지 전 과정을 마쳤습니다.</p>';
+  o.classList.add("on");
+}
+function outroTick(now){
+  const O=AP.outro, u=Math.min(1,(now-O.t0)/OUTRO_MS);
+  cam.yawT=O.y0+0.62*smooth(u);
+  if(u>=1){ AP.outro=null; $("#vmOutro").classList.remove("on"); apStop(); showResult(false); }
 }

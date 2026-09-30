@@ -474,33 +474,36 @@ function dPanels(){
 }
 
 /* ═══ 작업자 ═══ */
+const BACK_AISLE=-1550;                    /* 라인 뒤 통로 (병 · 정제 · 필름 · 캡 투입) */
 const WK=[
-  {id:"A", x:-2900, z:AISLE, home:[-2900,AISLE], route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"B", x:4400,  z:AISLE, home:[4400,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0}
+  {id:"A", x:-2900, z:AISLE, aisle:AISLE, home:[-2900,AISLE], route:[], yaw:0, gait:0, walking:false, job:null, t:0},
+  {id:"B", x:4400,  z:AISLE, aisle:AISLE, home:[4400,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0},
+  {id:"C", x:500,   z:BACK_AISLE, aisle:BACK_AISLE, home:[500,BACK_AISLE], route:[], yaw:Math.PI, face:Math.PI, gait:0, walking:false, job:null, t:0}
 ];
 /* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점
    서는 위치는 설비 앞면 · 열린 도어와 겹치지 않게 잡았다 (통로 z=AISLE 에서 수직으로 들어온다) */
 const JOBS={
-  bottle:{stand:[-3640,640], reach:[-3640,1560,-300], carry:"box",  view:"bottle", dur:2.8, door:"uaR", pour:true},
+  bottle:{stand:[-3640,-1080], reach:[-3640,1560,-520], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
-  tab:   {stand:[-64,440], reach:[336,1800,-620], carry:"drum", view:"tab", dur:2.9, pour:true},
-  film:  {stand:[3557,710], reach:[3487,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peL"},
-  cap:   {stand:[5128,700], reach:[5028,1530,-300], carry:"bag",  view:"cap", dur:2.7, door:"rcL", pour:true},
+  tab:   {stand:[436,-1250], reach:[436,1800,-760], carry:"drum", view:"tab", dur:2.9, pour:true},
+  film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},
+  cap:   {stand:[5040,-1270], reach:[5018,1560,-470], carry:"bag",  view:"cap", dur:2.7, door:"rcB", pour:true},
   reject:{stand:[L.rej+40,800], reach:[L.rej,CH-100,380], carry:null, view:"reject", dur:2.0},
   table: {stand:[L.table.x,900], reach:[L.table.x,1000,330], carry:null, view:"table", dur:2.2},
   look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}
 };
-function wkFor(x){ return x<1500?WK[0]:WK[1]; }
+/* 담당 작업자 : 뒤쪽 작업 = C · 앞쪽 = x 로 A · B */
+function wkFor(p){ const x=Array.isArray(p)?p[0]:p, z=Array.isArray(p)?p[1]:1; return z<0?WK[2]:x<1500?WK[0]:WK[1]; }
 function wkBusy(){ return WK.some(w=>w.job||w.route.length); }
 /* 작업 시작 : 통로를 따라 걸어가서 작업 → 콜백 */
 function startWork(key,cb,opt){
   const j=Object.assign({},JOBS[key]||JOBS.look,opt||{});
-  const w=wkFor(j.stand[0]);
+  const w=wkFor(j.stand);
   if(w.job){ return false; }
-  const rt=[];
-  if(Math.abs(w.z-AISLE)>30) rt.push([w.x,AISLE]);
-  if(j.door){ rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],DOOR_Z]); }     /* 도어 회전 범위 밖에서 대기 */
-  else { rt.push([j.stand[0],AISLE]); rt.push([j.stand[0],j.stand[1]]); }
+  const rt=[], dz=w.aisle+(w.aisle>0?320:-320);
+  if(Math.abs(w.z-w.aisle)>30) rt.push([w.x,w.aisle]);
+  if(j.door){ rt.push([j.stand[0],w.aisle]); rt.push([j.stand[0],dz]); }     /* 도어 회전 범위 밖에서 대기 */
+  else { rt.push([j.stand[0],w.aisle]); rt.push([j.stand[0],j.stand[1]]); }
   w.route=rt; w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
   if(j.view&&WORKVIEW[j.view]&&R3.gl){ w.job.prevView=cam.view; const v=WORKVIEW[j.view]; cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
   return true;
@@ -519,22 +522,22 @@ function wkTick(dt){
     const J=w.job;
     if(J){
       if(J.phase==="walk0"){ J.phase="door"; J.t=0; }
-      if(J.phase==="door"){ w.face=0; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
+      if(J.phase==="door"){ w.face=w.aisle>0?0:Math.PI; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
       if(J.phase==="exit"){ w.job=null; w.idle=0; continue; }
       if(J.phase==="walk"){ J.phase="work"; J.t=0; }
       J.t+=dt;
       if(J.j.reach){ const r=J.j.reach; w.face=Math.atan2(-(r[0]-w.x),-(r[2]-w.z)); }
-      else w.face=0;
+      else w.face=w.aisle>0?0:Math.PI;
       if(J.t>=J.j.dur){
         w.carry=null; w.idle=0;
         if(J.prevView&&cam.view==="work") camSet(J.prevView==="work"?"all":J.prevView);
-        if(J.j.door){ J.phase="exit"; w.route=[[w.x,DOOR_Z]]; } else w.job=null;
+        if(J.j.door){ J.phase="exit"; w.route=[[w.x,w.aisle+(w.aisle>0?320:-320)]]; } else w.job=null;
         try{ J.cb&&J.cb(); }catch(e){ console.error(e); }
       }
     }else{
       w.idle=(w.idle||0)+dt;
       if(w.idle>2.5&&(Math.abs(w.x-w.home[0])>5||Math.abs(w.z-w.home[1])>5)){
-        const rt=[]; if(Math.abs(w.z-AISLE)>30) rt.push([w.x,AISLE]); rt.push(w.home); w.route=rt; w.idle=0;
+        const rt=[]; if(Math.abs(w.z-w.aisle)>30) rt.push([w.x,w.aisle]); rt.push(w.home); w.route=rt; w.idle=0;
       }
     }
   }
