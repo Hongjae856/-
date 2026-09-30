@@ -1196,7 +1196,7 @@ const ALARMS={
 
 /* ═══ 장치 설명 (3D ＋ 핫스팟) : 좌표는 layout.js 의 DEVPOS ═══ */
 const DEVICES=[
- {n:1, k:"ua", nm:"벌크 호퍼 · 엘리베이터", en:"Bulk Hopper & Elevator", d:"가드 안 뒤쪽의 벌크 호퍼(경사 바닥 체인 벨트 · 레벨 센서)와 녹색 클리트 가변속 엘리베이터입니다. 디스크의 병이 줄면 자동으로 올려 보냅니다(온디맨드). 하부 캐비닛 안에 들어가 있으며, 라인 뒤쪽 통로에서 허리 아래의 병 공급 가드(위로 열림 · 인터락 제외)를 열고 병을 투입합니다."},
+ {n:1, k:"ua", nm:"벌크 호퍼 · 엘리베이터", en:"Bulk Hopper & Elevator", d:"가드 안 뒤쪽의 벌크 호퍼(경사 바닥 체인 벨트 · 레벨 센서)와 녹색 클리트 가변속 엘리베이터입니다. 디스크의 병이 줄면 자동으로 올려 보냅니다(온디맨드). 하부 캐비닛 안에 들어가 있고 윗면이 뚫려 있습니다. 라인 뒤쪽 통로에서 뒤 가드(위로 열림 · 병 공급용 · 인터락 제외)를 열고 위에서 병을 투입합니다."},
  {n:2, k:"ua", nm:"레벨 디스크 소터", en:"Level-Sensing Disc Sorter", d:"회전하는 원판이 병을 가장자리로 밀어 한 줄로 세웁니다. 옆 나사 기둥으로 높이를 조정합니다."},
  {n:3, k:"ua", nm:"반전 사이드 벨트", en:"Inverting Side Belts", d:"양옆 벨트가 병 몸통을 잡고 비틀어진 경로를 따라 이동해 병을 180° 뒤집었다가 다시 세웁니다. 병 크기가 바뀌어도 교체부품 없이 폭만 조정합니다."},
  {n:4, k:"ua", nm:"이온 에어 · 진공 세척부", en:"Ionized Air & Vacuum", d:"뒤집힌 병 입구로 필터·이온화 에어를 불어넣어 정전기로 붙은 먼지를 떼고, 바로 옆 진공 노즐이 빨아냅니다. 2회 반복 세척합니다."},
@@ -1283,7 +1283,7 @@ const L={
   /* UA-120 */
   uaX0:-5200, uaX1:-3230,
   tt:{x:-4760, z:-372, r:370},                       /* 언스크램블 턴테이블 (가장자리가 z=0 에 닿음) */
-  hop:{x0:-4000, x1:-3480, z0:-796, z1:-470, y0:380, y1:760},    /* 벌크 호퍼 (하부 캐비닛 안 · 뒤판 개구부 · 허리 아래) */
+  hop:{x0:-4000, x1:-3480, z0:-720, z1:-440, y0:380, y1:CH-86},  /* 벌크 호퍼 (하부 캐비닛 안 · 윗면 투입구 · 뒤 가드를 열고 투입) */
   belt0:-4560, inv0:-4460, inv1:-4160, flat1:-3700, inv2:-3700, inv3:-3400, belt1:-3330,
   air:[-4080,-3890], vac:[-3990,-3800],               /* 1차·2차 이온 에어 / 진공 */
   /* SG-120 */
@@ -1397,12 +1397,11 @@ const BD=()=>S.rc.bottle;                    /* 현재 병 규격 */
 function foot(x,z,top){ cylY(x,z,0,14,30,C.rubber,12); cylY(x,z,14,top||110,11,C.ss,10); }
 function cabinet(x0,x1,y0,y1,z0,z1,o){
   o=o||{};
-  const P=o.pocket;   /* [px0,px1,py0,py1,pz1] : 뒤판(z0)에서 pz1 까지 파인 공간 (호퍼 수납부) */
+  const P=o.pocket;   /* [px0,px1,pz0,pz1,py0] : 윗면에서 py0 까지 파인 공간 (호퍼 수납부 · 위로 열림) */
   if(!P) box(x0,x1,y0,y1,z0,z1,o.col||C.cab,o.top||C.ssL);
   else { const [a,b,c,d,e]=P, col=o.col||C.cab, top=o.top||C.ssL;
     box(x0,a,y0,y1,z0,z1,col,top); box(b,x1,y0,y1,z0,z1,col,top);
-    box(a,b,y0,c,z0,z1,col,top); box(a,b,d,y1,z0,z1,col,top); box(a,b,c,d,e,z1,col,top);
-    box(a,b,c-4,c,z0,e,C.ssD,C.ssD,0); }
+    box(a,b,y0,y1,z0,c,col,top); box(a,b,y0,y1,d,z1,col,top); box(a,b,y0,e,c,d,col,top); }
   for(const x of [x0+45,x1-45]) for(const z of [z0+45,z1-45]) foot(x,z,y0);
   box(x0+6,x1-6,y0-18,y0,z0+6,z1-6,C.ssD,C.ssD,0);            /* 걸레받이 */
   if(o.doors) doorsZ(x0,x1,y0+20,y1-20,o.front===undefined?z1:o.front,o.doors,o.dir||1);
@@ -1724,8 +1723,10 @@ let DIV_TIP=0;
 function sUA(){
   const b=BD(), tt=L.tt, U=UAB, hp=L.hop;
   const hp0=L.hop;
-  cabinet(U.x0,U.x1,110,CH-100,U.z0,U.z1,{doors:3,pocket:[hp0.x0-30,hp0.x1+30,hp0.y0-20,hp0.y1+10,hp0.z1+20]});
-  box(U.x0-10,U.x1+10,CH-100,CH-86,U.z0-10,U.z1+10,C.ssL,C.ssL);           /* 상판 */
+  const PK=[hp0.x0-20,hp0.x1+20,hp0.z0-20,hp0.z1+20];
+  cabinet(U.x0,U.x1,110,CH-100,U.z0,U.z1,{doors:3,pocket:[...PK,hp0.y0-20]});
+  { const T=(a,b,c,d)=>box(a,b,CH-100,CH-86,c,d,C.ssL,C.ssL);             /* 상판 (호퍼 투입구 자리는 뚫림) */
+    T(U.x0-10,PK[0],U.z0-10,U.z1+10); T(PK[1],U.x1+10,U.z0-10,U.z1+10); T(PK[0],PK[1],U.z0-10,PK[2]); T(PK[0],PK[1],PK[3],U.z1+10); }
   handWheel(U.x1-230,600,U.z1+1,95);                                      /* 사이드 벨트 높이 조정 */
   mainSwitch(U.x0+200,640,U.z1+1);
   /* 상부 가드 : 왼칸(디스크) · 가운데 기둥 · 오른칸(벨트 · 호퍼) — 앞 도어는 위로 여는 방식 */
@@ -1756,12 +1757,9 @@ function sUA(){
   const y0=hp.y0, y1=hp.y1;
   box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
-  box(hp.x0,hp.x1,y0,y1-160,hp.z0,hp.z0+4,C.ss);                                      /* 뒤 벽 (윗부분은 투입구) */
-  box(hp.x0,hp.x1,y0,y1,hp.z1-4,hp.z1,C.ss);
-  /* 병 공급 가드 (뒤판 · 위로 열림 · 인터락 제외) */
-  DOORS.push({id:"uaFeed",hinge:"top",x0:hp.x0-26,x1:hp.x1+26,y0:hp.y0-16,y1:hp.y1+6,z:U.z0-12,back:true});
-  box(hp.x0-30,hp.x1+30,hp.y1+6,hp.y1+14,U.z0-18,U.z0,C.ss,C.ss,0);                  /* 경첩 레일 */
-  for(const [a,b2,c,d] of [[hp.x0-6,hp.x1+6,hp.z0-6,hp.z0+8],[hp.x0-6,hp.x0+8,hp.z0-6,hp.z1],[hp.x1-8,hp.x1+6,hp.z0-6,hp.z1]]) box(a,b2,y1-4,y1+6,c,d,C.ssL,C.ssL,0);   /* 투입구 테두리 */
+  box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,y0,y1,hp.z1-4,hp.z1,C.ss);
+  for(const [a,b2,c,d] of [[hp.x0-20,hp.x1+20,hp.z0-20,hp.z0+6],[hp.x0-20,hp.x1+20,hp.z1-6,hp.z1+20],[hp.x0-20,hp.x0+6,hp.z0-20,hp.z1+20],[hp.x1-6,hp.x1+20,hp.z0-20,hp.z1+20]])
+    box(a,b2,y1-2,y1+6,c,d,C.ssL,C.ssL,0);                                              /* 투입구 테두리 (상판 위) */
   quad([hp.x0+4,y0+40,hp.z0+4],[hp.x0+4,y0+40,hp.z1-4],[hp.x1-4,y0+160,hp.z1-4],[hp.x1-4,y0+160,hp.z0+4],[0.36,0.25,0.19,0.08]);
   cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
   /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
@@ -3399,7 +3397,7 @@ function floorY(x,z){
 }
 /* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점 */
 const JOBS={
-  bottle:{stand:[-3740,-1470], reach:[-3740,700,-640], carry:"box",  view:"bottle", dur:2.8, door:"uaFeed", pour:true},
+  bottle:{stand:[-3740,-1000], reach:[-3740,760,-580], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
   tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},
   film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},
