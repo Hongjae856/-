@@ -101,7 +101,7 @@ function bindPanel(){
   $("#lcCheck").onclick=()=>{
     const st=curStep(); if(!st||st.lc===undefined||S.clear.includes(st.lc)) return;
     const c=CLEAR[st.lc];
-    if(!startWork("look",()=>{ S.clear.push(st.lc); toast("라인 클리어런스 확인 : "+c.t,"good"); after(); },{stand:c.at,reach:c.look,dur:1.6})) toast("작업자가 이동 중입니다.");
+    if(!startWork("look",()=>{ S.clear.push(st.lc); toast("라인 클리어런스 확인 : "+c.t,"good"); after(); },{stand:c.at,reach:c.look,dur:c.door?2.2:1.6,door:c.door||null})) toast("작업자가 이동 중입니다.");
   };
   $("#incAsk").onclick=()=>openIncidentAsk();
   $("#fixBtn").onclick=()=>{ const h=recoveryStep(); if(!h||h.k!=="fix"||!h.f.fix) return; if(!h.f.act()) toast("작업자가 다른 작업 중입니다."); };

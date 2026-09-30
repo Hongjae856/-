@@ -3415,8 +3415,8 @@ function wkTick(dt){
     w.walking=false;
     w.y+=(floorY(w.x,w.z)-w.y)*Math.min(1,dt*9);
     if(w.route.length){
-      const [tx,tz]=w.route[0], dx=tx-w.x, dz=tz-w.z, dd=Math.hypot(dx,dz), st=Math.min(dd,dt*1150);
-      if(dd>1){ w.x+=dx/dd*st; w.z+=dz/dd*st; w.walking=true; w.gait+=st/150; w.face=Math.atan2(-dx,-dz); }
+      const [tx,tz]=w.route[0], dx=tx-w.x, dz=tz-w.z, dd=Math.hypot(dx,dz), st=Math.min(dd,dt*1900);
+      if(dd>1){ w.x+=dx/dd*st; w.z+=dz/dd*st; w.walking=true; w.gait+=st/190; w.face=Math.atan2(-dx,-dz); }
       if(dd-st<=1) w.route.shift();
       continue;
     }
@@ -3832,8 +3832,8 @@ const PASS=80;
 /* ── 라인 클리어런스 5항목 ── */
 const CLEAR=[
   {t:"이전 제품 · 잔류 정제 제거 확인", d:"DMC-60T 호퍼 · 진동 트레이 · 게이트 · 노즐에 이전 품목 정제가 남아 있지 않은지 확인합니다.", at:[436,AISLE-300], look:[416,1450,-400]},
-  {t:"이전 용기 · 캡 · 포장자재 제거 확인", d:"UA-120 호퍼 · 턴테이블, 캡 호퍼, 실리카겔 · PE 필름 릴에 이전 자재가 없는지 확인합니다.", at:[-4600,AISLE-300], look:[-4760,1000,-200]},
-  {t:"접촉부 청소 상태 확인", d:"트레이 · 노즐 · 슈트 · 스타휠 · 컨베이어 가이드의 청소 상태(청소 완료 표시)를 확인합니다.", at:[5688,AISLE-300], look:[5738,1100,-300]},
+  {t:"이전 용기 · 캡 · 포장자재 제거 확인", d:"UA-120 가드 도어를 열고 디스크 소터 · 호퍼에 이전 자재가 없는지 확인합니다. 캡 볼 피더, 실리카겔 · PE 필름 릴도 확인합니다.", at:[-4700,630], look:[-4760,1000,-250], door:"uaL"},
+  {t:"접촉부 청소 상태 확인", d:"RCS-120 가드 도어를 열고 스타휠 · 척 헤드 · 슈트 · 컨베이어 가이드의 청소 상태(청소 완료 표시)를 확인합니다.", at:[L.T.x+70,830], look:[L.T.x,1150,-200], door:"rcR"},
   {t:"리젝트 트레이 · 집적 테이블 잔품 확인", d:"리젝트 트레이와 집적 테이블에 이전 로트의 병이 남아 있지 않은지 확인합니다.", at:[L.rej+40,AISLE-200], look:[L.rej,800,380]},
   {t:"작업지시 · 품목 · 라인 상태 확인", d:"작업지시서의 품목 · 포장단위 · 병 규격과 라인 표시(품목 식별표)가 일치하는지 확인합니다.", at:[L.lc2+420,AISLE-250], look:[L.lc2+420,1650,-150]}
 ];
@@ -4245,7 +4245,7 @@ function bindPanel(){
   $("#lcCheck").onclick=()=>{
     const st=curStep(); if(!st||st.lc===undefined||S.clear.includes(st.lc)) return;
     const c=CLEAR[st.lc];
-    if(!startWork("look",()=>{ S.clear.push(st.lc); toast("라인 클리어런스 확인 : "+c.t,"good"); after(); },{stand:c.at,reach:c.look,dur:1.6})) toast("작업자가 이동 중입니다.");
+    if(!startWork("look",()=>{ S.clear.push(st.lc); toast("라인 클리어런스 확인 : "+c.t,"good"); after(); },{stand:c.at,reach:c.look,dur:c.door?2.2:1.6,door:c.door||null})) toast("작업자가 이동 중입니다.");
   };
   $("#incAsk").onclick=()=>openIncidentAsk();
   $("#fixBtn").onclick=()=>{ const h=recoveryStep(); if(!h||h.k!=="fix"||!h.f.fix) return; if(!h.f.act()) toast("작업자가 다른 작업 중입니다."); };

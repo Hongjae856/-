@@ -550,8 +550,8 @@ function wkTick(dt){
     w.walking=false;
     w.y+=(floorY(w.x,w.z)-w.y)*Math.min(1,dt*9);
     if(w.route.length){
-      const [tx,tz]=w.route[0], dx=tx-w.x, dz=tz-w.z, dd=Math.hypot(dx,dz), st=Math.min(dd,dt*1150);
-      if(dd>1){ w.x+=dx/dd*st; w.z+=dz/dd*st; w.walking=true; w.gait+=st/150; w.face=Math.atan2(-dx,-dz); }
+      const [tx,tz]=w.route[0], dx=tx-w.x, dz=tz-w.z, dd=Math.hypot(dx,dz), st=Math.min(dd,dt*1900);
+      if(dd>1){ w.x+=dx/dd*st; w.z+=dz/dd*st; w.walking=true; w.gait+=st/190; w.face=Math.atan2(-dx,-dz); }
       if(dd-st<=1) w.route.shift();
       continue;
     }
