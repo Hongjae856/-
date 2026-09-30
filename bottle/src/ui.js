@@ -327,8 +327,8 @@ function openRubric(){
 }
 function bindHeader(){
   $$("#spdGrp [data-s]").forEach(b=>b.onclick=()=>{ SPD=+b.dataset.s; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x===b)); });
-  const bp=d=>{ if(!S) return; S.bpm=clamp(S.bpm+d,20,120); syncBpm(); drawHMI(); };
-  $("#bpmDn").onclick=()=>bp(-10); $("#bpmUp").onclick=()=>bp(10);
+  const bp=d=>{ if(!S) return; S.bpm=clamp(S.bpm+d,2,120); syncBpm(); drawHMI(); };
+  $("#bpmDn").onclick=()=>bp(S.bpm>20?-10:-1); $("#bpmUp").onclick=()=>bp(S.bpm>=20?10:1);
   $("#soundBtn").onclick=()=>{ SND.on=!SND.on; $("#soundBtn").textContent=SND.on?"사운드 ON":"사운드 OFF"; };
   $("#homeBtn").onclick=goHome;
   $("#rubricBtn").onclick=()=>{ if(S&&S.session&&!isDemo()) openRubric(); };

@@ -89,7 +89,7 @@ const SCREENS={
      row("공급 병 수","BOTTLES FED",pv(LN.fed))+
      row("병 규격 (자동 조정)","BOTTLE SIZE",pv(BD().ml+" ml · Ø"+BD().d)); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>UA-120 · SETTING</s></div>'+
-     row("공급 속도","FEED SPEED 20~120 병/분",ed(S.bpm+" 병/분","bpm"))+
+     row("공급 속도","FEED SPEED 2~120 병/분 · 표준 "+bpmFor(S.rc.n),ed(S.bpm+" 병/분","bpm"))+
      row("병 지름 / 높이","자동 (교체부품 불필요)",pv(BD().d+" / "+BD().h+" mm"))+
      row("사이드 벨트 폭","BELT GAP",pv((BD().d+14)+" mm"))+
      row("반전 구간","INVERT SECTION",pv("180° · 세척 2회"))+
@@ -230,7 +230,7 @@ function edClick(id){
   if(typeof examGate==="function"&&!examGate("ed",id)) return;
   if(S.lvl<3){ toast("설정 변경은 SUPERVISOR 권한이 필요합니다.","bad"); return; }
   const E2={
-    bpm:["공급 속도 (병/분)",[20,120],()=>S.bpm,v=>{S.bpm=v; syncBpm();},0],
+    bpm:["공급 속도 (병/분)",[2,120],()=>S.bpm,v=>{S.bpm=v; syncBpm();},0],
     sg_pitch:["파우치 피치 (mm)",[30,60],()=>S.sg.pitch,v=>S.sg.pitch=v,0],
     vib0:["1단 진동 (%)",[10,100],()=>S.dmc.vib[0],v=>S.dmc.vib[0]=v,0],
     vib1:["2단 진동 (%)",[10,100],()=>S.dmc.vib[1],v=>S.dmc.vib[1]=v,0],

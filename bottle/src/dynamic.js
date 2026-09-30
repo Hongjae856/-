@@ -207,7 +207,10 @@ function dDMC(){
   }
   if(!far){
     /* 트레이 1 · 2 : 흩어진 정제가 앞으로 흘러간다 */
-    const tr=[[DMC.t1,D.tray[0],22,0.35,4],[DMC.t2,D.tray[1],36,0.55,12]];
+    const tr=[[DMC.t1,D.tray[0],40,0.35,4],[DMC.t2,D.tray[1],60,0.55,12]];
+    /* 호퍼 게이트 → 1단 트레이 낙하 */
+    if(run&&S.mat.tab>0){ const h=DMC.hop; for(let i=0;i<8;i++){ const t=(D.vibPh*1.6+i/8)%1;
+      drawTab(lerp(h.ox0+20,h.ox1-20,hash1(i*2.7)),lerp(h.y0-34,DMC.t1.y+4,t),lerp(h.oz0+20,h.oz1-20,hash1(i*5.1)),i,col); } }
     for(const [t,fill,n,sp,amp] of tr){
       const m=Math.round(n*fill), Lz=t.z1-t.z0-12, gw=(t.x1-t.x0)/12;
       for(let i=0;i<m;i++){
@@ -473,46 +476,79 @@ function dPanels(){
   }
 }
 
-/* ═══ 작업자 ═══ */
-const BACK_AISLE=-1550;                    /* 라인 뒤 통로 (병 · 정제 · 필름 · 캡 투입) */
+/* ═══ 작업자 (2명) ═══
+   · A = 라인 왼쪽 절반 · B = 오른쪽 절반 담당. 앞 통로(z=AISLE)와 뒤 통로(z=BACK_AISLE) 사이는 라인 양 끝을 돌아서 간다
+   · 병 · 정제 · PE 필름 · 캡은 뒤에서 투입 (정제 호퍼 · 캡 볼 피더는 계단 발판에 올라가서)
+   · 도어가 있는 곳은 통로에서 도어가 다 열릴 때까지 기다렸다가 들어가고, 나온 뒤 닫힌다 */
+const BACK_AISLE=-1900, END_L=-5750, END_R=8700;
 const WK=[
-  {id:"A", x:-2900, z:AISLE, aisle:AISLE, home:[-2900,AISLE], route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"B", x:4400,  z:AISLE, aisle:AISLE, home:[4400,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"C", x:500,   z:BACK_AISLE, aisle:BACK_AISLE, home:[500,BACK_AISLE], route:[], yaw:Math.PI, face:Math.PI, gait:0, walking:false, job:null, t:0}
+  {id:"A", x:-2900, z:AISLE, y:0, home:[-2900,AISLE], end:END_L, route:[], yaw:0, gait:0, walking:false, job:null, t:0},
+  {id:"B", x:4400,  z:AISLE, y:0, home:[4400,AISLE],  end:END_R, route:[], yaw:0, gait:0, walking:false, job:null, t:0}
 ];
-/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점
-   서는 위치는 설비 앞면 · 열린 도어와 겹치지 않게 잡았다 (통로 z=AISLE 에서 수직으로 들어온다) */
+/* 계단 발판 : x 범위 · 발판 z 범위(zp0~zp1) · 계단 시작 zs · 높이 h (4 단) */
+const STAIRS=[
+  {x0:236+0, x1:636, zp0:-1420, zp1:-1090, zs:-1850, h:420},     /* DMC-60T 호퍼 */
+  {x0:4800, x1:5240, zp0:-1470, zp1:-1060, zs:-1850, h:380}      /* RCS-120 볼 피더 */
+];
+function floorY(x,z){
+  for(const t of STAIRS){ if(x<t.x0-10||x>t.x1+10) continue;
+    if(z>=t.zp0&&z<=t.zp1+10) return t.h;
+    if(z>=t.zs&&z<t.zp0) return t.h*Math.ceil((z-t.zs)/(t.zp0-t.zs)*4-1e-6)/4; }
+  return 0;
+}
+/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점 */
 const JOBS={
-  bottle:{stand:[-3640,-1080], reach:[-3640,1560,-520], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
+  bottle:{stand:[-3640,-1080], reach:[-3640,1200,-560], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
-  tab:   {stand:[436,-1250], reach:[436,1800,-760], carry:"drum", view:"tab", dur:2.9, pour:true},
+  tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},
   film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},
-  cap:   {stand:[5040,-1270], reach:[5018,1560,-470], carry:"bag",  view:"cap", dur:2.7, door:"rcB", pour:true},
+  cap:   {stand:[5018,-1230], reach:[5018,1640,-640], carry:"bag",  view:"cap", dur:2.7, door:"rcB", pour:true},
   reject:{stand:[L.rej+40,800], reach:[L.rej,CH-100,380], carry:null, view:"reject", dur:2.0},
   table: {stand:[L.table.x,900], reach:[L.table.x,1000,330], carry:null, view:"table", dur:2.2},
   look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}
 };
-/* 담당 작업자 : 뒤쪽 작업 = C · 앞쪽 = x 로 A · B */
-function wkFor(p){ const x=Array.isArray(p)?p[0]:p, z=Array.isArray(p)?p[1]:1; return z<0?WK[2]:x<1500?WK[0]:WK[1]; }
+/* 담당 작업자 : x 로 A · B */
+function wkFor(p){ const x=Array.isArray(p)?p[0]:p; return x<2000?WK[0]:WK[1]; }
 function wkBusy(){ return WK.some(w=>w.job||w.route.length); }
+const aisleOf=z=>z<0?BACK_AISLE:AISLE;
+/* 경로 : 현재 통로 → (반대편이면 라인 끝을 돌아) → 목표 통로 → 목표 */
+function routeTo(w,dest,stopAtAisle){
+  const rt=[], a0=aisleOf(w.z), a1=aisleOf(dest[1]);
+  if(Math.abs(w.z-a0)>30) rt.push([w.x,a0]);
+  if(a0!==a1){ rt.push([w.end,a0]); rt.push([w.end,a1]); }
+  rt.push([dest[0],a1]);
+  if(!stopAtAisle) rt.push([dest[0],dest[1]]);
+  return rt;
+}
+let CAMRET=null;                     /* 작업 뒤 시점 복귀 (다음 작업이 곧 이어지면 취소) */
+function jobView(j){
+  if(j.view===null) return null;
+  if(j.view&&WORKVIEW[j.view]) return WORKVIEW[j.view];
+  if(!j.view&&j.reach&&j.look) return {yaw:-0.38,pitch:0.16,dist:3600,tx:j.reach[0],ty:1150,tz:j.reach[2]*0.4};
+  return null;
+}
 /* 작업 시작 : 통로를 따라 걸어가서 작업 → 콜백 */
 function startWork(key,cb,opt){
   const j=Object.assign({},JOBS[key]||JOBS.look,opt||{});
+  if(opt&&opt.stand&&!("door" in opt)) j.door=null;          /* 위치를 바꾼 조치 작업은 기본 도어를 쓰지 않는다 */
+  if(key==="look") j.look=true;
   const w=wkFor(j.stand);
   if(w.job){ return false; }
-  const rt=[], dz=w.aisle+(w.aisle>0?320:-320);
-  if(Math.abs(w.z-w.aisle)>30) rt.push([w.x,w.aisle]);
-  if(j.door){ rt.push([j.stand[0],w.aisle]); rt.push([j.stand[0],dz]); }     /* 도어 회전 범위 밖에서 대기 */
-  else { rt.push([j.stand[0],w.aisle]); rt.push([j.stand[0],j.stand[1]]); }
-  w.route=rt; w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
-  if(j.view&&WORKVIEW[j.view]&&R3.gl){ w.job.prevView=cam.view; const v=WORKVIEW[j.view]; cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
+  const back=j.stand[1]<0;
+  if(j.door){ w.route=routeTo(w,j.stand,back); if(!back) w.route.push([j.stand[0],AISLE+320]); }
+  else w.route=routeTo(w,j.stand,false);
+  w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
+  const v=jobView(j);
+  if(v&&R3.gl){ w.job.prevView=CAMRET?CAMRET.view:(cam.view==="work"?"all":cam.view); CAMRET=null; w.job.hasView=true;
+    cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
   return true;
 }
-const DOOR_Z=AISLE+320;
 function wkTick(dt){
   doorTick(dt);
+  if(CAMRET){ CAMRET.t-=dt; if(CAMRET.t<=0){ if(cam.view==="work"&&!WK.some(w=>w.job&&w.job.hasView&&w.job.phase!=="exit")) camSet(CAMRET.view); CAMRET=null; } }
   for(const w of WK){
     w.walking=false;
+    w.y+=(floorY(w.x,w.z)-w.y)*Math.min(1,dt*9);
     if(w.route.length){
       const [tx,tz]=w.route[0], dx=tx-w.x, dz=tz-w.z, dd=Math.hypot(dx,dz), st=Math.min(dd,dt*1150);
       if(dd>1){ w.x+=dx/dd*st; w.z+=dz/dd*st; w.walking=true; w.gait+=st/150; w.face=Math.atan2(-dx,-dz); }
@@ -522,23 +558,23 @@ function wkTick(dt){
     const J=w.job;
     if(J){
       if(J.phase==="walk0"){ J.phase="door"; J.t=0; }
-      if(J.phase==="door"){ w.face=w.aisle>0?0:Math.PI; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
+      if(J.phase==="door"){ w.face=w.z>0?0:Math.PI; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
       if(J.phase==="exit"){ w.job=null; w.idle=0; continue; }
       if(J.phase==="walk"){ J.phase="work"; J.t=0; }
       J.t+=dt;
       if(J.j.reach){ const r=J.j.reach; w.face=Math.atan2(-(r[0]-w.x),-(r[2]-w.z)); }
-      else w.face=w.aisle>0?0:Math.PI;
+      else w.face=w.z>0?0:Math.PI;
       if(J.t>=J.j.dur){
         w.carry=null; w.idle=0;
-        if(J.prevView&&cam.view==="work") camSet(J.prevView==="work"?"all":J.prevView);
-        if(J.j.door){ J.phase="exit"; w.route=[[w.x,w.aisle+(w.aisle>0?320:-320)]]; } else w.job=null;
+        if(J.hasView) CAMRET={view:J.prevView||"all", t:1.1};
+        if(J.j.door){ J.phase="exit"; w.route=[[w.x,w.z<0?BACK_AISLE:AISLE+320]]; }
+        else if(w.z<0){ J.phase="exit"; w.route=[[w.x,BACK_AISLE]]; }
+        else w.job=null;
         try{ J.cb&&J.cb(); }catch(e){ console.error(e); }
       }
     }else{
       w.idle=(w.idle||0)+dt;
-      if(w.idle>2.5&&(Math.abs(w.x-w.home[0])>5||Math.abs(w.z-w.home[1])>5)){
-        const rt=[]; if(Math.abs(w.z-w.aisle)>30) rt.push([w.x,w.aisle]); rt.push(w.home); w.route=rt; w.idle=0;
-      }
+      if(w.idle>2.5&&(Math.abs(w.x-w.home[0])>5||Math.abs(w.z-w.home[1])>5)){ w.route=routeTo(w,w.home,false); w.idle=0; }
     }
   }
 }
@@ -575,7 +611,7 @@ function cuteOperatorShapes(o){
  El([0,HY+45,0],[47,13,43],'cap');
  return SS;
 }
-function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900,e[2]-w.z); if(dd>1500&&(dd>cam.dist*0.8||w.job)) drawWorker(w); } }
+function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900-(w.y||0),e[2]-w.z); if(dd>1600) drawWorker(w); } }
 /* 작업 진행 : 도어가 먼저 열리고 (0.45 s) 손을 뻗는다 · 끝나기 0.45 s 전에 손을 거둔다 */
 function reachAmt(J){ const t=J.t-0.15, e=J.j.dur-0.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/0.45):1); }
 function drawWorker(w){
@@ -585,9 +621,11 @@ function drawWorker(w){
   let dl=want-w.yaw; while(dl>Math.PI) dl-=2*Math.PI; while(dl<-Math.PI) dl+=2*Math.PI; w.yaw+=dl*0.2;
   const cy=Math.cos(w.yaw), sy=Math.sin(w.yaw);
   const J=w.job, work=J&&J.phase==="work"&&J.j.reach, reach=work?reachAmt(J):0;
-  const W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale,z+(-a*sy+c*cy)*scale];
+  const yw=w.y||0, W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale+yw,z+(-a*sy+c*cy)*scale];
   const Rn=([a,b,c])=>[a*cy+c*sy,b,-a*sy+c*cy];
-  const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,g[1]/scale,dx*sy+dz*cy];};
+  const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,(g[1]-yw)/scale,dx*sy+dz*cy];};
+  /* 쏟기 : 손은 투입구 앞 · 위 (설비를 뚫지 않게) · 흐름만 투입구 안으로 */
+  const handPt=J&&J.j.reach?(J.j.pour?(()=>{ const r=J.j.reach, dx=r[0]-x, dz=r[2]-z, d=Math.hypot(dx,dz)||1, k=Math.min(0.55,300/d); return [r[0]-dx*k,r[1]+120,r[2]-dz*k]; })():J.j.reach):null;
   /* 들고 있는 물건 : 걷는 동안 가슴 앞 → 작업 중 손으로 (쏟는 물건은 기울였다가 비운다) */
   const holdEnd=J?(J.j.pour?J.j.dur*0.78:J.j.dur*0.55):0;
   const walkCarry=w.carry&&w.walking;
@@ -597,7 +635,7 @@ function drawWorker(w){
     const idle=[s*64,222,-4+sway];
     if(walkCarry||(handCarry&&reach<0.05)) return [s*34,300,-86];
     if(!work) return idle;
-    const tl=toLocal(J.j.reach), osc=J.j.pour?0:Math.sin(J.t*7+i)*5;
+    const tl=toLocal(handPt), osc=J.j.pour?0:Math.sin(J.t*7+i)*5;
     const tgt=[tl[0]+s*(handCarry?34:26),Math.min(560,tl[1])+osc,Math.max(-220,Math.min(-60,tl[2]))];
     const from=w.carry?[s*34,300,-86]:idle;
     return from.map((v,k)=>v+(tgt[k]-v)*reach);
@@ -613,11 +651,11 @@ function drawWorker(w){
     const c=W(mid);
     const tilt=J&&J.j.pour&&handCarry?smooth(clamp((J.t-0.9)/0.5,0,1))*1.05:0;
     mPush(); mT(c[0],c[1],c[2]); mRY(w.yaw); mRX(tilt);
-    if(w.carry==="box"){ box(-110,110,-70,70,-80,80,C.box,C.box); }
+    if(w.carry==="box"){ box(-85,85,-55,55,-65,65,C.box,C.box); }
     else if(w.carry==="reel"){ cylZ(0,0,-17,17,150,C.gel,20); cylZ(0,0,-20,20,40,C.dark,12); }
     else if(w.carry==="roll"){ cylX(-90,90,0,0,100,[0.86,0.93,0.97,0.15],20); cylX(-96,96,0,0,34,C.dark,12); }
-    else if(w.carry==="drum"){ cylY(0,0,-110,110,110,[0.30,0.52,0.82,0.1],18); cylY(0,0,110,116,112,[0.22,0.40,0.66,0.1],18); }
-    else if(w.carry==="bag"){ ellipsoid([0,0,0],[120,90,70],[0.85,0.88,0.92,0.05],12,8); }
+    else if(w.carry==="drum"){ cylY(0,0,-85,85,85,[0.30,0.52,0.82,0.1],18); cylY(0,0,85,90,87,[0.22,0.40,0.66,0.1],18); }
+    else if(w.carry==="bag"){ ellipsoid([0,0,0],[95,70,55],[0.85,0.88,0.92,0.05],12,8); }
     mPop();
     /* 쏟는 흐름 : 용기 입구 → 목표 */
     if(tilt>0.6&&!far&&J.t<holdEnd-0.1){

@@ -645,7 +645,7 @@ const C={
  yellow:[0.95,0.78,0.18,0.2], green:[0.10,0.66,0.38,0.2], white:[0.96,0.96,0.95,0.05], cream:[0.95,0.93,0.86,0.05],
  hdpe:[0.95,0.95,0.93,0.03], hdpeS:[0.90,0.90,0.88,0.03], amber:[0.66,0.42,0.16,0.1],
  capW:[0.97,0.97,0.96,0.04], capB:[0.14,0.36,0.72,0.08], capG:[0.10,0.52,0.36,0.08],
- tabA:[0.97,0.97,0.95,0.02], tabB:[0.96,0.86,0.52,0.02], capsR:[0.80,0.16,0.18,0.05], capsW:[0.97,0.96,0.94,0.05],
+ tabA:[0.98,0.52,0.20,0.02], tabB:[0.28,0.62,0.95,0.02], capsR:[0.80,0.16,0.18,0.05], capsW:[0.97,0.96,0.94,0.05],
  gel:[0.96,0.96,0.94,0.02], gelPrint:[0.20,0.42,0.78,0.02], film:[0.78,0.90,0.96,0.1],
  glass:[0.66,0.80,0.90,0.4], acryl:[0.78,0.88,0.94,0.3], floor:[0.72,0.75,0.78,0.1],
  suit:[0.95,0.96,0.97,0.02], led:[0.30,1.00,0.55,0.0], ledR:[1.00,0.28,0.20,0.0], ledA:[1.00,0.78,0.20,0.0],
@@ -1134,8 +1134,8 @@ const machOf=k=>MACH.find(m=>m.k===k);
 
 /* 제품 : 단위 중량(mg) · 형상(mm) · 겉보기 부피(cc, 병 선정용) */
 const PRODUCTS=[
- {k:"A", nm:"제품 A", type:"정제", shape:"round",   unit:250, len:9.0,  dia:9.0, thk:4.2, vol:0.32, col:"tabA", note:"원형 백색 정제 Ø9"},
- {k:"B", nm:"제품 B", type:"정제", shape:"oblong",  unit:520, len:17.0, dia:8.0, thk:6.2, vol:0.72, col:"tabB", note:"장방형 황색 정제 17×8"},
+ {k:"A", nm:"제품 A", type:"정제", shape:"round",   unit:250, len:9.0,  dia:9.0, thk:4.2, vol:0.32, col:"tabA", note:"원형 주황색 정제 Ø9"},
+ {k:"B", nm:"제품 B", type:"정제", shape:"oblong",  unit:520, len:17.0, dia:8.0, thk:6.2, vol:0.72, col:"tabB", note:"장방형 청색 정제 17×8"},
  {k:"C", nm:"제품 C", type:"캡슐", shape:"capsule", unit:410, len:21.7, dia:7.6, thk:7.6, vol:0.75, col:"caps", note:"0호 경질캡슐 적/백"}
 ];
 /* 포장 단위 : C = 캡슐 */
@@ -1153,6 +1153,8 @@ const BOTTLES=[
  {ml:500, d:86, h:158, nk:42, capD:45, capH:18, tare:38.5, gel:2, capCol:"capG"}
 ];
 /* 허용오차 (정) : 30T 이하 ±0.5 · 300T 이하 ±1 · 500T 이하 ±2 · 1000T 이상 ±5 */
+/* 라인 속도 (병/분) : 포장 단위별 표준 */
+function bpmFor(n){ return n<=100?28:n<=300?12:n<=500?7:4; }
 function tolTabs(n){ return n<=30?0.5:n<=300?1:n<=500?2:5; }
 /* 병 적정성 : 겉보기 부피가 병 공칭 용량의 80 % 이하 */
 function bottleFits(p,n,b){ return p.vol*n<=b.ml*0.8; }
@@ -1188,12 +1190,13 @@ const ALARMS={
  "RC61":{mk:"rc",t:"슈트 캡 없음 (캡 공급 부족)",kind:"trip"},
  "RC62":{mk:"rc",t:"캡 이송 불량 (슈트 · 벨트 걸림)",kind:"trip"},
  "RC63":{mk:"rc",t:"체결 토크 이상",kind:"warn"},
- "RC64":{mk:"rc",t:"집적 테이블 만량",kind:"trip"}
+ "RC64":{mk:"rc",t:"집적 테이블 만량",kind:"trip"},
+ "RC65":{mk:"rc",t:"기밀도 시험 실패 (캡 체결 불량)",kind:"trip"}
 };
 
 /* ═══ 장치 설명 (3D ＋ 핫스팟) : 좌표는 layout.js 의 DEVPOS ═══ */
 const DEVICES=[
- {n:1, k:"ua", nm:"벌크 호퍼 · 엘리베이터", en:"Bulk Hopper & Elevator", d:"가드 안 뒤쪽의 벌크 호퍼(경사 바닥 체인 벨트 · 레벨 센서)와 녹색 클리트 가변속 엘리베이터입니다. 디스크의 병이 줄면 자동으로 올려 보냅니다(온디맨드). 라인 뒤쪽 통로에서 뒤 도어를 위로 열어 병을 투입합니다."},
+ {n:1, k:"ua", nm:"벌크 호퍼 · 엘리베이터", en:"Bulk Hopper & Elevator", d:"가드 안 뒤쪽의 벌크 호퍼(경사 바닥 체인 벨트 · 레벨 센서)와 녹색 클리트 가변속 엘리베이터입니다. 디스크의 병이 줄면 자동으로 올려 보냅니다(온디맨드). 라인 뒤쪽 통로에서 뒤 도어(양문)를 열어 허리 높이의 호퍼에 병을 투입합니다."},
  {n:2, k:"ua", nm:"레벨 디스크 소터", en:"Level-Sensing Disc Sorter", d:"회전하는 원판이 병을 가장자리로 밀어 한 줄로 세웁니다. 옆 나사 기둥으로 높이를 조정합니다."},
  {n:3, k:"ua", nm:"반전 사이드 벨트", en:"Inverting Side Belts", d:"양옆 벨트가 병 몸통을 잡고 비틀어진 경로를 따라 이동해 병을 180° 뒤집었다가 다시 세웁니다. 병 크기가 바뀌어도 교체부품 없이 폭만 조정합니다."},
  {n:4, k:"ua", nm:"이온 에어 · 진공 세척부", en:"Ionized Air & Vacuum", d:"뒤집힌 병 입구로 필터·이온화 에어를 불어넣어 정전기로 붙은 먼지를 떼고, 바로 옆 진공 노즐이 빨아냅니다. 2회 반복 세척합니다."},
@@ -1201,7 +1204,7 @@ const DEVICES=[
  {n:6, k:"sg", nm:"트윈 벨트 이송 · 센서", en:"Twin Belt Feeder & Sensors", d:"노란 타이밍 벨트 두 줄이 띠를 물고 한 번에 파우치 한 개 길이(피치)만큼 내립니다. 센서(SE2 · SE6)가 파우치 경계를 읽어 절단 위치를 맞춥니다."},
  {n:7, k:"sg", nm:"커터 · 가이드 튜브", en:"Cutter & Guide Tube", d:"커터가 파우치 경계를 자르고, 잘린 파우치가 투명 가이드 튜브를 지나 병 속으로 떨어집니다. 점검 도어에는 안전 스위치(SW3)가 있습니다."},
  {n:8, k:"wc", nm:"전단 계량 스테이션", en:"Pre-Weigh Station", d:"레인 A · B 에 원형 팬이 하나씩 있습니다. 게이트가 레인마다 병을 한 개씩 보내고 포크가 IN → 팬 → OUT 으로 옮기며, 팬 위에서 빈 병(병 + 실리카겔) 중량을 1회 잽니다. 기준 범위를 벗어나면(파우치 누락 · 이물) 추적 신호를 걸어 후단 뒤에서 배출합니다. (3급 · 0.02~200 g · 최소눈금 0.01 g)"},
- {n:9, k:"dmc", nm:"정제 호퍼", en:"Product Hopper", d:"헤드 뒤 위의 호퍼입니다. 레벨 센서가 부족을 감지하면 경고를 냅니다. 호퍼 게이트(mm)로 1단 타공 트레이 공급량을 조절합니다."},
+ {n:9, k:"dmc", nm:"정제 호퍼", en:"Product Hopper", d:"헤드 뒤 위의 호퍼입니다. 레벨 센서가 부족을 감지하면 경고를 냅니다. 호퍼 게이트(mm)로 1단 타공 트레이 공급량을 조절합니다. 정제는 라인 뒤쪽 계단 발판에 올라가 투입합니다."},
  {n:10,k:"dmc", nm:"3단 진동 트레이", en:"3-Stage Vibratory Trays", d:"1단 타공 트레이가 분진을 거르고, 2 · 3단 골판(물결) 트레이의 12 홈이 정제를 한 줄씩 세웁니다. 바이브레이터 속도 1 · 2 · 3 으로 계수 속도를 조절합니다."},
  {n:11,k:"dmc", nm:"계수 센서 박스", en:"Optical Sensor Head", d:"트레이 끝 앞쪽 박스입니다. 채널마다 IR/LED 센서가 떨어지는 정제를 셉니다. 윗면 점검창 2개로 내부를 보며, 먼지 감지창이 오염되면 경고합니다."},
  {n:12,k:"dmc", nm:"중간 게이트 · 원뿔 노즐 A·B", en:"Gates & Twin Nozzles", d:"1~6 채널 정제는 노즐 A(레인 A · 뒤), 7~12 채널 정제는 노즐 B(레인 B · 앞)의 게이트 위에 모였다가 해당 레인의 병이 서면 열려 백색 원뿔 노즐로 떨어집니다."},
@@ -1211,7 +1214,7 @@ const DEVICES=[
  {n:16,k:"wc", nm:"중량선별 PLC 패널", en:"Check-Weigher PLC", d:"후단 스테이션 뒤 기둥 위의 별도 PLC 터치 패널입니다. 기준 중량, 허용오차, 빈병 기준, 영점, 판정 이력을 관리하고 성적서를 프린터로 출력합니다."},
  {n:17,k:"pe", nm:"PE 필름 롤 2군", en:"PE Film Rolls", d:"뒤쪽에 가로로 걸린 필름 롤 두 군(좌 · 우 레인)입니다. 필름 센서가 소진을 감지합니다."},
  {n:18,k:"pe", nm:"인덱싱 디스크 · 톱날 커터 · 푸셔", en:"Index Disc, Saw Cutter & Pusher", d:"톱날 커터가 필름을 한 장 길이로 자르면 스포크 디스크의 튜브에 들어가고, 디스크가 돌아 병 위에 온 튜브의 필름을 앞쪽 수직 푸셔가 병 입구로 밀어 넣습니다. (톱날식 · 가열 없음)"},
- {n:19,k:"rc", nm:"진동 볼 피더 · C 슈트 · 캡 벨트", en:"Cap Feeder", d:"왼쪽 칸의 진동 볼 피더(레벨 센서 봉)가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 라인 뒤쪽 도어를 열어 볼에 캡을 보충합니다."},
+ {n:19,k:"rc", nm:"진동 볼 피더 · C 슈트 · 캡 벨트", en:"Cap Feeder", d:"왼쪽 칸의 진동 볼 피더(레벨 센서 봉)가 캡 방향을 맞춰 C 자 슈트로 내려 보내고, 녹색 벨트와 검은 포켓 체인이 캡을 헤드 아래로 옮깁니다. 라인 뒤쪽 계단 발판에 올라가 뒤 도어를 열고 볼에 캡을 보충합니다."},
  {n:20,k:"rc", nm:"타이밍 스크류 · 스타휠", en:"Timing Screw & Star Wheels", d:"타이밍 스크류가 병 간격을 터렛 피치에 맞추고, 흰 UHMW 인피드 스타휠(교체부품)이 터렛으로, 아웃피드 스타휠이 컨베이어로 옮깁니다."},
  {n:21,k:"rc", nm:"캡핑 터렛 · 타이밍 벨트", en:"Capping Turret", d:"2단 원통 드럼 아래 3조 공압 척 헤드 3개가 캡을 집어 캠을 따라 내려와 회전해 설정 토크로 체결합니다. 병은 황색 타이밍 벨트가 터렛 포켓에 눌러 잡습니다."},
  {n:22,k:"rc", nm:"집적 테이블", en:"Accumulation Table", d:"캡핑이 끝난 병을 모으는 회전 테이블입니다. 가득 차면 작업자가 완제품을 회수합니다."}
@@ -1280,7 +1283,7 @@ const L={
   /* UA-120 */
   uaX0:-5200, uaX1:-3230,
   tt:{x:-4760, z:-372, r:370},                       /* 언스크램블 턴테이블 (가장자리가 z=0 에 닿음) */
-  hop:{x0:-3900, x1:-3380, z0:-760, z1:-280, y0:1080, y1:1560},   /* 벌크 호퍼 (가드 안 뒤쪽 오른칸) */
+  hop:{x0:-3900, x1:-3380, z0:-760, z1:-280, y0:880, y1:1250},   /* 벌크 호퍼 (가드 안 뒤쪽 오른칸) */
   belt0:-4560, inv0:-4460, inv1:-4160, flat1:-3700, inv2:-3700, inv3:-3400, belt1:-3330,
   air:[-4080,-3890], vac:[-3990,-3800],               /* 1차·2차 이온 에어 / 진공 */
   /* SG-120 */
@@ -1369,7 +1372,8 @@ const WORKVIEW={
   film:  {yaw:-0.40,pitch:0.40,dist:3500,tx:3617,ty:1200,tz:-850},
   cap:   {yaw:-0.40,pitch:0.42,dist:3900,tx:5018,ty:1250,tz:-950},
   reject:{yaw:-0.30,pitch:0.26,dist:2600,tx:2600,ty:900,tz:250},
-  table: {yaw:-0.55,pitch:0.34,dist:2800,tx:7725,ty:900,tz:250}
+  table: {yaw:-0.55,pitch:0.34,dist:2800,tx:7725,ty:900,tz:250},
+  rcHead:{yaw:-0.20,pitch:0.14,dist:2600,tx:L.T.x,ty:1250,tz:-100}
 };
 
 /* ── 장치 핫스팟 위치 (월드 mm) ── */
@@ -1617,7 +1621,7 @@ function staticKey(){ const b=BD(); return [b.ml,VIEW3.guard?1:0].join("|"); }
 function buildStatic(){
   STATIC_KEY=staticKey(); DOORS=[];
   geoBegin(GEO.stat);
-  sConveyor(); sUA(); sSG(); sLoadCell(L.lc1,1); sDMC(); sLoadCell(L.lc2,2); sReject(); sPrinter(); sPE(); sRCS(); sTable(); sDust();
+  sConveyor(); sUA(); sSG(); for(const t of STAIRS) sStair(t); sLoadCell(L.lc1,1); sDMC(); sLoadCell(L.lc2,2); sReject(); sPrinter(); sPE(); sRCS(); sTable(); sDust();
   R3.statDirty=true;
   geoBegin(GEO.dyn);
 }
@@ -1720,7 +1724,7 @@ function sUA(){
   mainSwitch(U.x0+200,640,U.z1+1);
   /* 상부 가드 : 왼칸(디스크) · 가운데 기둥 · 오른칸(벨트 · 호퍼) — 앞 도어는 위로 여는 방식 */
   alFrame(U.x0,U.x1,CH-86,U.yT,U.z0,U.z1,{mx:[U.col0,U.col1], fskip:[1],
-    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"top"}},
+    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"double"}},
     hole:{r:[-110,110,CH-90,CH+b.h+60]}});
   /* 가운데 기둥 : 조작 패널 (위) · 점검창 (아래) */
   const H=HMIS.ua;
@@ -1746,7 +1750,7 @@ function sUA(){
   box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,y0,y1-120,hp.z1-4,hp.z1,C.ss);
-  quad([hp.x0+4,y0+60,hp.z0+4],[hp.x0+4,y0+60,hp.z1-4],[hp.x1-4,y0+240,hp.z1-4],[hp.x1-4,y0+240,hp.z0+4],[0.36,0.25,0.19,0.08]);
+  quad([hp.x0+4,y0+40,hp.z0+4],[hp.x0+4,y0+40,hp.z1-4],[hp.x1-4,y0+160,hp.z1-4],[hp.x1-4,y0+160,hp.z0+4],[0.36,0.25,0.19,0.08]);
   for(const x of [hp.x0+40,hp.x1-40]) for(const z of [hp.z0+40,hp.z1-40]) cylY(x,z,CH-86,y0,16,C.ss,10);
   cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
   /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
@@ -1785,7 +1789,7 @@ function sUA(){
   box(U.x1-420,U.x1-320,560,760,U.z1,U.z1+40,C.dark); cylZ(U.x1-370,720,U.z1+40,U.z1+50,26,C.white,20); cylY(U.x1-370,U.z1+20,560,600,20,[0.75,0.82,0.9,0.1],14);
 }
 /* UA 엘리베이터 : 호퍼 바닥 → 디스크 위 */
-const UA_EL=[[L.hop.x0-40,1110,-520],[L.tt.x+180,1560,-600]];
+const UA_EL=[[L.hop.x0-40,L.hop.y0+40,-520],[L.tt.x+180,1560,-600]];
 /* 호스 (3점 곡선) */
 function hoseTo(a,m,e,r,col){ const pts=[]; for(let i=0;i<=10;i++){ const t=i/10,u=1-t; pts.push([u*u*a[0]+2*u*t*m[0]+t*t*e[0],u*u*a[1]+2*u*t*m[1]+t*t*e[1],u*u*a[2]+2*u*t*m[2]+t*t*e[2]]); } tubePath(pts,r,col,10); }
 
@@ -2178,6 +2182,24 @@ function sTable(){
   mPop();
   box(XE-20,t.x-t.r+30,CH-10,CH-2,-50,50,C.ss);
   for(const s of [-1,1]) box(XE-20,t.x-t.r+30,CH-2,CH+b.h*0.5,s*(b.d/2+5),s*(b.d/2+10),C.guide,C.guide,0);
+}
+/* ── 계단 발판 (4 단 · 체크 플레이트 · 양옆 손잡이 : 계단 구간만) ── */
+function sStair(t){
+  const n=4, L2=(t.zp0-t.zs)/n, col=[0.72,0.75,0.78,0.7], leg=C.ss;
+  box(t.x0,t.x1,t.h-24,t.h,t.zp0,t.zp1,col,[0.80,0.82,0.85,0.8]);
+  for(let x=t.x0+30;x<t.x1-20;x+=40) box(x,x+18,t.h,t.h+1.2,t.zp0+10,t.zp1-10,[0.66,0.69,0.72,0.8],null,0);
+  for(const x of [t.x0+20,t.x1-20]) for(const z of [t.zp0+20,t.zp1-20]) box(x-15,x+15,0,t.h-24,z-15,z+15,leg);
+  box(t.x0,t.x1,t.h-26,t.h-22,t.zp0-2,t.zp0+30,C.yellow,C.yellow,0);
+  for(let i=0;i<n;i++){ const z0=t.zs+i*L2, top=t.h*(i+1)/n;
+    box(t.x0+14,t.x1-14,top-18,top,z0,z0+L2+4,col,[0.80,0.82,0.85,0.8]);
+    box(t.x0+14,t.x1-14,top-20,top-17,z0,z0+14,C.yellow,C.yellow,0); }
+  for(const x of [t.x0,t.x1]){
+    const a=[x,0,t.zs], b=[x,t.h,t.zp0];
+    tube([x,0,t.zs],[x,t.h-10,t.zp0],12,leg,8);                              /* 옆판(스트링거) */
+    const r0=[x,900,t.zs+40], r1=[x,t.h+900,t.zp0];
+    tube(r0,r1,14,C.yellow,10);                                              /* 손잡이 */
+    cylY(x,t.zs+40,0,900,13,leg,10); cylY(x,t.zp0,t.h,t.h+900,13,leg,10);
+  }
 }
 /* ── 천장 집진 배관 (DMC 헤드 뒤 · 주름 호스) ── */
 function sDust(){
@@ -2824,6 +2846,7 @@ function lineReset(){
     if(k==="RC62") return S.rcp.jam;
     if(k==="RC63") return S.rcp.torqueBad;
     if(k==="RC64") return S.table.n>=S.table.cap;
+    if(k==="RC65") return !!S.rcp.leak;
     if(k==="WC41"){ S.wc.consec=0; return false; }
     return false;
   });
@@ -3048,7 +3071,10 @@ function dDMC(){
   }
   if(!far){
     /* 트레이 1 · 2 : 흩어진 정제가 앞으로 흘러간다 */
-    const tr=[[DMC.t1,D.tray[0],22,0.35,4],[DMC.t2,D.tray[1],36,0.55,12]];
+    const tr=[[DMC.t1,D.tray[0],40,0.35,4],[DMC.t2,D.tray[1],60,0.55,12]];
+    /* 호퍼 게이트 → 1단 트레이 낙하 */
+    if(run&&S.mat.tab>0){ const h=DMC.hop; for(let i=0;i<8;i++){ const t=(D.vibPh*1.6+i/8)%1;
+      drawTab(lerp(h.ox0+20,h.ox1-20,hash1(i*2.7)),lerp(h.y0-34,DMC.t1.y+4,t),lerp(h.oz0+20,h.oz1-20,hash1(i*5.1)),i,col); } }
     for(const [t,fill,n,sp,amp] of tr){
       const m=Math.round(n*fill), Lz=t.z1-t.z0-12, gw=(t.x1-t.x0)/12;
       for(let i=0;i<m;i++){
@@ -3314,46 +3340,79 @@ function dPanels(){
   }
 }
 
-/* ═══ 작업자 ═══ */
-const BACK_AISLE=-1550;                    /* 라인 뒤 통로 (병 · 정제 · 필름 · 캡 투입) */
+/* ═══ 작업자 (2명) ═══
+   · A = 라인 왼쪽 절반 · B = 오른쪽 절반 담당. 앞 통로(z=AISLE)와 뒤 통로(z=BACK_AISLE) 사이는 라인 양 끝을 돌아서 간다
+   · 병 · 정제 · PE 필름 · 캡은 뒤에서 투입 (정제 호퍼 · 캡 볼 피더는 계단 발판에 올라가서)
+   · 도어가 있는 곳은 통로에서 도어가 다 열릴 때까지 기다렸다가 들어가고, 나온 뒤 닫힌다 */
+const BACK_AISLE=-1900, END_L=-5750, END_R=8700;
 const WK=[
-  {id:"A", x:-2900, z:AISLE, aisle:AISLE, home:[-2900,AISLE], route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"B", x:4400,  z:AISLE, aisle:AISLE, home:[4400,AISLE],  route:[], yaw:0, gait:0, walking:false, job:null, t:0},
-  {id:"C", x:500,   z:BACK_AISLE, aisle:BACK_AISLE, home:[500,BACK_AISLE], route:[], yaw:Math.PI, face:Math.PI, gait:0, walking:false, job:null, t:0}
+  {id:"A", x:-2900, z:AISLE, y:0, home:[-2900,AISLE], end:END_L, route:[], yaw:0, gait:0, walking:false, job:null, t:0},
+  {id:"B", x:4400,  z:AISLE, y:0, home:[4400,AISLE],  end:END_R, route:[], yaw:0, gait:0, walking:false, job:null, t:0}
 ];
-/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점
-   서는 위치는 설비 앞면 · 열린 도어와 겹치지 않게 잡았다 (통로 z=AISLE 에서 수직으로 들어온다) */
+/* 계단 발판 : x 범위 · 발판 z 범위(zp0~zp1) · 계단 시작 zs · 높이 h (4 단) */
+const STAIRS=[
+  {x0:236+0, x1:636, zp0:-1420, zp1:-1090, zs:-1850, h:420},     /* DMC-60T 호퍼 */
+  {x0:4800, x1:5240, zp0:-1470, zp1:-1060, zs:-1850, h:380}      /* RCS-120 볼 피더 */
+];
+function floorY(x,z){
+  for(const t of STAIRS){ if(x<t.x0-10||x>t.x1+10) continue;
+    if(z>=t.zp0&&z<=t.zp1+10) return t.h;
+    if(z>=t.zs&&z<t.zp0) return t.h*Math.ceil((z-t.zs)/(t.zp0-t.zs)*4-1e-6)/4; }
+  return 0;
+}
+/* 작업 정의 : 서는 위치 · 손 목표 · 들고 가는 물건 · 여는 도어 · 쏟기(pour) · 확대 시점 */
 const JOBS={
-  bottle:{stand:[-3640,-1080], reach:[-3640,1560,-520], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
+  bottle:{stand:[-3640,-1080], reach:[-3640,1200,-560], carry:"box",  view:"bottle", dur:2.8, door:"uaB", pour:true},
   gel:   {stand:[L.sg-300,620], reach:[L.sg-440,1700,40], carry:"reel", view:"gel", dur:2.6, lid:"sgLid"},
-  tab:   {stand:[436,-1250], reach:[436,1800,-760], carry:"drum", view:"tab", dur:2.9, pour:true},
+  tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},
   film:  {stand:[3617,-1090], reach:[3617,1450,-590], carry:"roll", view:"film", dur:2.6, door:"peB"},
-  cap:   {stand:[5040,-1270], reach:[5018,1560,-470], carry:"bag",  view:"cap", dur:2.7, door:"rcB", pour:true},
+  cap:   {stand:[5018,-1230], reach:[5018,1640,-640], carry:"bag",  view:"cap", dur:2.7, door:"rcB", pour:true},
   reject:{stand:[L.rej+40,800], reach:[L.rej,CH-100,380], carry:null, view:"reject", dur:2.0},
   table: {stand:[L.table.x,900], reach:[L.table.x,1000,330], carry:null, view:"table", dur:2.2},
   look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}
 };
-/* 담당 작업자 : 뒤쪽 작업 = C · 앞쪽 = x 로 A · B */
-function wkFor(p){ const x=Array.isArray(p)?p[0]:p, z=Array.isArray(p)?p[1]:1; return z<0?WK[2]:x<1500?WK[0]:WK[1]; }
+/* 담당 작업자 : x 로 A · B */
+function wkFor(p){ const x=Array.isArray(p)?p[0]:p; return x<2000?WK[0]:WK[1]; }
 function wkBusy(){ return WK.some(w=>w.job||w.route.length); }
+const aisleOf=z=>z<0?BACK_AISLE:AISLE;
+/* 경로 : 현재 통로 → (반대편이면 라인 끝을 돌아) → 목표 통로 → 목표 */
+function routeTo(w,dest,stopAtAisle){
+  const rt=[], a0=aisleOf(w.z), a1=aisleOf(dest[1]);
+  if(Math.abs(w.z-a0)>30) rt.push([w.x,a0]);
+  if(a0!==a1){ rt.push([w.end,a0]); rt.push([w.end,a1]); }
+  rt.push([dest[0],a1]);
+  if(!stopAtAisle) rt.push([dest[0],dest[1]]);
+  return rt;
+}
+let CAMRET=null;                     /* 작업 뒤 시점 복귀 (다음 작업이 곧 이어지면 취소) */
+function jobView(j){
+  if(j.view===null) return null;
+  if(j.view&&WORKVIEW[j.view]) return WORKVIEW[j.view];
+  if(!j.view&&j.reach&&j.look) return {yaw:-0.38,pitch:0.16,dist:3600,tx:j.reach[0],ty:1150,tz:j.reach[2]*0.4};
+  return null;
+}
 /* 작업 시작 : 통로를 따라 걸어가서 작업 → 콜백 */
 function startWork(key,cb,opt){
   const j=Object.assign({},JOBS[key]||JOBS.look,opt||{});
+  if(opt&&opt.stand&&!("door" in opt)) j.door=null;          /* 위치를 바꾼 조치 작업은 기본 도어를 쓰지 않는다 */
+  if(key==="look") j.look=true;
   const w=wkFor(j.stand);
   if(w.job){ return false; }
-  const rt=[], dz=w.aisle+(w.aisle>0?320:-320);
-  if(Math.abs(w.z-w.aisle)>30) rt.push([w.x,w.aisle]);
-  if(j.door){ rt.push([j.stand[0],w.aisle]); rt.push([j.stand[0],dz]); }     /* 도어 회전 범위 밖에서 대기 */
-  else { rt.push([j.stand[0],w.aisle]); rt.push([j.stand[0],j.stand[1]]); }
-  w.route=rt; w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
-  if(j.view&&WORKVIEW[j.view]&&R3.gl){ w.job.prevView=cam.view; const v=WORKVIEW[j.view]; cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
+  const back=j.stand[1]<0;
+  if(j.door){ w.route=routeTo(w,j.stand,back); if(!back) w.route.push([j.stand[0],AISLE+320]); }
+  else w.route=routeTo(w,j.stand,false);
+  w.job={key,j,cb,phase:j.door?"walk0":"walk",t:0}; w.carry=j.carry;
+  const v=jobView(j);
+  if(v&&R3.gl){ w.job.prevView=CAMRET?CAMRET.view:(cam.view==="work"?"all":cam.view); CAMRET=null; w.job.hasView=true;
+    cam.view="work"; cam.yawT=v.yaw; cam.pitchT=v.pitch; cam.distT=v.dist; cam.txT=v.tx; cam.tyT=v.ty; cam.tzT=v.tz; }
   return true;
 }
-const DOOR_Z=AISLE+320;
 function wkTick(dt){
   doorTick(dt);
+  if(CAMRET){ CAMRET.t-=dt; if(CAMRET.t<=0){ if(cam.view==="work"&&!WK.some(w=>w.job&&w.job.hasView&&w.job.phase!=="exit")) camSet(CAMRET.view); CAMRET=null; } }
   for(const w of WK){
     w.walking=false;
+    w.y+=(floorY(w.x,w.z)-w.y)*Math.min(1,dt*9);
     if(w.route.length){
       const [tx,tz]=w.route[0], dx=tx-w.x, dz=tz-w.z, dd=Math.hypot(dx,dz), st=Math.min(dd,dt*1150);
       if(dd>1){ w.x+=dx/dd*st; w.z+=dz/dd*st; w.walking=true; w.gait+=st/150; w.face=Math.atan2(-dx,-dz); }
@@ -3363,23 +3422,23 @@ function wkTick(dt){
     const J=w.job;
     if(J){
       if(J.phase==="walk0"){ J.phase="door"; J.t=0; }
-      if(J.phase==="door"){ w.face=w.aisle>0?0:Math.PI; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
+      if(J.phase==="door"){ w.face=w.z>0?0:Math.PI; if((DOOR_OPEN[J.j.door]||0)>=0.98||!DOORS.some(D=>D.id===J.j.door)){ J.phase="walk"; w.route=[[J.j.stand[0],J.j.stand[1]]]; } continue; }
       if(J.phase==="exit"){ w.job=null; w.idle=0; continue; }
       if(J.phase==="walk"){ J.phase="work"; J.t=0; }
       J.t+=dt;
       if(J.j.reach){ const r=J.j.reach; w.face=Math.atan2(-(r[0]-w.x),-(r[2]-w.z)); }
-      else w.face=w.aisle>0?0:Math.PI;
+      else w.face=w.z>0?0:Math.PI;
       if(J.t>=J.j.dur){
         w.carry=null; w.idle=0;
-        if(J.prevView&&cam.view==="work") camSet(J.prevView==="work"?"all":J.prevView);
-        if(J.j.door){ J.phase="exit"; w.route=[[w.x,w.aisle+(w.aisle>0?320:-320)]]; } else w.job=null;
+        if(J.hasView) CAMRET={view:J.prevView||"all", t:1.1};
+        if(J.j.door){ J.phase="exit"; w.route=[[w.x,w.z<0?BACK_AISLE:AISLE+320]]; }
+        else if(w.z<0){ J.phase="exit"; w.route=[[w.x,BACK_AISLE]]; }
+        else w.job=null;
         try{ J.cb&&J.cb(); }catch(e){ console.error(e); }
       }
     }else{
       w.idle=(w.idle||0)+dt;
-      if(w.idle>2.5&&(Math.abs(w.x-w.home[0])>5||Math.abs(w.z-w.home[1])>5)){
-        const rt=[]; if(Math.abs(w.z-w.aisle)>30) rt.push([w.x,w.aisle]); rt.push(w.home); w.route=rt; w.idle=0;
-      }
+      if(w.idle>2.5&&(Math.abs(w.x-w.home[0])>5||Math.abs(w.z-w.home[1])>5)){ w.route=routeTo(w,w.home,false); w.idle=0; }
     }
   }
 }
@@ -3416,7 +3475,7 @@ function cuteOperatorShapes(o){
  El([0,HY+45,0],[47,13,43],'cap');
  return SS;
 }
-function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900,e[2]-w.z); if(dd>1500&&(dd>cam.dist*0.8||w.job)) drawWorker(w); } }
+function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900-(w.y||0),e[2]-w.z); if(dd>1600) drawWorker(w); } }
 /* 작업 진행 : 도어가 먼저 열리고 (0.45 s) 손을 뻗는다 · 끝나기 0.45 s 전에 손을 거둔다 */
 function reachAmt(J){ const t=J.t-0.15, e=J.j.dur-0.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/0.45):1); }
 function drawWorker(w){
@@ -3426,9 +3485,11 @@ function drawWorker(w){
   let dl=want-w.yaw; while(dl>Math.PI) dl-=2*Math.PI; while(dl<-Math.PI) dl+=2*Math.PI; w.yaw+=dl*0.2;
   const cy=Math.cos(w.yaw), sy=Math.sin(w.yaw);
   const J=w.job, work=J&&J.phase==="work"&&J.j.reach, reach=work?reachAmt(J):0;
-  const W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale,z+(-a*sy+c*cy)*scale];
+  const yw=w.y||0, W=([a,b,c])=>[x+(a*cy+c*sy)*scale,b*scale+yw,z+(-a*sy+c*cy)*scale];
   const Rn=([a,b,c])=>[a*cy+c*sy,b,-a*sy+c*cy];
-  const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,g[1]/scale,dx*sy+dz*cy];};
+  const toLocal=g=>{const dx=(g[0]-x)/scale,dz=(g[2]-z)/scale;return [dx*cy-dz*sy,(g[1]-yw)/scale,dx*sy+dz*cy];};
+  /* 쏟기 : 손은 투입구 앞 · 위 (설비를 뚫지 않게) · 흐름만 투입구 안으로 */
+  const handPt=J&&J.j.reach?(J.j.pour?(()=>{ const r=J.j.reach, dx=r[0]-x, dz=r[2]-z, d=Math.hypot(dx,dz)||1, k=Math.min(0.55,300/d); return [r[0]-dx*k,r[1]+120,r[2]-dz*k]; })():J.j.reach):null;
   /* 들고 있는 물건 : 걷는 동안 가슴 앞 → 작업 중 손으로 (쏟는 물건은 기울였다가 비운다) */
   const holdEnd=J?(J.j.pour?J.j.dur*0.78:J.j.dur*0.55):0;
   const walkCarry=w.carry&&w.walking;
@@ -3438,7 +3499,7 @@ function drawWorker(w){
     const idle=[s*64,222,-4+sway];
     if(walkCarry||(handCarry&&reach<0.05)) return [s*34,300,-86];
     if(!work) return idle;
-    const tl=toLocal(J.j.reach), osc=J.j.pour?0:Math.sin(J.t*7+i)*5;
+    const tl=toLocal(handPt), osc=J.j.pour?0:Math.sin(J.t*7+i)*5;
     const tgt=[tl[0]+s*(handCarry?34:26),Math.min(560,tl[1])+osc,Math.max(-220,Math.min(-60,tl[2]))];
     const from=w.carry?[s*34,300,-86]:idle;
     return from.map((v,k)=>v+(tgt[k]-v)*reach);
@@ -3454,11 +3515,11 @@ function drawWorker(w){
     const c=W(mid);
     const tilt=J&&J.j.pour&&handCarry?smooth(clamp((J.t-0.9)/0.5,0,1))*1.05:0;
     mPush(); mT(c[0],c[1],c[2]); mRY(w.yaw); mRX(tilt);
-    if(w.carry==="box"){ box(-110,110,-70,70,-80,80,C.box,C.box); }
+    if(w.carry==="box"){ box(-85,85,-55,55,-65,65,C.box,C.box); }
     else if(w.carry==="reel"){ cylZ(0,0,-17,17,150,C.gel,20); cylZ(0,0,-20,20,40,C.dark,12); }
     else if(w.carry==="roll"){ cylX(-90,90,0,0,100,[0.86,0.93,0.97,0.15],20); cylX(-96,96,0,0,34,C.dark,12); }
-    else if(w.carry==="drum"){ cylY(0,0,-110,110,110,[0.30,0.52,0.82,0.1],18); cylY(0,0,110,116,112,[0.22,0.40,0.66,0.1],18); }
-    else if(w.carry==="bag"){ ellipsoid([0,0,0],[120,90,70],[0.85,0.88,0.92,0.05],12,8); }
+    else if(w.carry==="drum"){ cylY(0,0,-85,85,85,[0.30,0.52,0.82,0.1],18); cylY(0,0,85,90,87,[0.22,0.40,0.66,0.1],18); }
+    else if(w.carry==="bag"){ ellipsoid([0,0,0],[95,70,55],[0.85,0.88,0.92,0.05],12,8); }
     mPop();
     /* 쏟는 흐름 : 용기 입구 → 목표 */
     if(tilt>0.6&&!far&&J.t<holdEnd-0.1){
@@ -3579,7 +3640,7 @@ const SCREENS={
      row("공급 병 수","BOTTLES FED",pv(LN.fed))+
      row("병 규격 (자동 조정)","BOTTLE SIZE",pv(BD().ml+" ml · Ø"+BD().d)); },
   set(){ return '<div class="hTitle">⚙ 설정 <s>UA-120 · SETTING</s></div>'+
-     row("공급 속도","FEED SPEED 20~120 병/분",ed(S.bpm+" 병/분","bpm"))+
+     row("공급 속도","FEED SPEED 2~120 병/분 · 표준 "+bpmFor(S.rc.n),ed(S.bpm+" 병/분","bpm"))+
      row("병 지름 / 높이","자동 (교체부품 불필요)",pv(BD().d+" / "+BD().h+" mm"))+
      row("사이드 벨트 폭","BELT GAP",pv((BD().d+14)+" mm"))+
      row("반전 구간","INVERT SECTION",pv("180° · 세척 2회"))+
@@ -3720,7 +3781,7 @@ function edClick(id){
   if(typeof examGate==="function"&&!examGate("ed",id)) return;
   if(S.lvl<3){ toast("설정 변경은 SUPERVISOR 권한이 필요합니다.","bad"); return; }
   const E2={
-    bpm:["공급 속도 (병/분)",[20,120],()=>S.bpm,v=>{S.bpm=v; syncBpm();},0],
+    bpm:["공급 속도 (병/분)",[2,120],()=>S.bpm,v=>{S.bpm=v; syncBpm();},0],
     sg_pitch:["파우치 피치 (mm)",[30,60],()=>S.sg.pitch,v=>S.sg.pitch=v,0],
     vib0:["1단 진동 (%)",[10,100],()=>S.dmc.vib[0],v=>S.dmc.vib[0]=v,0],
     vib1:["2단 진동 (%)",[10,100],()=>S.dmc.vib[1],v=>S.dmc.vib[1]=v,0],
@@ -3810,7 +3871,7 @@ function stepsOperation(easy){
     ()=>S.pe.sensor?null:hmiRoute("pe","main",HB("pe_sensor")),()=>S.pe.sensor&&S.user,{pts:3,hmi:true}));
   if(!easy) A.push(T_("torque","캡핑 토크 확인","RCS-120 주화면의 [토크 확인] 을 누릅니다. 캡 규격별 권장 토크 범위인지 확인합니다.",()=>hmiRoute("rc","main",HB("rc_check")),()=>S.rcp.checked,{pts:4,hmi:true}));
   A.push(T_("start","자동 운전 START","기동 조건(전원 · 공압 · 안전문 · 로그인 · 레시피 · 자재)을 확인하고 [START] 를 누릅니다.",()=>"#swStart",()=>S.started,{pts:6}));
-  A.push(T_("watch","운전 감시 · 연속 생산","목표 "+(easy?24:40)+"병을 생산합니다. 중량 불합격 병은 리젝트되고, 알람이 나면 STOP → 원인 판단 → 조치 → RESET → START 로 대응합니다.",
+  A.push(T_("watch","운전 감시 · 연속 생산","목표 수량을 생산합니다. 중량 불합격 병은 리젝트되고, 알람이 나면 STOP → 원인 판단 → 조치 → RESET → START 로 대응합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target,{pts:14,watch:true}));
   A.push(T_("stop","STOP — 운전 종료","목표 수량을 채웠으면 [STOP] 을 눌러 운전을 마칩니다.",()=>"#swStop",()=>!S.running&&S.cnt.good>=S.cnt.target&&S.flags.stopped,{pts:4}));
   if(!easy){
@@ -3830,7 +3891,7 @@ function startSession(mode){
   S.cnt.target=isEasy()?24:40;
   if(isEasy()){ S.dust=true; S.ua.air=true; S.ua.vac=true; S.dmc.checked=true; S.wc.checked=true; S.rcp.checked=true; }
   S.session={active:true, ended:false, start:performance.now(), sec:0};
-  S.rc=recipeOf(SEL.prod,SEL.count,SEL.ml);
+  S.rc=recipeOf(SEL.prod,SEL.count,SEL.ml); S.bpm=bpmFor(S.rc.n); if(typeof syncBpm==="function") syncBpm();
   hMach="ua"; hScr="main"; lgOpen=false;
   if(isExam()) scheduleExamTrouble();
   if(S.mode==="demo") demoSetup();
@@ -3869,7 +3930,8 @@ function finishSession(manual){
   if(!S.session||S.session.ended) return;
   S.session.ended=true; S.session.active=false; S.running=false;
   S.session.sec=(performance.now()-S.session.start)/1000;
-  if(!manual&&typeof AP!=="undefined"&&AP.video){ apOutro(); return; }
+  if(!manual&&typeof AP!=="undefined"&&AP.video){ for(const id of ["#mInc","#mList"]) $(id).classList.remove("on"); apOutro(); return; }
+  for(const id of ["#mInc","#mList"]) $(id).classList.remove("on");
   if(typeof apStop==="function") apStop();
   showResult(manual);
 }
@@ -3954,6 +4016,14 @@ const INC={
     q:"집적 테이블이 가득 찼습니다. 올바른 조치는?", a:"STOP 후 완제품을 회수해 다음 공정(라벨 · 포장)으로 보낸다",
     w:["테이블 속도를 올린다","리젝트 트레이에 담는다","가이드를 떼어 낸다"],
     fix:[{sel:"#mTable",t:"[완제품 회수] 를 눌러 집적 테이블을 비웁니다.",done:()=>S.table.n<S.table.cap}]},
+  RC65:{nm:"기밀도 시험 실패", mk:"rc", fire(){ S.rcp.leak=true; raise("RC65"); },
+    q:"완제품 기밀도(리크) 시험에서 불합격이 나왔습니다. 원인과 조치로 옳은 것은?", a:"캡 체결 불량 의심 → STOP 후 캡핑기(척 헤드 · 클러치 · 토크)를 점검하고 토크를 확인한다",
+    w:["정제 계수 설정을 바꾼다","PE 필름을 두 장 넣는다","기밀도 시험 기준을 낮춘다"],
+    fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
+         {fix:[L.T.x,1250,-150],t:"캡핑기 척 헤드 · 클러치를 점검합니다 (빨간 ! 누르기).",done:()=>!S.rcp.leak,
+          act(){ return startWork("cap",()=>{S.rcp.leak=false; const r=torqueRange(); S.rcp.torque=Math.round((r[0]+r[1])/2); S.rcp.torqueBad=false;},{stand:[L.T.x+70,830],reach:[L.T.x,1250,-150],carry:null,dur:2.8,pour:false,view:"rcHead",door:"rcR"}); }},
+         {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"},
+         {sel:()=>hmiRoute("rc","main",HB("rc_check")),t:"RCS-120 주화면에서 [토크 확인] 을 누릅니다.",done:()=>S.flags.torqueRechk,hmi:true,pre(){S.flags.torqueRechk=false;}}]},
   E001:{nm:"안전문 열림 (인터락)", mk:"line", fire(){ S.door="open"; raise("E001"); },
     q:"운전 중 안전문이 열려 라인이 비상 정지했습니다. 올바른 조치는?", a:"안전을 확인하고 안전문을 닫은 뒤 RESET → START 한다",
     w:["인터락 스위치를 테이프로 막는다","문을 연 채 START 한다","전원을 껐다 켠다"],
@@ -4400,8 +4470,8 @@ function openRubric(){
 }
 function bindHeader(){
   $$("#spdGrp [data-s]").forEach(b=>b.onclick=()=>{ SPD=+b.dataset.s; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x===b)); });
-  const bp=d=>{ if(!S) return; S.bpm=clamp(S.bpm+d,20,120); syncBpm(); drawHMI(); };
-  $("#bpmDn").onclick=()=>bp(-10); $("#bpmUp").onclick=()=>bp(10);
+  const bp=d=>{ if(!S) return; S.bpm=clamp(S.bpm+d,2,120); syncBpm(); drawHMI(); };
+  $("#bpmDn").onclick=()=>bp(S.bpm>20?-10:-1); $("#bpmUp").onclick=()=>bp(S.bpm>=20?10:1);
   $("#soundBtn").onclick=()=>{ SND.on=!SND.on; $("#soundBtn").textContent=SND.on?"사운드 ON":"사운드 OFF"; };
   $("#homeBtn").onclick=goHome;
   $("#rubricBtn").onclick=()=>{ if(S&&S.session&&!isDemo()) openRubric(); };
@@ -4438,7 +4508,7 @@ function apSet(on,video){
 function apStart(video){
   if(!S||!S.session||!S.session.active){ toast("먼저 과정과 모드를 선택해 시작하세요.","bad"); return; }
   if(isExam()){ toast("평가 모드에서는 자동재생을 쓸 수 없습니다.","bad"); return; }
-  if(video){ SPD=2; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==="2")); AP.cx=innerWidth/2; AP.cy=innerHeight/2; }
+  if(video){ S.cnt.target=Math.max(S.cnt.target,1000); SPD=2; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==="2")); AP.cx=innerWidth/2; AP.cy=innerHeight/2; }
   apSet(true,video);
 }
 function apStop(){ apSet(false,false); }
@@ -4454,24 +4524,21 @@ function firstVis(sel){
 }
 /* PLC(HMI) · 알람 대응 : 느리게 */
 function isSlow(el){ return !!(el.closest&&el.closest("#hmi,#mNum,#mInc,#listBox,#hMenu"))||!!S.activeTrouble||el.id==="fixBtn"||el.id==="incAsk"; }
-/* 영상 모드 연출 : 생산 중 이상사례 1건 → 알람 1건 */
+/* 영상 모드 연출 : 생산 중 알람 1건(기밀도 시험 실패 → 캡핑기 점검) · 이후 이상 없이 연속 생산 */
 function directorTarget(){
   if(!AP.video||!S.running||S.activeTrouble||S.flags.casePending) return null;
   const st=curStep(); if(!st||!st.watch) return null;
   const inList=$("#mList").classList.contains("on");
-  if(AP.dir==="wait"&&S.cnt.good>=4) AP.dir="case";
-  if(AP.dir==="case"){ if(!inList) return "#caseBtn"; return '#listBox [data-k="C_DIRT"]'; }
-  if(AP.dir==="caseDone"&&S.cnt.good>=Math.round(S.cnt.target*0.45)) AP.dir="fault";
-  if(AP.dir==="fault"){ if(!inList) return "#faultBtn"; return '#listBox [data-k="DM33"]'; }
+  if(AP.dir==="wait"&&S.cnt.good>=6) AP.dir="fault";
+  if(AP.dir==="fault"){ if(!inList) return "#faultBtn"; return '#listBox [data-k="RC65"]'; }
   return null;
 }
 function apTick(now){
   if(AP.outro){ outroTick(now); return; }
   if(!AP.on) return;
   if(!S||!S.session||!S.session.active||S.session.ended){ apStop(); return; }
-  if(AP.dir==="case"&&(S.flags.casePending||S.activeTrouble)) AP.dir="caseRun";
-  if(AP.dir==="caseRun"&&!S.activeTrouble&&!S.flags.casePending) AP.dir="caseDone";
   if(AP.dir==="fault"&&S.activeTrouble) AP.dir="faultRun";
+  if(AP.dir==="faultRun"&&!S.activeTrouble) AP.dir="done";
   const dirSel=directorTarget();
   const sel=dirSel||hintTarget();
   AP.pinSel=dirSel;
@@ -4563,15 +4630,19 @@ const DEMO_JOBS=[
   ["reject",()=>S.reject.n>=S.reject.cap-6,      ()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); }],
   ["table", ()=>S.table.n>=S.table.cap-8,        ()=>{ unloadTable(); }]
 ];
-function demoTick(dt){
-  if(!isDemo()||!S.session||!S.session.active) return;
-  /* 자재 · 회수 */
+/* 자재 보충 · 회수를 알람 전에 미리 (시연 모드 · 영상 자동재생의 연속 생산 구간) */
+function autoSupply(){
   for(const [job,need,act] of DEMO_JOBS){
     if(!need()) continue;
     if(WK.some(w=>w.job&&w.job.key===job)) continue;
     const w=wkFor(JOBS[job].stand); if(w.job) continue;
-    startWork(job,act,DEMO.tour?{}:{view:null});
+    startWork(job,act,(isDemo()&&!DEMO.tour)?{view:null}:{});
   }
+}
+function demoTick(dt){
+  if(typeof AP!=="undefined"&&AP.video&&S&&S.session&&S.session.active&&!S.activeTrouble&&S.running){ const st=curStep(); if(st&&st.watch&&AP.dir==="done") autoSupply(); }
+  if(!isDemo()||!S.session||!S.session.active) return;
+  autoSupply();
   /* 알람 자동 복구 (시연 중 정지 방지) */
   if(!S.running){ DEMO.rT+=dt; if(DEMO.rT>1.2){ DEMO.rT=0; lineReset(); if(!tripAlarms().length){ S.running=true; S.tripStop=false; } } }
   else DEMO.rT=0;

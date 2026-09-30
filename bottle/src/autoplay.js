@@ -19,7 +19,7 @@ function apSet(on,video){
 function apStart(video){
   if(!S||!S.session||!S.session.active){ toast("먼저 과정과 모드를 선택해 시작하세요.","bad"); return; }
   if(isExam()){ toast("평가 모드에서는 자동재생을 쓸 수 없습니다.","bad"); return; }
-  if(video){ SPD=2; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==="2")); AP.cx=innerWidth/2; AP.cy=innerHeight/2; }
+  if(video){ S.cnt.target=Math.max(S.cnt.target,1000); SPD=2; $$("#spdGrp [data-s]").forEach(x=>x.classList.toggle("on",x.dataset.s==="2")); AP.cx=innerWidth/2; AP.cy=innerHeight/2; }
   apSet(true,video);
 }
 function apStop(){ apSet(false,false); }
@@ -35,24 +35,21 @@ function firstVis(sel){
 }
 /* PLC(HMI) · 알람 대응 : 느리게 */
 function isSlow(el){ return !!(el.closest&&el.closest("#hmi,#mNum,#mInc,#listBox,#hMenu"))||!!S.activeTrouble||el.id==="fixBtn"||el.id==="incAsk"; }
-/* 영상 모드 연출 : 생산 중 이상사례 1건 → 알람 1건 */
+/* 영상 모드 연출 : 생산 중 알람 1건(기밀도 시험 실패 → 캡핑기 점검) · 이후 이상 없이 연속 생산 */
 function directorTarget(){
   if(!AP.video||!S.running||S.activeTrouble||S.flags.casePending) return null;
   const st=curStep(); if(!st||!st.watch) return null;
   const inList=$("#mList").classList.contains("on");
-  if(AP.dir==="wait"&&S.cnt.good>=4) AP.dir="case";
-  if(AP.dir==="case"){ if(!inList) return "#caseBtn"; return '#listBox [data-k="C_DIRT"]'; }
-  if(AP.dir==="caseDone"&&S.cnt.good>=Math.round(S.cnt.target*0.45)) AP.dir="fault";
-  if(AP.dir==="fault"){ if(!inList) return "#faultBtn"; return '#listBox [data-k="DM33"]'; }
+  if(AP.dir==="wait"&&S.cnt.good>=6) AP.dir="fault";
+  if(AP.dir==="fault"){ if(!inList) return "#faultBtn"; return '#listBox [data-k="RC65"]'; }
   return null;
 }
 function apTick(now){
   if(AP.outro){ outroTick(now); return; }
   if(!AP.on) return;
   if(!S||!S.session||!S.session.active||S.session.ended){ apStop(); return; }
-  if(AP.dir==="case"&&(S.flags.casePending||S.activeTrouble)) AP.dir="caseRun";
-  if(AP.dir==="caseRun"&&!S.activeTrouble&&!S.flags.casePending) AP.dir="caseDone";
   if(AP.dir==="fault"&&S.activeTrouble) AP.dir="faultRun";
+  if(AP.dir==="faultRun"&&!S.activeTrouble) AP.dir="done";
   const dirSel=directorTarget();
   const sel=dirSel||hintTarget();
   AP.pinSel=dirSel;

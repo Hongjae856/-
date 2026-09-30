@@ -29,15 +29,19 @@ const DEMO_JOBS=[
   ["reject",()=>S.reject.n>=S.reject.cap-6,      ()=>{ S.reject.n=0; LN.rejBin=[]; clearAlarm("WC42"); }],
   ["table", ()=>S.table.n>=S.table.cap-8,        ()=>{ unloadTable(); }]
 ];
-function demoTick(dt){
-  if(!isDemo()||!S.session||!S.session.active) return;
-  /* 자재 · 회수 */
+/* 자재 보충 · 회수를 알람 전에 미리 (시연 모드 · 영상 자동재생의 연속 생산 구간) */
+function autoSupply(){
   for(const [job,need,act] of DEMO_JOBS){
     if(!need()) continue;
     if(WK.some(w=>w.job&&w.job.key===job)) continue;
     const w=wkFor(JOBS[job].stand); if(w.job) continue;
-    startWork(job,act,DEMO.tour?{}:{view:null});
+    startWork(job,act,(isDemo()&&!DEMO.tour)?{view:null}:{});
   }
+}
+function demoTick(dt){
+  if(typeof AP!=="undefined"&&AP.video&&S&&S.session&&S.session.active&&!S.activeTrouble&&S.running){ const st=curStep(); if(st&&st.watch&&AP.dir==="done") autoSupply(); }
+  if(!isDemo()||!S.session||!S.session.active) return;
+  autoSupply();
   /* 알람 자동 복구 (시연 중 정지 방지) */
   if(!S.running){ DEMO.rT+=dt; if(DEMO.rT>1.2){ DEMO.rT=0; lineReset(); if(!tripAlarms().length){ S.running=true; S.tripStop=false; } } }
   else DEMO.rT=0;

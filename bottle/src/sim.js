@@ -580,6 +580,7 @@ function lineReset(){
     if(k==="RC62") return S.rcp.jam;
     if(k==="RC63") return S.rcp.torqueBad;
     if(k==="RC64") return S.table.n>=S.table.cap;
+    if(k==="RC65") return !!S.rcp.leak;
     if(k==="WC41"){ S.wc.consec=0; return false; }
     return false;
   });

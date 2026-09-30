@@ -232,7 +232,7 @@ function staticKey(){ const b=BD(); return [b.ml,VIEW3.guard?1:0].join("|"); }
 function buildStatic(){
   STATIC_KEY=staticKey(); DOORS=[];
   geoBegin(GEO.stat);
-  sConveyor(); sUA(); sSG(); sLoadCell(L.lc1,1); sDMC(); sLoadCell(L.lc2,2); sReject(); sPrinter(); sPE(); sRCS(); sTable(); sDust();
+  sConveyor(); sUA(); sSG(); for(const t of STAIRS) sStair(t); sLoadCell(L.lc1,1); sDMC(); sLoadCell(L.lc2,2); sReject(); sPrinter(); sPE(); sRCS(); sTable(); sDust();
   R3.statDirty=true;
   geoBegin(GEO.dyn);
 }
@@ -335,7 +335,7 @@ function sUA(){
   mainSwitch(U.x0+200,640,U.z1+1);
   /* 상부 가드 : 왼칸(디스크) · 가운데 기둥 · 오른칸(벨트 · 호퍼) — 앞 도어는 위로 여는 방식 */
   alFrame(U.x0,U.x1,CH-86,U.yT,U.z0,U.z1,{mx:[U.col0,U.col1], fskip:[1],
-    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"top"}},
+    door:{0:{id:"uaL",hinge:"top"},2:{id:"uaR",hinge:"top"}}, bdoor:{2:{id:"uaB",hinge:"double"}},
     hole:{r:[-110,110,CH-90,CH+b.h+60]}});
   /* 가운데 기둥 : 조작 패널 (위) · 점검창 (아래) */
   const H=HMIS.ua;
@@ -361,7 +361,7 @@ function sUA(){
   box(hp.x0,hp.x1,y0,y0+14,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x0+4,y0,y1,hp.z0,hp.z1,C.ss); box(hp.x1-4,hp.x1,y0,y1,hp.z0,hp.z1,C.ss);
   box(hp.x0,hp.x1,y0,y1,hp.z0,hp.z0+4,C.ss); box(hp.x0,hp.x1,y0,y1-120,hp.z1-4,hp.z1,C.ss);
-  quad([hp.x0+4,y0+60,hp.z0+4],[hp.x0+4,y0+60,hp.z1-4],[hp.x1-4,y0+240,hp.z1-4],[hp.x1-4,y0+240,hp.z0+4],[0.36,0.25,0.19,0.08]);
+  quad([hp.x0+4,y0+40,hp.z0+4],[hp.x0+4,y0+40,hp.z1-4],[hp.x1-4,y0+160,hp.z1-4],[hp.x1-4,y0+160,hp.z0+4],[0.36,0.25,0.19,0.08]);
   for(const x of [hp.x0+40,hp.x1-40]) for(const z of [hp.z0+40,hp.z1-40]) cylY(x,z,CH-86,y0,16,C.ss,10);
   cylY(hp.x1-60,hp.z0+30,y1-160,y1-90,12,C.dark,10);
   /* 가변속 엘리베이터 (녹색 클리트 벨트) : 호퍼 → 디스크 */
@@ -400,7 +400,7 @@ function sUA(){
   box(U.x1-420,U.x1-320,560,760,U.z1,U.z1+40,C.dark); cylZ(U.x1-370,720,U.z1+40,U.z1+50,26,C.white,20); cylY(U.x1-370,U.z1+20,560,600,20,[0.75,0.82,0.9,0.1],14);
 }
 /* UA 엘리베이터 : 호퍼 바닥 → 디스크 위 */
-const UA_EL=[[L.hop.x0-40,1110,-520],[L.tt.x+180,1560,-600]];
+const UA_EL=[[L.hop.x0-40,L.hop.y0+40,-520],[L.tt.x+180,1560,-600]];
 /* 호스 (3점 곡선) */
 function hoseTo(a,m,e,r,col){ const pts=[]; for(let i=0;i<=10;i++){ const t=i/10,u=1-t; pts.push([u*u*a[0]+2*u*t*m[0]+t*t*e[0],u*u*a[1]+2*u*t*m[1]+t*t*e[1],u*u*a[2]+2*u*t*m[2]+t*t*e[2]]); } tubePath(pts,r,col,10); }
 
@@ -793,6 +793,24 @@ function sTable(){
   mPop();
   box(XE-20,t.x-t.r+30,CH-10,CH-2,-50,50,C.ss);
   for(const s of [-1,1]) box(XE-20,t.x-t.r+30,CH-2,CH+b.h*0.5,s*(b.d/2+5),s*(b.d/2+10),C.guide,C.guide,0);
+}
+/* ── 계단 발판 (4 단 · 체크 플레이트 · 양옆 손잡이 : 계단 구간만) ── */
+function sStair(t){
+  const n=4, L2=(t.zp0-t.zs)/n, col=[0.72,0.75,0.78,0.7], leg=C.ss;
+  box(t.x0,t.x1,t.h-24,t.h,t.zp0,t.zp1,col,[0.80,0.82,0.85,0.8]);
+  for(let x=t.x0+30;x<t.x1-20;x+=40) box(x,x+18,t.h,t.h+1.2,t.zp0+10,t.zp1-10,[0.66,0.69,0.72,0.8],null,0);
+  for(const x of [t.x0+20,t.x1-20]) for(const z of [t.zp0+20,t.zp1-20]) box(x-15,x+15,0,t.h-24,z-15,z+15,leg);
+  box(t.x0,t.x1,t.h-26,t.h-22,t.zp0-2,t.zp0+30,C.yellow,C.yellow,0);
+  for(let i=0;i<n;i++){ const z0=t.zs+i*L2, top=t.h*(i+1)/n;
+    box(t.x0+14,t.x1-14,top-18,top,z0,z0+L2+4,col,[0.80,0.82,0.85,0.8]);
+    box(t.x0+14,t.x1-14,top-20,top-17,z0,z0+14,C.yellow,C.yellow,0); }
+  for(const x of [t.x0,t.x1]){
+    const a=[x,0,t.zs], b=[x,t.h,t.zp0];
+    tube([x,0,t.zs],[x,t.h-10,t.zp0],12,leg,8);                              /* 옆판(스트링거) */
+    const r0=[x,900,t.zs+40], r1=[x,t.h+900,t.zp0];
+    tube(r0,r1,14,C.yellow,10);                                              /* 손잡이 */
+    cylY(x,t.zs+40,0,900,13,leg,10); cylY(x,t.zp0,t.h,t.h+900,13,leg,10);
+  }
 }
 /* ── 천장 집진 배관 (DMC 헤드 뒤 · 주름 호스) ── */
 function sDust(){

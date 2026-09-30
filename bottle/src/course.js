@@ -49,7 +49,7 @@ function stepsOperation(easy){
     ()=>S.pe.sensor?null:hmiRoute("pe","main",HB("pe_sensor")),()=>S.pe.sensor&&S.user,{pts:3,hmi:true}));
   if(!easy) A.push(T_("torque","캡핑 토크 확인","RCS-120 주화면의 [토크 확인] 을 누릅니다. 캡 규격별 권장 토크 범위인지 확인합니다.",()=>hmiRoute("rc","main",HB("rc_check")),()=>S.rcp.checked,{pts:4,hmi:true}));
   A.push(T_("start","자동 운전 START","기동 조건(전원 · 공압 · 안전문 · 로그인 · 레시피 · 자재)을 확인하고 [START] 를 누릅니다.",()=>"#swStart",()=>S.started,{pts:6}));
-  A.push(T_("watch","운전 감시 · 연속 생산","목표 "+(easy?24:40)+"병을 생산합니다. 중량 불합격 병은 리젝트되고, 알람이 나면 STOP → 원인 판단 → 조치 → RESET → START 로 대응합니다.",
+  A.push(T_("watch","운전 감시 · 연속 생산","목표 수량을 생산합니다. 중량 불합격 병은 리젝트되고, 알람이 나면 STOP → 원인 판단 → 조치 → RESET → START 로 대응합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target,{pts:14,watch:true}));
   A.push(T_("stop","STOP — 운전 종료","목표 수량을 채웠으면 [STOP] 을 눌러 운전을 마칩니다.",()=>"#swStop",()=>!S.running&&S.cnt.good>=S.cnt.target&&S.flags.stopped,{pts:4}));
   if(!easy){
@@ -69,7 +69,7 @@ function startSession(mode){
   S.cnt.target=isEasy()?24:40;
   if(isEasy()){ S.dust=true; S.ua.air=true; S.ua.vac=true; S.dmc.checked=true; S.wc.checked=true; S.rcp.checked=true; }
   S.session={active:true, ended:false, start:performance.now(), sec:0};
-  S.rc=recipeOf(SEL.prod,SEL.count,SEL.ml);
+  S.rc=recipeOf(SEL.prod,SEL.count,SEL.ml); S.bpm=bpmFor(S.rc.n); if(typeof syncBpm==="function") syncBpm();
   hMach="ua"; hScr="main"; lgOpen=false;
   if(isExam()) scheduleExamTrouble();
   if(S.mode==="demo") demoSetup();
@@ -108,7 +108,8 @@ function finishSession(manual){
   if(!S.session||S.session.ended) return;
   S.session.ended=true; S.session.active=false; S.running=false;
   S.session.sec=(performance.now()-S.session.start)/1000;
-  if(!manual&&typeof AP!=="undefined"&&AP.video){ apOutro(); return; }
+  if(!manual&&typeof AP!=="undefined"&&AP.video){ for(const id of ["#mInc","#mList"]) $(id).classList.remove("on"); apOutro(); return; }
+  for(const id of ["#mInc","#mList"]) $(id).classList.remove("on");
   if(typeof apStop==="function") apStop();
   showResult(manual);
 }
@@ -193,6 +194,14 @@ const INC={
     q:"집적 테이블이 가득 찼습니다. 올바른 조치는?", a:"STOP 후 완제품을 회수해 다음 공정(라벨 · 포장)으로 보낸다",
     w:["테이블 속도를 올린다","리젝트 트레이에 담는다","가이드를 떼어 낸다"],
     fix:[{sel:"#mTable",t:"[완제품 회수] 를 눌러 집적 테이블을 비웁니다.",done:()=>S.table.n<S.table.cap}]},
+  RC65:{nm:"기밀도 시험 실패", mk:"rc", fire(){ S.rcp.leak=true; raise("RC65"); },
+    q:"완제품 기밀도(리크) 시험에서 불합격이 나왔습니다. 원인과 조치로 옳은 것은?", a:"캡 체결 불량 의심 → STOP 후 캡핑기(척 헤드 · 클러치 · 토크)를 점검하고 토크를 확인한다",
+    w:["정제 계수 설정을 바꾼다","PE 필름을 두 장 넣는다","기밀도 시험 기준을 낮춘다"],
+    fix:[{sel:"#uDoor",t:"안전문을 엽니다.",done:()=>S.door==="open"},
+         {fix:[L.T.x,1250,-150],t:"캡핑기 척 헤드 · 클러치를 점검합니다 (빨간 ! 누르기).",done:()=>!S.rcp.leak,
+          act(){ return startWork("cap",()=>{S.rcp.leak=false; const r=torqueRange(); S.rcp.torque=Math.round((r[0]+r[1])/2); S.rcp.torqueBad=false;},{stand:[L.T.x+70,830],reach:[L.T.x,1250,-150],carry:null,dur:2.8,pour:false,view:"rcHead",door:"rcR"}); }},
+         {sel:"#uDoor",t:"안전문을 닫습니다.",done:()=>S.door==="closed"},
+         {sel:()=>hmiRoute("rc","main",HB("rc_check")),t:"RCS-120 주화면에서 [토크 확인] 을 누릅니다.",done:()=>S.flags.torqueRechk,hmi:true,pre(){S.flags.torqueRechk=false;}}]},
   E001:{nm:"안전문 열림 (인터락)", mk:"line", fire(){ S.door="open"; raise("E001"); },
     q:"운전 중 안전문이 열려 라인이 비상 정지했습니다. 올바른 조치는?", a:"안전을 확인하고 안전문을 닫은 뒤 RESET → START 한다",
     w:["인터락 스위치를 테이프로 막는다","문을 연 채 START 한다","전원을 껐다 켠다"],
