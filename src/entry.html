@@ -11,12 +11,21 @@
 button{padding:30px;text-align:center;border:1px solid #b7c4d2;border-radius:20px;background:#ffffffed;color:#142b47;box-shadow:0 12px 30px #142b4710;font-family:inherit;cursor:pointer}
 button:last-child{background:#142b47;color:#fff}button small{display:block;font-size:15px;letter-spacing:2px;opacity:.7}button strong{display:block;font-size:32px;margin:15px 0}button span{display:block;font-size:19px;line-height:1.7}
 button:hover{box-shadow:0 12px 30px #142b4726}button:focus-visible{outline:4px solid #799fc9;outline-offset:5px}
-#entry .ver{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));font-size:13px;font-weight:600;color:#8a96a6;letter-spacing:.5px}
+#entry .ver{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:max(12px,env(safe-area-inset-bottom,0px));font-size:14px;font-weight:700;color:#5d7086;letter-spacing:.5px;padding:7px 14px;border:1px solid #c9d4e0;border-radius:16px;background:#fff;cursor:pointer}
+#entry .ver:hover{color:#142b47;border-color:#142b47}
+#verModal{position:fixed;inset:0;z-index:50;background:rgba(12,20,30,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#verModal .box{width:860px;max-width:100%;max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:24px 26px;box-shadow:0 12px 34px rgba(12,22,36,.28);text-align:left}
+#verModal h2{margin:0 0 6px;font-size:24px}#verModal h2 small{font-size:15px;color:#5d7086;font-weight:600}#verModal p{margin:0 0 12px;color:#5d7086}
+#verModal table{width:100%;border-collapse:collapse;font-size:15px}#verModal th{background:#dde5ee;border:1px solid #c7d3e0;padding:8px;color:#33465c}
+#verModal td{border:1px solid #dbe3ec;padding:8px 10px;vertical-align:top}#verModal td:nth-child(-n+2){white-space:nowrap;text-align:center;font-weight:700}
+#verModal .close{margin-top:14px;width:100%;text-align:center;padding:13px;border:0;border-radius:10px;background:#142b47;color:#fff;font-size:16px;font-weight:700;cursor:pointer;box-shadow:none}
 iframe{position:fixed;inset:0;width:100%;height:100%;border:0;background:white} [hidden]{display:none!important}
 @media(max-width:900px){.choices{gap:12px}button{padding:20px}button strong{font-size:26px}button span{font-size:17px}}
 @media(max-width:600px){.content{padding:20px}h1{font-size:32px}.intro{font-size:18px}button{padding:20px 10px}button strong{font-size:22px}button small{font-size:12px;letter-spacing:1px}button span{font-size:14px}}
 </style></head><body>
-<main id="entry"><div class="content"><h1>PTP 라인 IDT<span style="display:block;font-size:.46em;font-weight:600;letter-spacing:0;color:#3a5070;margin-top:8px">(PTP Line Interactive Digital Tutor)</span></h1><div class="choices"><button type="button" data-course="filler"><small>01 · PTP FILLING</small><strong>PTP 충전기</strong><span>PTP 충전·포장 공정 학습</span></button><button type="button" data-course="line"><small>02 · PACKAGING LINE</small><strong>PTP 포장라인</strong><span>카톤 포장부터 팔렛트 적재까지</span></button></div></div><div class="ver" aria-label="버전">V7</div></main>
+<main id="entry"><div class="content"><h1>PTP 라인 IDT<span style="display:block;font-size:.46em;font-weight:600;letter-spacing:0;color:#3a5070;margin-top:8px">(PTP Line Interactive Digital Tutor)</span></h1><div class="choices"><button type="button" data-course="filler"><small>01 · PTP FILLING</small><strong>PTP 충전기</strong><span>PTP 충전·포장 공정 학습</span></button><button type="button" data-course="line"><small>02 · PACKAGING LINE</small><strong>PTP 포장라인</strong><span>카톤 포장부터 팔렛트 적재까지</span></button></div></div><div class="ver" id="verBadge" role="button" tabindex="0" aria-label="버전 이력 보기">V12</div></main>
+<div id="verModal" hidden><div class="box" role="dialog" aria-label="버전 이력"><h2>📋 버전 이력 <small id="verCur"></small></h2><p>수정 요청 1건마다 버전이 1씩 올라갑니다.</p>
+<table><thead><tr><th>버전</th><th>날짜</th><th>수정 내용</th></tr></thead><tbody id="verRows"></tbody></table><div class="close" role="button" tabindex="0" id="verClose">닫기</div></div></div>
 <script id="simulators" type="application/json">__SIMULATORS__</script>
 <script>
 const sources=JSON.parse(document.getElementById('simulators').textContent);
@@ -47,4 +56,22 @@ function openSimulator(key){
  document.getElementById('entry').hidden=true;document.body.appendChild(frame);
 }
 document.querySelectorAll('[data-course]').forEach(button=>button.addEventListener('click',()=>openSimulator(button.dataset.course)));
+/* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신) · V7~V11 은 git 커밋 기록으로 복원 (날짜 : 한국 시간 기준) */
+const CHANGELOG=[
+ {v:12,d:'2026-10-01',t:'장비 선택 화면 하단 버전 표시 · 버전 이력 창 추가'},
+ {v:11,d:'2026-09-29',t:'자동재생 PLC 버튼 클릭 화살표 표시, 알람 발생 시 자동재생 유지, 팔렛트 투입 시 확대 시점'},
+ {v:10,d:'2026-09-29',t:'자동재생 알람 대응 · PLC 조작 감속 (실제 시간 2초 간격, 배속 무관)'},
+ {v:9,d:'2026-09-29',t:'포장라인 케이스당 카톤 30개 적재 표시'},
+ {v:8,d:'2026-09-29',t:'영상 자동재생 모드 추가 (라인 조정 단계 분리, T230 팔렛트 정지 수정, 학습 종료 후 결과 화면)'},
+ {v:7,d:'2026-09-28',t:'3D 렌더링 개선 (픽셀 조명 · 톤매핑 · 둥근 모서리 · 그림자), 장비 선택 화면 버전 표시'},
+ {v:'1~6',d:'~2026-09-27',t:'이전 작업 (상세 기록 없음)'}
+];
+const verBadge=document.getElementById('verBadge'), verModal=document.getElementById('verModal');
+verBadge.textContent='V'+CHANGELOG[0].v;
+document.getElementById('verCur').textContent='현재 V'+CHANGELOG[0].v;
+document.getElementById('verRows').innerHTML=CHANGELOG.map(r=>'<tr><td>V'+r.v+'</td><td>'+r.d+'</td><td>'+r.t+'</td></tr>').join('');
+const verOpen=()=>{verModal.hidden=false;}, verClose=()=>{verModal.hidden=true;};
+verBadge.addEventListener('click',verOpen); verBadge.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' ')verOpen();});
+document.getElementById('verClose').addEventListener('click',verClose);
+verModal.addEventListener('click',e=>{if(e.target===verModal)verClose();});
 </script></body></html>

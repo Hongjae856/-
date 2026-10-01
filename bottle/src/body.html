@@ -1,6 +1,6 @@
 <div id="stage"><div id="app">
   <div id="head">
-    <div class="ttl">병충전 라인 IDT <i>V3</i></div>
+    <div class="ttl">병충전 라인 IDT <i id="verHead">V</i></div>
     <div id="bpmCtl">라인 속도 <button class="gbtn" id="bpmDn" aria-label="속도 낮춤">−</button><b id="bpmV">60</b><button class="gbtn" id="bpmUp" aria-label="속도 높임">＋</button> 병/분</div>
     <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button></div>
     <button class="gbtn" id="apBtn">▶ 자동재생</button>
@@ -144,9 +144,9 @@
   <div class="modal" id="mList"><div class="mbox" id="listBox"></div></div>
   <div class="modal" id="mRub"><div class="mbox" id="rubBox" style="width:640px"></div></div>
   <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
+  <div class="modal" id="mVer"><div class="mbox" id="verBox"></div></div>
   <div id="splash">
     <div class="box">
-      <span class="ver">V3</span>
       <h1>병충전 라인 IDT<small>Bottle Filling Line · Interactive Digital Tutor</small></h1>
       <div id="lineStrip"></div>
       <div id="coursePicker">
@@ -165,6 +165,7 @@
         </div>
       </div>
       <button id="courseBack" style="display:none">← 과정 다시 선택</button>
+      <button id="verBadge" class="ver">V</button>
     </div>
   </div>
   <div id="banner" role="alert" hidden></div>

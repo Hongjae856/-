@@ -328,7 +328,11 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
 #splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s}
 #splash.hide{opacity:0;pointer-events:none;visibility:hidden}
 #splash .box{max-width:1300px;width:100%;padding:40px;text-align:center}
-#splash .ver{display:inline-block;margin-bottom:12px;font:800 13px/1 var(--ff);color:#fff;background:#15304e;border-radius:20px;padding:6px 13px;letter-spacing:1px}
+#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
+#splash .ver:hover{color:#15304e;border-color:#15304e}
+#verHead{cursor:pointer}
+#mVer .mbox{width:860px;max-width:94%}
+table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{padding:7px 9px}table.vt td:first-child{font-weight:800;white-space:nowrap}table.vt td:nth-child(2){white-space:nowrap}
 #splash h1{font:800 50px/1.15 var(--ff);letter-spacing:-2px;margin:0 0 8px}
 #splash h1 small{display:block;font:700 17px/1.4 var(--ff);letter-spacing:1px;color:#6a7f96;margin-top:8px}
 #lineStrip{display:flex;gap:6px;justify-content:center;align-items:center;margin:26px 0 30px;flex-wrap:nowrap}
@@ -400,7 +404,7 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
 <body>
 <div id="stage"><div id="app">
   <div id="head">
-    <div class="ttl">병충전 라인 IDT <i>V3</i></div>
+    <div class="ttl">병충전 라인 IDT <i id="verHead">V</i></div>
     <div id="bpmCtl">라인 속도 <button class="gbtn" id="bpmDn" aria-label="속도 낮춤">−</button><b id="bpmV">60</b><button class="gbtn" id="bpmUp" aria-label="속도 높임">＋</button> 병/분</div>
     <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button></div>
     <button class="gbtn" id="apBtn">▶ 자동재생</button>
@@ -544,9 +548,9 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
   <div class="modal" id="mList"><div class="mbox" id="listBox"></div></div>
   <div class="modal" id="mRub"><div class="mbox" id="rubBox" style="width:640px"></div></div>
   <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
+  <div class="modal" id="mVer"><div class="mbox" id="verBox"></div></div>
   <div id="splash">
     <div class="box">
-      <span class="ver">V3</span>
       <h1>병충전 라인 IDT<small>Bottle Filling Line · Interactive Digital Tutor</small></h1>
       <div id="lineStrip"></div>
       <div id="coursePicker">
@@ -565,6 +569,7 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
         </div>
       </div>
       <button id="courseBack" style="display:none">← 과정 다시 선택</button>
+      <button id="verBadge" class="ver">V</button>
     </div>
   </div>
   <div id="banner" role="alert" hidden></div>
@@ -4692,6 +4697,40 @@ function bindDemo(){
   $("#demoTour").onclick=()=>{ DEMO.tour=!DEMO.tour; DEMO.t=0; demoTourBtn(); if(DEMO.tour) camSet(DEMO_TOUR[DEMO.i]); };
 }
 
+/* ── changelog.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신)
+   · V1~V13 은 git 커밋 · 아티펙트 게시 기록으로 복원 (날짜 : 한국 시간 기준)
+   ═══════════════════════════════════════════════════════════════════ */
+const CHANGELOG=[
+ {v:14, d:"2026-10-01", t:"메인화면 하단 버전 표시 · 버전 이력 창 추가"},
+ {v:13, d:"2026-10-01", t:"UA-120 병 호퍼 투입구를 캐비닛 윗면으로 변경, 뒤 가드를 위로 열고 위에서 투입"},
+ {v:12, d:"2026-10-01", t:"UA-120 병 호퍼를 하부 캐비닛 안으로 수납, 뒤 병 공급 가드(위로 열림 · 인터락 제외) 추가"},
+ {v:11, d:"2026-10-01", t:"UA-120 병 호퍼를 뒤쪽 하단(허리 아래)으로 이동, 상승 컨베이어에서 디스크로 바로 낙하(배출 슈트 삭제)"},
+ {v:10, d:"2026-09-30", t:"정제 호퍼 → 1·2·3단 트레이 연속 흐름(진동 비례 제어), 실리카겔 롤 표현, 뒤쪽 자재 투입 시점 변경"},
+ {v:9,  d:"2026-09-30", t:"트레이 · 디스크 빈 상태로 시작, 집진기 메인 전원 연동, 합류 후 비닐 누락 수정, 작업자 대기 방향, 중량선별 표시 흰색"},
+ {v:8,  d:"2026-09-30", t:"작업자 이동 속도 상향, 라인 클리어런스 시 가드 도어를 열고 점검"},
+ {v:7,  d:"2026-09-30", t:"영상 자동재생 기밀도 시험 실패 알람 1건 · 목표 1,000병, 작업자 2명 뒤쪽 동선 · 계단 발판, 포장단위별 라인 속도, 정제 색상"},
+ {v:6,  d:"2026-09-30", t:"PLC 패널 폭 축소 · 장비 탭 2단, 라인 모니터 흰색, 시점 높이 낮춤, 병 · 정제 · 필름 · 캡 뒤쪽 투입, 영상 자동재생 마무리"},
+ {v:5,  d:"2026-09-30", t:"트윈 레인(A·B) 분기 · 합류 및 레인별 계량 스테이션, 시연 모드 추가"},
+ {v:4,  d:"2026-09-30", t:"RCS-120 캡핑 헤드 3개로 변경"},
+ {v:3,  d:"2026-09-30", t:"현장 사진 기준 5기종 · 로드셀(포크 이송) 재모델링, 톱날 커터, 장비 간 간격 500 mm 이상"},
+ {v:2,  d:"2026-09-30", t:"카운텍 제품 사진 · 브로셔 기준 5기종 3D 재모델링"},
+ {v:1,  d:"2026-09-30", t:"병충전 라인 IDT 최초 버전 (5기종 · 중량선별 PLC, 가동 모드 학습/평가 · 자동재생)"}
+];
+const VER=CHANGELOG[0].v;
+function openVersions(){
+  $("#verBox").innerHTML='<h2>📋 버전 이력 <small style="font-size:14px;color:#61748a">현재 V'+VER+'</small></h2>'+
+    '<p>수정 요청 1건마다 버전이 1씩 올라갑니다.</p>'+
+    '<table class="ht vt"><tr><th>버전</th><th>날짜</th><th>수정 내용</th></tr>'+
+    CHANGELOG.map(r=>'<tr><td>V'+r.v+'</td><td>'+r.d+'</td><td class="l">'+esc(r.t)+'</td></tr>').join("")+'</table>'+
+    '<div class="mbtn"><button class="pri" id="verX">닫기</button></div>';
+  $("#mVer").classList.add("on"); $("#verX").onclick=()=>$("#mVer").classList.remove("on");
+}
+function bindVersion(){
+  for(const id of ["#verBadge","#verHead"]){ const e=$(id); if(!e) continue; e.textContent="V"+VER; e.onclick=openVersions; e.title="버전 이력"; }
+}
+
 /* ── boot.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    부팅 · 메인 루프
@@ -4727,7 +4766,7 @@ function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  initKeypad(); bindTiles(); bindPanel(); bindHeader(); bindAuto(); bindDemo(); initSplash();
+  initKeypad(); bindTiles(); bindPanel(); bindHeader(); bindAuto(); bindDemo(); bindVersion(); initSplash();
   lineInit(); drawHMI(); syncBpm(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, SEL, apStart, apStop, AP, launchIncident};
   requestAnimationFrame(frame);

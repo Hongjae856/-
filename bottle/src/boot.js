@@ -32,7 +32,7 @@ function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  initKeypad(); bindTiles(); bindPanel(); bindHeader(); bindAuto(); bindDemo(); initSplash();
+  initKeypad(); bindTiles(); bindPanel(); bindHeader(); bindAuto(); bindDemo(); bindVersion(); initSplash();
   lineInit(); drawHMI(); syncBpm(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, SEL, apStart, apStop, AP, launchIncident};
   requestAnimationFrame(frame);

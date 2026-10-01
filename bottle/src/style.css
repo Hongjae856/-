@@ -320,7 +320,11 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
 #splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s}
 #splash.hide{opacity:0;pointer-events:none;visibility:hidden}
 #splash .box{max-width:1300px;width:100%;padding:40px;text-align:center}
-#splash .ver{display:inline-block;margin-bottom:12px;font:800 13px/1 var(--ff);color:#fff;background:#15304e;border-radius:20px;padding:6px 13px;letter-spacing:1px}
+#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
+#splash .ver:hover{color:#15304e;border-color:#15304e}
+#verHead{cursor:pointer}
+#mVer .mbox{width:860px;max-width:94%}
+table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{padding:7px 9px}table.vt td:first-child{font-weight:800;white-space:nowrap}table.vt td:nth-child(2){white-space:nowrap}
 #splash h1{font:800 50px/1.15 var(--ff);letter-spacing:-2px;margin:0 0 8px}
 #splash h1 small{display:block;font:700 17px/1.4 var(--ff);letter-spacing:1px;color:#6a7f96;margin-top:8px}
 #lineStrip{display:flex;gap:6px;justify-content:center;align-items:center;margin:26px 0 30px;flex-wrap:nowrap}
