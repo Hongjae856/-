@@ -142,6 +142,7 @@ function glide(from,to,dur){
   f();
 }
 function enter(from){
+  glideId++;                                     /* 진행 중인 이동 취소 */
   if(from==='filler') glide({yaw:-0.95,pitch:0.22,dist:620,tx:-1120,ty:230,tz:30},ROOM_DEFAULT,1300);
   else if(m3.ready) Object.assign(m3,TGT(ROOM_DEFAULT));
 }
@@ -259,7 +260,6 @@ const HZ=c=>roomHazeArr(c);
 function fb(x0,x1,y0,y1,z0,z1,col){ const c=HZ(col); bx(FX(x0-620),FX(x1-620),FY(y0),FY(y1),FZ(z0),FZ(z1),c,c); }
 let fT=0;
 function fillRoom(){
-  const run=RB.st.fillerRun; fT+=run?RDT*SPD:0;
   const W=[0.95,0.95,0.94], WD=[0.80,0.81,0.80], STL=[0.76,0.77,0.78], FRM=[0.76,0.77,0.77], DRK=[0.30,0.32,0.35], GL=[0.77,0.88,0.93];
   /* 베이스 프레임 · 다리 · 스커트 */
   for(const x of [150,420,690,960,1160]) for(const z of [-90,90]) fb(x-13,x+13,-266,-220,z-13,z+13,[0.59,0.61,0.63]);
@@ -294,9 +294,13 @@ function fillRoom(){
   gAlpha=ga;
   /* 걸이형 HMI · 타워 램프 */
   fb(392,408,298,330,96,112,FRM); fb(392,408,180,298,128,140,FRM); fb(345,455,110,182,132,142,[0.20,0.24,0.28]); fb(352,448,118,174,142,143,[0.32,0.55,0.62]);
-  { const c=run?[0.24,0.70,0.44]:[0.79,0.81,0.84]; fb(1150,1160,300,340,-130,-120,STL); fb(1146,1164,340,356,-134,-116,c); }
+  fb(1150,1160,300,340,-130,-120,STL);
   /* 흡착 배출 휠 */
   { const c=HZ([0.85,0.88,0.90]); cylZ(FX(1144-620),FY(380-271),FZ(-40),FZ(40),52*0.8,c,16); }
+}
+function fillRoomDyn(){
+  const run=RB.st.fillerRun; fT+=run?RDT*SPD:0;
+  fb(1146,1164,340,356,-134,-116,run?[0.24,0.70,0.44]:[0.79,0.81,0.84]);
 }
 /* 충전기 배출 컨베이어 (연결부 → 선명) : 충전기 CV x 1052~1212, 상면 Y 44 */
 function fillerOutfeed(){
@@ -306,11 +310,98 @@ function fillerOutfeed(){
   for(const z of [-49,45]) bx(FX(1048-620),FX(1216-620),FY(44-20),FY(44+4),FZ(z),FZ(z+5),RAILC,RAILC);
   for(const x of [1070,1190]) for(const z of [-40,40]) bx(FX(x-620)-1.5,FX(x-620)+1.5,0,FY(44-14),FZ(z)-1.5,FZ(z)+1.5,LEGC,LEGC);
 }
+/* ═══ 6. 세부 형상 (선명 · 정적) ═══ */
+const STEEL=[0.72,0.74,0.76], BOLT=[0.55,0.57,0.60], PLATE=[0.82,0.84,0.86], INK=[0.22,0.25,0.29], TRAYC=[0.74,0.76,0.78], STRUT=[0.62,0.65,0.68];
+const bolt=(x,y,z,ax)=>{ if(ax==='z') bx(x-1.1,x+1.1,y-1.1,y+1.1,z,z+0.9,BOLT,BOLT); else bx(x-1.1,x+1.1,y,y+0.9,z-1.1,z+1.1,BOLT,BOLT); };
+/* 바닥 앵커 플레이트 + 볼트 4개 */
+function anchor(x,z,h){ h=h||8; bx(x-h,x+h,0,1.1,z-h,z+h,PLATE,PLATE); for(const dx of [-1,1]) for(const dz of [-1,1]) bolt(x+dx*(h-2.6),1.1,z+dz*(h-2.6)); }
+/* 카토너 : 레벨링 풋 앵커 · 상부 모서리 보강판 · 명판 */
+function cartonerDetail(){
+  const a=X3(60), b=X3(900), y=YC;
+  for(let i=0;i<6;i++){ const px=a+26+i*(b-a-52)/5; anchor(px,ZF-40,9); anchor(px,ZB+22,9); }
+  for(const [x0,x1] of [[a,a+18],[b-18,b]]){                       /* 전면 위 모서리 L 보강판 */
+    bx(x0,x1,y+156,y+160,ZF-16.6,ZF-15.8,STEEL,STEEL); bx(x0<a+1?a:b-4,x0<a+1?a+4:b,y+138,y+160,ZF-16.6,ZF-15.8,STEEL,STEEL);
+    for(const yy of [y+158,y+148]) bolt(x0<a+1?a+2:b-2,yy,ZF-15.8,'z');
+    bolt((x0+x1)/2+(x0<a+1?4:-4),y+158,ZF-15.8,'z'); }
+  const nx=a+14, ny=118, nz=ZF-19.4;                                  /* 명판 (1번 도어 좌상단) */
+  bx(nx,nx+50,ny,ny+18,nz,nz+0.7,PLATE,PLATE);
+  bx(nx+3,nx+9,ny+6,ny+12,nz+0.7,nz+1.0,[0.78,0.20,0.16],[0.78,0.20,0.16]);
+  for(let r=0;r<3;r++) bx(nx+12,nx+46-r*8,ny+13-r*4.2,ny+14.6-r*4.2,nz+0.7,nz+0.95,INK,INK);
+  for(const xx of [nx+2,nx+48]) for(const yy of [ny+2,ny+16]) bolt(xx,yy,nz+0.7,'z');
+}
+/* 배선 트레이 (높이 2450 mm · 라인 뒤쪽) : 충전실 캐비닛 → 벽 관통 → 포장실 (카토너 인입) */
+const TRAY={y:ly(2450), z:lz(-1350), hw:lz(150), side:ly(80)};
+function trayRun(x0,x1,col){
+  const {y,z,hw,side}=TRAY;
+  bx(x0,x1,y,y+1.2,z-hw,z+hw,col,col);
+  for(const s of [-1,1]) bx(x0,x1,y,y+side,z+s*hw-0.6,z+s*hw+0.6,col,col);
+  for(let x=x0+20;x<x1;x+=30) bx(x-1.2,x+1.2,y+1.2,y+2,z-hw+1,z+hw-1,col,col);   /* 가로 살 (사다리형) */
+}
+function trayPost(x,col){ const {y,z,hw}=TRAY;
+  bx(x-2,x+2,0,y,z-2,z+2,col,col); bx(x-2.5,x+2.5,y-4,y,z-hw-2,z+hw+2,col,col); anchor(x,z,6); }
+function cableTray(){
+  const xw=lx(BL.wallX);
+  trayRun(xw+12,840,TRAYC);
+  for(const x of [-1450,-950,-450,50,450,820]) trayPost(x,STRUT);
+  /* 카토너 인입 : 트레이 → 상부 후면 레일 (전선관) */
+  const cx=-800, z=TRAY.z;
+  tube([cx,TRAY.y-1,z+TRAY.hw],[cx,TRAY.y-1,ZB+3],2.4,STRUT,10);
+  tube([cx,TRAY.y-1,ZB+3],[cx,YC+160+2,ZB+3],2.4,STRUT,10);
+  bx(cx-5,cx+5,YC+160,YC+166,ZB-2,ZB+8,STEEL,STEEL);
+  /* 벽 관통 슬리브 */
+  bx(xw-14,xw+14,TRAY.y-4,TRAY.y+TRAY.side+4,z-TRAY.hw-4,z+TRAY.hw+4,SLEEVE,SLEEVE);
+  /* 충전실 쪽 (옅은 안개 톤) */
+  const H=HZ(TRAYC), Hs=HZ(STRUT);
+  trayRun(FX(380),xw-12,H);
+  for(const x of [FX(200),FX(700)]){ bx(x-2,x+2,0,TRAY.y,z-2,z+2,Hs,Hs); bx(x-2.5,x+2.5,TRAY.y-4,TRAY.y,z-TRAY.hw-2,z+TRAY.hw+2,Hs,Hs); }
+  tube([FX(440),TRAY.y-1,z+TRAY.hw],[FX(440),TRAY.y-1,FZ(-126)],2.2,Hs,8);
+  tube([FX(440),TRAY.y-1,FZ(-126)],[FX(440),FY(292),FZ(-126)],2.2,Hs,8);
+}
+/* 칸막이 벽 : 패널 이음 기둥 · 구역 표지판 */
+function wallDetail(){
+  const x=lx(BL.wallX), t=BL.wallT/10, y1=ly(BL.wallH);
+  for(const zm of [-1700,-500,800,2000,3200]){ const z=lz(zm); bx(x-t-1.4,x+t+1.4,20,y1-6,z-2.4,z+2.4,TRIM,TRIM); }
+  const zy0=ly(1720), zy1=ly(1900), zz0=lz(420), zz1=lz(780);                     /* 포장실 쪽 구역 표지 : G구역 (갈색) */
+  bx(x+t+1.4,x+t+2.2,zy0,zy1,zz0,zz1,[0.55,0.42,0.20],[0.55,0.42,0.20]);
+  bx(x+t+2.2,x+t+2.5,zy0+8,zy1-8,zz0+8,zz1-8,[0.97,0.95,0.90],[0.97,0.95,0.90]);
+}
+/* 연결 컨베이어 : 구동부(모터 · 감속기) · 광전 센서 · 다리 앵커 · 시작 롤러 */
+function conveyorDetail(){
+  const hw=RB.L.beltW/10;
+  { const f=frameAt(330), c=f.c, g=[c[0]-f.v[0]*10,c[1]-f.v[1]*10,c[2]-f.v[2]*10];
+    obox(g,f.u,f.v,f.w,9,8,10,[0.30,0.36,0.44]);                                    /* 감속기 */
+    tube([g[0]-f.w[0]*10,g[1],g[2]-f.w[2]*10],[g[0]-f.w[0]*30,g[1],g[2]-f.w[2]*30],8,[0.32,0.38,0.46],14);   /* 모터 */
+    tube([g[0]-f.w[0]*30,g[1],g[2]-f.w[2]*30],[g[0]-f.w[0]*32,g[1],g[2]-f.w[2]*32],6.5,[0.20,0.22,0.25],12);
+    bx(g[0]-4,g[0]+4,g[1]+8,g[1]+11,g[2]-hw,g[2]+hw,STEEL,STEEL); }
+  { const f=frameAt(0), c=f.c; tube([c[0]-f.w[0]*(hw+1),c[1]-2.6,c[2]-f.w[2]*(hw+1)],[c[0]+f.w[0]*(hw+1),c[1]-2.6,c[2]+f.w[2]*(hw+1)],2.6,[0.78,0.80,0.83],12); }
+  for(const s of [1350,RB.LEN-200]){ const f=frameAt(s), c=f.c, o=hw+3.5;
+    const p=[c[0]+f.w[0]*o,c[1]+3,c[2]+f.w[2]*o], r=[c[0]-f.w[0]*o,c[1]+3,c[2]-f.w[2]*o];
+    obox(p,f.u,f.v,f.w,2.5,4,3,[0.18,0.20,0.23]); obox([p[0]-f.w[0]*3.1,p[1]+1,p[2]-f.w[2]*3.1],f.u,f.v,f.w,1.4,1.4,0.2,[0.85,0.40,0.15]);
+    obox(r,f.u,f.v,f.w,2.5,3,1.2,[0.80,0.30,0.25]); }
+  for(const s of [200,1100,2350,3000]){ const f=frameAt(s); if(Math.abs(f.mm.x-BL.wallX)<220||f.mm.x>1830) continue; anchor(f.c[0],f.c[2],hw+3); }
+}
+/* ═══ 7. 정적 형상 캐시 : 벽 · 컨베이어 · 트레이 · 옆방 모델 · 세부는 한 번만 만들고 매 프레임 이어 붙인다
+   (셰이더가 법선을 픽셀마다 카메라 쪽으로 돌리므로 카메라가 바뀌어도 그대로 쓸 수 있다) ═══ */
+let SC=null, SCkey='';
+function staticGeom(){ wall(); wallDetail(); conveyor(); conveyorDetail(); fillerOutfeed(); fillRoom(); cableTray(); if(!m3.exp&&!m3.cut) cartonerDetail(); }
 const _mach=m3Machine;
 m3Machine=function(){
   _mach.apply(this,arguments);
   const ga=gAlpha; gAlpha=1;
-  try{ wall(); conveyor(); packsOnBelt(); fillerOutfeed(); fillRoom(); }catch(e){ console.error(e); }
+  try{
+    const key=(m3.exp?1:0)+(m3.cut?2:0)+'';
+    if(!SC||SCkey!==key||window.ROOM_GEOM_NOCACHE){
+      const L0=[GP.length,GN.length,GC.length,TP.length,TN.length,TC.length];
+      staticGeom();
+      SC=[GP.slice(L0[0]),GN.slice(L0[1]),GC.slice(L0[2]),TP.slice(L0[3]),TN.slice(L0[4]),TC.slice(L0[5])]; SCkey=key;
+    } else {
+      const add=(D,A)=>{ for(let i=0,n=A.length;i<n;i++) D.push(A[i]); };      /* 뒤에만 덧붙인다 (배열 전체 복사 없음) */
+      add(GP,SC[0]); add(GN,SC[1]); add(GC,SC[2]);
+      if(SC[3].length){ add(TP,SC[3]); add(TN,SC[4]); add(TC,SC[5]); }
+    }
+    packsOnBelt(); fillRoomDyn();
+  }catch(e){ console.error(e); }
   gAlpha=ga;
 };
+window.ROOM_GEOM_STATS=()=>SC?{opaqueTri:SC[0].length/9,glassTri:SC[3].length/9}:null;
 })();

@@ -30,9 +30,17 @@ PATCHES = {
         # 방 배경
         ("function drawRoom(W,H){\n  const g=ctx2;",
          "function drawRoom(W,H){\n  if(window.ROOM_BG)return ROOM_BG(W,H);\n  const g=ctx2;"),
+        # 작업자 LOD : 카메라에서 멀면 원기둥 · 타원체 분할 수를 줄인다 (가까우면 원본과 동일)
+        ("tube(W(s.a),W(s.b),s.r*scale,col,14,true)",
+         "tube(W(s.a),W(s.b),s.r*scale,col,window.ROOM_LOD?ROOM_LOD(x,z).t:14,true)"),
+        ("cuteEllPoints(s.c,s.r,big?18:12,big?11:8)",
+         "(window.ROOM_LOD?ROOM_LOD(x,z).e(s.c,s.r,big):cuteEllPoints(s.c,s.r,big?18:12,big?11:8))"),
         # 카토너 사이클 속도 : 연동 중에는 표시 CPM 그대로 (라인 스케일 미적용)
         ("const adv=(S.cpm/60)*LINE_SCALE*dt;",
          "const adv=(S.cpm/60)*(window.ROOM_LINK&&ROOM_LINK()?1:LINE_SCALE)*dt;"),
+        # 적응 해상도 : 렌더 해상도에 GFX.q(0.6~1) 를 곱한다 (m3Resize · m3Draw 두 곳)
+        ("Math.min(1.8,window.devicePixelRatio||1)",
+         "Math.min(1.8,window.devicePixelRatio||1)*(window.GFX?GFX.q:1)", 2),
         ("tick=function(dt){S.spd.line=LINE_CPM;",
          "tick=function(dt){S.spd.line=(window.ROOM_CPM&&ROOM_CPM())||LINE_CPM;"),
         # 스태커 : 연결 컨베이어에서 받은 팩만큼 수직 적층
@@ -60,16 +68,19 @@ PATCHES = {
     ],
 }
 
-SCRIPTS = {"filler": ("common.js", "filler_room.js"), "line": ("common.js", "line_room.js")}
+SCRIPTS = {"filler": ("common.js", "gfx_common.js", "gfx_filler.js", "filler_room.js"),
+           "line": ("common.js", "gfx_common.js", "gfx_line.js", "line_room.js")}
 SHELL_SCRIPTS = ("changelog.js", "bus.js", "shell.js")
 
 
 def patched(key: str) -> str:
     text = (SRC / f"{key}.html").read_text(encoding="utf-8")
-    for old, new in PATCHES[key]:
+    for patch in PATCHES[key]:
+        old, new = patch[0], patch[1]
+        want = patch[2] if len(patch) > 2 else 1
         n = text.count(old)
-        if n != 1:
-            sys.exit(f"{key}.html: patch anchor found {n} times: {old[:60]!r}")
+        if n != want:
+            sys.exit(f"{key}.html: patch anchor found {n} times (expected {want}): {old[:60]!r}")
         text = text.replace(old, new)
     parts = []
     for name in SCRIPTS[key]:

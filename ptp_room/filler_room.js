@@ -86,6 +86,7 @@ function glide(from,to,dur){
   f();
 }
 function enter(from){
+  glideId++;                                     /* 진행 중인 이동 취소 */
   if(!M3.on) return;
   if(from==='line') glide({yaw:0.55,pitch:0.26,dist:900,tx:340,ty:30,tz:80},ROOM_DEFAULT,1300);
   else Object.assign(M3.tgt,ROOM_DEFAULT);
@@ -198,8 +199,6 @@ const HZ=h=>roomHazeHex(h);
 function gb(x0,x1,y0,y1,z0,z1,hex,o){ pbox(LX(x0),LX(x1),LY(y0),LY(y1),LZ(z0),LZ(z1),HZ(hex),o); }
 let gT=0;
 function packRoom(){
-  const live=RB.st.lineRun;
-  gT+=live?RDT*SPD:0;
   const INOX='#dadee2', INOXD='#bcc3ca', ALUF='#c5cbd1', DARK='#2b3138', GL='#c3e4ee';
   const frame=(x0,x1,y0,y1,z0,z1)=>{ for(const x of [x0,x1-6]) for(const z of [z0,z1-6]) gb(x,x+6,y0,y1,z,z+6,ALUF,{m:.7});
     for(const z of [z0,z1-6]) gb(x0,x1,y1-6,y1,z,z+6,ALUF,{m:.7}); for(const x of [x0,x1-6]) gb(x,x+6,y1-6,y1,z0,z1,ALUF,{m:.7}); };
@@ -213,7 +212,7 @@ function packRoom(){
   gb(-1140,-396,170,176,-66,-26,'#2f6b4f');
   gb(-560,-396,176,188,28,68,'#d9c99a');
   gb(-930,-860,196,300,-30,30,'#262b31'); gb(-880,-800,230,320,-10,40,'#efe7d2');
-  gb(b-26,b-18,326,372,-70,-62,'#9aa3ac'); gb(b-27,b-17,372,384,-71,-61,live?'#3cb371':'#c9cfd5');
+  gb(b-26,b-18,326,372,-70,-62,'#9aa3ac');
   /* ② 카톤인쇄기 · ③ 중량선별기 */
   gb(-340,-210,16,170,-70,60,'#d9dde2',{m:.5}); gb(-300,-250,170,250,-40,-10,'#2c3238'); gb(-330,-220,250,262,-50,0,'#c5cbd1');
   gb(-200,10,40,168,-60,60,'#cfd5db',{m:.5}); gb(-170,-20,168,176,-40,40,'#e9ecef'); gb(-10,10,176,236,40,52,'#2c3238'); gb(-8,8,236,268,44,48,'#2c3238');
@@ -226,24 +225,88 @@ function packRoom(){
   for(const x of [880,1214]) for(const z of [-110,104]) gb(x,x+6,0,330,z,z+6,ALUF,{m:.7});
   gb(880,1220,324,334,-110,110,ALUF,{m:.7}); gb(1020,1060,250,324,-20,20,'#8d959e');
   gb(990,1110,0,14,-70,70,'#3a68b0');
-  { const k=live?Math.floor(gT*0.25)%13:4; for(let i=0;i<Math.min(12,k);i++){ const l=Math.floor(i/4), q=i%4;
-      gb(995+(q%2)*58,1050+(q%2)*58,14+l*48,60+l*48,-66+Math.floor(q/2)*68,-2+Math.floor(q/2)*68,'#c49a62'); } }
-  /* 라인 컨베이어 + 카톤 흐름 (카토너 배출 → 박스포장기) */
   gb(-380,40,168,176,-16,16,'#3d9b7f');
-  if(live){ const sp=58, off=(gT*48)%sp; for(let x=-380+off;x<34;x+=sp) gb(x,x+20,176,190,-12,12,'#d9c99a'); }
-  /* 스태커 매거진 + 쌓인 팩 (연결부 끝 → 선명) */
+  /* 스태커 매거진 (연결부 끝 → 선명) */
   gb(-1124,-1040,190,232,-72,-20,INOX,{m:.6});
   for(const dx of [-16,14]) for(const dz of [-60,-34]) pbox(LX(-1082+dx),LX(-1080+dx),LY(232),LY(314),LZ(dz),LZ(dz+2),'#aab3bc',{m:.8});
+}
+/* 포장실 움직이는 부분 : 타워 램프 · 팔레트 적재 · 카톤 흐름 · 스태커 적재 팩 */
+function packRoomDyn(){
+  const live=RB.st.lineRun, b=-380;
+  gT+=live?RDT*SPD:0;
+  gb(b-27,b-17,372,384,-71,-61,live?'#3cb371':'#c9cfd5');
+  { const k=live?Math.floor(gT*0.25)%13:4; for(let i=0;i<Math.min(12,k);i++){ const l=Math.floor(i/4), q=i%4;
+      gb(995+(q%2)*58,1050+(q%2)*58,14+l*48,60+l*48,-66+Math.floor(q/2)*68,-2+Math.floor(q/2)*68,'#c49a62'); } }
+  if(live){ const sp=58, off=(gT*48)%sp; for(let x=-380+off;x<34;x+=sp) gb(x,x+20,176,190,-12,12,'#d9c99a'); }
   { const n=RB.st.link?RB.st.tower:(live?8:0);
     for(let i=0;i<n;i++) pbox(LX(-1095),LX(-1069),LY(234+i*6.4),LY(238.4+i*6.4),LZ(-57),LZ(-35),'#f2f0f6',{top:'#d8d9dd'}); }
 }
+/* ═══ 세부 형상 (선명 · 정적) ═══ */
+const STEEL='#b8bec4', BOLTC='#8c949c', PLATE='#d2d6da', TRAYC='#bcc2c8', STRUT='#9ea6ae', SLV='#c9ced4';
+const bolt=(x,y,z,ax)=>{ if(ax==='z') pbox(x-1.5,x+1.5,y-1.5,y+1.5,z,z+1.2,BOLTC,{m:.8}); else pbox(x-1.5,x+1.5,y,y+1.2,z-1.5,z+1.5,BOLTC,{m:.8}); };
+function anchor(x,z,h){ pbox(x-h,x+h,FLOORY,FLOORY+1.4,z-h,z+h,PLATE,{m:.75}); for(const dx of [-1,1]) for(const dz of [-1,1]) bolt(x+dx*(h-3.5),FLOORY+1.4,z+dz*(h-3.5)); }
+/* 충전기 다리 앵커 플레이트 */
+function fillerDetail(){ for(const x of [150,420,690,960,1160]) for(const z of [-90,90]) anchor(X3(x),z,15); }
+/* 배선 트레이 (높이 2450 mm) : 충전기 후면 캐비닛 → 벽 관통 → 포장실 */
+const TRAY={y:fy(2450), z:fz(-1350), hw:fz(150), side:80/4};
+function trayRun(x0,x1,col){ const {y,z,hw,side}=TRAY;
+  pbox(x0,x1,y,y+1.5,z-hw,z+hw,col,{m:.7});
+  for(const s of [-1,1]) pbox(x0,x1,y,y+side,z+s*hw-0.8,z+s*hw+0.8,col,{m:.7});
+  for(let x=x0+25;x<x1;x+=38) pbox(x-1.5,x+1.5,y+1.5,y+2.6,z-hw+1,z+hw-1,col,{m:.7}); }
+function cableTray(){
+  const xw=fx(BL.wallX), {y,z,hw,side}=TRAY;
+  trayRun(370,xw-15,TRAYC);
+  for(const x of [250,760]){ pbox(x-2.5,x+2.5,FLOORY,y,z-2.5,z+2.5,STRUT,{m:.6}); pbox(x-3,x+3,y-5,y,z-hw-2.5,z+hw+2.5,STRUT,{m:.6}); anchor(x,z,8); }
+  /* 캐비닛 인입 전선관 */
+  limb(P3(440,y-1.5,z+hw),P3(440,y-1.5,-126),3,3,STRUT,10,{m:.6});
+  limb(P3(440,y-1.5,-126),P3(440,Y3(88)+2,-126),3,3,STRUT,10,{m:.6});
+  pbox(434,446,Y3(88),Y3(88)+7,-133,-119,STEEL,{m:.7});
+  /* 벽 관통 슬리브 */
+  pbox(xw-18,xw+18,y-5,y+side+5,z-hw-5,z+hw+5,SLV,{m:.8});
+  /* 포장실 쪽 (옅은 안개 톤) */
+  const H=HZ(TRAYC), Hs=HZ(STRUT);
+  trayRun(xw+15,LX(840),H);
+  for(const lxp of [-1450,-950,-450,50,450,820]){ const x=LX(lxp); pbox(x-2.5,x+2.5,FLOORY,y,z-2.5,z+2.5,Hs); pbox(x-3,x+3,y-5,y,z-hw-2.5,z+hw+2.5,Hs); }
+  limb(P3(LX(-800),y-1.5,z+hw),P3(LX(-800),y-1.5,LZ(-92)),3,3,Hs,8,{});
+  limb(P3(LX(-800),y-1.5,LZ(-92)),P3(LX(-800),LY(338),LZ(-92)),3,3,Hs,8,{});
+}
+/* 칸막이 벽 : 패널 이음 기둥 · 구역 표지판 */
+function wallDetail(){
+  const x=fx(BL.wallX), t=BL.wallT/8, y0=FLOORY, y1=FLOORY+BL.wallH/4;
+  for(const zm of [-1700,-500,800,2000,3200]){ const z=fz(zm); pbox(x-t-1.8,x+t+1.8,y0+26,y1-8,z-3,z+3,'#c3ccd5',{m:.4}); }
+  const zy0=fy(1720), zy1=fy(1900), zz0=fz(420), zz1=fz(780);                   /* 충전실 쪽 구역 표지 : D구역 (청색) */
+  pbox(x-t-2.8,x-t-1.8,zy0,zy1,zz0,zz1,'#2e73a8',{m:.1});
+  pbox(x-t-3.2,x-t-2.8,zy0+10,zy1-10,zz0+10,zz1-10,'#f2f6fa',{m:.1});
+}
+/* 연결 컨베이어 : 구동부 · 시작 롤러 · 광전 센서 · 다리 앵커 */
+function conveyorDetail(){
+  const hw=RB.L.beltW/8, sc=(f,a,b,c)=>P3(f.c.x+f.u.x*a+f.v.x*b+f.w.x*c,f.c.y+f.u.y*a+f.v.y*b+f.w.y*c,f.c.z+f.u.z*a+f.v.z*b+f.w.z*c);
+  { const f=frameAt(330), g=sc(f,0,-12,0);
+    obox(g,f.u,f.v,f.w,11,10,12,'#4d5c6e',{m:.35});                               /* 감속기 */
+    limb(sc(f,0,-12,-12),sc(f,0,-12,-38),10,10,'#516275',16,{m:.4});              /* 모터 */
+    limb(sc(f,0,-12,-38),sc(f,0,-12,-41),8,8,'#2b3036',14,{m:.3});
+    obox(sc(f,0,-1,0),f.u,f.v,f.w,5,1.5,hw,STEEL,{m:.7}); }
+  { const f=frameAt(0); limb(sc(f,0,-3.2,-hw-1.5),sc(f,0,-3.2,hw+1.5),3.2,3.2,'#cfd5db',14,{m:.85}); }
+  for(const s of [1350,RB.LEN-200]){ const f=frameAt(s), o=hw+4.5;
+    obox(sc(f,0,4,o),f.u,f.v,f.w,3,5,3.5,'#2a2f35',{m:.3}); obox(sc(f,0,5,o-3.8),f.u,f.v,f.w,1.8,1.8,0.3,'#d9632a',{fl:0});
+    obox(sc(f,0,4,-o),f.u,f.v,f.w,3,3.5,1.4,'#c94a3a',{}); }
+  for(const s of [200,1100,2350,3000]){ const f=frameAt(s); if(Math.abs(f.mm.x-BL.wallX)<220||f.mm.x>1830) continue; anchor(f.c.x,f.c.z,hw+4); }
+}
+/* ═══ 정적 형상 캐시 : 한 번 만든 면(월드 좌표)을 매 프레임 그대로 다시 넣는다 (투영만 매번) ═══ */
+let SC=null;
+function staticGeom(){ wall(); wallDetail(); conveyor(); conveyorDetail(); fillerDetail(); cableTray(); packRoom(); }
 const _packs=m3Packs;
 m3Packs=function(){
   _packs.apply(this,arguments);
   const ek=expK, cz=cutZ; expK=0; cutZ=1e9;
-  try{ wall(); conveyor(); packsOnBelt(); packRoom(); }catch(e){ console.error(e); }
+  try{
+    if(!SC||window.ROOM_GEOM_NOCACHE){ const n0=M3.faces.length; staticGeom(); SC=M3.faces.slice(n0); }
+    else { const F=M3.faces; for(let i=0;i<SC.length;i++) F.push(SC[i]); }
+    packsOnBelt(); packRoomDyn();
+  }catch(e){ console.error(e); }
   expK=ek; cutZ=cz;
 };
+window.ROOM_GEOM_STATS=()=>SC?{faces:SC.length}:null;
 
 /* ═══ 4. 후공정 대기 표시 (3D 화면 위) ═══ */
 const badge=document.createElement('div');
