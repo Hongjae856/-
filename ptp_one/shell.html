@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PTP 통합라인 IDT (단일 화면)</title>
+<style>
+:root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0;--bg:#fff;--d:#2f7fb8;--g:#8a6d2f;--ok:#1f8a5b;--warn:#c4661f}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic",Arial,sans-serif;overflow:hidden}
+button{font-family:inherit}
+#bar{position:fixed;left:0;right:0;top:0;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#fff;border-bottom:1px solid var(--line);z-index:20;white-space:nowrap;overflow:hidden}
+#bar2{position:fixed;left:0;right:0;top:52px;height:30px;display:flex;align-items:center;gap:6px;padding:0 12px;background:#f7f9fb;border-bottom:1px solid var(--line);box-shadow:0 2px 10px #142b4710;z-index:19;white-space:nowrap;overflow:hidden}
+.brand{font-weight:800;font-size:16px;letter-spacing:-.5px;flex:0 0 auto}
+#rooms{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden;flex:0 0 auto}
+#rooms button{border:0;background:#fff;color:var(--ink);font:800 15px "Malgun Gothic",Arial,sans-serif;padding:8px 18px;cursor:pointer;display:flex;align-items:center;gap:7px}
+#rooms button+button{border-left:1px solid #b7c4d2}
+#rooms button small{font-size:11.5px;font-weight:700;padding:2px 6px;border-radius:7px;background:#eef2f6;color:var(--sub)}
+#rooms button.on{background:var(--ink);color:#fff}
+#rooms button.on small{background:#ffffff26;color:#fff}
+#phase{display:flex;align-items:center;gap:4px;flex:1 1 auto;min-width:0;overflow:hidden}
+#phase span{font-size:12.5px;font-weight:700;color:#8a9aac;padding:5px 9px;border-radius:8px;background:#f1f4f7}
+#phase span.on{background:#e8f2fb;color:#1d5f97;box-shadow:inset 0 0 0 1.5px #7fb0d8}
+#phase span.done{color:#1f8a5b;background:#eefaf3}
+#phase i{font-style:normal;color:#b7c4d2;font-size:11px}
+.opt{flex:0 0 auto;border:1px solid #b7c4d2;border-radius:10px;background:#fff;color:var(--ink);font-size:13.5px;font-weight:700;padding:7px 11px;cursor:pointer}
+.opt.on{background:#eefaf3;border-color:#8fcfb0;color:var(--ok)}
+.opt:disabled{opacity:.45;cursor:default}
+.ctl{flex:0 0 auto;border:1px solid #b7c4d2;border-radius:10px;background:#fff;color:var(--ink);font-size:13.5px;font-weight:700;padding:7px 11px;cursor:pointer}
+.ctl.pri{background:#1459a4;border-color:#1459a4;color:#fff}
+.ctl.end{background:#fff0e9;border-color:#f0ad8e;color:#9b3417}
+.ver{flex:0 0 auto;font-size:13px;font-weight:700;color:var(--sub);padding:6px 11px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer}
+.chip{flex:0 0 auto;font-size:12.5px;color:var(--sub);border:1px solid #dbe3ec;border-radius:8px;padding:2px 8px;background:#fff}
+.chip b{color:var(--ink);font-size:13px;margin-left:3px}
+.chip.on{border-color:#9fd4b9;background:#eefaf3;color:var(--ok)}.chip.on b{color:var(--ok)}
+.chip.warn{border-color:#f0c49e;background:#fff5ec;color:var(--warn)}.chip.warn b{color:var(--warn)}
+#stage{position:fixed;left:0;right:0;top:82px;bottom:0;overflow:hidden;background:#fff}
+#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+#stage iframe.off{opacity:0;pointer-events:none}
+#toast{position:fixed;left:50%;top:92px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;white-space:normal;text-align:center}
+#toast.on{opacity:.96}
+/* 메인화면 */
+#home{position:fixed;inset:0;z-index:40;background:#fff;display:flex;align-items:center;justify-content:center;overflow:auto;padding:16px}
+#home .box{max-width:1080px;width:100%;text-align:center}
+#home h1{font-size:46px;line-height:1.15;letter-spacing:-2px;margin:0 0 10px;font-weight:800}
+#home h1 span{display:block;font-size:.42em;font-weight:600;letter-spacing:0;color:#3a5070;margin-top:8px}
+#home .intro{font-size:19px;color:#24344a;margin:0 0 24px;line-height:1.6}
+#home .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto}
+#home .cards button{padding:26px;text-align:left;border:1px solid #b7c4d2;border-radius:18px;background:#fff;color:var(--ink);box-shadow:0 12px 30px #142b4710;cursor:pointer}
+#home .cards button:hover{box-shadow:0 12px 30px #142b4726}
+#home .cards small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
+#home .cards strong{display:block;font-size:28px;margin:10px 0}
+#home .cards span{display:block;font-size:16px;line-height:1.6;color:#33465c}
+#home .modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;margin:0 auto}
+#home .modes button{padding:18px;border:1px solid #b7c4d2;border-radius:14px;background:#fff;color:var(--ink);font-size:20px;font-weight:800;cursor:pointer;text-align:left}
+#home .modes button s{display:block;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--sub);margin-top:5px}
+#home .modes button.e{background:#f3f7fc}
+#home .row{display:flex;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap}
+#home .sub{border:1px solid #b7c4d2;border-radius:10px;background:#fff;color:var(--ink);font-size:15px;font-weight:700;padding:10px 16px;cursor:pointer}
+#home .sub.demo{background:#1f8a5b;border-color:#1f8a5b;color:#fff}
+#home .ver{position:fixed;right:16px;bottom:12px}
+#home .note{font-size:14px;color:var(--sub);margin-top:16px;line-height:1.6}
+/* 모달 */
+.modal{position:fixed;inset:0;z-index:70;background:rgba(12,20,30,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+.modal .box{width:860px;max-width:100%;max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:24px 26px;box-shadow:0 12px 34px rgba(12,22,36,.28)}
+.modal h2{margin:0 0 6px;font-size:24px}.modal h2 small{font-size:15px;color:var(--sub);font-weight:600}.modal p{margin:0 0 12px;color:var(--sub)}
+.modal table{width:100%;border-collapse:collapse;font-size:15px}.modal th{background:#dde5ee;border:1px solid #c7d3e0;padding:8px;color:#33465c}
+.modal td{border:1px solid #dbe3ec;padding:8px 10px;vertical-align:middle}
+#verModal td:nth-child(-n+2){white-space:nowrap;text-align:center;font-weight:700}
+.modal .close{margin-top:14px;width:100%;text-align:center;padding:13px;border:0;border-radius:10px;background:var(--ink);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+#resModal .big{font-size:34px;font-weight:800;margin:4px 0 10px}
+#resModal td.c{text-align:center;font-weight:700}
+#resModal .det{border:1px solid #b7c4d2;border-radius:8px;background:#fff;padding:6px 10px;font-weight:700;cursor:pointer}
+#resModal .foot{font-size:13px;color:var(--sub);margin-top:8px}
+[hidden]{display:none!important}
+@media(max-width:1100px){.brand{display:none}#phase span{padding:4px 6px;font-size:11.5px}}
+@media(max-width:700px){#home h1{font-size:30px}#home .cards,#home .modes{grid-template-columns:1fr}}
+</style></head><body>
+<header id="bar">
+  <div class="brand">PTP 통합라인 IDT</div>
+  <nav id="rooms" aria-label="조작 화면 선택">
+    <button type="button" data-room="filler" class="on">충전 <small>D구역</small></button>
+    <button type="button" data-room="line">포장 <small>G구역</small></button>
+  </nav>
+  <div id="phase" aria-live="polite"></div>
+  <button type="button" class="opt" id="optF" title="충전기를 가동 준비 완료 상태로 만들고 채점에서 제외합니다 (포장라인만 학습)">충전준비</button>
+  <button type="button" class="opt" id="optL" title="포장라인을 가동 준비 완료 상태로 만들고 채점에서 제외합니다 (충전기만 학습)">포장준비</button>
+  <button type="button" class="ctl pri" id="btnExam" hidden>평가 시작</button>
+  <button type="button" class="ctl end" id="btnEnd">학습 종료</button>
+  <button type="button" class="ctl" id="btnRestart">처음부터</button>
+  <button type="button" class="ctl" id="btnHome">메인화면</button>
+  <button type="button" class="ver" id="verBadge" title="버전 이력">V1</button>
+</header>
+<div id="bar2" aria-live="polite"></div>
+<main id="stage"></main>
+<div id="toast" role="status"></div>
+<section id="home">
+  <div class="box">
+    <h1>PTP 통합라인 IDT<span>(PTP Line Interactive Digital Tutor · 충전실 D구역 + 포장실 G구역 일관 라인)</span></h1>
+    <p class="intro" id="hIntro">학습 과정을 선택하세요. 충전기와 포장라인이 한 화면에서 함께 동작합니다.</p>
+    <div class="cards" id="hCourse">
+      <button type="button" data-course="change"><small>01 · INSTALLATION</small><strong>체인지파트 모드</strong><span>충전기 → 포장라인 순서로 교체부품 장착 학습</span></button>
+      <button type="button" data-course="operation"><small>02 · OPERATION</small><strong>가동 모드</strong><span>충전기 준비 → 포장라인 준비 → 연동 가동 → 정지 · 회수</span></button>
+    </div>
+    <div id="hMode" hidden>
+      <div class="modes">
+        <button type="button" data-mode="easy">기본학습<s>핵심 절차를 안내와 함께 진행</s></button>
+        <button type="button" class="e" data-mode="examEasy">기본평가<s>기본 절차를 안내 없이 평가</s></button>
+        <button type="button" data-mode="guide">심화학습<s>전체 절차를 단계별로 학습</s></button>
+        <button type="button" class="e" data-mode="exam">심화평가<s>전체 절차를 안내 없이 평가</s></button>
+      </div>
+      <div class="row"><button type="button" class="sub" id="hBack">← 과정 다시 선택</button></div>
+    </div>
+    <div class="row"><button type="button" class="sub demo" id="hDemo">▶ 연동 가동 시연 (두 설비 자동 준비)</button></div>
+    <p class="note">상단 [충전] · [포장] 버튼으로 같은 3D 화면에서 조작 UI 만 바꿉니다. [충전준비] · [포장준비] 를 누르면 해당 설비가 가동 준비 완료 상태가 되어 다른 설비만 학습할 수 있습니다.</p>
+  </div>
+  <button type="button" class="ver" id="verBadge2" title="버전 이력">V1</button>
+</section>
+<div id="resModal" class="modal" hidden><div class="box" role="dialog" aria-label="종합 결과"><h2>종합 결과 <small id="resSub"></small></h2>
+<div class="big" id="resBig"></div>
+<table><thead><tr><th>설비</th><th>점수</th><th>합격 기준</th><th>결과</th><th>상세</th></tr></thead><tbody id="resRows"></tbody></table>
+<div class="foot">※ 종합 점수 = 채점 대상 설비 점수의 산술 평균 · 합격 = 채점 대상 설비가 모두 합격 기준 이상 · [충전준비] · [포장준비] 로 자동 준비한 설비는 채점 제외</div>
+<button type="button" class="close" id="resClose">닫기</button></div></div>
+<div id="verModal" class="modal" hidden><div class="box" role="dialog" aria-label="버전 이력"><h2>📋 버전 이력 <small id="verCur"></small></h2><p>수정 요청 1건마다 버전이 1씩 올라갑니다.</p>
+<table><thead><tr><th>버전</th><th>날짜</th><th>수정 내용</th></tr></thead><tbody id="verRows"></tbody></table><button type="button" class="close" id="verClose">닫기</button></div></div>
+<script id="apps" type="application/json">__APPS__</script>
+<script>
+/*__SHELL_JS__*/
+</script>
+</body></html>
