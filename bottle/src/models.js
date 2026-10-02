@@ -5,7 +5,10 @@ const VIEW3={guard:true,label:true};
 const BD=()=>S.rc.bottle;                    /* 현재 병 규격 */
 
 /* ── 공용 부품 ── */
-function foot(x,z,top){ cylY(x,z,0,14,30,C.rubber,12); cylY(x,z,14,top||110,11,C.ss,10); }
+function foot(x,z,top){
+  box(x-40,x+40,0,5,z-40,z+40,C.ssD,C.ssD,0);                                  /* 바닥 앵커 플레이트 */
+  for(const s of [-1,1]) cylY(x+s*28,z+s*28,5,10,6,C.dark,6);                  /* 앵커 볼트 2 */
+  cylY(x,z,0,14,30,C.rubber,12); cylY(x,z,14,top||110,11,C.ss,10); }
 function cabinet(x0,x1,y0,y1,z0,z1,o){
   o=o||{};
   const P=o.pocket;   /* [px0,px1,pz0,pz1,py0] : 윗면에서 py0 까지 파인 공간 (호퍼 수납부 · 위로 열림) */
@@ -15,7 +18,20 @@ function cabinet(x0,x1,y0,y1,z0,z1,o){
     box(a,b,y0,y1,z0,c,col,top); box(a,b,y0,y1,d,z1,col,top); box(a,b,y0,e,c,d,col,top); }
   for(const x of [x0+45,x1-45]) for(const z of [z0+45,z1-45]) foot(x,z,y0);
   box(x0+6,x1-6,y0-18,y0,z0+6,z1-6,C.ssD,C.ssD,0);            /* 걸레받이 */
-  if(o.doors) doorsZ(x0,x1,y0+20,y1-20,o.front===undefined?z1:o.front,o.doors,o.dir||1);
+  if(o.doors){ const zf=o.front===undefined?z1:o.front, dir=o.dir||1;
+    doorsZ(x0,x1,y0+20,y1-20,zf,o.doors,dir);
+    cabLabels(x0,x1,y0+20,y1-20,zf+dir*1.2,o.doors,dir); }
+}
+/* 캐비닛 문 표지 : 첫 문 위쪽 = 감전 주의(노란 삼각) · 마지막 문 아래쪽 = 정격 명판 */
+function cabLabels(x0,x1,y0,y1,z,n,dir){
+  const w=(x1-x0)/n, cx=x0+w/2, cy=y1-130, s=Math.min(46,w*0.18);
+  if(y1-y0<360||w<160) return;
+  const T=(r,zz,col)=>tri([cx-r,cy-r*0.58,zz],[cx+r,cy-r*0.58,zz],[cx,cy+r*1.15,zz],col);
+  T(s+7,z+dir*1.4,C.black); T(s,z+dir*1.9,C.yellow);
+  box(cx-3,cx+3,cy-s*0.12,cy+s*0.62,z+dir*1.9,z+dir*2.5,C.black,C.black,0); box(cx-3,cx+3,cy-s*0.42,cy-s*0.28,z+dir*1.9,z+dir*2.5,C.black,C.black,0);
+  const px=x1-w/2, py=y0+150;
+  box(px-62,px+62,py-38,py+38,Math.min(z,z+dir*2),Math.max(z,z+dir*2),C.ssL,C.ssL,0);
+  for(let i=0;i<3;i++) box(px-48,px+(i===0?40:20-i*10),py+18-i*16,py+24-i*16,Math.min(z+dir*2,z+dir*2.6),Math.max(z+dir*2,z+dir*2.6),C.dark,C.dark,0);
 }
 /* +z(또는 −z) 면에 문짝 : 틈 · 손잡이 · 경첩 */
 function doorsZ(x0,x1,y0,y1,z,n,dir){
@@ -271,6 +287,15 @@ function sConveyor(){
     for(const z of [-hz,hz]) { foot(x,z,40); cylY(x,z,40,CH-96,14,C.ss,10); }
     box(x-10,x+10,300,318,-hz,hz,C.ss);
   }
+  /* 구동부 : 배출 끝 기어드 모터 (프레임 뒤쪽 아래) */
+  { const gx=XE-180, gy=CH-118, zf=-(w+16);
+    box(gx-55,gx+55,gy-52,gy+52,zf-96,zf,[0.30,0.36,0.44,0.3]);
+    cylZ(gx,gy,zf-96,zf-290,50,[0.32,0.38,0.46,0.35],18); cylZ(gx,gy,zf-290,zf-306,44,C.dark,16);
+    box(gx-24,gx+24,gy+48,gy+82,zf-200,zf-140,[0.30,0.36,0.44,0.3]); }
+  /* 바닥 케이블 덕트 커버 (뒤쪽 · 바닥과 같은 높이로 걸어 다닌다) */
+  { const z0=-1720, z1=-1480, xa=END_L+500, xb=END_R-700;
+    box(xa,xb,0,4,z0,z1,C.ssD,C.ssD,0);
+    for(let x=xa+1200;x<xb;x+=1200) box(x-3,x+3,4,5,z0+6,z1-6,C.dark,C.dark,0); }
   /* 가이드 레일 : 병 지름 + 10 간격, 2단 · 별 손잡이 브래킷 */
   const zr=b.d/2+5, y1=CH+Math.max(16,b.h*0.28), y2=CH+b.h*0.70, d=b.d;
   const bracket=(x,z,side)=>{ box(x-8,x+8,CH+5,y2+10,z+side*(w-zr+10),z+side*(w-zr+22),C.ss);

@@ -24,7 +24,7 @@ function frame(){
     if(!R3.ready){ if(!r3Init()) return; bindOrbit(R3.cv,onCvClick,onCvHover); }
     if(!R3.gl) return;
     if(STATIC_KEY!==staticKey()) buildStatic();
-    r3Resize(); camPrep(R3.W,R3.H); drawRoom(); drawDynamic(); r3Paint(); drawOverlay();
+    gfxAdapt(now); r3Resize(); camPrep(R3.W,R3.H); drawRoom(); drawDynamic(); r3Paint(); drawOverlay();
   }
   applyHint();
 }

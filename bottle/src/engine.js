@@ -247,19 +247,43 @@ float shadowAt(vec3 P,vec3 N){
 vec3 lin(vec3 c){return pow(max(c,0.0),vec3(2.2));}
 vec3 envAt(float t){vec3 h=vec3(0.73,0.737,0.741);return t>=0.0?mix(h,vec3(1.0),t):mix(h,vec3(0.475,0.482,0.486),-t);}
 vec3 envRefl(float t){return mix(vec3(0.40,0.41,0.42),vec3(1.0),smoothstep(-0.42,0.10,t));}
+uniform float uDet;
+float gHash(vec3 p){p=fract(p*0.1031);p+=dot(p,p.yzx+33.33);return fract((p.x+p.y)*p.z);}
+float gNoise(vec3 x){vec3 i=floor(x),f=fract(x);f=f*f*(3.0-2.0*f);
+ return mix(mix(mix(gHash(i),gHash(i+vec3(1.0,0.0,0.0)),f.x),mix(gHash(i+vec3(0.0,1.0,0.0)),gHash(i+vec3(1.0,1.0,0.0)),f.x),f.y),
+            mix(mix(gHash(i+vec3(0.0,0.0,1.0)),gHash(i+vec3(1.0,0.0,1.0)),f.x),mix(gHash(i+vec3(0.0,1.0,1.0)),gHash(i+vec3(1.0,1.0,1.0)),f.x),f.y),f.z);}
+/* 작업장 반사 환경 : 바닥(어두움) → 벽(밝음) → 천장, 천장 매입 조명 띠, 수평선 반짝임 */
+vec3 gStudio(vec3 R){
+ float t=R.y;
+ vec3 c=mix(vec3(0.36,0.37,0.39),vec3(0.84,0.855,0.87),smoothstep(-0.30,0.18,t));
+ c=mix(c,vec3(0.95,0.955,0.96),smoothstep(0.25,0.80,t));
+ c+=vec3(0.10)*exp(-abs(t)*16.0);
+ if(t>0.10){ float q=R.z/t+R.x/t*0.15; float s=abs(fract(q*0.40+0.5)-0.5);
+   float band=smoothstep(0.12,0.05,s)*smoothstep(0.10,0.45,t); c=mix(c,vec3(1.0),band*0.85); }
+ return c;}
+/* 재질 : 스테인리스 헤어라인(가로 결) · 도장/수지면 미세 요철 + 클리어코트 · 금속 하이라이트에 고유색 (단위 mm) */
 vec3 pxShade(vec3 alb,float met,vec3 P,vec3 N,float br){
  vec3 Vv=uEye-P;float vl=length(Vv);vec3 V=Vv/max(vl,1e-4);
  if(dot(N,V)<0.0)N=-N;
+ float det=clamp(1.35-vl/uDet,0.0,1.0);
+ float g=0.5;
+ if(met>0.45){
+  vec3 T=abs(N.y)<0.85?normalize(cross(N,vec3(0.0,1.0,0.0))):vec3(1.0,0.0,0.0); vec3 B=cross(N,T);
+  g=gNoise(vec3(dot(P,T)*0.011,dot(P,B)*0.48,0.0))*0.65+gNoise(vec3(dot(P,T)*0.028,dot(P,B)*1.15,7.0))*0.35;
+  alb*=1.0+(g-0.5)*0.13*det;
+ } else { g=gNoise(P*0.14); alb*=1.0+(g-0.5)*0.035*det; }
  float sh=shadowAt(P,N);
  float d=max(dot(N,uL1),0.0)*sh,d2=max(dot(N,uL2),0.0),d3=max(dot(N,uL3),0.0);
  float nv=max(dot(N,V),0.0);float q=1.0-nv;q*=q;float fr=q*q;
  float nh=max(dot(N,normalize(uL1+V)),0.0);
- float sp=pow(nh,met>0.5?52.0:18.0)*(0.22+0.78*met)*sh;
+ float sp=pow(nh,met>0.45?mix(30.0,76.0,g):mix(16.0,22.0,g))*(0.22+0.78*met)*sh;
+ if(met<=0.45) sp+=pow(nh,110.0)*0.15*sh;
  float ao=0.70+0.30*clamp((P.y-uAO.x)/uAO.y,0.0,1.0);
  float diff=(mix(0.12,0.27,N.y*0.5+0.5)+1.16*d+0.17*d2+0.25*d3)*ao;
- float kEnv=(0.06+0.55*met+0.40*fr*met)*(0.58+0.42*ao);
- vec3 env=mix(envAt(N.y),envRefl(reflect(-V,N).y),met);
- vec3 c=lin(alb)*diff*(1.0-kEnv*0.55)+lin(env)*kEnv+sp;
+ float kEnv=(0.06+0.58*met+0.45*fr*met)*(0.58+0.42*ao);
+ vec3 tint=alb/max(0.001,max(alb.r,max(alb.g,alb.b)));
+ vec3 env=mix(envAt(N.y),gStudio(reflect(-V,N))*mix(vec3(1.0),tint,0.35),met);
+ vec3 c=lin(alb)*diff*(1.0-kEnv*0.55)+lin(env)*kEnv+sp*mix(vec3(1.0),lin(tint),met*0.45);
  float w=(d-0.42)*0.05;c*=vec3(1.0+w,1.0,1.0-w*0.7);
  c=(c+fr*fr*(0.03+0.10*met))*br*uExpo;
  float m=max(max(c.r,c.g),c.b);if(m>0.75)c*=(1.0-0.25*exp((0.75-m)*4.0))/m;
@@ -366,13 +390,14 @@ function r3Init(){
   const B=()=>({p:g.createBuffer(),n:g.createBuffer(),c:g.createBuffer(),m:g.createBuffer()});
   R3.buf={stat:B(),dyn:B(),tr:B(),q:g.createBuffer()};
   R3.sm=pxShadowTarget(g,R3.smSize); R3.lm=pxLightMatrix(R3.lo,R3.hi,R3.smSize);
+  try{ R3.ao=gfxAOInit(g); }catch(e){ console.warn("AO 비활성",e); R3.ao=null; }
   g.enable(g.DEPTH_TEST); g.depthFunc(g.LEQUAL); g.disable(g.CULL_FACE);
   R3.glCv.addEventListener("webglcontextlost",e=>{e.preventDefault(); R3.gl=null;});
   R3.gl=g;
   return true;
 }
 function r3Resize(){
-  const wrap=$("#view3d"), dpr=Math.min(1.8,window.devicePixelRatio||1)*fitApp.k;
+  const wrap=$("#view3d"), dpr=Math.min(1.8,window.devicePixelRatio||1)*fitApp.k*GFX.q;
   const W=Math.max(2,Math.round(wrap.clientWidth*dpr)), H=Math.max(2,Math.round(wrap.clientHeight*dpr));
   if(W!==R3.cv.width||H!==R3.cv.height){ R3.cv.width=W; R3.cv.height=H; R3.glCv.width=W; R3.glCv.height=H; }
   R3.W=W; R3.H=H;
@@ -395,7 +420,7 @@ function r3Light(prog){
   g.useProgram(prog.p);
   g.uniform3fv(prog.u("uEye"),R3.eye); g.uniform3fv(prog.u("uL1"),PX_L1); g.uniform3fv(prog.u("uL2"),PX_L2); g.uniform3fv(prog.u("uL3"),PX_L3);
   g.uniform3fv(prog.u("uAO"),[0,1300,R3.fog]); g.uniformMatrix4fv(prog.u("uLMat"),false,R3.lm.m);
-  g.uniform4fv(prog.u("uSMI"),[R3.lm.info[0],(R3.sm.ok&&R3.shadowOn)?1:0,R3.lm.info[2],R3.lm.info[3]]); g.uniform1f(prog.u("uExpo"),PX_EXPO);
+  g.uniform4fv(prog.u("uSMI"),[R3.lm.info[0],(R3.sm.ok&&R3.shadowOn)?1:0,R3.lm.info[2],R3.lm.info[3]]); g.uniform1f(prog.u("uExpo"),PX_EXPO); g.uniform1f(prog.u("uDet"),3200);
   g.activeTexture(g.TEXTURE0); g.bindTexture(g.TEXTURE_2D,R3.sm.tex); g.uniform1i(prog.u("uSM"),0);
   g.uniformMatrix4fv(prog.u("mvp"),false,R3.mvp);
 }
@@ -430,6 +455,15 @@ function r3Paint(){
     if(D.v){ r3Bind(R3.buf.dyn,true); g.drawArrays(g.TRIANGLES,0,D.v); }
     g.bindFramebuffer(g.FRAMEBUFFER,null);
   }
+  /* ①-2 주변광 차폐용 깊이 (반해상도) : 불투명 정적 · 동적 + 바닥 */
+  const aoOn=GFX.ao&&R3.ao&&gfxAOSize(g,R3.ao,R3.W,R3.H);
+  if(aoOn) gfxAODepth(g,R3.ao,()=>{
+    if(R3.statCount){ r3Bind(R3.buf.stat,true); g.drawArrays(g.TRIANGLES,0,R3.statCount); }
+    if(D.v){ r3Bind(R3.buf.dyn,true); g.drawArrays(g.TRIANGLES,0,D.v); }
+    const x0=R3.lo[0]-1500, x1=R3.hi[0]+3000, z0=R3.lo[2]-600, z1=R3.hi[2]+400;
+    g.bindBuffer(g.ARRAY_BUFFER,R3.buf.q); g.bufferData(g.ARRAY_BUFFER,new Float32Array([x0,0,z0, x1,0,z0, x1,0,z1, x0,0,z0, x1,0,z1, x0,0,z1]),g.DYNAMIC_DRAW);
+    g.enableVertexAttribArray(0); g.vertexAttribPointer(0,3,g.FLOAT,false,0,0); for(let i=1;i<4;i++) g.disableVertexAttribArray(i);
+    g.drawArrays(g.TRIANGLES,0,6); });
   g.viewport(0,0,R3.W,R3.H); g.clearColor(0,0,0,0); g.clearDepth(1); g.depthMask(true);
   g.clear(g.COLOR_BUFFER_BIT|g.DEPTH_BUFFER_BIT);
   if(shadow){
@@ -446,6 +480,7 @@ function r3Paint(){
   r3Light(R3.prog.main);
   if(R3.statCount){ r3Bind(R3.buf.stat); g.drawArrays(g.TRIANGLES,0,R3.statCount); }
   if(D.v){ r3Bind(R3.buf.dyn); g.drawArrays(g.TRIANGLES,0,D.v); }
+  if(aoOn){ gfxAOResolve(g,R3.ao,R3.W,R3.H); r3Light(R3.prog.main); }      /* ③-2 주변광 차폐 적용 */
   const nt=r3SortTransparent();
   if(nt){
     r3Upload(R3.buf.tr,TRS,nt,g.DYNAMIC_DRAW); r3Bind(R3.buf.tr);
@@ -453,7 +488,7 @@ function r3Paint(){
     g.drawArrays(g.TRIANGLES,0,nt); g.depthMask(true); g.disable(g.BLEND);
   }
   R3.ctx.drawImage(R3.glCv,0,0,R3.W,R3.H);
-  R3.stats={stat:R3.statCount/3,dyn:D.v/3,tr:nt/3};
+  R3.stats={stat:R3.statCount/3,dyn:D.v/3,tr:nt/3,ao:!!aoOn,q:GFX.q};
 }
 
 /* ── 궤도 카메라 조작 ── */

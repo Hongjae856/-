@@ -12,6 +12,7 @@ OUT = HERE.parent / "병충전라인_IDT.html"
 SCRIPTS = (
     "util.js",
     "engine.js",
+    "gfx.js",
     "data.js",
     "state.js",
     "layout.js",
