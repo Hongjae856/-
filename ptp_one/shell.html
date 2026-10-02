@@ -36,19 +36,20 @@ button{font-family:inherit}
 #toast{position:fixed;left:50%;top:92px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none;max-width:90vw;white-space:normal;text-align:center}
 #toast.on{opacity:.96}
 /* 메인화면 */
-#home{position:fixed;inset:0;z-index:40;background:#fff;display:flex;align-items:center;justify-content:center;overflow:auto;padding:16px}
+#home{position:fixed;inset:0;z-index:40;background:#fff;display:flex;align-items:center;justify-content:center;overflow:auto;padding:16px;isolation:isolate}
+#home:before{content:"";position:absolute;inset:0;z-index:-1;background:url('__BG__') center 68%/94% auto no-repeat;opacity:.17}
 #home .box{max-width:1080px;width:100%;text-align:center}
-#home h1{font-size:46px;line-height:1.15;letter-spacing:-2px;margin:0 0 10px;font-weight:800}
+#home h1{font-size:52px;line-height:1.15;letter-spacing:-2px;margin:0 0 14px;font-weight:800}
 #home h1 span{display:block;font-size:.42em;font-weight:600;letter-spacing:0;color:#3a5070;margin-top:8px}
 #home .intro{font-size:19px;color:#24344a;margin:0 0 24px;line-height:1.6}
-#home .cards{display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto}
+#home .cards{margin-top:30px!important;display:grid;grid-template-columns:1fr 1fr;gap:20px;max-width:900px;margin:0 auto}
 #home .cards button{padding:26px;text-align:left;border:1px solid #b7c4d2;border-radius:18px;background:#fff;color:var(--ink);box-shadow:0 12px 30px #142b4710;cursor:pointer}
 #home .cards button:hover{box-shadow:0 12px 30px #142b4726}
 #home .cards small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
 #home .cards strong{display:block;font-size:28px;margin:10px 0}
 #home .cards span{display:block;font-size:16px;line-height:1.6;color:#33465c}
-#home .modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;margin:0 auto}
-#home .modes button{padding:18px;border:1px solid #b7c4d2;border-radius:14px;background:#fff;color:var(--ink);font-size:20px;font-weight:800;cursor:pointer;text-align:left}
+#home .modes{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:760px;margin:30px auto 0}
+#home .modes button{padding:18px;text-align:center!important;border:1px solid #b7c4d2;border-radius:14px;background:#fff;color:var(--ink);font-size:20px;font-weight:800;cursor:pointer;text-align:left}
 #home .modes button s{display:block;text-decoration:none;font-size:13.5px;font-weight:600;color:var(--sub);margin-top:5px}
 #home .modes button.e{background:#f3f7fc}
 #home .row{display:flex;justify-content:center;gap:10px;margin-top:18px;flex-wrap:wrap}
@@ -92,23 +93,21 @@ button{font-family:inherit}
 <div id="toast" role="status"></div>
 <section id="home">
   <div class="box">
-    <h1>PTP 통합라인 IDT<span>(PTP Line Interactive Digital Tutor · 충전실 D구역 + 포장실 G구역 일관 라인)</span></h1>
-    <p class="intro" id="hIntro">학습 과정을 선택하세요. 충전기와 포장라인이 한 화면에서 함께 동작합니다.</p>
+    <h1>PTP 통합라인 IDT<span>(PTP Line Interactive Digital Tutor)</span></h1>
     <div class="cards" id="hCourse">
-      <button type="button" data-course="change"><small>01 · INSTALLATION</small><strong>체인지파트 모드</strong><span>충전기 → 포장라인 순서로 교체부품 장착 학습</span></button>
-      <button type="button" data-course="operation"><small>02 · OPERATION</small><strong>가동 모드</strong><span>충전기 준비 → 포장라인 준비 → 연동 가동 → 정지 · 회수</span></button>
+      <button type="button" data-course="change"><small>01 · INSTALLATION</small><strong>체인지파트 모드</strong><span>교체부품 장착 학습</span></button>
+      <button type="button" data-course="operation"><small>02 · OPERATION</small><strong>가동 모드</strong><span>장비 설정 · 가동 학습</span></button>
     </div>
     <div id="hMode" hidden>
       <div class="modes">
-        <button type="button" data-mode="easy">기본학습<s>핵심 절차를 안내와 함께 진행</s></button>
-        <button type="button" class="e" data-mode="examEasy">기본평가<s>기본 절차를 안내 없이 평가</s></button>
-        <button type="button" data-mode="guide">심화학습<s>전체 절차를 단계별로 학습</s></button>
-        <button type="button" class="e" data-mode="exam">심화평가<s>전체 절차를 안내 없이 평가</s></button>
+        <button type="button" data-mode="easy">기본학습</button>
+        <button type="button" class="e" data-mode="examEasy">기본평가</button>
+        <button type="button" data-mode="guide">심화학습</button>
+        <button type="button" class="e" data-mode="exam">심화평가</button>
       </div>
       <div class="row"><button type="button" class="sub" id="hBack">← 과정 다시 선택</button></div>
     </div>
-    <div class="row"><button type="button" class="sub demo" id="hDemo">▶ 연동 가동 시연 (두 설비 자동 준비)</button></div>
-    <p class="note">상단 [충전] · [포장] 버튼으로 같은 3D 화면에서 조작 UI 만 바꿉니다. [충전준비] · [포장준비] 를 누르면 해당 설비가 가동 준비 완료 상태가 되어 다른 설비만 학습할 수 있습니다.</p>
+    <div class="row"><button type="button" class="sub demo" id="hDemo">▶ 연동 가동</button></div>
   </div>
   <button type="button" class="ver" id="verBadge2" title="버전 이력">V1</button>
 </section>

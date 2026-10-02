@@ -283,10 +283,9 @@ $('#hDemo').addEventListener('click',startDemo);
 
 /* ── 메인화면 : 과정 → 모드 ── */
 let pickCourse=null;
-function showCoursePick(){ pickCourse=null; $('#hCourse').hidden=false; $('#hMode').hidden=true; $('#hIntro').textContent='학습 과정을 선택하세요. 충전기와 포장라인이 한 화면에서 함께 동작합니다.'; }
+function showCoursePick(){ pickCourse=null; $('#hCourse').hidden=false; $('#hMode').hidden=true; }
 document.querySelectorAll('#hCourse [data-course]').forEach(b=>b.addEventListener('click',()=>{
   pickCourse=b.dataset.course; $('#hCourse').hidden=true; $('#hMode').hidden=false;
-  $('#hIntro').textContent=(pickCourse==='change'?'체인지파트 모드':'가동 모드')+' — 학습 · 평가 방식을 선택하세요.'+(pickCourse==='operation'?' (다음 화면에서 생산 품목 · 성형 방법을 고릅니다)':'');
 }));
 $('#hBack').addEventListener('click',showCoursePick);
 document.querySelectorAll('#hMode [data-mode]').forEach(b=>b.addEventListener('click',()=>beginCourse(pickCourse||'operation',b.dataset.mode)));

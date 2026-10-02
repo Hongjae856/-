@@ -7,6 +7,7 @@
 · 결과 두 문서를 base64 로 shell.html 에 내장한다.
 """
 import base64
+import re
 import json
 import sys
 from pathlib import Path
@@ -104,7 +105,11 @@ def build() -> str:
     js = "\n".join(f"/* ── {name} ── */\n" + (HERE / name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     if "</script" in js.lower():
         sys.exit("shell scripts must not contain </script")
-    for key, val in (("__APPS__", json.dumps(apps, separators=(",", ":"))), ("/*__SHELL_JS__*/", js)):
+    # 메인화면 배경 : PTP 라인 IDT 장비 선택 화면(src/entry.html)과 같은 PTP 그림
+    bg = re.search(r"#entry:before\{[^}]*url\('(data:image/[a-z]+;base64,[A-Za-z0-9+/=]+)'\)", (SRC / "entry.html").read_text(encoding="utf-8"))
+    if not bg:
+        sys.exit("entry.html background image not found")
+    for key, val in (("__BG__", bg.group(1)), ("__APPS__", json.dumps(apps, separators=(",", ":"))), ("/*__SHELL_JS__*/", js)):
         if shell.count(key) != 1:
             sys.exit(f"shell.html must contain {key} exactly once")
         shell = shell.replace(key, val)
