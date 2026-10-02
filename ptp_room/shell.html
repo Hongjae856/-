@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PTP 통합라인 IDT</title>
+<style>
+:root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0;--bg:#fff;--d:#2f7fb8;--g:#8a6d2f;--ok:#1f8a5b;--warn:#c4661f}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--ink);font-family:"Malgun Gothic",Arial,sans-serif;overflow:hidden}
+#bar{position:fixed;left:0;right:0;top:0;height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 2px 10px #142b4712;z-index:20;white-space:nowrap;overflow-x:auto;overflow-y:hidden}
+#bar .brand{font-weight:800;font-size:17px;letter-spacing:-.5px;flex:0 0 auto}
+#rooms{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden;flex:0 0 auto}
+#rooms button{border:0;background:#fff;color:var(--ink);font:700 15px "Malgun Gothic",Arial,sans-serif;padding:9px 16px;cursor:pointer;display:flex;align-items:center;gap:7px}
+#rooms button+button{border-left:1px solid #b7c4d2}
+#rooms button small{font-size:12px;font-weight:700;padding:2px 7px;border-radius:7px;background:#eef2f6;color:var(--sub)}
+#rooms button.on{background:var(--ink);color:#fff}
+#rooms button.on small{background:#ffffff26;color:#fff}
+#rooms button:focus-visible,#demoBtn:focus-visible,.ver:focus-visible{outline:3px solid #799fc9;outline-offset:2px}
+#info{display:flex;gap:6px;flex:1 1 auto;min-width:0;overflow:hidden}
+.chip{flex:0 0 auto;font-size:13px;color:var(--sub);border:1px solid #dbe3ec;border-radius:9px;padding:5px 9px;background:#f8fafc}
+.chip b{color:var(--ink);font-size:14px;margin-left:3px}
+.chip.on{border-color:#9fd4b9;background:#eefaf3;color:var(--ok)}.chip.on b{color:var(--ok)}
+.chip.warn{border-color:#f0c49e;background:#fff5ec;color:var(--warn)}.chip.warn b{color:var(--warn)}
+#demoBtn{flex:0 0 auto;border:0;border-radius:11px;background:var(--ok);color:#fff;font:800 15px "Malgun Gothic",Arial,sans-serif;padding:10px 16px;cursor:pointer}
+#demoBtn.stop{background:#a33a2a}
+#demoBtn:disabled{opacity:.6;cursor:wait}
+.ver{flex:0 0 auto;font-size:14px;font-weight:700;color:var(--sub);letter-spacing:.5px;padding:7px 12px;border:1px solid var(--line);border-radius:16px;background:#fff;cursor:pointer}
+.ver:hover{color:var(--ink);border-color:var(--ink)}
+#stage{position:fixed;left:0;right:0;top:56px;bottom:0;overflow:hidden;background:#fff}
+#stage iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff;transition:transform .55s cubic-bezier(.45,.05,.25,1),opacity .45s ease}
+#stage iframe.off{opacity:0;pointer-events:none}
+#stage iframe.toL{transform:translateX(-14%)}#stage iframe.toR{transform:translateX(14%)}
+#toast{position:fixed;left:50%;top:66px;transform:translateX(-50%);background:var(--ink);color:#fff;font-size:14px;font-weight:700;padding:9px 16px;border-radius:10px;z-index:30;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.on{opacity:.96}
+#verModal{position:fixed;inset:0;z-index:50;background:rgba(12,20,30,.55);display:flex;align-items:center;justify-content:center;padding:16px}
+#verModal .box{width:860px;max-width:100%;max-height:90vh;overflow:auto;background:#fff;border-radius:16px;padding:24px 26px;box-shadow:0 12px 34px rgba(12,22,36,.28)}
+#verModal h2{margin:0 0 6px;font-size:24px}#verModal h2 small{font-size:15px;color:var(--sub);font-weight:600}#verModal p{margin:0 0 12px;color:var(--sub)}
+#verModal table{width:100%;border-collapse:collapse;font-size:15px}#verModal th{background:#dde5ee;border:1px solid #c7d3e0;padding:8px;color:#33465c}
+#verModal td{border:1px solid #dbe3ec;padding:8px 10px;vertical-align:top}#verModal td:nth-child(-n+2){white-space:nowrap;text-align:center;font-weight:700}
+#verModal .close{margin-top:14px;width:100%;text-align:center;padding:13px;border:0;border-radius:10px;background:var(--ink);color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+[hidden]{display:none!important}
+@media(max-width:900px){#bar .brand{display:none}#rooms button{padding:8px 11px;font-size:14px}.chip{font-size:12px}}
+</style></head><body>
+<header id="bar">
+  <div class="brand">PTP 통합라인 IDT</div>
+  <nav id="rooms" aria-label="방 선택">
+    <button type="button" data-room="filler" class="on">충전실 <small>D구역</small></button>
+    <button type="button" data-room="line">포장실 <small>G구역</small></button>
+  </nav>
+  <div id="info" aria-live="polite"></div>
+  <button type="button" id="demoBtn">▶ 연동 가동</button>
+  <button type="button" class="ver" id="verBadge" title="버전 이력">V1</button>
+</header>
+<main id="stage"></main>
+<div id="toast" role="status"></div>
+<div id="verModal" hidden><div class="box" role="dialog" aria-label="버전 이력"><h2>📋 버전 이력 <small id="verCur"></small></h2><p>수정 요청 1건마다 버전이 1씩 올라갑니다.</p>
+<table><thead><tr><th>버전</th><th>날짜</th><th>수정 내용</th></tr></thead><tbody id="verRows"></tbody></table><button type="button" class="close" id="verClose">닫기</button></div></div>
+<script id="apps" type="application/json">__APPS__</script>
+<script>
+/*__SHELL_JS__*/
+</script>
+</body></html>
