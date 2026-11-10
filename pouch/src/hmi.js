@@ -219,10 +219,10 @@ function bindPanelBtns(){
   on("swRun",()=>{ if(f.run) return; if(p.align&&!f.started&&S.room==="F"){ deduct("alignOn"); } if(fillerRun()) toast("RUN — 자동 운전","good"); });
   on("swStop",()=>{ fillerStop(); f.stoppedOnce=true; toast("STOP — 0 위치 정지"); });
   on("swJog",()=>{ if(f.run){ toast("운전 중입니다."); return; } const b=fillerBlockers().filter(x=>!/후 공정/.test(x)); if(b.length){ toast("JOG 조건 미충족\n"+b[0],"bad"); return; } f.run=true; f.jogOne=true; f.phase=0.5; toast("JOG — 한 스텝 작동"); });
-  on("swReset",()=>{ fillerReset(); if(S.recovery&&!tripAlarms().length) S.recovery.reset=true; toast(tripAlarms().length?"원인이 남아 있어 해제되지 않은 알람이 있습니다.":"RESET — 알람 해제",tripAlarms().length?"bad":"good"); });
+  on("swReset",()=>{ fillerReset(); f.resetOnce=true; if(S.recovery&&!tripAlarms().length) S.recovery.reset=true; toast(tripAlarms().length?"원인이 남아 있어 해제되지 않은 알람이 있습니다.":"RESET — 알람 해제",tripAlarms().length?"bad":"good"); });
   on("swFill",()=>{ f.filling=!f.filling; toast("FILLING "+(f.filling?"ON — 내용물 충전":"OFF")); });
   on("swBuz",()=>{ f.buzzer=!f.buzzer; });
-  on("swEmg",()=>{ f.emg=!f.emg; if(f.emg){ f.run=false; p.ctRun=false; p.sfRun=false; raise("EMG"); toast("비상정지!","bad"); } else toast("비상정지 해제 — RESET 후 재가동"); });
+  on("swEmg",()=>{ f.emg=!f.emg; if(f.emg){ if(!S.activeTrouble) deduct("emg"); f.run=false; p.ctRun=false; p.sfRun=false; raise("EMG"); toast("비상정지!","bad"); } else toast("비상정지 해제 — RESET 후 재가동"); });
   on("sfStart",()=>{ if(!p.sfUser){ toast("로그인이 필요합니다.","bad"); return; } if(!(p.sfServo&&p.sfFeed)){ toast("서보 전원 공급 · 제품 공급 아이콘을 먼저 활성화하세요.","bad"); return; } p.sfRun=true; toast("스틱공급장치 START","good"); });
   on("sfStop",()=>{ p.sfRun=false; toast("스틱공급장치 STOP"); });
   on("sfReset",()=>{ p.sfReset=true; toast("스틱공급장치 RESET"); });

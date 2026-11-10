@@ -1,0 +1,122 @@
+<div id="stage"><div id="app">
+  <div id="head">
+    <div class="ttl">파우치 라인 IDT</div>
+    <div id="roomTag" class="pill"><b id="roomNm">-</b></div>
+    <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button><button data-s="10">×10</button></div>
+    <button class="gbtn" id="apBtn">▶ 자동재생</button>
+    <div class="sp"></div>
+    <button class="gbtn" id="soundBtn">사운드 OFF</button>
+    <button class="gbtn" id="homeBtn">메인화면</button>
+    <button class="gbtn" id="rubricBtn">채점 관리</button>
+    <button class="gbtn" id="endBtn">학습 종료</button>
+    <button class="gbtn" id="resetBtn">처음부터</button>
+  </div>
+  <div id="main">
+    <!-- ══ 좌측 ══ -->
+    <div class="col">
+      <div class="card" id="cardUtil">
+        <h3><span class="ic a">🔌</span>유틸리티<em id="utilEm">기동 전 준비</em></h3>
+        <div class="tiles" id="utilTiles"></div>
+      </div>
+      <div class="card" id="cardMat">
+        <h3><span class="ic g">📦</span>자재 · 원료 · 기록<em>작업자가 현장으로 이동</em></h3>
+        <div class="tiles" id="matTiles"></div>
+      </div>
+      <div class="card" id="cardMon">
+        <h3>라인 모니터<em id="monRun">대기</em></h3>
+        <div id="monTop"></div>
+        <div id="monStats"></div>
+      </div>
+    </div>
+    <!-- ══ 중앙 ══ -->
+    <div class="col">
+      <div class="card" id="mimicCard">
+        <div id="coach">
+          <div id="cB"><div id="cStep">준비</div><div id="cTitle">과정을 선택하세요</div>
+            <div id="cDesc">과정과 모드를 고르면 절차를 단계별로 안내합니다.</div></div>
+          <div id="autoStatus" role="status" aria-live="polite"></div>
+          <button id="lcCheck" style="display:none">점검 완료 ✓</button>
+          <button id="incAsk" style="display:none">🔎 원인 판단</button>
+          <button id="examHint" style="display:none">💡 힌트 보기 · −5점</button>
+          <div id="stepNav"><button id="stepPrev">← 이전</button><button id="stepCur">1 / 1</button><button id="stepNext">다음 →</button></div>
+        </div>
+        <div id="view3d">
+          <canvas id="cv3d"></canvas>
+          <div class="pill" id="v3Grp"></div>
+          <div class="pill" id="panGrp"><button id="panL" aria-label="왼쪽으로">◀</button><button id="panC" aria-label="가운데로">⌂</button><button id="panR" aria-label="오른쪽으로">▶</button></div>
+          <button id="fixBtn" hidden aria-label="현장 조치">!</button>
+          <div id="ipcPanel" hidden></div>
+        </div>
+        <div id="legend">
+          <span><i style="background:#c9cdd2"></i>파우치 (은박)</span>
+          <span><i style="background:#d33a2a"></i>적색 인쇄</span>
+          <span><i style="background:#e9e2cf;border:1px solid #bbb"></i>카톤</span>
+          <span><i style="background:#e0922a"></i>공포 · 불량 배출</span>
+          <span style="margin-left:auto">＋ 표시를 누르면 장치 설명이 나옵니다</span>
+        </div>
+      </div>
+      <div class="card" id="cardFlow">
+        <h3><span class="ic b">🔗</span>라인 공정 순서<em>초록 = 동작 중 · 빨강 = 알람 · 누르면 이동</em></h3>
+        <div id="flow"></div>
+      </div>
+    </div>
+    <!-- ══ 우측 : 설비 화면 · 조작반 ══ -->
+    <div class="col">
+      <div id="hmiWrap">
+        <div id="hmi">
+          <div id="hTop">
+            <div class="brand">POUCH<u>LINE</u></div>
+            <div id="hMach">-</div>
+            <div id="hAlarmTick"></div>
+            <div id="hClock">—<br>—</div>
+          </div>
+          <div id="hTabs"></div>
+          <div id="hBody"></div>
+          <div id="hNav"></div>
+          <div id="hMenu"><button id="caseBtn">이상사례</button><button id="faultBtn">알람</button></div>
+        </div>
+      </div>
+      <div id="panel"></div>
+    </div>
+  </div>
+  <!-- 모달 -->
+  <div class="modal" id="mNum"><div class="mbox" style="width:360px">
+    <h2 id="numT">값 입력</h2><p id="numR"></p>
+    <input class="inp" id="numV" readonly>
+    <div class="keys" id="numKeys"></div>
+    <div class="mbtn"><button class="pri" id="numOk">확인</button><button id="numNo">취소</button></div>
+  </div></div>
+  <div class="modal" id="mCarry"><div class="mbox" id="carryBox"></div></div>
+  <div class="modal" id="mDev"><div class="mbox" id="devBox"></div></div>
+  <div class="modal" id="mInc"><div class="mbox" id="incBox"></div></div>
+  <div class="modal" id="mList"><div class="mbox" id="listBox"></div></div>
+  <div class="modal" id="mRub"><div class="mbox" id="rubBox" style="width:640px"></div></div>
+  <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
+  <div class="modal" id="mVer"><div class="mbox" id="verBox"></div></div>
+  <div id="splash">
+    <div class="box">
+      <h1>파우치 라인 IDT<small>Pouch Line · Interactive Digital Tutor</small></h1>
+      <div id="lineStrip"></div>
+      <p class="prodLine">판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤</p>
+      <div id="coursePicker">
+        <button id="chooseF" class="main"><small>01 · FILLING ROOM</small><strong>충전실 과정</strong><span>파우치 충전기 SP303 · 2층 데크 · IPC · 알람 15종</span></button>
+        <button id="chooseP" class="main"><small>02 · PACKING ROOM</small><strong>포장실 과정</strong><span>스틱공급장치 · 카토너 · 케이스 프린터 · 비전 · X-ray · 중량선별기</span></button>
+      </div>
+      <div class="go" style="display:none">
+        <div class="modeColumn">
+          <button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>
+          <button class="e" id="spExamEasy">기본모드 · 평가</button>
+        </div>
+        <div class="modeColumn">
+          <button class="s" id="spGuide">심화모드 · 학습<small>전체 절차 단계별 안내</small></button>
+          <button class="e" id="spExam">심화모드 · 평가</button>
+        </div>
+      </div>
+      <button id="courseBack" style="display:none">← 과정 다시 선택</button>
+      <button id="verBadge" class="ver">V</button>
+    </div>
+  </div>
+  <div id="banner" role="alert" hidden></div>
+  <div id="toast"></div>
+</div></div>
+<div id="guideArrow" aria-hidden="true">⬇</div>
