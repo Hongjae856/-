@@ -2491,7 +2491,7 @@ function drawPanel(){
   else if(k==="sf"||k==="ct") h=B(k+"Start","start","▶","START",k==="sf"?"스틱공급장치":"카토너",k==="sf"?p.sfRun:p.ctRun)+B(k+"Stop","stop","■","STOP","정지")+B(k+"Reset","reset","↺","RESET","리셋")+B("swEmg","emg","⏻","EMERGENCY","비상 정지",f.emg);
   else if(k==="cw") h=B("cwStart","start","▶","START","녹색 램프",p.cwRun)+B("cwStop","stop","■","STOP","빨간 램프")+B("cwHome","reset","🏠","HOME","기본화면");
   else h='<div class="pnote">'+esc(machOf(k).md)+' 은 화면 버튼으로 조작합니다.</div>';
-  if(P.dataset.h!==h){ P.innerHTML=h; P.dataset.h=h; bindPanelBtns(); }
+  if(P.dataset.h!==h||P._s!==S){ P.innerHTML=h; P.dataset.h=h; P._s=S; bindPanelBtns(); }   /* 세션이 바뀌면 다시 연결 */
 }
 
 /* ═══ 버튼 동작 ═══ */
@@ -3003,7 +3003,7 @@ const INC={
   AIR:{nm:"메인 에어단절", mk:"fl", fire(){ S.f.airV[1]=false; raise("AIR"); },
     q:"'메인 에어단절' 알람입니다. 원인과 조치로 옳은 것은?", a:"공급 라인 문제 → 압축공기 밸브 · 에어체크센서를 확인해 복구한다",
     w:["에어 없이 운전한다","에어체크센서를 끈다","레귤레이터를 최대로 올린다"],
-    fix:[{sel:()=>S.f.airV[0]?"#fAir2":"#fAir1",t:"압축공기 밸브를 확인해 엽니다.",done:()=>S.f.airV[0]&&S.f.airV[1]&&S.f.airP>=5.5}]},
+    fix:[{sel:()=>!S.f.airV[0]?"#fAir1":!S.f.airV[1]?"#fAir2":null,t:"압축공기 밸브를 확인해 엽니다 (압력 회복 대기).",done:()=>S.f.airV[0]&&S.f.airV[1]&&S.f.airP>=5.5}]},
   CNT:{nm:"카운트 에러", mk:"fl", fire:flt("CNT"),
     q:"'카운트 에러' 알람입니다. 원인과 조치로 옳은 것은?", a:"카운팅 컨베이어 오류 → 서보모터를 확인 · 조치하고 잠시 정지 후 가동한다",
     w:["카운터를 0 으로 바꾸고 계속한다","컨베이어를 손으로 민다","속도를 올린다"],

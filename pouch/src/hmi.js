@@ -153,7 +153,7 @@ function drawPanel(){
   else if(k==="sf"||k==="ct") h=B(k+"Start","start","▶","START",k==="sf"?"스틱공급장치":"카토너",k==="sf"?p.sfRun:p.ctRun)+B(k+"Stop","stop","■","STOP","정지")+B(k+"Reset","reset","↺","RESET","리셋")+B("swEmg","emg","⏻","EMERGENCY","비상 정지",f.emg);
   else if(k==="cw") h=B("cwStart","start","▶","START","녹색 램프",p.cwRun)+B("cwStop","stop","■","STOP","빨간 램프")+B("cwHome","reset","🏠","HOME","기본화면");
   else h='<div class="pnote">'+esc(machOf(k).md)+' 은 화면 버튼으로 조작합니다.</div>';
-  if(P.dataset.h!==h){ P.innerHTML=h; P.dataset.h=h; bindPanelBtns(); }
+  if(P.dataset.h!==h||P._s!==S){ P.innerHTML=h; P.dataset.h=h; P._s=S; bindPanelBtns(); }   /* 세션이 바뀌면 다시 연결 */
 }
 
 /* ═══ 버튼 동작 ═══ */
