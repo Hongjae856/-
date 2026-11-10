@@ -20,7 +20,8 @@ const CV={y:880, z:620, w:150};                                          /* 정�
 const PANEL_F={x:FIL.x0-330, z:520};                                     /* 충전기 컨트롤 판넬 (본체 왼쪽 앞) */
 const IBC=[{k:"add", x:-6500, z:-1950}, {k:"sug", x:-4900, z:-1950}];   /* 1층 충전기 뒤편 IBC */
 const LIFT={x:DECK.x1+520, z:-1150};                                     /* 리프터 (1층 ↔ 데크) */
-const ROLL={x:FIL.xc, z:-1500, y:950};                                   /* 은박 롤 거치대 (후면) */
+const ROLL={x:FIL.xc, z:-1500, y:950};
+const DOORW={z0:1750, z1:2650, h:2250};                                  /* 충전실 ↔ 포장실 출입구 [추정] */                                   /* 은박 롤 거치대 (후면) */
 
 /* 포장실 */
 const PK={y:900};

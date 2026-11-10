@@ -251,7 +251,7 @@ function drawOverlay(){
   const g=R3.ctx, W=R3.W, H=R3.H, K=W/Math.max(1,$("#view3d").clientWidth);
   HOT.length=0;
   g.textAlign="center"; g.textBaseline="middle";
-  if(VIEW3.label){
+  if(VIEW3.label&&!fpActive()){
     g.font="800 "+(12*K).toFixed(0)+"px "+'"Malgun Gothic",sans-serif';
     for(const [x,y,z,t] of LBL){ const p=prj(x,y,z); if(!p||p.x<0||p.x>W||p.y<0||p.y>H) continue;
       const w=g.measureText(t).width+16*K, h=21*K;
@@ -278,6 +278,8 @@ function drawOverlay(){
   const fb=$("#fixBtn"), h2=S&&S.activeTrouble?recoveryStep():null;
   if(h2&&h2.k==="fix"&&h2.f.fix){ const p=prj(...h2.f.fix); if(p&&p.x>0&&p.x<W&&p.y>0&&p.y<H){ fb.hidden=false; fb.style.left=(p.x/K)+"px"; fb.style.top=(p.y/K)+"px"; } else fb.hidden=true; }
   else fb.hidden=true;
+  if(fpActive()) fb.hidden=true;
+  fpOverlay(g,K);
 }
 function rr(g,x,y,w,h,r){ g.beginPath(); g.moveTo(x+r,y); g.arcTo(x+w,y,x+w,y+h,r); g.arcTo(x+w,y+h,x,y+h,r); g.arcTo(x,y+h,x,y,r); g.arcTo(x,y,x+w,y,r); g.closePath(); }
 let HOVER=null;
@@ -319,7 +321,7 @@ function initSplash(){
   for(const [id,mode] of [["#spEasy","easy"],["#spExamEasy","examEasy"],["#spGuide","guide"],["#spExam","exam"]]) $(id).onclick=()=>{
     $("#splash").classList.add("hide"); startSession(mode,PICK_ROOM); toast(ROOM_NM[PICK_ROOM]+" · "+MODE_NM[mode]+" 시작"); };
 }
-function goHome(){ if(typeof apStop==="function") apStop(); if(S&&S.session) S.session.active=false; $("#splash").classList.remove("hide"); $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; }
+function goHome(){ if(typeof apStop==="function") apStop(); if(FP.on){ FP.mod.stop(); cam.fp=null; FP.on=false; fpMoveHMI(false); } if(S&&S.session) S.session.active=false; $("#splash").classList.remove("hide"); $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; }
 
 /* ── 결과 · 채점 관리 ── */
 function showResult(manual){

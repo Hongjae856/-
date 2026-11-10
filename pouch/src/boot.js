@@ -13,6 +13,7 @@ function frame(){
     caseTick(); examTroubleTick();
     S.session.sec=(now-S.session.start)/1000;
   }else if(S) wkTick(dt);
+  fpFrame(now);
   camStep(dt);
   uiAcc+=dt; hmiAcc+=dt;
   if(uiAcc>0.25&&S&&S.session){ uiAcc=0; renderTiles(); stepCheck(); renderCoach(); }
@@ -22,7 +23,7 @@ function frame(){
     if(!R3.ready){ if(!r3Init()) return; bindOrbit(R3.cv,onCvClick,onCvHover); }
     if(!R3.gl) return;
     if(STATIC_KEY!==staticKey()) buildStatic();
-    gfxAdapt(now); r3Resize(); camPrep(R3.W,R3.H); drawRoom(); drawDynamic(); r3Paint(); drawOverlay();
+    gfxAdapt(now); r3Resize(); camPrep(R3.W,R3.H); drawRoom(); drawDynamic(); r3Paint(); drawOverlay(); fpPlaceMonitor();
   }
   applyHint();
 }
@@ -30,9 +31,9 @@ function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash();
+  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit();
   lineInit(); clock();
-  window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK};
+  window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet};
   requestAnimationFrame(frame);
 }
 boot();

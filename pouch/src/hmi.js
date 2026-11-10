@@ -4,6 +4,7 @@
    · 포장실 과정 : 스틱공급장치 · 카토너 · 케이스 프린터 · 비전 · X-ray · 중량선별기
    ═══════════════════════════════════════════════════════════════════ */
 let hMach="fl", hScr="run";
+let FPMON=null;                 /* 1인칭 : 지금 보고 있는 모니터의 설비 목록 (탭 제한) */
 const HTABS={F:[["fl","SP303","파우치 충전기"]],
   P:[["sf","스틱공급","PanelView"],["ct","HC 100L","카토너 (LS)"],["pr","AX150i","케이스 프린터"],["vs","비전","인쇄 검사"],["xr","X-ray","IX-EN"],["cw","중량선별","SSV"]]};
 const HB=id=>'#hBody [data-hb="'+id+'"]';
@@ -23,7 +24,7 @@ function machPower(k){ const p=S.p;
   return k==="fl"?S.f.panel:k==="sf"?p.ctMain&&p.sfSw:k==="ct"?p.ctMain:k==="pr"?p.prMain&&p.prPow:k==="vs"?p.prMain:k==="xr"?p.xrPow:k==="cw"?p.cwPow:false; }
 function drawHMI(){
   if(!S) return;
-  const tabs=HTABS[S.room];
+  const tabs=HTABS[S.room].filter(t=>!FPMON||FPMON.includes(t[0]));
   if(!tabs.some(t=>t[0]===hMach)){ hMach=tabs[0][0]; hScr=hMach==="fl"?"run":"main"; }
   const m=machOf(hMach);
   $("#hMach").textContent=m?m.md+" · "+m.nm:"";

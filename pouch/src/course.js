@@ -220,8 +220,9 @@ function startSession(mode,room){
   hMach=room==="F"?"fl":"sf"; hScr=hMach==="fl"?"run":"main";
   if(isExam()) scheduleExamTrouble();
   if(typeof buildTiles==="function") buildTiles();
-  buildStatic(); camSet(room==="F"?"fill":"pack"); drawHMI(); renderCoach(); renderTiles();
+  buildStatic(); cam.fp=null; camSet(room==="F"?"fill":"pack"); drawHMI(); renderCoach(); renderTiles();
   S.stepAt=tSim;
+  if(typeof fpSet==="function") fpSet(FP.want);
 }
 /* 충전실 과정 : 포장실 설비는 가동 상태 (정렬컨베어 스위치만 작업자 조작) */
 function presetPackAuto(){

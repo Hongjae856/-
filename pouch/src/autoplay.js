@@ -13,6 +13,7 @@ function apSet(on){
 function apStart(){
   if(!S||!S.session||!S.session.active){ toast("먼저 과정과 모드를 선택해 시작하세요.","bad"); return; }
   if(isExam()){ toast("평가 모드에서는 자동재생을 쓸 수 없습니다.","bad"); return; }
+  if(FP.on) fpSet(false);                    /* 자동재생은 3인칭에서 화면 버튼을 눌러 진행 */
   apSet(true);
 }
 function apStop(){ apSet(false); }

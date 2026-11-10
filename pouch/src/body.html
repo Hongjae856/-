@@ -3,6 +3,7 @@
     <div class="ttl">파우치 라인 IDT</div>
     <div id="roomTag" class="pill"><b id="roomNm">-</b></div>
     <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button><button data-s="10">×10</button></div>
+    <button class="gbtn" id="fpBtn">🧍 1인칭</button>
     <button class="gbtn" id="apBtn">▶ 자동재생</button>
     <div class="sp"></div>
     <button class="gbtn" id="soundBtn">사운드 OFF</button>
@@ -46,6 +47,8 @@
           <div class="pill" id="panGrp"><button id="panL" aria-label="왼쪽으로">◀</button><button id="panC" aria-label="가운데로">⌂</button><button id="panR" aria-label="오른쪽으로">▶</button></div>
           <button id="fixBtn" hidden aria-label="현장 조치">!</button>
           <div id="ipcPanel" hidden></div>
+          <div id="fpMon" hidden></div>
+          <div id="fpHelp" hidden><b>1인칭 조작</b><span>W A S D</span>이동 (계단으로 2층 데크 오르내림)<span>마우스</span>시선 (화면 클릭 시 포인터 고정)<span>좌클릭 · E</span>조준한 대상 조작 · 설비 화면 열기<span>Esc</span>설비 화면 닫기 · 포인터 해제<span>F1</span>힌트 (평가모드 −5점)<span>R · 우클릭</span>운반 중인 자재 반납<span>Tab</span>메뉴 (3인칭 전환 · 이상사례 · 알람)<span>H</span>도움말 닫기</div>
         </div>
         <div id="legend">
           <span><i style="background:#c9cdd2"></i>파우치 (은박)</span>
@@ -77,6 +80,7 @@
         </div>
       </div>
       <div id="panel"></div>
+      <div id="fpNote"><b>🧍 1인칭 진행 중</b>설비 화면과 조작반은 현장 모니터 앞에서 좌클릭(E)으로 엽니다. Esc 로 닫습니다.<br>상단 [🎥 3인칭 보기] 로 이 자리에 다시 표시할 수 있습니다.</div>
     </div>
   </div>
   <!-- 모달 -->

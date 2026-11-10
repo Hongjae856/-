@@ -22,6 +22,8 @@ SCRIPTS = (
     "hmi.js",
     "course.js",
     "ui.js",
+    "fps.js",
+    "fp.js",
     "autoplay.js",
     "changelog.js",
     "boot.js",

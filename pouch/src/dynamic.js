@@ -20,7 +20,7 @@ function drawDynamic(){
   geoBegin(GEO.dyn);
   dRoomShell();
   if(!S) return;
-  dFiller(); dHoppers(); dPouches(); dCartons(); dPack(); dScreens();
+  dFiller(); dHoppers(); dPouches(); dCartons(); dPack(); dScreens(); dProps();
   drawWorkers();
 }
 /* 실바 · 커터 상하 운동 · 은박 롤 · 리프터 */
@@ -163,6 +163,7 @@ function routeTo(w,dest,deck){
 }
 let CAMRET=null;
 function startWork(key,cb,opt){
+  if(cam.fp){ try{ cb&&cb(); }catch(e){ console.error(e); } return true; }   /* 1인칭 : 교육생이 현장에서 직접 조작 → 즉시 반영 */
   const j=Object.assign({},JOBS[key]||JOBS.look,opt||{});
   const w=wkFor(j.stand);
   if(w.job) return false;
@@ -237,7 +238,7 @@ function cuteOperatorShapes(o){
  El([0,HY+45,0],[47,13,43],'cap');
  return SS;
 }
-function drawWorkers(){ for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900-(w.y||0),e[2]-w.z); if(dd>1600) drawWorker(w); } }
+function drawWorkers(){ if(cam.fp) return; for(const w of WK){ const e=R3.eye, dd=Math.hypot(e[0]-w.x,e[1]-900-(w.y||0),e[2]-w.z); if(dd>1600) drawWorker(w); } }
 function reachAmt(J){ const t=J.t-0.15, e=J.j.dur-0.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/0.45):1); }
 function drawWorker(w){
   const scale=1650/488, x=w.x, z=w.z, far=FAR();
@@ -294,4 +295,22 @@ function ellipsoidT(c,r,col,nu,nv,W,Rn){
       else quadN(A.p,B.p,Cc.p,D.p,A.n,B.n,Cc.n,D.n,col); }
     prev=row;
   }
+}
+
+/* ═══ 현장 소품 : 은박 롤 팔레트 · IPC 저울대 · 기밀도 시험대 · 문서 게시판 (1인칭 조작 대상) ═══ */
+function dProps(){
+  if(!S) return;
+  const f=S.f, wood=[0.56,0.43,0.29,0.1], paper=[0.95,0.95,0.92,0.05], foil=[0.80,0.82,0.85,0.9], red=[0.80,0.12,0.10,0.35];
+  const pal=(x,z,col,show)=>{ box(x-500,x+500,0,140,z-400,z+400,wood); if(show){ cylX(x-330,x+330,400,z,250,col,20,true); cylX(x-345,x+345,400,z,45,C.dark,10,true); } };
+  if(S.room==="F"){
+    pal(FPX.redPal[0],FPX.redPal[1],red,f.roll!=="red"&&f.rollCarry!=="red");
+    pal(FPX.plainPal[0],FPX.plainPal[1],foil,f.roll!=="plain");
+    const [ix,iz]=FPX.ipc; box(ix-400,ix+400,820,860,iz-250,iz+250,C.ss); for(const dx of [-360,360]) for(const dz of [-210,210]) box(ix+dx-20,ix+dx+20,0,820,iz+dz-20,iz+dz+20,C.ssD);
+    box(ix-170,ix+170,860,900,iz-150,iz+150,C.dark); box(ix-140,ix+140,900,910,iz-120,iz+120,C.ssL);
+    box(ix+40,ix+170,900,990,iz+160,iz+220,S.ipc.open?E.scr:E.scrDim,null,0);
+    const [lx,lz]=FPX.leak; box(lx-350,lx+350,820,860,lz-250,lz+250,C.ss); for(const dx of [-310,310]) for(const dz of [-210,210]) box(lx+dx-20,lx+dx+20,0,820,lz+dz-20,lz+dz+20,C.ssD);
+    cylY(lx,lz,860,1060,150,C.ssL,18,true); box(lx-150,lx+150,1060,1080,lz-150,lz+150,f.leak.ok?E.ledG:f.leak.sampled?E.ledY:C.dark);
+  }
+  const brd=(x,y,z,dirX)=>{ box(x-(dirX>0?0:20),x+(dirX>0?20:0),y-350,y+350,z-450,z+450,C.ss); for(let i=0;i<3;i++) box(x+(dirX>0?20:-24),x+(dirX>0?24:-20),y+180-i*230,y+330-i*230,z-380+i*20,z-60+i*20,paper); };
+  if(S.room==="F") brd(FPX.docF[0]-12,FPX.docF[1],FPX.docF[2],1); else brd(FPX.docP[0]-12,FPX.docP[1],FPX.docP[2],1);
 }

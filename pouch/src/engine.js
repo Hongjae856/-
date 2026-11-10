@@ -390,6 +390,9 @@ function lookAtM(e,c,up){
   return new Float32Array([xx,yx,zx,0, xy,yy,zy,0, xz,yz,zz,0, -(xx*e[0]+xy*e[1]+xz*e[2]), -(yx*e[0]+yy*e[1]+yz*e[2]), -(zx*e[0]+zy*e[1]+zz*e[2]), 1]);
 }
 function camPrep(w,h){
+  if(cam.fp){ const p=cam.fp, cp=Math.cos(p.pitch), e=[p.x,p.y,p.z];
+    const t=[p.x-Math.sin(p.yaw)*cp, p.y-Math.sin(p.pitch), p.z-Math.cos(p.yaw)*cp];
+    R3.eye=e; R3.mvp=matMul(perspM(2*Math.atan(0.5/p.focal),w/h,25,80000),lookAtM(e,t,[0,1,0])); return; }
   const cp=Math.cos(cam.pitch), sp=Math.sin(cam.pitch);
   R3.eye=[cam.tx+cam.dist*cp*Math.sin(cam.yaw), cam.ty+cam.dist*sp, cam.tz+cam.dist*cp*Math.cos(cam.yaw)];
   R3.mvp=matMul(perspM(0.62,w/h,40,80000),lookAtM(R3.eye,[cam.tx,cam.ty,cam.tz],[0,1,0]));
@@ -402,11 +405,13 @@ function prj(x,y,z){
   return {x:(cx/cw*0.5+0.5)*R3.W, y:(1-(cy/cw*0.5+0.5))*R3.H, w:cw};
 }
 function camStep(dt){
+  if(cam.fp) return;
   const k=Math.min(1,dt*5.5);
   cam.yaw+=(cam.yawT-cam.yaw)*k; cam.pitch+=(cam.pitchT-cam.pitch)*k; cam.dist+=(cam.distT-cam.dist)*k;
   cam.tx+=(cam.txT-cam.tx)*k; cam.ty+=(cam.tyT-cam.ty)*k; cam.tz+=(cam.tzT-cam.tz)*k;
 }
 function camSet(v){
+  if(cam.fp) return;
   const p=CAMVIEW[v]||CAMVIEW.all; if(!p) return; cam.view=v;
   cam.yawT=p.yaw; cam.pitchT=p.pitch; cam.distT=p.dist; cam.txT=p.tx; cam.tyT=p.ty; cam.tzT=p.tz||0;
   $$("#v3Grp [data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
@@ -529,8 +534,9 @@ function r3Paint(){
 function bindOrbit(cv,onClick,onHover){
   let down=false,moved=false,lx=0,ly=0,pan=false;
   const toCv=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height};};
-  cv.addEventListener("pointerdown",e=>{down=true;moved=false;pan=(e.button===1||e.button===2||e.shiftKey);lx=e.clientX;ly=e.clientY;try{cv.setPointerCapture(e.pointerId);}catch(_){}});
+  cv.addEventListener("pointerdown",e=>{if(cam.fp)return; down=true;moved=false;pan=(e.button===1||e.button===2||e.shiftKey);lx=e.clientX;ly=e.clientY;try{cv.setPointerCapture(e.pointerId);}catch(_){}});
   cv.addEventListener("pointermove",e=>{
+    if(cam.fp){ down=false; return; }
     if(down){ const dx=e.clientX-lx,dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
       if(Math.abs(dx)+Math.abs(dy)>3) moved=true;
       if(pan){ const s=cam.dist*0.0016, c=Math.cos(cam.yaw), sn=Math.sin(cam.yaw); cam.txT-=dx*s*c; cam.tzT+=dx*s*sn; cam.tyT+=dy*s; }
@@ -538,8 +544,8 @@ function bindOrbit(cv,onClick,onHover){
       return; }
     if(onHover) onHover(toCv(e));
   });
-  cv.addEventListener("pointerup",e=>{ const wm=moved; down=false; try{cv.releasePointerCapture(e.pointerId);}catch(_){}
+  cv.addEventListener("pointerup",e=>{ if(cam.fp){ down=false; return; } const wm=moved; down=false; try{cv.releasePointerCapture(e.pointerId);}catch(_){}
     if(!wm&&onClick) onClick(toCv(e)); });
   cv.addEventListener("contextmenu",e=>e.preventDefault());
-  cv.addEventListener("wheel",e=>{ e.preventDefault(); cam.distT=clamp(cam.distT*(1+Math.sign(e.deltaY)*0.12),350,26000); },{passive:false});
+  cv.addEventListener("wheel",e=>{ e.preventDefault(); if(cam.fp) return; cam.distT=clamp(cam.distT*(1+Math.sign(e.deltaY)*0.12),350,26000); },{passive:false});
 }

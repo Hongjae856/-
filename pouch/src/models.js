@@ -38,7 +38,11 @@ function sRoom(){
   box(W-t,W+t,0,H,ROOM.back,hole.z0,wcol,wcol,0);
   box(W-t,W+t,0,hole.y0,hole.z0,hole.z1,wcol,wcol,0);
   box(W-t,W+t,hole.y1,H,hole.z0,hole.z1,wcol,wcol,0);
-  box(W-t,W+t,0,H,hole.z1,ROOM.front-400,wcol,wcol,0);
+  box(W-t,W+t,0,H,hole.z1,DOORW.z0,wcol,wcol,0);
+  box(W-t,W+t,DOORW.h,H,DOORW.z0,DOORW.z1,wcol,wcol,0);                    /* 실 사이 출입구 (1인칭 이동용) [추정] */
+  box(W-t,W+t,0,H,DOORW.z1,ROOM.front,wcol,wcol,0);
+  for(const z of [DOORW.z0,DOORW.z1]) box(W-t-12,W+t+12,0,DOORW.h,z-30,z+30,C.ssL,C.ssL,0);
+  box(W-t-12,W+t+12,DOORW.h,DOORW.h+40,DOORW.z0-30,DOORW.z1+30,C.ssL,C.ssL,0);
   /* 관찰창 */
   const wz0=-1700, wz1=-500, wy0=1100, wy1=2100;
   glassBox(W-t+4,W+t-4,wy0,wy1,wz0,wz1,COL.glassW,0.22);
