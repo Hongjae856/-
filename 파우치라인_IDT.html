@@ -2344,7 +2344,7 @@ function dProps(){
 let hMach="fl", hScr="run";
 let FPMON=null;                 /* 1인칭 : 지금 보고 있는 모니터의 설비 목록 (탭 제한) */
 const HTABS={F:[["fl","SP303","파우치 충전기"]],
-  P:[["sf","스틱공급","PanelView"],["ct","HC 100L","카토너 (LS)"],["pr","AX150i","케이스 프린터"],["vs","비전","인쇄 검사"],["xr","X-ray","IX-EN"],["cw","중량선별","SSV"]]};
+  P:[["sf","스틱공급","PanelView"],["ct","HC 100L","카토너 (LS)"],["pr","AX150i","케이스 프린터"],["vs","비전","인쇄 검사"],["xr","X-ray","IX-EN"],["cw","중량선별","SSV"],["fl","SP303","충전기 (연동)"]]};
 const HB=id=>'#hBody [data-hb="'+id+'"]';
 const HMT=k=>'#hTabs [data-mt="'+k+'"]';
 const HNV=k=>'#hNav [data-nav="'+k+'"]';
@@ -2952,10 +2952,12 @@ function renderIpc(){
 
 /* ═══ 평가모드 자동 발생 : 이상사례 1회 → 해결 · 재가동 15초 후 알람 1회 (잠정) ═══ */
 const EXAM_ALARMS=["FILM","DOOR","FEED","TSEN","THI","AIR","PRT","VIS","EMP"];
+/* 포장실 과정 : 충전실 타일 없이 현장 조치 · 충전기 화면으로 대응할 수 있는 알람 (사용자 지시 11/10 : 평가 시 충전기 알람 1건) */
+const P_ALARMS=["TSEN","THI","PRT","VIS","EMP"];
 function scheduleExamTrouble(){
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   if(S.room==="F") S.flags.examTrouble={c:pick(["F1","F2","F3"]), a:pick(EXAM_ALARMS), at:20+Math.floor(Math.random()*20), fired:0};
-  else { const c=pick(["P1","P2"]); S.flags.examTrouble={c, a:c==="P1"?"P2":"P1", at:20+Math.floor(Math.random()*20), fired:0}; }
+  else S.flags.examTrouble={c:pick(["P1","P2"]), a:pick(P_ALARMS), at:20+Math.floor(Math.random()*20), fired:0};
 }
 function examTroubleTick(){
   const f=S.flags.examTrouble;
@@ -3065,7 +3067,7 @@ const incOf=k=>INC[k]||CASES[k];
 /* 알람 발생 시 대응 흐름 시작 */
 function onAlarm(key){
   if(!S.session||!S.session.active||S.activeTrouble||S.flags.casePending) return;
-  if(S.room!=="F"||!INC[key]) return;
+  if(!INC[key]) return;
   beginRecovery(key);
 }
 function launchIncident(k,sched){
@@ -3098,10 +3100,13 @@ function beginRecovery(k){
 /* 대응 단계 : ① 정지 → ② 원인 판단 → ③ 조치 → ④ RESET → ⑤ 재가동 */
 function recoveryStep(){
   const T=S.activeTrouble, R=S.recovery; if(!T||!R) return null;
-  const P=S.room==="P";
-  const stopSel=P?panelSel("ct","ctStop"):"#swStop", startSel=P?(S.p.ctReset?panelSel("ct","ctStart"):panelSel("ct","ctReset")):"#swRun";
+  const P=S.room==="P"&&!INC[T.k];                 /* 포장실 과정의 충전기 알람은 충전기 조작반으로 대응 */
+  const PF=S.room==="P"&&!!INC[T.k];
+  const fl=id=>PF?panelSel("fl",id):"#"+id;
+  const running=()=>PF?S.f.run:lineRunning();
+  const stopSel=P?panelSel("ct","ctStop"):fl("swStop"), startSel=P?(S.p.ctReset?panelSel("ct","ctStart"):panelSel("ct","ctReset")):fl("swRun");
   if(!R.phase) R.phase="stop";
-  if(R.phase==="stop"){ if(lineRunning()) return {k:"stop",sel:stopSel,t:P?"카토너 [STOP] 을 눌러 정지합니다.":"[STOP] 을 눌러 충전기를 정지합니다.",title:"① 정지"}; R.phase="ask"; if(P) S.p.ctReset=false; }
+  if(R.phase==="stop"){ if(running()) return {k:"stop",sel:stopSel,t:P?"카토너 [STOP] 을 눌러 정지합니다.":"[STOP] 을 눌러 충전기를 정지합니다.",title:"① 정지"}; R.phase="ask"; if(P) S.p.ctReset=false; }
   if(R.phase==="ask"){ if(!R.accepted) return {k:"ask",sel:"#incAsk",t:"원인과 조치를 판단합니다.",title:"② 원인 판단"}; R.phase="fix"; }
   if(R.phase==="fix"){
     const fx=T.inc.fix;
@@ -3120,10 +3125,10 @@ function recoveryStep(){
     R.phase="reset";
   }
   if(R.phase==="reset"){
-    if(!P&&tripAlarms().length) return {k:"reset",sel:"#swReset",t:"[RESET] 을 눌러 알람을 해제합니다.",title:"④ 알람 해제"};
+    if(!P&&tripAlarms().length) return {k:"reset",sel:fl("swReset"),t:"[RESET] 을 눌러 알람을 해제합니다.",title:"④ 알람 해제"};
     R.phase="start";
   }
-  if(R.phase==="start"){ if(!lineRunning()) return {k:"start",sel:startSel,t:P?"카토너 [RESET] → [START] 로 재가동합니다.":"[RUN] 을 눌러 재가동합니다.",title:"⑤ 재가동"}; R.phase="done"; }
+  if(R.phase==="start"){ if(!running()) return {k:"start",sel:startSel,t:P?"카토너 [RESET] → [START] 로 재가동합니다.":"[RUN] 을 눌러 재가동합니다.",title:"⑤ 재가동"}; R.phase="done"; }
   return null;
 }
 function recoveryCheck(){
@@ -3244,7 +3249,6 @@ function buildTiles(){
   $("#tgGuard").onclick=()=>{ VIEW3.guard=!VIEW3.guard; $("#tgGuard").classList.toggle("on",VIEW3.guard); buildStatic(); };
   $("#tgShadow").onclick=()=>{ R3.shadowOn=!R3.shadowOn; $("#tgShadow").classList.toggle("on",R3.shadowOn); };
   $("#tgLabel").onclick=()=>{ VIEW3.label=!VIEW3.label; $("#tgLabel").classList.toggle("on",VIEW3.label); };
-  $("#faultBtn").style.display=S.room==="F"?"":"none";
 }
 /* 2인 1조 운반 선택 */
 function openCarry(what){
@@ -3453,9 +3457,9 @@ function hideBanner(){ $("#banner").hidden=true; }
 function openList(kind){
   if(!S||!S.session) return;
   if(isExam()){ toast("평가모드에서는 이상사례 · 알람이 자동으로 발생합니다.","bad"); return; }
-  const list=kind==="case"?Object.fromEntries(Object.entries(CASES).filter(([k,v])=>v.room===S.room)):INC;
+  const list=kind==="case"?Object.fromEntries(Object.entries(CASES).filter(([k,v])=>v.room===S.room)):S.room==="F"?INC:Object.fromEntries(P_ALARMS.map(k=>[k,INC[k]]));
   const running=lineRunning();
-  $("#listBox").innerHTML='<h2>'+(kind==="case"?"🟧 이상사례":"🚨 알람")+' 발생</h2><p>운전 중에 목록의 상황을 직접 발생시켜 대응을 연습합니다. '+(kind==="case"?"이상사례는 알람 없이 품질 이상으로 먼저 나타납니다.":"충전기 SOP 알람 15종입니다. 발생 즉시 충전기가 정지합니다.")+'</p>'+
+  $("#listBox").innerHTML='<h2>'+(kind==="case"?"🟧 이상사례":"🚨 알람")+' 발생</h2><p>운전 중에 목록의 상황을 직접 발생시켜 대응을 연습합니다. '+(kind==="case"?"이상사례는 알람 없이 품질 이상으로 먼저 나타납니다.":(S.room==="F"?"충전기 SOP 알람 15종입니다.":"포장실 과정에서 대응하는 충전기 알람입니다 (연동 충전기 · 현장 조치).")+" 발생 즉시 충전기가 정지합니다.")+'</p>'+
     Object.entries(list).map(([k,v])=>'<div class="row"><b>'+esc(v.nm)+'<s>'+esc(machOf(v.mk)?machOf(v.mk).md+" · "+machOf(v.mk).nm:"")+'</s></b><button data-k="'+k+'"'+(running&&!S.activeTrouble?"":" disabled")+'>지금 발생</button></div>').join("")+
     '<div class="mbtn"><button id="listX">닫기</button></div>';
   $("#mList").classList.add("on");
@@ -3899,7 +3903,7 @@ function fpMenu(){
   $("#listBox").innerHTML='<h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
     '<div class="row"><b>교육 계속<s>Esc</s></b><button id="fmGo">계속</button></div>'+
     '<div class="row"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button id="fm3">전환</button></div>'+
-    (isExam()?'':'<div class="row"><b>이상사례 발생<s>학습모드</s></b><button id="fmCase">열기</button></div>'+(S.room==="F"?'<div class="row"><b>알람 발생<s>학습모드</s></b><button id="fmAlm">열기</button></div>':''))+
+    (isExam()?'':'<div class="row"><b>이상사례 발생<s>학습모드</s></b><button id="fmCase">열기</button></div>'+'<div class="row"><b>알람 발생<s>학습모드</s></b><button id="fmAlm">열기</button></div>')+
     '<div class="row"><b>조작 도움말<s>H</s></b><button id="fmHelp">보기</button></div>'+
     '<div class="row"><b>메인화면<s>교육 중단</s></b><button id="fmHome">이동</button></div>';
   $("#mList").classList.add("on");
@@ -4022,6 +4026,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:3, d:"2026-11-10", t:"포장실 과정 평가모드 : 이상사례 1건 + 충전기 알람 1건(온도센서 · 상한온도 · 프린터 · 비젼 · 공포감지 중 무작위)으로 변경, 포장실 학습모드 알람 목록 추가, 충전기 화면 탭(연동) 추가"},
  {v:2, d:"2026-11-10", t:"1인칭 시점 도입 — 교육 시작 시 1인칭(WASD · 마우스 · 좌클릭/E), 계단 · 2층 데크 눈높이 자연 보정, 설비 화면을 현장 모니터에 투영, 충전실 ↔ 포장실 출입구, 상단 버튼으로 3인칭 전환"},
  {v:1, d:"2026-11-10", t:"최초 게시 — 충전실 · 포장실 과정 × 기본/심화 × 학습/평가, 충전기 도면 반영 3D(2층 데크 · 전면 확장 데크), 알람 15종 · 이상사례 5종 · 정기 공정검사(IPC)"}
 ];

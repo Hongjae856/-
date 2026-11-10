@@ -6,7 +6,7 @@
 let hMach="fl", hScr="run";
 let FPMON=null;                 /* 1인칭 : 지금 보고 있는 모니터의 설비 목록 (탭 제한) */
 const HTABS={F:[["fl","SP303","파우치 충전기"]],
-  P:[["sf","스틱공급","PanelView"],["ct","HC 100L","카토너 (LS)"],["pr","AX150i","케이스 프린터"],["vs","비전","인쇄 검사"],["xr","X-ray","IX-EN"],["cw","중량선별","SSV"]]};
+  P:[["sf","스틱공급","PanelView"],["ct","HC 100L","카토너 (LS)"],["pr","AX150i","케이스 프린터"],["vs","비전","인쇄 검사"],["xr","X-ray","IX-EN"],["cw","중량선별","SSV"],["fl","SP303","충전기 (연동)"]]};
 const HB=id=>'#hBody [data-hb="'+id+'"]';
 const HMT=k=>'#hTabs [data-mt="'+k+'"]';
 const HNV=k=>'#hNav [data-nav="'+k+'"]';

@@ -367,10 +367,12 @@ function renderIpc(){
 
 /* ═══ 평가모드 자동 발생 : 이상사례 1회 → 해결 · 재가동 15초 후 알람 1회 (잠정) ═══ */
 const EXAM_ALARMS=["FILM","DOOR","FEED","TSEN","THI","AIR","PRT","VIS","EMP"];
+/* 포장실 과정 : 충전실 타일 없이 현장 조치 · 충전기 화면으로 대응할 수 있는 알람 (사용자 지시 11/10 : 평가 시 충전기 알람 1건) */
+const P_ALARMS=["TSEN","THI","PRT","VIS","EMP"];
 function scheduleExamTrouble(){
   const pick=a=>a[Math.floor(Math.random()*a.length)];
   if(S.room==="F") S.flags.examTrouble={c:pick(["F1","F2","F3"]), a:pick(EXAM_ALARMS), at:20+Math.floor(Math.random()*20), fired:0};
-  else { const c=pick(["P1","P2"]); S.flags.examTrouble={c, a:c==="P1"?"P2":"P1", at:20+Math.floor(Math.random()*20), fired:0}; }
+  else S.flags.examTrouble={c:pick(["P1","P2"]), a:pick(P_ALARMS), at:20+Math.floor(Math.random()*20), fired:0};
 }
 function examTroubleTick(){
   const f=S.flags.examTrouble;
@@ -480,7 +482,7 @@ const incOf=k=>INC[k]||CASES[k];
 /* 알람 발생 시 대응 흐름 시작 */
 function onAlarm(key){
   if(!S.session||!S.session.active||S.activeTrouble||S.flags.casePending) return;
-  if(S.room!=="F"||!INC[key]) return;
+  if(!INC[key]) return;
   beginRecovery(key);
 }
 function launchIncident(k,sched){
@@ -513,10 +515,13 @@ function beginRecovery(k){
 /* 대응 단계 : ① 정지 → ② 원인 판단 → ③ 조치 → ④ RESET → ⑤ 재가동 */
 function recoveryStep(){
   const T=S.activeTrouble, R=S.recovery; if(!T||!R) return null;
-  const P=S.room==="P";
-  const stopSel=P?panelSel("ct","ctStop"):"#swStop", startSel=P?(S.p.ctReset?panelSel("ct","ctStart"):panelSel("ct","ctReset")):"#swRun";
+  const P=S.room==="P"&&!INC[T.k];                 /* 포장실 과정의 충전기 알람은 충전기 조작반으로 대응 */
+  const PF=S.room==="P"&&!!INC[T.k];
+  const fl=id=>PF?panelSel("fl",id):"#"+id;
+  const running=()=>PF?S.f.run:lineRunning();
+  const stopSel=P?panelSel("ct","ctStop"):fl("swStop"), startSel=P?(S.p.ctReset?panelSel("ct","ctStart"):panelSel("ct","ctReset")):fl("swRun");
   if(!R.phase) R.phase="stop";
-  if(R.phase==="stop"){ if(lineRunning()) return {k:"stop",sel:stopSel,t:P?"카토너 [STOP] 을 눌러 정지합니다.":"[STOP] 을 눌러 충전기를 정지합니다.",title:"① 정지"}; R.phase="ask"; if(P) S.p.ctReset=false; }
+  if(R.phase==="stop"){ if(running()) return {k:"stop",sel:stopSel,t:P?"카토너 [STOP] 을 눌러 정지합니다.":"[STOP] 을 눌러 충전기를 정지합니다.",title:"① 정지"}; R.phase="ask"; if(P) S.p.ctReset=false; }
   if(R.phase==="ask"){ if(!R.accepted) return {k:"ask",sel:"#incAsk",t:"원인과 조치를 판단합니다.",title:"② 원인 판단"}; R.phase="fix"; }
   if(R.phase==="fix"){
     const fx=T.inc.fix;
@@ -535,10 +540,10 @@ function recoveryStep(){
     R.phase="reset";
   }
   if(R.phase==="reset"){
-    if(!P&&tripAlarms().length) return {k:"reset",sel:"#swReset",t:"[RESET] 을 눌러 알람을 해제합니다.",title:"④ 알람 해제"};
+    if(!P&&tripAlarms().length) return {k:"reset",sel:fl("swReset"),t:"[RESET] 을 눌러 알람을 해제합니다.",title:"④ 알람 해제"};
     R.phase="start";
   }
-  if(R.phase==="start"){ if(!lineRunning()) return {k:"start",sel:startSel,t:P?"카토너 [RESET] → [START] 로 재가동합니다.":"[RUN] 을 눌러 재가동합니다.",title:"⑤ 재가동"}; R.phase="done"; }
+  if(R.phase==="start"){ if(!running()) return {k:"start",sel:startSel,t:P?"카토너 [RESET] → [START] 로 재가동합니다.":"[RUN] 을 눌러 재가동합니다.",title:"⑤ 재가동"}; R.phase="done"; }
   return null;
 }
 function recoveryCheck(){

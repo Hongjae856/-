@@ -93,7 +93,6 @@ function buildTiles(){
   $("#tgGuard").onclick=()=>{ VIEW3.guard=!VIEW3.guard; $("#tgGuard").classList.toggle("on",VIEW3.guard); buildStatic(); };
   $("#tgShadow").onclick=()=>{ R3.shadowOn=!R3.shadowOn; $("#tgShadow").classList.toggle("on",R3.shadowOn); };
   $("#tgLabel").onclick=()=>{ VIEW3.label=!VIEW3.label; $("#tgLabel").classList.toggle("on",VIEW3.label); };
-  $("#faultBtn").style.display=S.room==="F"?"":"none";
 }
 /* 2인 1조 운반 선택 */
 function openCarry(what){
@@ -302,9 +301,9 @@ function hideBanner(){ $("#banner").hidden=true; }
 function openList(kind){
   if(!S||!S.session) return;
   if(isExam()){ toast("평가모드에서는 이상사례 · 알람이 자동으로 발생합니다.","bad"); return; }
-  const list=kind==="case"?Object.fromEntries(Object.entries(CASES).filter(([k,v])=>v.room===S.room)):INC;
+  const list=kind==="case"?Object.fromEntries(Object.entries(CASES).filter(([k,v])=>v.room===S.room)):S.room==="F"?INC:Object.fromEntries(P_ALARMS.map(k=>[k,INC[k]]));
   const running=lineRunning();
-  $("#listBox").innerHTML='<h2>'+(kind==="case"?"🟧 이상사례":"🚨 알람")+' 발생</h2><p>운전 중에 목록의 상황을 직접 발생시켜 대응을 연습합니다. '+(kind==="case"?"이상사례는 알람 없이 품질 이상으로 먼저 나타납니다.":"충전기 SOP 알람 15종입니다. 발생 즉시 충전기가 정지합니다.")+'</p>'+
+  $("#listBox").innerHTML='<h2>'+(kind==="case"?"🟧 이상사례":"🚨 알람")+' 발생</h2><p>운전 중에 목록의 상황을 직접 발생시켜 대응을 연습합니다. '+(kind==="case"?"이상사례는 알람 없이 품질 이상으로 먼저 나타납니다.":(S.room==="F"?"충전기 SOP 알람 15종입니다.":"포장실 과정에서 대응하는 충전기 알람입니다 (연동 충전기 · 현장 조치).")+" 발생 즉시 충전기가 정지합니다.")+'</p>'+
     Object.entries(list).map(([k,v])=>'<div class="row"><b>'+esc(v.nm)+'<s>'+esc(machOf(v.mk)?machOf(v.mk).md+" · "+machOf(v.mk).nm:"")+'</s></b><button data-k="'+k+'"'+(running&&!S.activeTrouble?"":" disabled")+'>지금 발생</button></div>').join("")+
     '<div class="mbtn"><button id="listX">닫기</button></div>';
   $("#mList").classList.add("on");

@@ -184,7 +184,7 @@ function fpMenu(){
   $("#listBox").innerHTML='<h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
     '<div class="row"><b>교육 계속<s>Esc</s></b><button id="fmGo">계속</button></div>'+
     '<div class="row"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button id="fm3">전환</button></div>'+
-    (isExam()?'':'<div class="row"><b>이상사례 발생<s>학습모드</s></b><button id="fmCase">열기</button></div>'+(S.room==="F"?'<div class="row"><b>알람 발생<s>학습모드</s></b><button id="fmAlm">열기</button></div>':''))+
+    (isExam()?'':'<div class="row"><b>이상사례 발생<s>학습모드</s></b><button id="fmCase">열기</button></div>'+'<div class="row"><b>알람 발생<s>학습모드</s></b><button id="fmAlm">열기</button></div>')+
     '<div class="row"><b>조작 도움말<s>H</s></b><button id="fmHelp">보기</button></div>'+
     '<div class="row"><b>메인화면<s>교육 중단</s></b><button id="fmHome">이동</button></div>';
   $("#mList").classList.add("on");
