@@ -9,14 +9,14 @@ function buildUnwinder(g,cz0,cz1){
     rod(g,[ex+.54,.7,zc+s*hw-.03],[ex+.54,.7,zc+s*hw+.03],.05,M.ssMir,24); rod(g,[ex+.54,.7,zc+s*(hw+.03)],[ex+.54,.7,zc+s*(hw+.09)],.032,M.ssMir,20); }
   bx(g,ex+.44,ex+.62,.56,.84,zc-hw-.14,zc-hw-.03,M.white);                                   /* 롤 축 구동 박스 (북쪽) */
   /* 은박 롤 · 지관 · 축 */
-  const roll=new T3.Mesh(new T3.CylinderGeometry(.165,.165,rw*2,56),M.foilP); roll.rotation.x=Math.PI/2; roll.position.set(ex+.54,.7,zc); add(g,roll);
+  const wm=M.web.clone(); wm.map=TX.web.clone(); wm.map.repeat.set(2*Math.PI*.165/.11,rw*2/.08); wm.map.needsUpdate=true; const roll=new T3.Mesh(new T3.CylinderGeometry(.165,.165,rw*2,56,1,true),wm); bx(g,ex+.54-.001,ex+.54+.001,.7-.001,.7+.001,zc-rw,zc+rw,M.white); for(const s of [-1,1]){ const c=new T3.Mesh(new T3.RingGeometry(.048,.165,48),M.white); c.position.set(ex+.54,.7,zc+s*rw); if(s<0) c.rotation.y=Math.PI; g.add(c); } roll.rotation.x=Math.PI/2; roll.position.set(ex+.54,.7,zc); add(g,roll);
   rod(g,[ex+.54,.7,zc-rw-.004],[ex+.54,.7,zc+rw+.004],.048,M.black,28); rod(g,[ex+.54,.7,zc-hw],[ex+.54,.7,zc+hw],.02,M.ssMir,16);
   { const a=new T3.Mesh(new T3.TorusGeometry(.2,.007,8,28,Math.PI*.62),M.ss); a.scale.z=4; a.position.set(ex+.54,.7,zc+rw-.03); a.rotation.z=Math.PI*.12; add(g,a); rod(g,[ex+.74,.74,zc+rw-.03],[ex+.78,.74,zc+rw-.03],.014,M.dark,10); }
   /* 가이드 롤러 · 은박 경로 (롤 → 롤러 → 인쇄 유닛) */
   const R=[[.16,1.0],[.4,1.1],[.2,1.24],[.46,1.36],[.14,1.46]]; for(const [x,y] of R){ rod(g,[ex+x,y,zc-hw],[ex+x,y,zc+hw],.024,M.ssMir,18); }
-  ribbon(g,[[ex+.44,.83],[ex+.16,.976],[ex+.136,1.0],[ex+.4,1.124],[ex+.424,1.1],[ex+.2,1.216],[ex+.176,1.24],[ex+.46,1.384],[ex+.484,1.36],[ex+.14,1.484],[ex+.116,1.46],[ex+.1,1.9]],zc-rw,zc+rw,M.sheet);
+  ribbon(g,[[ex+.44,.83],[ex+.16,.976],[ex+.136,1.0],[ex+.4,1.124],[ex+.424,1.1],[ex+.2,1.216],[ex+.176,1.24],[ex+.46,1.384],[ex+.484,1.36],[ex+.14,1.484],[ex+.116,1.46],[ex+.1,1.9]],zc-rw,zc+rw,M.web);
   /* 접합대 : 낮게 뻗은 판 · 누름 봉 · 테이프 */
-  bx(g,ex+.36,ex+1.0,.33,.35,zc-.44,zc+.44,M.ss); ribbon(g,[[ex+.5,.54],[ex+.62,.356],[ex+.97,.356]],zc-rw,zc+rw,M.sheet);
+  bx(g,ex+.36,ex+1.0,.33,.35,zc-.44,zc+.44,M.ss); ribbon(g,[[ex+.5,.54],[ex+.62,.356],[ex+.97,.356]],zc-rw,zc+rw,M.web);
   for(const x of [.7,.92]){ rod(g,[ex+x,.375,zc-.46],[ex+x,.375,zc+.46],.01,M.ssMir,10); for(const s of [-1,1]) bx(g,ex+x-.03,ex+x+.03,.35,.39,zc+s*.46-.012,zc+s*.46+.012,M.ssD); }
   { const t=new T3.Mesh(new T3.CylinderGeometry(.035,.035,.024,20),new T3.MeshStandardMaterial({color:0xb99a3a,roughness:.5})); t.position.set(ex+.84,.4,zc+.3); add(g,t); }
   for(const s of [-1,1]) bx(g,ex+.36,ex+1.0,.3,.36,zc+s*.44-.012,zc+s*.44+.012,M.ssD);

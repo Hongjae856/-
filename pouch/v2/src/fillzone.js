@@ -1,5 +1,6 @@
 /* ═══ 충전실 주변 : 북쪽 벽 유리창 · 개구부, 경사 컨베이어, 프린터 컨트롤러 거치대, IBC 2기 · 받침 호퍼 · 진공호스,
        저울 작업대 2대(북서), 드럼리프터(북동), 예비 은박(남동), 출입문 2(남) — DRAWING.md 6 · 8절 ═══ */
+let FILLCART=null;
 function buildFillZone(S){
   const g=new T3.Group(); S.add(g); const F=FL, zc=F.zc, H=RM.fill.h;
   /* ── 북쪽 벽 : 유리창 2 (컨베이어 양옆) · 사각 개구부(스테인리스 테두리) · 인터폰 ── */
@@ -30,8 +31,8 @@ function buildFillZone(S){
   const oS=ibc(6.75,2.22,"백당",true), oA=ibc(6.75,.8,"첨가제",false);
   /* 진공호스 : 받침 호퍼 → 바닥 → 2층 데크 → 호퍼 1(첨가제) · 3(백당) 진공이송기 (두 가닥 함께) */
   const hz=F.z0-.12;
-  tube(g,[oA,[oA[0]-.25,.08,oA[2]],[5.9,.05,.95],[5.75,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[3.7,F.top+.1,zc-.5],[3.3+.1,F.top,zc]],.03,M.hose);
-  tube(g,[oS,[oS[0]-.3,.08,oS[2]-.2],[6.0,.05,1.2],[5.82,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.9,F.top+.12,zc-.4],[4.54+.1,F.top,zc]],.03,M.hose);
+  tube(g,[oA,[oA[0]-.25,.08,oA[2]],[5.9,.05,.95],[5.75,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[FM.xf+.3,F.top+.3,zc-.5],[FM.xf-.3,F.top+.22,zc-.2],[FM.xf-.37,F.top+.11,zc-.1]],.03,M.hose);
+  tube(g,[oS,[oS[0]-.3,.08,oS[2]-.2],[6.0,.05,1.2],[5.82,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.6,F.top+.2,zc-.4],[FM.xf+.6,F.top+.16,zc-.2],[FM.xf+.49,F.top+.11,zc-.1]],.03,M.hose);
   /* ── 저울 작업대 2대 (북서 · 벽을 따라 세로) ── */
   for(const z0 of [.25,1.4]){ bx(g,.12,.72,.78,.82,z0,z0+1.0,M.ss); for(const x of [.16,.68]) for(const z of [z0+.05,z0+.95]) bx(g,x-.02,x+.02,.03,.78,z-.02,z+.02,M.ss);
     bx(g,.16,.68,.2,.22,z0+.05,z0+.95,M.ss); bx(g,.26,.56,.82,.88,z0+.3,z0+.62,M.white); bx(g,.3,.52,.88,.89,z0+.34,z0+.58,M.ssMir); bx(g,.3,.52,.82,.9,z0+.66,z0+.74,M.dark); }
@@ -43,6 +44,14 @@ function buildFillZone(S){
     plate(g,.42,.3,labelTex([["리프터 사용 규칙","#111",44],["3인 1조","#c00",52],["(1명 운전 · 2명 하역)","#111",34]],{w:512,h:360,border:"#1f5fb8"}),[RM.fill.x1-.03,1.6,z],-Math.PI/2); }
   /* ── 예비 은박 (남동) : 스테인리스 팔레트 + 은박 롤 ── */
   { const x=10.95, z=6.2; bx(g,x-.55,x+.55,.1,.16,z-.5,z+.5,M.ss); for(const dx of [-.45,0,.45]) bx(g,x+dx-.04,x+dx+.04,0,.1,z-.5,z+.5,M.ss);
+  /* ── 은박 교체 대차 (남동 예비 은박 자리에 보관 · 교체 시 언와인더 옆으로 이동 — 사용자 확정 11/11) : 스테인리스 틀 · 캐스터 · 받침 롤러 · 흰 포장 롤 ── */
+  { const G=new T3.Group(); G.position.set(9.9,0,5.9); g.add(G); FILLCART=G;
+    for(const x of [-.2,.2]) for(const z of [-.42,.42]){ bx(G,x-.02,x+.02,.09,.62,z-.02,z+.02,M.ss); rod(G,[x,.045,z],[x,.045,z+.03],.045,M.dark,16); bx(G,x-.015,x+.015,.07,.1,z-.015,z+.015,M.ssD); }
+    for(const y of [.2,.6]){ for(const z of [-.42,.42]) bx(G,-.2,.2,y,y+.03,z-.015,z+.015,M.ss); for(const x of [-.2,.2]) bx(G,x-.015,x+.015,y,y+.03,-.42,.42,M.ss); }
+    for(const x of [-.09,.09]) rod(G,[x,.65,-.44],[x,.65,.44],.03,M.dark,16); rod(G,[-.26,.9,-.42],[-.26,.9,.42],.012,M.ssMir,10); for(const z of [-.42,.42]) rod(G,[-.2,.62,z],[-.26,.9,z],.012,M.ssMir,10);
+    const wt=tex(cvs(512,256,(c)=>{ c.fillStyle="#f4f5f5"; c.fillRect(0,0,512,256); c.fillStyle="#2d55a8"; c.font="bold 40px Arial"; for(let j=0;j<3;j++) for(let i=0;i<3;i++) c.fillText("SOLPAC",20+i*170+(j%2)*60,60+j*80); }),2,1,true);
+    const r=new T3.Mesh(new T3.CylinderGeometry(.16,.16,.86,48,1,true),new T3.MeshStandardMaterial({map:wt,roughness:.45})); r.rotation.x=Math.PI/2; r.position.set(0,.81,0); add(G,r);
+    for(const s of [-1,1]){ const c=new T3.Mesh(new T3.RingGeometry(.045,.16,40),M.foilP.clone()); c.material.side=T3.DoubleSide; c.position.set(0,.81,s*.43); G.add(c); rod(G,[0,.81,s*.4],[0,.81,s*.44],.045,new T3.MeshStandardMaterial({color:0xb08a52,roughness:.8}),20); } }
     for(const [dz,m] of [[-.25,M.foil],[.25,M.foilP]]){ const r=new T3.Mesh(new T3.CylinderGeometry(.22,.22,.95,40),m); r.rotation.z=Math.PI/2; r.position.set(x,.38,z+dz); add(g,r); rod(g,[x-.5,.38,z+dz],[x+.5,.38,z+dz],.04,M.dark,16); } }
   /* ── 출입문 2 (남쪽 벽) : 양개문 · 유리창 ── */
   for(const x0 of [.7,8.3]){ const z=RM.fill.z1-.03; bx(g,x0-.05,x0+1.05,0,2.15,z-.02,z,M.alu); for(const dx of [0,.5]){ bx(g,x0+dx+.01,x0+dx+.49,.02,2.1,z-.03,z-.02,M.white); bx(g,x0+dx+.1,x0+dx+.4,1.2,1.8,z-.034,z-.03,glass); rod(g,[x0+(dx?.56:.44),1.0,z-.06],[x0+(dx?.56:.44),1.12,z-.06],.01,M.ssMir); } }

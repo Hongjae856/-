@@ -1,47 +1,56 @@
-/* ═══ 배출 컨베이어 : 슈트 아래 칸막이 벨트(트레이) → 북쪽 일직선 → 경사 상승 → 벽 개구부 → 스틱공급장치 상단
-   칸 간격 = 성형 열 간격 (10열이 동시에 10칸에 1포씩 안착). 칸막이 · 스틱은 경로 함수 CV.at(s) 로 배치한다 ═══ */
-const CV={ w:.15, zS:FL.zc+.66, zB:FL.zc-.95, zE:-.45, yE:1.52, R:.16, H:.018 };
+/* ═══ 배출 컨베이어 : 슈트 아래 검은 받침 칸(트레이) → 북쪽 일직선 → 경사 상승 → 벽 개구부 → 스틱공급장치 상단
+   멈추지 않고 연속 주행 (사용자 확정 11/11). 칸 간격 = 성형 열 간격 → 10열이 동시에 10칸에 1포씩 안착.
+   받침 칸 · 스틱은 경로 함수 CV.at(s) 로 배치해 한 몸으로 움직인다. 프레임 서쪽 기둥 바깥으로 지나간다 ═══ */
+const CV={ w:.13, zS:FL.zc+.56, zB:FL.zc-.95, zE:-.45, yE:1.52, R:.16, hb:.008 };
 function buildConveyor(S){
-  const g=new T3.Group(); S.add(g); const y0=FM.beltY, zS=CV.zS, zB=CV.zB, zE=CV.zE, yE=CV.yE, hw=CV.w/2, zc=FL.zc, X=CVX;
+  const g=new T3.Group(); S.add(g); const y0=FM.beltY, zS=CV.zS, zB=CV.zB, zE=CV.zE, yE=CV.yE, hw=CV.w/2, zc=FL.zc, X=CVX, zT=zc-.42;
   const L1=zS-zB, L2=Math.hypot(zB-zE,yE-y0), A=Math.atan2(yE-y0,zB-zE), R=CV.R; CV.L=L1+L2; CV.L1=L1; CV.A=A;
-  /* s(남쪽 끝 기준 거리) → 벨트 윗면 점 · 기울기. 꺾이는 곳은 2차 곡선으로 둥글게 */
   CV.at=s=>{ if(s<L1-R) return {y:y0,z:zS-s,a:0}; if(s>L1+R){ const d=s-L1; return {y:y0+d*Math.sin(A),z:zB-d*Math.cos(A),a:A}; }
     const t=(s-(L1-R))/(2*R), p0=[zB+R,y0], p1=[zB,y0], p2=[zB-R*Math.cos(A),y0+R*Math.sin(A)], u=1-t;
     const z=u*u*p0[0]+2*u*t*p1[0]+t*t*p2[0], y=u*u*p0[1]+2*u*t*p1[1]+t*t*p2[1], dz=2*u*(p1[0]-p0[0])+2*t*(p2[0]-p1[0]), dy=2*u*(p1[1]-p0[1])+2*t*(p2[1]-p1[1]); return {y,z,a:Math.atan2(dy,-dz)}; };
-  /* 구간 틀 : 받침(알루미늄) · 벨트 · 옆 가이드 · 투명 커버 */
+  /* 구간 틀 : 받침(알루미늄) · 벨트 · 옆 가이드 · 투명 커버 (트레이 구간은 동쪽이 슈트 쪽으로 열림) */
   const sect=(G,l0,l1,o)=>{ bx(G,-hw-.03,hw+.03,-.06,-.004,l0,l1,M.alu); bx(G,-hw,hw,-.004,0,l0,l1,M.belt);
-    bx(G,-hw-.02,-hw-.003,0,.045,l0,l1,M.ss); if(!o.open) bx(G,hw+.003,hw+.02,0,.045,l0,l1,M.ss);
-    bx(G,-hw-.034,-hw-.028,0,.135,l0,l1,M.acryl); if(!o.open) bx(G,hw+.028,hw+.034,0,.135,l0,l1,M.acryl);
-    bx(G,-hw-.034,o.open?hw:hw+.034,.135,.141,l0,l1,M.acryl);
-    for(const s of (o.open?[-1]:[-1,1])) for(let z=l0+.08;z<l1;z+=.42) bx(G,s*(hw+.036)-.004,s*(hw+.036)+.004,-.05,.141,z-.012,z+.012,M.alu); };
-  { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zc-.57,zS,{open:true}); }
-  { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zB,zc-.57,{});
-    for(const z of [zc-.2,zc+.3]){ rod(G,[-hw-.05,.16,z-.07],[-hw-.05,.16,z+.07],.007,M.ssMir,8); for(const d of [-.07,.07]) rod(G,[-hw-.034,.141,z+d],[-hw-.05,.16,z+d],.005,M.ssMir,6); } }
+    bx(G,-hw-.02,-hw-.003,0,.03,l0,l1,M.ss); if(!o.open) bx(G,hw+.003,hw+.02,0,.03,l0,l1,M.ss);
+    bx(G,-hw-.034,-hw-.028,0,.1,l0,l1,M.acryl); if(!o.open) bx(G,hw+.028,hw+.034,0,.1,l0,l1,M.acryl);
+    bx(G,-hw-.034,o.open?hw-.02:hw+.034,.1,.106,l0,l1,M.acryl);
+    for(const s of (o.open?[-1]:[-1,1])) for(let z=l0+.08;z<l1;z+=.42) bx(G,s*(hw+.036)-.004,s*(hw+.036)+.004,-.05,.106,z-.012,z+.012,M.alu); };
+  { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zT,zS,{open:true});
+    for(const z of [zc-.2,zc+.2]){ rod(G,[-.03,.14,z-.05],[-.03,.14,z+.05],.008,M.white,10); for(const d of [-.05,.05]) rod(G,[-.03,.106,z+d],[-.03,.14,z+d],.007,M.white,8); }       /* 흰 손잡이 */
+    for(const z of [zc,zc-.21,zc+.21]) bx(G,-hw-.034,hw-.02,.1,.112,z-.003,z+.003,M.acryl);
+    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,.108,zc],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=Math.PI/2; }
+  { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zB,zT,{}); for(const z of [zB+.25]){ rod(G,[-.04,.135,z-.05],[.04,.135,z-.05],.007,M.white,8); } }
   { const G=new T3.Group(); G.position.set(X,(y0+yE)/2,(zB+zE)/2); G.rotation.x=A; g.add(G); sect(G,-L2/2,L2/2,{});
-    for(const t of [-.25,.05,.3]) for(const s of [-1,1]){ rod(G,[s*(hw+.05),.09,t*L2-.06],[s*(hw+.05),.09,t*L2+.06],.007,M.ssMir,8); } }
-  /* 칸막이 · 스틱 (경로를 따라 놓임 — 구동 시 CV.set 로 함께 이동) */
+    for(const t of [-.3,0,.3]) for(const s of [-1,1]) rod(G,[s*(hw+.05),.07,t*L2-.05],[s*(hw+.05),.07,t*L2+.05],.007,M.ssMir,8); }
+  /* 받침 칸 (검은 U 자 받침) · 스틱 */
   const P=FM.P, N=Math.ceil(CV.L/P)+1, o=new T3.Object3D();
-  const cle=new T3.InstancedMesh(new T3.BoxGeometry(CV.w-.012,CV.H,.004),M.belt,N); cle.castShadow=true; g.add(cle);
-  const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.receiveShadow=true; g.add(stk);
-  CV.N=N; CV.full=new Uint8Array(N+4).fill(1);
-  CV.out=0; CV.set=u=>{ const span=N*P; for(let k=0;k<N;k++){ let s=((k*P+u)%span+span)%span; if(CV.prev){ if(s<CV.prev[k]-P){ CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; } const q=CV.at(Math.min(s,CV.L)), vis=s<=CV.L;
-      o.position.set(X,q.y+Math.cos(q.a)*CV.H/2,q.z+Math.sin(q.a)*CV.H/2); o.rotation.set(q.a,0,0); o.scale.setScalar(vis?1:0); o.updateMatrix(); cle.setMatrixAt(k,o.matrix);
-      const s2=s+P/2, q2=CV.at(Math.min(s2,CV.L)), on=CV.full[k]&&s2<CV.L; o.position.set(X,q2.y+Math.cos(q2.a)*.0052,q2.z+Math.sin(q2.a)*.0052); o.rotation.set(q2.a,0,0); o.scale.setScalar(on?1:0); o.updateMatrix(); stk.setMatrixAt(k,o.matrix); }
+  const sh=new T3.Shape(); [[-.026,0],[.026,0],[.026,.02],[.019,.02],[.019,CV.hb],[-.019,CV.hb],[-.019,.02],[-.026,.02]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b));
+  const hg=new T3.ExtrudeGeometry(sh,{depth:CV.w-.012,bevelEnabled:false}); hg.translate(0,0,-(CV.w-.012)/2); hg.rotateY(Math.PI/2);
+  const cle=new T3.InstancedMesh(hg,M.belt,N); cle.castShadow=true; cle.frustumCulled=false; g.add(cle);
+  const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.frustumCulled=false; g.add(stk);
+  CV.N=N; CV.full=new Uint8Array(N+4); CV.out=0; CV.prev=null;
+  CV.sOf=(k,u)=>{ const span=N*P; return ((k*P+u)%span+span)%span; };                                     /* 칸 k 중심의 경로 위치 */
+  CV.set=u=>{ for(let k=0;k<N;k++){ const s=CV.sOf(k,u); if(CV.prev){ if(s<CV.prev[k]-P){ CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; }
+      const vis=s<=CV.L, q=CV.at(Math.min(s,CV.L)), c=Math.cos(q.a), sn=Math.sin(q.a);
+      o.position.set(X,q.y,q.z); o.rotation.set(q.a,0,0); o.scale.setScalar(vis?1:0); o.updateMatrix(); cle.setMatrixAt(k,o.matrix);
+      const h=CV.hb+.0052; o.position.set(X,q.y+c*h,q.z+sn*h); o.scale.setScalar(vis&&CV.full[k]?1:0); o.updateMatrix(); stk.setMatrixAt(k,o.matrix); }
     cle.instanceMatrix.needsUpdate=true; stk.instanceMatrix.needsUpdate=true; };
   CV.set(0);
-  /* 트레이 하부 함체 · 다리 · 남쪽 구동부 (곡면 커버 · 감속기) */
-  bx(g,X-hw-.05,X+hw+.03,.3,y0-.06,zc-.78,zS,M.ss); bx(g,X-hw-.056,X-hw-.05,.34,y0-.1,zc-.7,zS-.08,M.ssD);
-  for(const z of [zc-.72,zS-.06]) for(const x of [X-hw-.02,X+hw]){ rod(g,[x,.03,z],[x,.3,z],.016,M.ssD,10); rod(g,[x,0,z],[x,.03,z],.035,M.ss,16); }
-  bx(g,X-hw-.07,X+hw+.07,.3,y0+.06,zS,zS+.3,M.ssMir); { const c=new T3.Mesh(new T3.CylinderGeometry(.15,.15,CV.w+.14,28,1,false,0,Math.PI),M.ssMir); c.rotation.z=Math.PI/2; c.position.set(X,y0+.06,zS+.15); add(g,c); }
-  bx(g,X-.08,X+.08,.36,.56,zS+.3,zS+.46,M.blue); rod(g,[X,.46,zS+.46],[X,.46,zS+.56],.05,M.dark,18);
-  /* 경광등(녹 · 황 · 적) · 바닥 조작 박스(비상정지) — 트레이 북서 모서리 */
-  { const bx0=X-hw-.42, bz=zc-.95; rod(g,[bx0+.3,.5,bz],[bx0+.3,1.02,bz],.014,M.ssMir,12); for(const [k,m] of [[0,M.green],[1,M.yellow],[2,M.red]]) rod(g,[bx0+.3,1.02+k*.055,bz],[bx0+.3,1.072+k*.055,bz],.028,m,18); rod(g,[bx0+.3,1.185,bz],[bx0+.3,1.2,bz],.03,M.ssD,18);
-    bx(g,bx0,bx0+.42,.1,.5,bz-.2,bz+.2,M.ssMir); for(const dx of [.04,.38]) for(const dz of [-.16,.16]) rod(g,[bx0+dx,0,bz+dz],[bx0+dx,.1,bz+dz],.014,M.ssD,8);
-    bx(g,bx0+.05,bx0+.17,.5,.57,bz-.06,bz+.06,M.yellow); rod(g,[bx0+.11,.57,bz],[bx0+.11,.6,bz],.032,M.red,18);
-    plate(g,.2,.07,labelTex([["불량 조치 시","#c00",50],["핀셋 사용","#c00",50]],{w:384,h:140,border:"#c00"}),[bx0+.24,.502,bz-.1],0).rotation.x=-Math.PI/2; }
+  /* 트레이 하부 함체 (핀셋 거치 · 압력계 2 · 케이블 체인) · 다리 · 남쪽 구동부 (곡면 커버) */
+  bx(g,X-hw-.16,X+hw+.03,.14,y0-.06,zT+.04,zS,M.ss); bx(g,X-hw-.2,X-hw-.16,y0-.16,y0-.04,zT+.06,zS-.04,M.ssMir);
+  plate(g,.07,.03,labelTex([["핀셋","#111",70]],{w:256,h:100}),[X-hw-.201,y0-.07,zS-.12],-Math.PI/2);
+  for(const dz of [-.08,.02]){ rod(g,[X-hw-.16,.24,zc+dz],[X-hw-.175,.24,zc+dz],.02,M.white,16); rod(g,[X-hw-.175,.24,zc+dz],[X-hw-.178,.24,zc+dz],.022,M.ssD,16); }
+  chain(g,[[X-hw-.18,.3,zc+.2],[X-hw-.2,.2,zc+.21],[X-hw-.21,.08,zc+.24],[X-hw-.2,.03,zc+.3]],.04,.016,M.black,[1,0,0]);
+  for(const z of [zT+.1,zS-.06]) for(const x of [X-hw-.12,X+hw]){ rod(g,[x,.03,z],[x,.14,z],.014,M.ssD,10); rod(g,[x,0,z],[x,.03,z],.032,M.ss,16); }
+  bx(g,X-hw-.07,X+hw+.07,.14,y0+.04,zS,zS+.26,M.ssMir); { const c=new T3.Mesh(new T3.CylinderGeometry(.13,.13,CV.w+.14,28,1,false,0,Math.PI),M.ssMir); c.rotation.z=Math.PI/2; c.position.set(X,y0+.04,zS+.13); add(g,c); }
+  bx(g,X+hw+.07,X+hw+.2,.2,.34,zS+.04,zS+.2,M.dark); rod(g,[X+hw+.2,.27,zS+.12],[X+hw+.24,.27,zS+.12],.05,M.blue,18);
+  /* 바닥 조작 박스(비상정지) · 그 위 경광등(적 · 황 · 녹) — 트레이 북서 */
+  { const bx0=X-hw-.5, bz=zT-.2; bx(g,bx0,bx0+.4,.08,.42,bz-.19,bz+.19,M.ssMir); for(const dx of [.04,.36]) for(const dz of [-.15,.15]) rod(g,[bx0+dx,0,bz+dz],[bx0+dx,.08,bz+dz],.014,M.ssD,8);
+    bx(g,bx0+.05,bx0+.17,.42,.48,bz-.06,bz+.06,M.yellow); rod(g,[bx0+.11,.48,bz],[bx0+.11,.51,bz],.03,M.red,18); rod(g,[bx0+.25,.42,bz+.08],[bx0+.25,.44,bz+.08],.012,M.dark,10);
+    rod(g,[bx0+.34,.42,bz-.13],[bx0+.34,.86,bz-.13],.013,M.ssMir,12); for(const [k,m] of [[0,M.green],[1,M.orange],[2,M.red]]) rod(g,[bx0+.34,.86+k*.055,bz-.13],[bx0+.34,.912+k*.055,bz-.13],.028,m,18); rod(g,[bx0+.34,1.025,bz-.13],[bx0+.34,1.04,bz-.13],.03,M.ssD,18);
+    plate(g,.1,.07,labelTex([["⚡","#111",90]],{w:128,h:100,bg:"#f5d400"}),[bx0-.001,.25,bz],-Math.PI/2); }
   /* 경사부 A자 받침대 (회색 · 캐스터) · 표지 */
   { const q=CV.at(L1+L2*.5), zs=q.z, ys=q.y-.07; for(const s of [-1,1]){ rod(g,[X+s*.22,.06,zs-.25],[X+s*.13,ys,zs],.02,M.grey); rod(g,[X+s*.22,.06,zs+.25],[X+s*.13,ys,zs],.02,M.grey); rod(g,[X+s*.22,.06,zs-.25],[X+s*.22,.06,zs+.25],.02,M.grey); for(const dz of [-.25,.25]) rod(g,[X+s*.22,0,zs+dz],[X+s*.22,.05,zs+dz],.025,M.dark,12); }
     rod(g,[X-.22,.35,zs-.12],[X+.22,.35,zs-.12],.016,M.grey); rod(g,[X-.13,ys,zs],[X+.13,ys,zs],.016,M.grey);
-    const q2=CV.at(L1+.35); plate(g,.26,.06,labelTex([["안전커버 임의 Open 금지!","#c00",44]],{w:640,h:150,bar:"#c2185b"}),[X-hw-.037,q2.y+.07,q2.z],-Math.PI/2).rotation.x=0; }
+    const q2=CV.at(L1+.4); plate(g,.26,.06,labelTex([["안전커버 임의 Open 금지!","#c00",44]],{w:640,h:150,bar:"#c2185b"}),[X-hw-.037,q2.y+.05,q2.z],-Math.PI/2); }
   return g;
 }

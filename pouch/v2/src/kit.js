@@ -20,7 +20,7 @@ TX.perf=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#8a8a8a"; g.fillRect(0,0,w,h); f
 /* ── 재질 ── */
 const M={};
 M.ss   =new T3.MeshStandardMaterial({color:0xb9bdc0,metalness:1,roughness:.3,envMapIntensity:1.15,roughnessMap:TX.hair,bumpMap:TX.hair,bumpScale:.0006});
-M.ssMir=new T3.MeshStandardMaterial({color:0xcdd0d3,metalness:1,roughness:.1,envMapIntensity:1.25});
+M.ssMir=new T3.MeshStandardMaterial({color:0xe0e3e6,metalness:1,roughness:.07,envMapIntensity:1.45});
 M.ssD  =new T3.MeshStandardMaterial({color:0x9da2a6,metalness:1,roughness:.45,roughnessMap:TX.hair});
 M.deck =new T3.MeshStandardMaterial({color:0xa9adb0,metalness:1,roughness:.42,bumpMap:TX.checker,bumpScale:.0022,roughnessMap:TX.checker});
 M.grey =new T3.MeshStandardMaterial({color:0x8d9297,metalness:.1,roughness:.55});
@@ -62,8 +62,8 @@ function plate(g,w,h,t,pos,rotY){ const m=new T3.Mesh(new T3.PlaneGeometry(w,h),
 /* 레벨링 풋 + 기둥 */
 function foot(g,x,z,h,r){ rod(g,[x,0,z],[x,.012,z],(r||.05)*1.5,M.ss,20); rod(g,[x,.012,z],[x,h,z],r||.05,M.ss,20); }
 /* 리본 : 단면 꺾은선을 한 축으로 늘린 얇은 판 — axis "z" 면 단면은 (x,y), "x" 면 (z,y) */
-function ribbon(g,prof,a0,a1,mat,axis){ const p=[],idx=[],n=prof.length; for(let i=0;i<n;i++){ const q=prof[i]; if(axis==="x") p.push(a0,q[1],q[0], a1,q[1],q[0]); else p.push(q[0],q[1],a0, q[0],q[1],a1); if(i<n-1){ const k=i*2; idx.push(k,k+1,k+3, k,k+3,k+2); } }
-  const geo=new T3.BufferGeometry(); geo.setAttribute("position",new T3.Float32BufferAttribute(p,3)); geo.setIndex(idx); geo.computeVertexNormals(); return add(g,new T3.Mesh(geo,mat)); }
+function ribbon(g,prof,a0,a1,mat,axis){ const p=[],uv=[],idx=[],n=prof.length; let cum=0; for(let i=0;i<n;i++){ const q=prof[i]; if(i) cum+=Math.hypot(q[0]-prof[i-1][0],q[1]-prof[i-1][1]); if(axis==="x") p.push(a0,q[1],q[0], a1,q[1],q[0]); else p.push(q[0],q[1],a0, q[0],q[1],a1); uv.push(cum,0,cum,Math.abs(a1-a0)); if(i<n-1){ const k=i*2; idx.push(k,k+1,k+3, k,k+3,k+2); } }
+  const geo=new T3.BufferGeometry(); geo.setAttribute("position",new T3.Float32BufferAttribute(p,3)); geo.setAttribute("uv",new T3.Float32BufferAttribute(uv,2)); geo.setIndex(idx); geo.computeVertexNormals(); return add(g,new T3.Mesh(geo,mat)); }
 /* 케이블 체인 : 곡선을 따라 놓인 마디 (up = 마디 폭 방향) */
 function chain(g,pts,w,h,mat,up){ const c=new T3.CatmullRomCurve3(pts.map(p=>new T3.Vector3(...p))), n=Math.floor(c.getLength()/.03), im=new T3.InstancedMesh(new T3.BoxGeometry(h,w,.025),mat,n), o=new T3.Object3D(); o.up.set(...(up||[1,0,0]));
   for(let i=0;i<n;i++){ const t=(i+.5)/n, q=c.getPointAt(t); o.position.copy(q); o.lookAt(q.clone().add(c.getTangentAt(t))); o.updateMatrix(); im.setMatrixAt(i,o.matrix); } im.castShadow=true; g.add(im); return im; }
@@ -71,10 +71,10 @@ function chain(g,pts,w,h,mat,up){ const c=new T3.CatmullRomCurve3(pts.map(p=>new
 function textTex(t,col,W,H,size){ return tex(cvs(W,H,(g)=>{ g.clearRect(0,0,W,H); g.fillStyle=col; g.textAlign="center"; g.textBaseline="middle"; g.font=`bold ${size||Math.floor(H*.7)}px Arial,"Malgun Gothic",sans-serif`; g.fillText(t,W/2,H/2); }),1,1,true); }
 function decal(g,w,h,t,pos,rotY){ const m=new T3.Mesh(new T3.PlaneGeometry(w,h),new T3.MeshStandardMaterial({map:t,transparent:true,roughness:.5,polygonOffset:true,polygonOffsetFactor:-2})); m.position.set(...pos); m.rotation.y=rotY||0; g.add(m); return m; }
 /* 스틱 파우치 : 은박 · 양끝 실링 · 적색 인쇄 — 길이 방향 X */
-function stickArt(g,L,W,vert){ if(vert){ g.translate(0,L); g.rotate(-Math.PI/2); } const gr=g.createLinearGradient(0,0,0,W); gr.addColorStop(0,"#b9bdc1"); gr.addColorStop(.5,"#e6e8ea"); gr.addColorStop(1,"#b3b7bb"); g.fillStyle=gr; g.fillRect(0,0,L,W);
-  g.strokeStyle="rgba(120,124,128,.8)"; g.lineWidth=1; for(const x0 of [0,L*.92]) for(let x=x0+2;x<x0+L*.08;x+=3){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,W); g.stroke(); }
-  g.fillStyle="#b9242c"; g.fillRect(L*.2,W*.14,L*.46,W*.72); g.fillStyle="#fff"; g.font=`bold ${Math.floor(W*.36)}px "Malgun Gothic",sans-serif`; g.textAlign="center"; g.textBaseline="middle"; g.fillText("판콜에이치",L*.43,W*.5);
-  g.fillStyle="#555"; g.font=`${Math.floor(W*.2)}px sans-serif`; g.fillText("건조시럽",L*.79,W*.5); }
+function stickArt(g,L,W,vert){ if(vert){ g.translate(0,L); g.rotate(-Math.PI/2); } const gr=g.createLinearGradient(0,0,0,W); gr.addColorStop(0,"#d9dcdf"); gr.addColorStop(.5,"#f6f7f8"); gr.addColorStop(1,"#d2d5d8"); g.fillStyle=gr; g.fillRect(0,0,L,W);
+  g.strokeStyle="rgba(150,154,158,.8)"; g.lineWidth=1; for(const x0 of [0,L*.94]) for(let x=x0+2;x<x0+L*.06;x+=3){ g.beginPath(); g.moveTo(x,0); g.lineTo(x,W); g.stroke(); }
+  g.fillStyle="#d8342c"; g.fillRect(L*.06,0,L*.3,W); g.fillRect(L*.87,0,L*.07,W); g.fillStyle="#fff"; g.font=`bold ${Math.floor(W*.4)}px "Malgun Gothic",sans-serif`; g.textAlign="center"; g.textBaseline="middle"; g.fillText("판콜",L*.21,W*.5);
+  g.fillStyle="#d8342c"; g.font=`bold ${Math.floor(W*.34)}px sans-serif`; g.fillText("H",L*.42,W*.5); g.fillStyle="#666"; for(let k=0;k<4;k++) g.fillRect(L*.5,W*(.2+k*.17),L*.3,W*.05); }
 TX.stick=tex(cvs(256,64,(g)=>stickArt(g,256,64,false)),1,1,true);
 TX.strip=tex(cvs(64,256,(g)=>stickArt(g,256,64,true)),1,1,true);
 M.stick=new T3.MeshStandardMaterial({map:TX.stick,metalness:.3,roughness:.36,envMapIntensity:1.3});
@@ -88,3 +88,10 @@ function stickGeo(L,W,T){ const nu=12,nv=4,p=[],uv=[],idx=[]; for(const s of [1,
   const geo=new T3.BufferGeometry(); geo.setAttribute("position",new T3.Float32BufferAttribute(p,3)); geo.setAttribute("uv",new T3.Float32BufferAttribute(uv,2)); geo.setIndex(idx); geo.computeVertexNormals(); return geo; }
 /* 두 꺾은선 사이를 메운 평판 (z 고정) */
 function fin(g,pa,pb,z,mat){ const p=[],idx=[]; for(let i=0;i<pa.length;i++){ p.push(pa[i][0],pa[i][1],z, pb[i][0],pb[i][1],z); if(i<pa.length-1){ const k=i*2; idx.push(k,k+1,k+3,k,k+3,k+2); } } const geo=new T3.BufferGeometry(); geo.setAttribute("position",new T3.Float32BufferAttribute(p,3)); geo.setIndex(idx); geo.computeVertexNormals(); const m=new T3.Mesh(geo,mat); g.add(m); return m; }
+/* 엠보(마름모) 슈트 · 인쇄 은박 웹 · 크림색 수지 */
+TX.emboss=tex(cvs(64,64,(g,w,h)=>{ g.fillStyle="#808080"; g.fillRect(0,0,w,h); for(let j=-1;j<3;j++) for(let i=-1;i<3;i++){ const x=i*32+(j%2?16:0), y=j*16; const gr=g.createRadialGradient(x+16,y+8,1,x+16,y+8,13); gr.addColorStop(0,"#ffffff"); gr.addColorStop(1,"#606060"); g.fillStyle=gr; g.beginPath(); g.moveTo(x+16,y-4); g.lineTo(x+30,y+8); g.lineTo(x+16,y+20); g.lineTo(x+2,y+8); g.fill(); } }),1/.012,1/.012);
+M.emboss=new T3.MeshStandardMaterial({color:0xd2d5d8,metalness:1,roughness:.22,envMapIntensity:1.25,side:T3.DoubleSide,bumpMap:TX.emboss,bumpScale:.0016,roughnessMap:TX.emboss});
+TX.web=tex(cvs(256,128,(g,w,h)=>{ g.fillStyle="#f1f2f2"; g.fillRect(0,0,w,h); g.fillStyle="#d8342c"; g.fillRect(8,0,84,h); g.fillRect(226,0,18,h); g.fillStyle="#fff"; g.font="bold 30px sans-serif"; g.save(); g.translate(50,h/2); g.rotate(-Math.PI/2); g.textAlign="center"; g.fillText("판콜",0,10); g.restore(); g.fillStyle="#777"; for(let k=0;k<5;k++) g.fillRect(118,14+k*22,86,5); g.strokeStyle="#b9bcc0"; g.lineWidth=2; g.strokeRect(0,0,w,h); }),1/.11,1/.08,true);
+M.web=new T3.MeshStandardMaterial({map:TX.web,metalness:.25,roughness:.35,side:T3.DoubleSide});
+M.cream=new T3.MeshStandardMaterial({color:0xe9e2c4,roughness:.6});
+M.brass=new T3.MeshStandardMaterial({color:0xb08d3c,metalness:.8,roughness:.4});
