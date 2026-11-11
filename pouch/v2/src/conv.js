@@ -17,7 +17,7 @@ function buildConveyor(S){
   { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zT,zS,{open:true});
     for(const z of [zc-.2,zc+.2]){ rod(G,[-.03,.14,z-.05],[-.03,.14,z+.05],.008,M.white,10); for(const d of [-.05,.05]) rod(G,[-.03,.106,z+d],[-.03,.14,z+d],.007,M.white,8); }       /* 흰 손잡이 */
     for(const z of [zc,zc-.21,zc+.21]) bx(G,-hw-.034,hw-.02,.1,.112,z-.003,z+.003,M.acryl);
-    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,.108,zc],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=Math.PI/2; }
+    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,.108,zc],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=-Math.PI/2; }
   { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zB,zT,{}); for(const z of [zB+.25]){ rod(G,[-.04,.135,z-.05],[.04,.135,z-.05],.007,M.white,8); } }
   { const G=new T3.Group(); G.position.set(X,(y0+yE)/2,(zB+zE)/2); G.rotation.x=A; g.add(G); sect(G,-L2/2,L2/2,{});
     for(const t of [-.3,0,.3]) for(const s of [-1,1]) rod(G,[s*(hw+.05),.07,t*L2-.05],[s*(hw+.05),.07,t*L2+.05],.007,M.ssMir,8); }
