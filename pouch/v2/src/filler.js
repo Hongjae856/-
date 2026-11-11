@@ -23,6 +23,9 @@ function buildFiller(S){
   bx(g,3.85,4.45,Y+.0,Y+.05,F.z1-.07,F.z1-.01,M.haz); rod(g,[3.85,Y+F.rail,F.z1-e],[4.45,Y+F.rail,F.z1-e],.012,M.yellow);
   plate(g,.42,.13,labelTex([["원료투입구","#111",90]],{w:512,h:160,border:"#c00"}),[4.15,Y+.55,F.z1-.02],0);
   for(const [x,z] of [[xw+e,F.z0+e],[F.x1-e,F.z0+e],[xw+e,F.z1-e]]) rod(g,[x,Y+F.rail,z],[x,RM.fill.h,z],.016,M.ssMir);
+  plate(g,.5,.14,labelTex([["머리충돌주의!","#111",80]],{w:640,h:170,bg:"#f2c400",border:"#111"}),[xw-.008,Y-.09,F.z1-.9],-Math.PI/2);
+  plate(g,.5,.14,labelTex([["머리충돌주의!","#111",80]],{w:640,h:170,bg:"#f2c400",border:"#111"}),[4.2,Y-.09,F.z1+.008],0);
+  for(let x=xw+.15;x<F.x1;x+=.3) rod(g,[x,Y-.05,F.z1+.006],[x,Y-.05,F.z1+.01],.007,M.ssD,8);                         /* 테두리판 볼트 */
   /* ── 계단 : 1,586 × 630 · 11단 · 50° · 양쪽 난간 ── */
   const n=STR.n, run=(STR.x1-STR.x0)/n, rise=Y/n;
   for(let i=0;i<n;i++){ const x=STR.x0+i*run, y=Y-(i+1)*rise+rise; const st=bx(g,x+.01,x+run+.04,y-rise-.006+rise*0,y-rise+.0+.02-.02,STR.z0+.04,STR.z1-.04,M.deck); st.position.y=Y-(i+.999)*rise; st.scale.y=1; st.geometry=new T3.BoxGeometry(run+.03,.025,STR.z1-STR.z0-.08); }
@@ -35,7 +38,13 @@ function buildFiller(S){
   bx(g,F.bx0,F.bx1,by0,by1,F.bz0,F.bz1,M.ss);
   for(const x of [F.bx0+.2,(F.bx0+F.bx1)/2,F.bx1-.2]) for(const z of [F.bz0+.18,F.bz1-.18]){ rod(g,[x,0,z],[x,.2,z],.09,M.ss,24); rod(g,[x,.2,z],[x,by0,z],.03,M.ssD); }
   bx(g,F.bx0+.5,F.bx1-.55,by0+.12,by1-.15,F.bz1,F.bz1+.012,M.ss); bx(g,F.bx0+.5,F.bx1-.55,by0+.11,by0+.12,F.bz1,F.bz1+.014,M.ssD);  /* 제어함 문 */
-  rod(g,[F.bx1-.62,1.05,F.bz1+.02],[F.bx1-.62,1.2,F.bz1+.02],.012,M.dark); 
+  rod(g,[F.bx1-.62,1.05,F.bz1+.02],[F.bx1-.62,1.2,F.bz1+.02],.012,M.dark);
+  for(const y of [.7,1.15,1.6]) bx(g,F.bx0+.48,F.bx0+.51,y-.05,y+.05,F.bz1+.012,F.bz1+.024,M.ssD);                 /* 문 경첩 */
+  bx(g,F.bx0+.1,F.bx0+.42,.5,1.75,F.bz1,F.bz1+.008,M.ss); bx(g,F.bx1-.5,F.bx1-.08,.5,1.75,F.bz1,F.bz1+.008,M.ss);     /* 좌우 패널 이음 */
+  for(const x of [F.bx0+.05,F.bx1-.05]) for(let y=.45;y<1.85;y+=.2) rod(g,[x,y,F.bz1],[x,y,F.bz1+.006],.008,M.ssD,8); /* 볼트 */
+  { const G=new T3.Group(); for(let i=0;i<8;i++) bx(G,-.14,.14,i*.03,i*.03+.012,0,.012,M.ssD); bx(G,-.16,.16,-.02,.25,-.002,.004,M.ss); G.position.set(F.bx1-.3,1.25,F.bz1+.004); g.add(G); }  /* 통풍 루버 */
+  plate(g,.22,.13,labelTex([["SOLPAC","#fff",70],["PACKAGING SOLUTIONS","#fff",26],["MODEL  SP303-10P","#111",30]],{w:512,h:300,bg:"#2d55a8"}),[F.bx1-.3,1.62,F.bz1+.013],0);
+
   tube(g,[[F.bx0+.3,1.1,F.bz1+.03],[F.bx0+.3,.6,F.bz1+.08],[F.bx0+.32,.25,F.bz1+.12],[F.bx0+.36,.5,F.bz1+.1]],.012,M.yellow);                     /* 노란 코일 에어호스 */
   plate(g,.5,.18,labelTex([["고온주의","#fff",120]],{w:512,h:180,bg:"#c8201c"}),[(F.bx0+F.bx1)/2,1.55,F.bz1+.014],0);
   /* ── 서쪽 정면 : 성형 → 세로 실링 → 가로 실링 → 커팅 → 곡면 슈트 → 포켓 트레이 ── */
