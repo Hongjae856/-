@@ -11,19 +11,20 @@ function buildConveyor(S){
   /* 구간 틀 : 받침(알루미늄) · 벨트 · 옆 가이드 · 투명 커버 (트레이 구간은 동쪽이 슈트 쪽으로 열림) */
   const sect=(G,l0,l1,o)=>{ bx(G,-hw-.03,hw+.03,-.06,-.004,l0,l1,M.alu); bx(G,-hw,hw,-.004,0,l0,l1,M.belt);
     bx(G,-hw-.02,-hw-.003,0,.03,l0,l1,M.ss); if(!o.open) bx(G,hw+.003,hw+.02,0,.03,l0,l1,M.ss);
-    bx(G,-hw-.034,-hw-.028,0,.1,l0,l1,M.acryl); if(!o.open) bx(G,hw+.028,hw+.034,0,.1,l0,l1,M.acryl);
-    bx(G,-hw-.034,o.open?hw-.02:hw+.034,.1,.106,l0,l1,M.acryl);
-    for(const s of (o.open?[-1]:[-1,1])) for(let z=l0+.08;z<l1;z+=.42) bx(G,s*(hw+.036)-.004,s*(hw+.036)+.004,-.05,.106,z-.012,z+.012,M.alu); };
+    const lh=o.open?.125:.1;                                                    /* 트레이 구간 뚜껑은 슈트 끝 · 미끄러져 들어오는 스틱과 닿지 않게 높이고 동쪽 끝을 물림 */
+    bx(G,-hw-.034,-hw-.028,0,lh,l0,l1,M.acryl); if(!o.open) bx(G,hw+.028,hw+.034,0,.1,l0,l1,M.acryl);
+    bx(G,-hw-.034,o.open?hw-.04:hw+.034,lh,lh+.006,l0,l1,M.acryl);
+    for(const s of (o.open?[-1]:[-1,1])) for(let z=l0+.08;z<l1;z+=.42) bx(G,s*(hw+.036)-.004,s*(hw+.036)+.004,-.05,lh+.006,z-.012,z+.012,M.alu); };
   { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zT,zS,{open:true});
-    for(const z of [zc-.2,zc+.2]){ rod(G,[-.03,.14,z-.05],[-.03,.14,z+.05],.008,M.white,10); for(const d of [-.05,.05]) rod(G,[-.03,.106,z+d],[-.03,.14,z+d],.007,M.white,8); }       /* 흰 손잡이 */
-    for(const z of [zc,zc-.21,zc+.21]) bx(G,-hw-.034,hw-.02,.1,.112,z-.003,z+.003,M.acryl);
-    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,.108,zc],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=-Math.PI/2; }
+    for(const z of [zc-.4,zc+.4]){ rod(G,[-.085,.165,z],[-.005,.165,z],.008,M.white,10); for(const d of [-.085,-.005]) rod(G,[d,.131,z],[d,.165,z],.007,M.white,8); }       /* 흰 손잡이 : 슈트 구간 바깥 양끝 */
+    for(const z of [zc,zc-.37,zc+.37]) bx(G,-hw-.034,hw-.04,.125,.137,z-.003,z+.003,M.acryl);
+    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,.133,zc-.19],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=-Math.PI/2; }
   { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zB,zT,{}); for(const z of [zB+.25]){ rod(G,[-.04,.135,z-.05],[.04,.135,z-.05],.007,M.white,8); } }
   { const G=new T3.Group(); G.position.set(X,(y0+yE)/2,(zB+zE)/2); G.rotation.x=A; g.add(G); sect(G,-L2/2,L2/2,{});
     for(const t of [-.3,0,.3]) for(const s of [-1,1]) rod(G,[s*(hw+.05),.07,t*L2-.05],[s*(hw+.05),.07,t*L2+.05],.007,M.ssMir,8); }
   /* 받침 칸 (검은 U 자 받침) · 스틱 */
   const P=FM.P, N=Math.ceil(CV.L/P)+1, o=new T3.Object3D();
-  const sh=new T3.Shape(); [[-.026,0],[.026,0],[.026,.02],[.019,.02],[.019,CV.hb],[-.019,CV.hb],[-.019,.02],[-.026,.02]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b));
+  const sh=new T3.Shape(); [[-.03,0],[.03,0],[.03,.018],[.026,.018],[.026,CV.hb],[-.026,CV.hb],[-.026,.018],[-.03,.018]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b));
   const hg=new T3.ExtrudeGeometry(sh,{depth:CV.w-.012,bevelEnabled:false}); hg.translate(0,0,-(CV.w-.012)/2); hg.rotateY(Math.PI/2);
   const cle=new T3.InstancedMesh(hg,M.belt,N); cle.castShadow=true; cle.frustumCulled=false; g.add(cle);
   const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.frustumCulled=false; g.add(stk);
