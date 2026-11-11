@@ -17,8 +17,8 @@ function labelTex(lines,o){ o=o||{}; const W=o.w||512,H=o.h||192; return tex(cvs
   g.textAlign="center"; g.textBaseline="middle"; const n=lines.length; lines.forEach((l,i)=>{ g.fillStyle=l[1]||"#111"; g.font=`bold ${l[2]||Math.floor(H/(n+.6))}px "Malgun Gothic","Noto Sans KR",sans-serif`; g.fillText(l[0],W/2,H*(i+.5)/n); }); }),1,1,true); }
 /* ── 재질 ── */
 const M={};
-M.ss   =new T3.MeshStandardMaterial({color:0xc9ccce,metalness:1,roughness:.34,roughnessMap:TX.hair,bumpMap:TX.hair,bumpScale:.0006});
-M.ssMir=new T3.MeshStandardMaterial({color:0xd8dadc,metalness:1,roughness:.12});
+M.ss   =new T3.MeshStandardMaterial({color:0xd2d5d7,metalness:1,roughness:.3,envMapIntensity:1.25,roughnessMap:TX.hair,bumpMap:TX.hair,bumpScale:.0006});
+M.ssMir=new T3.MeshStandardMaterial({color:0xe2e4e6,metalness:1,roughness:.1,envMapIntensity:1.35});
 M.ssD  =new T3.MeshStandardMaterial({color:0x9da2a6,metalness:1,roughness:.45,roughnessMap:TX.hair});
 M.deck =new T3.MeshStandardMaterial({color:0xbfc3c5,metalness:1,roughness:.42,bumpMap:TX.checker,bumpScale:.004,roughnessMap:TX.checker});
 M.grey =new T3.MeshStandardMaterial({color:0x8d9297,metalness:.1,roughness:.55});

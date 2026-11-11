@@ -20,8 +20,8 @@ function buildFillRoom(S){
   const grille=(x,z,ry)=>{ const G=new T3.Group(); bx(G,-.3,.3,.12,.62,0,.02,M.ss); for(let i=0;i<9;i++) bx(G,-.26,.26,.16+i*.05,.185+i*.05,.02,.03,M.ssD); G.position.set(x,0,z); G.rotation.y=ry; g.add(G); };
   grille(.03,5.6,Math.PI/2); grille(R.x1-.03,4.6,-Math.PI/2); grille(9.5,R.z0+.03,0); grille(RM.pier+.14,.3,Math.PI/2);
   /* 조명 */
-  S.add(new T3.HemisphereLight(0xf2f6ff,0xa9ada4,.28));
-  const key=new T3.DirectionalLight(0xffffff,.72); key.position.set(4.6,H+3,5.2); key.target.position.set(4.2,0,2.7); key.castShadow=true; key.shadow.mapSize.set(2048,2048);
+  S.add(new T3.HemisphereLight(0xf4f7ff,0x8a8e86,.22));
+  const key=new T3.DirectionalLight(0xffffff,.95); key.position.set(4.6,H+3,5.2); key.target.position.set(4.2,0,2.7); key.castShadow=true; key.shadow.mapSize.set(2048,2048);
   Object.assign(key.shadow.camera,{left:-7,right:8,top:6,bottom:-6,near:.5,far:14}); key.shadow.bias=-.0004; key.shadow.normalBias=.02; key.shadow.radius=4; S.add(key); S.add(key.target);
   for(const [x,z] of [[2.2,3],[8.6,3.4]]){ const p=new T3.PointLight(0xfff8ee,.22,9,1.6); p.position.set(x,H-.3,z); S.add(p); }
   return g;

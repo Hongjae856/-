@@ -53,6 +53,16 @@ function buildFiller(S){
     bx(g,wx-.42,wx-.3,.9,.97,z-.055,z+.055,M.black); }                                   /* 곡면 슈트 · 포켓 */
   bx(g,wx-.46,wx-.26,.86,.9,zc-.72,zc+.72,M.ss); bx(g,wx-.46,wx-.26,.55,.86,zc-.7,zc+.7,M.ss);     /* 트레이 받침 · 구동부 커버 */
   for(const s of [-1,1]){ bx(g,wx-.45,wx-.27,.97,1.06,zc+s*.36-.34,zc+s*.36+.34,M.acryl); rod(g,[wx-.47,1.02,zc+s*.36-.08],[wx-.47,1.02,zc+s*.36+.08],.008,M.ssMir); }
+  /* 케이블 체인 · 주름 커버 이송 나사 · 클램프 레버 (성형부 양옆) */
+  for(const s of [-1,1]){ const z=zc+s*.71; for(let k=0;k<14;k++) bx(g,wx-.2,wx-.12,1.0+k*.05,1.04+k*.05,z-.03,z+.03,M.black);
+    for(let k=0;k<16;k++) rod(g,[wx-.3,1.08+k*.022,z],[wx-.3,1.095+k*.022,z],.028-(k%2)*.006,M.dark,14); }
+  rod(g,[wx-.26,1.5,zc-.76],[wx-.4,1.42,zc-.76],.012,M.dark);
+  /* 배출부 : 서쪽으로 빠지는 투명 커버 컨베이어 시작부 · 경광등 · 조작 박스 · 공압 레귤레이터 */
+  bx(g,wx-.46,wx-.26,.86,.9,zc-.95,zc-.72,M.ss); rod(g,[wx-.36,1.06,zc-.86],[wx-.36,1.5,zc-.86],.018,M.ssMir);
+  for(const [y,m] of [[1.5,M.green],[1.56,M.yellow],[1.62,M.red]]) rod(g,[wx-.36,y,zc-.86],[wx-.36,y+.058,zc-.86],.032,m,18);
+  bx(g,wx-.46,wx-.3,.92,1.04,zc-.95,zc-.78,M.white); rod(g,[wx-.46,.99,zc-.9],[wx-.49,.99,zc-.9],.022,M.red,16); rod(g,[wx-.46,.99,zc-.83],[wx-.48,.99,zc-.83],.014,M.green,12);
+  plate(g,.2,.07,labelTex([["불량 조치 시","#c00",50],["핀셋 사용","#c00",50]],{w:384,h:140,border:"#c00"}),[wx-.462,.8,zc+.2],-Math.PI/2);
+  for(const dz of [.15,.3]){ rod(g,[wx-.2,.42,zc-.5+dz],[wx-.2,.56,zc-.5+dz],.028,M.white,12); rod(g,[wx-.2,.56,zc-.5+dz],[wx-.2,.62,zc-.5+dz],.022,M.dark,12); }
   /* 정면 투명 아크릴 문 (도어 인터락) */
   bx(g,wx-.52,wx-.5,1.05,by1,zc-.78,zc+.78,M.acryl);
   for(const z of [zc-.78,zc+.78]) bx(g,wx-.53,wx-.49,1.05,by1,z-.012,z+.012,M.ss);
@@ -73,7 +83,7 @@ function buildFiller(S){
   for(const dz of [.78,.92]) { rod(g,[ex+.06,.5,zc+dz-.3],[ex+.06,.75,zc+dz-.3],.03,M.white,12); rod(g,[ex+.06,.75,zc+dz-.3],[ex+.06,.85,zc+dz-.3],.025,M.dark,12); }
   /* ── 데크 위 : 도징 베이스 · 호퍼 1(첨가제) · 2(주성분) · 3(백당) · 진공이송기 · 도징 실린더 ── */
   bx(g,F.bx0+.15,F.bx1-.15,Y,Y+.22,F.bz0+.2,F.bz1-.2,M.ss);
-  const hop=(x,nm,vac)=>{ const w=vac?.52:.74, yb=Y+.62, yt=Y+(vac?1.08:1.02);
+  const hop=(x,nm,vac)=>{ const w=vac?.46:.6, yb=Y+.62, yt=Y+(vac?1.08:1.02);
     bx(g,x-w/2,x+w/2,yb,yt,zc-.3,zc+.3,M.ssMir);                                           /* 상자형 몸체 */
     if(vac) frustum(g,x,Y+.3,yb,zc,w,.6,.12,.12,M.ssMir,(x<4.2?-.18:.18),0); else frustum(g,x,Y+.3,yb,zc,w,.6,.14,.14,M.ssMir);
     bx(g,x-w/2-.07,x+w/2+.07,yt,yt+.015,zc-.37,zc+.37,M.ssMir);                             /* 윗판 */
@@ -83,9 +93,12 @@ function buildFiller(S){
       tube(g,[[x+.1,F.top,zc],[x+.14,F.top+.14,zc-.1],[x+.3,F.top+.1,zc-.5],[x+.5,Y+1.0,zc-1.0]],.022,M.hose); }
     else { bx(g,x-.2,x+.2,yt+.015,yt+.03,zc-.2,zc+.2,M.ss); rod(g,[x-.08,yt+.07,zc],[x+.08,yt+.07,zc],.01,M.ssMir); rod(g,[x,yt+.03,zc],[x,yt+.2,zc],.045,M.white,20); }
     for(let k=0;k<5;k++){ const z=zc-.24+k*.12; rod(g,[x,Y+.22,z],[x,Y+.44,z],.02,M.alu,10); rod(g,[x,Y+.44,z],[x,Y+.47,z],.012,M.orange,8); } };
-  hop(3.55,"1",true); hop(4.22,"2",false); hop(4.9,"3",true);
+  hop(3.48,"1",true); hop(4.22,"2",false); hop(4.96,"3",true);
   bx(g,F.bx1-.5,F.bx1-.2,Y+.22,Y+.5,zc-.5,zc-.3,M.green); rod(g,[F.bx1-.35,Y+.5,zc-.4],[F.bx1-.35,Y+.6,zc-.4],.03,M.yellow,16);     /* 공압 밸브 블록 · 압력계 */
   bx(g,F.bx0+.3,F.bx1-.3,Y+.22,Y+.3,zc-.08,zc+.08,M.cloth);
+  /* 공압 호스 다발 (투명 · 파랑) · 은색 주름 진공 호스 */
+  for(let k=0;k<7;k++){ const x=3.4+k*.26; tube(g,[[x,Y+.46,zc-.26],[x+.03,Y+.62,zc-.42],[x-.02,Y+.4,zc-.52],[x,Y+.24,zc-.46]],.006,k%2?M.hoseB:M.hose); }
+  tube(g,[[F.bx1-.35,Y+.55,zc-.4],[F.bx1-.1,Y+.8,zc-.55],[F.bx1+.1,Y+.5,zc-.6],[F.bx1+.15,Y+.05,zc-.62]],.03,M.ssD);
   /* ── 컨트롤 판넬 : 데크에서 내려온 암 · 흰 함체 · 터치스크린 · RUN STOP JOG RESET FILLING BUZZER · 비상정지 ── */
   const px=2.2, pzz=F.z0+.45;
   bx(g,px-.03,px+.03,1.72,Y-.1,pzz-.03,pzz+.03,M.white); bx(g,px-.18,px+.02,1.05,1.72,pzz-.27,pzz+.27,M.white);
