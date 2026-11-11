@@ -1,6 +1,6 @@
 /* ═══ 배출 컨베이어 : 슈트 아래 칸막이 벨트(트레이) → 북쪽 일직선 → 경사 상승 → 벽 개구부 → 스틱공급장치 상단
    칸 간격 = 성형 열 간격 (10열이 동시에 10칸에 1포씩 안착). 칸막이 · 스틱은 경로 함수 CV.at(s) 로 배치한다 ═══ */
-const CV={ w:.15, zS:FL.zc+.66, zB:FL.zc-.95, zE:-.45, yE:1.52, R:.16, H:.034 };
+const CV={ w:.15, zS:FL.zc+.66, zB:FL.zc-.95, zE:-.45, yE:1.52, R:.16, H:.018 };
 function buildConveyor(S){
   const g=new T3.Group(); S.add(g); const y0=FM.beltY, zS=CV.zS, zB=CV.zB, zE=CV.zE, yE=CV.yE, hw=CV.w/2, zc=FL.zc, X=CVX;
   const L1=zS-zB, L2=Math.hypot(zB-zE,yE-y0), A=Math.atan2(yE-y0,zB-zE), R=CV.R; CV.L=L1+L2; CV.L1=L1; CV.A=A;
@@ -24,7 +24,7 @@ function buildConveyor(S){
   const cle=new T3.InstancedMesh(new T3.BoxGeometry(CV.w-.012,CV.H,.004),M.belt,N); cle.castShadow=true; g.add(cle);
   const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.receiveShadow=true; g.add(stk);
   CV.N=N; CV.full=new Uint8Array(N+4).fill(1);
-  CV.set=u=>{ const span=N*P; for(let k=0;k<N;k++){ let s=((k*P+u)%span+span)%span; const q=CV.at(Math.min(s,CV.L)), vis=s<=CV.L;
+  CV.out=0; CV.set=u=>{ const span=N*P; for(let k=0;k<N;k++){ let s=((k*P+u)%span+span)%span; if(CV.prev){ if(s<CV.prev[k]-P){ CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; } const q=CV.at(Math.min(s,CV.L)), vis=s<=CV.L;
       o.position.set(X,q.y+Math.cos(q.a)*CV.H/2,q.z+Math.sin(q.a)*CV.H/2); o.rotation.set(q.a,0,0); o.scale.setScalar(vis?1:0); o.updateMatrix(); cle.setMatrixAt(k,o.matrix);
       const s2=s+P/2, q2=CV.at(Math.min(s2,CV.L)), on=CV.full[k]&&s2<CV.L; o.position.set(X,q2.y+Math.cos(q2.a)*.0052,q2.z+Math.sin(q2.a)*.0052); o.rotation.set(q2.a,0,0); o.scale.setScalar(on?1:0); o.updateMatrix(); stk.setMatrixAt(k,o.matrix); }
     cle.instanceMatrix.needsUpdate=true; stk.instanceMatrix.needsUpdate=true; };

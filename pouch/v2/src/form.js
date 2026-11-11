@@ -35,7 +35,8 @@ function buildForming(g,by1){
   { const m=bx(g,X(.2712),X(.27),1.262,1.283,zc-.03,zc+.03,M.warn); m.castShadow=false; }
   for(let k=0;k<n;k+=1){ const z=edge(k)+P*.5; if(k%2===0) rod(g,[X(.25),1.13,z+.03],[X(.21),1.1,z+.03],.009,M.dark,8); }
   /* 은박 10열 (성형 뒤 ~ 커터) */
-  for(let i=0;i<n;i++){ const h=1.64-FM.yCut, m=new T3.Mesh(new T3.PlaneGeometry(FM.stickW,h),M.strip.clone()); m.material.map=TX.strip.clone(); m.material.map.repeat.set(1,h/FM.stickL); m.material.map.needsUpdate=true; m.rotation.y=WEST; m.position.set(X(.062),FM.yCut+h/2,pz(i)); add(g,m); }
+  { const h=1.64-FM.yCut, sm=M.strip.clone(); sm.map=TX.strip.clone(); sm.map.repeat.set(1,h/FM.stickL); sm.map.needsUpdate=true; FM.stripTex=sm.map;
+    for(let i=0;i<n;i++){ const m=new T3.Mesh(new T3.PlaneGeometry(FM.stickW,h),sm); m.rotation.y=WEST; m.position.set(X(.062),FM.yCut+h/2,pz(i)); add(g,m); } }
   /* 커터 : 가로 바 · 양옆 검은 톱니판 · 열 감지 센서 */
   bx(g,X(.2),X(.03),FM.yCut,FM.yCut+.045,zc-.58,zc+.58,M.ssD); bx(g,X(.21),X(.2),FM.yCut+.008,FM.yCut+.037,zc-.56,zc+.56,M.ss);
   for(const s of [-1,1]){ bx(g,X(.25),X(.03),FM.yCut-.02,FM.yCut+.075,zc+s*.58,zc+s*.78,M.black); for(let k=0;k<6;k++) bx(g,X(.255),X(.25),FM.yCut-.012+k*.015,FM.yCut-.005+k*.015,zc+s*.6,zc+s*.76,M.dark); }
