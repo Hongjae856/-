@@ -1,25 +1,12 @@
 /* ═══ 충전실 주변 : 북쪽 벽 유리창 · 개구부, 경사 컨베이어, 프린터 컨트롤러 거치대, IBC 2기 · 받침 호퍼 · 진공호스,
-       저울 작업대 2대(북서), 드럼리프터(북동), 예비 은박(남동), 출입문 2(남), 진공청소기 — DRAWING.md 6 · 8절 ═══ */
+       저울 작업대 2대(북서), 드럼리프터(북동), 예비 은박(남동), 출입문 2(남) — DRAWING.md 6 · 8절 ═══ */
 function buildFillZone(S){
   const g=new T3.Group(); S.add(g); const F=FL, zc=F.zc, H=RM.fill.h;
   /* ── 북쪽 벽 : 유리창 2 (컨베이어 양옆) · 사각 개구부(스테인리스 테두리) · 인터폰 ── */
   const glass=new T3.MeshPhysicalMaterial({color:0x9fc4d6,roughness:.05,metalness:0,transparent:true,opacity:.45});
   for(const x0 of [CVX-1.25,CVX+.3]){ bx(g,x0,x0+.95,1.05,2.15,.026,.034,glass); for(const [a,b,c,d] of [[x0-.04,x0+.99,1.01,1.05],[x0-.04,x0+.99,2.15,2.19],[x0-.04,x0,1.01,2.19],[x0+.95,x0+.99,1.01,2.19]]) bx(g,a,b,c,d,.02,.045,M.alu); }
-  for(const [a,b,c,d] of [[CVX-.2,CVX+.2,1.2,1.24],[CVX-.2,CVX+.2,1.72,1.76],[CVX-.2,CVX-.16,1.2,1.76],[CVX+.16,CVX+.2,1.2,1.76]]) bx(g,a,b,c,d,.0,.09,M.ss);
-  bx(g,CVX-.16,CVX+.16,1.24,1.72,.024,.03,M.black);
+  for(const [a,b,c,d] of [[CVX-.2,CVX+.2,1.2,1.24],[CVX-.2,CVX+.2,1.62,1.66],[CVX-.2,CVX-.16,1.2,1.66],[CVX+.16,CVX+.2,1.2,1.66]]) bx(g,a,b,c,d,.0,.09,M.ss);
   bx(g,CVX+.45,CVX+.55,1.35,1.6,.026,.06,M.white);
-  /* ── 경사 컨베이어 : 배출 트레이 → 북쪽 일직선 상승 → 벽 개구부 (투명 커버 · 알루미늄 프레임 · A자 받침대) ── */
-  { const z0=zc-.8, z1=zc-1.3, zN=.05, y0=.9, y1=1.44, L=Math.hypot(z1-zN,y1-y0), ang=Math.atan2(y1-y0,z1-zN);
-    bx(g,CVX-.13,CVX+.13,y0-.06,y0,z1,z0+.1,M.alu); bx(g,CVX-.1,CVX+.1,y0,y0+.006,z1,z0+.1,M.dark);
-    const G=new T3.Group(); G.position.set(CVX,(y0+y1)/2,(z1+zN)/2); G.rotation.x=ang; g.add(G);
-    bx(G,-.13,.13,-.06,0,-L/2,L/2,M.alu); bx(G,-.1,.1,0,.006,-L/2,L/2,M.dark);
-    for(const s of [-1,1]) bx(G,s*.13-.008,s*.13+.008,0,.14,-L/2,L/2,M.acryl); bx(G,-.13,.13,.14,.146,-L/2,L/2,M.acryl);
-    for(const t of [-.3,.1,.4]) rod(G,[-.06,.16,t*L],[.06,.16,t*L],.008,M.ssMir);
-    for(let k=0;k<5;k++){ const pm=new T3.Mesh(new T3.BoxGeometry(.035,.004,.11),M.foil); pm.position.set((k%2-.5)*.06,.012,-L/2+.3+k*.32); add(G,pm); }
-    const zs=(z1+zN)/2-.2, ys=(y0+y1)/2-.02;                                                   /* A자 받침대 (회색 · 캐스터) */
-    for(const s of [-1,1]){ rod(g,[CVX+s*.2,.06,zs-.25],[CVX+s*.14,ys-.06,zs],.02,M.grey); rod(g,[CVX+s*.2,.06,zs+.25],[CVX+s*.14,ys-.06,zs],.02,M.grey); rod(g,[CVX+s*.2,.06,zs-.25],[CVX+s*.2,.06,zs+.25],.02,M.grey); for(const dz of [-.25,.25]) rod(g,[CVX+s*.2,0,zs+dz],[CVX+s*.2,.05,zs+dz],.025,M.dark,12); }
-    rod(g,[CVX-.2,.35,zs],[CVX+.2,.35,zs],.016,M.grey);
-    plate(g,.2,.07,labelTex([["안전커버 임의 Open 금지!","#c00",44]],{w:640,h:150,bar:"#c2185b"}),[CVX+.14,ys+.12,zs+.5],Math.PI/2); }
   /* ── 프린터 컨트롤러 · 비전 PC 거치대 (알루미늄 프로파일 케이스) ── */
   { const x0=CVX+.35,x1=CVX+.97,z0=.42,z1=.9; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-.02,x+.02,.05,1.55,z-.02,z+.02,M.alu);
     for(const y of [.25,.95,1.55]){ bx(g,x0,x1,y-.015,y,z0,z1,M.white); }
@@ -59,8 +46,7 @@ function buildFillZone(S){
     for(const [dz,m] of [[-.25,M.foil],[.25,M.foilP]]){ const r=new T3.Mesh(new T3.CylinderGeometry(.22,.22,.95,40),m); r.rotation.z=Math.PI/2; r.position.set(x,.38,z+dz); add(g,r); rod(g,[x-.5,.38,z+dz],[x+.5,.38,z+dz],.04,M.dark,16); } }
   /* ── 출입문 2 (남쪽 벽) : 양개문 · 유리창 ── */
   for(const x0 of [.7,8.3]){ const z=RM.fill.z1-.03; bx(g,x0-.05,x0+1.05,0,2.15,z-.02,z,M.alu); for(const dx of [0,.5]){ bx(g,x0+dx+.01,x0+dx+.49,.02,2.1,z-.03,z-.02,M.white); bx(g,x0+dx+.1,x0+dx+.4,1.2,1.8,z-.034,z-.03,glass); rod(g,[x0+(dx?.56:.44),1.0,z-.06],[x0+(dx?.56:.44),1.12,z-.06],.01,M.ssMir); } }
-  /* ── 진공청소기 · 소화기 ── */
-  { const x=5.3,z=4.9; rod(g,[x,.08,z],[x,.5,z],.17,M.ssMir,28); const d=new T3.Mesh(new T3.SphereGeometry(.17,24,12,0,7,0,Math.PI/2),M.acryl); d.position.set(x,.5,z); g.add(d); tube(g,[[x+.15,.3,z],[x+.5,.25,z+.2],[x+.6,.05,z-.2],[x+.3,.04,z-.45]],.022,M.black);
-    rod(g,[.3,.05,6.5],[.3,.5,6.5],.06,M.red,18); rod(g,[.3,.5,6.5],[.3,.58,6.5],.02,M.dark,10); }
+  /* ── 소화기 (진공청소기는 구현하지 않음 — 사용자 지시 11/11) ── */
+  rod(g,[.3,.05,6.5],[.3,.5,6.5],.06,M.red,18); rod(g,[.3,.5,6.5],[.3,.58,6.5],.02,M.dark,10);
   return g;
 }

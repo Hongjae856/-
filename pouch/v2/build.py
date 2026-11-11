@@ -2,7 +2,7 @@
 import sys
 from pathlib import Path
 H=Path(__file__).resolve().parent
-SCRIPTS=("kit.js","layout.js","room.js","filler.js","fillzone.js","packzone.js","main.js")
+SCRIPTS=("kit.js","layout.js","room.js","form.js","unwind.js","hopper.js","filler.js","conv.js","fillzone.js","packzone.js","main.js")
 three=(H/"vendor"/"three.min.js").read_text(encoding="utf-8")
 js="\n".join(f"/* ── {n} ── */\n"+(H/"src"/n).read_text(encoding="utf-8") for n in SCRIPTS)
 assert "</script" not in js.lower()

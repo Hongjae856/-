@@ -6,4 +6,7 @@ const FL={ x0:2.9, x1:5.54, z0:1.3, z1:4.155, ext:1.0, deckY:2.0, rail:.9356, to
 FL.bz0=FL.z0+.6535; FL.bz1=FL.bz0+1.55; FL.bx0=FL.x0+.2; FL.bx1=FL.bx0+1.4; FL.zc=(FL.bz0+FL.bz1)/2;   /* bx0 : 성형부 뒤판 · bx1 : 제어함 동쪽 면(언와인더 시작) */
 const STR={ x0:FL.x1, x1:FL.x1+1.58647, z0:FL.z1-.63, z1:FL.z1, n:11 };      /* 계단 : 동쪽으로 내려감 */
 const COL={ x0:6.4, x1:7.1, z0:STR.z0-.62, z1:STR.z0-.02 };                 /* 건물 기둥 (계단 바로 북쪽) */
-const CVX=FL.bx0-.45;                                                             /* 경사 컨베이어 · 포장 라인 중심선 */
+const CVX=FL.bx0-.36;                                                             /* 경사 컨베이어 · 포장 라인 중심선 */
+/* 성형 · 배출 기준 (10열 · 열 간격 = 배출 컨베이어 칸 간격) */
+const FM={ n:10, P:.105, yCut:.86, beltY:.64, stickL:.11, stickW:.036 };
+FM.pz=i=>FL.zc-FM.n*FM.P/2+FM.P*(i+.5);
