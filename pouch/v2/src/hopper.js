@@ -35,23 +35,24 @@ function buildHoppers(g){
   bx(g,xc-.3,xc+.3,Y,Y+.02,zc-.56,zc+.56,M.ss);                                                                 /* 본체 윗판 */
   for(let k=0;k<3;k++){ const x0=xc-bw+k*(2*bw/3)+.003, x1=xc-bw+(k+1)*(2*bw/3)-.003; bx(g,x0,x1,dy0,dy1,zc-dl,zc+dl,M.black);
     for(const s of [-1,1]){ rod(g,[(x0+x1)/2,dy0+.085,zc+s*dl],[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],.03,M.ssD,20); rod(g,[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],[(x0+x1)/2,dy0+.085,zc+s*(dl+.03)],.012,M.ssMir,12); } }
-  /* 함량판 · 셔터 틀 (스테인리스 레일) · 셔터 실린더 · 바이브레이터 */
-  const fy0=Y+.2, fy1=Y+.3, fl=.5;
-  for(const s of [-1,1]){ bx(g,xc+s*(bw+.012)-.012,xc+s*(bw+.012)+.012,fy0,fy1,zc-fl,zc+fl,M.ss); bx(g,xc-bw-.024,xc+bw+.024,fy0,fy1,zc+s*fl-.012,zc+s*fl+.012,M.ss);
-    bx(g,xc+s*(bw+.03),xc+s*(bw+.05),fy0+.03,fy0+.045,zc-fl+.03,zc+fl-.03,M.ssMir); }
-  bx(g,xc-bw+.01,xc+bw-.01,fy0+.05,fy0+.062,zc-fl+.02,zc+fl-.02,M.dark); bx(g,xc-bw+.01,xc+bw-.01,fy0+.03,fy0+.04,zc-fl-.08,zc+fl-.04,M.green.clone());
+  /* 함량판 · 셔터 틀 : 호퍼 바깥면까지 넓은 스테인리스 틀 (2단) · 셔터 판 · 셔터 실린더 · 바이브레이터 */
+  const fy0=Y+.2, fy1=Y+.3, fl=.5, fw=.42;
+  for(const s of [-1,1]){ for(const [a,b] of [[fy0,fy0+.03],[fy1-.03,fy1],[Y+.44,Y+.47]]){ bx(g,xc+s*fw-.012,xc+s*fw+.012,a,b,zc-fl,zc+fl,M.ss); bx(g,xc-fw,xc+fw,a,b,zc+s*fl-.012,zc+s*fl+.012,M.ss); }
+    for(const z of [zc-fl,zc-.17,zc+.17,zc+fl]) bx(g,xc+s*fw-.012,xc+s*fw+.012,fy0,Y+.47,z-.012,z+.012,M.ss);
+    bx(g,xc+s*fw-.003,xc+s*fw+.003,fy1,Y+.44,zc-fl+.012,zc+fl-.012,M.acryl);                                    /* 투명 옆판 */
+    rod(g,[xc+s*(fw+.03),Y+.38,zc-.07],[xc+s*(fw+.03),Y+.38,zc+.07],.006,M.ssMir,8); for(const d of [-.07,.07]) rod(g,[xc+s*fw,Y+.38,zc+d],[xc+s*(fw+.03),Y+.38,zc+d],.005,M.ssMir,6);
+    ribbon(g,[[xc+s*fw,Y+.47],[xc+s*(bw+.01),Y+.47]],zc-dl,zc+dl,M.sheet); }
+  bx(g,xc-fw+.02,xc+fw-.02,fy0+.05,fy0+.062,zc-fl+.02,zc+fl-.02,M.dark); bx(g,xc-bw+.01,xc+bw-.01,fy0+.03,fy0+.04,zc-fl-.08,zc+fl-.04,M.green.clone());
   rod(g,[xc,fy0+.035,zc-fl-.08],[xc,fy0+.035,zc-fl-.24],.02,M.alu,14); rod(g,[xc,fy0+.035,zc-fl-.24],[xc,fy0+.035,zc-fl-.26],.023,M.grey,14);
   for(const s of [-1,1]){ bx(g,xc-.05,xc+.05,fy0-.005,fy0+.03,zc+s*(fl+.02)-.03,zc+s*(fl+.02)+.03,M.blue); bx(g,xc-.05,xc+.05,Y+.1,Y+.135,zc+s*(fl-.06)-.03,zc+s*(fl-.06)+.03,M.red); }
-  /* 열별 검은 유닛 · 양쪽 긴 면의 주황 속도 조절 밸브 줄 · 흰 슬리브 */
-  for(const s of [-1,1]) bx(g,xc+s*.2-.015,xc+s*.2+.015,Y+.085,Y+.115,zc-.42,zc+.42,M.alu);
-  for(let i=0;i<n;i++){ const z=pz(i); bx(g,xc-.13,xc+.13,Y+.115,fy0,z-.027,z+.027,M.black); rod(g,[xc,Y+.02,z],[xc,Y+.115,z],.018,M.cream,14);
-    for(const s of [-1,1]){ const xf=xc+s*.2; bx(g,xf-.014,xf+.014,Y+.115,Y+.15,z-.014,z+.014,M.orange); rod(g,[xf+s*.014,Y+.1,z],[xf+s*.05,Y+.1,z],.011,M.ssMir,12);
-      rod(g,[xc+s*.13,Y+.17,z],[xc+s*.15,Y+.17,z],.006,M.blue,8); tube(g,[[xc+s*.15,Y+.17,z],[xc+s*.24,Y+.2,z+.01],[xc+s*.27,Y+.1,z+.03],[xc+s*.26,Y+.045,z+.06]],.0045,M.hose); } }
-  for(const s of [-1,1]) for(const dy of [0,.014]) tube(g,[[xc+s*.26,Y+.04+dy,zc-.4],[xc+s*.27,Y+.04+dy,zc],[xc+s*.26,Y+.04+dy,zc+.4],[xc+s*.1,Y+.05+dy,zc+.58]],.008,M.hose);
-  /* 투명 경사 커버 (호퍼 1 · 3 아래) · 위쪽 주황 밸브 4 */
-  for(const s of [-1,1]){ ribbon(g,[[xc+s*.5,Y+.56],[xc+s*.5,Y+.4],[xc+s*(bw+.03),Y+.31]],zc-dl,zc+dl,M.acryl); for(const z of [zc-dl,zc+dl]) rod(g,[xc+s*.5,Y+.56,z],[xc+s*.5,Y+.4,z],.008,M.ss,8); rod(g,[xc+s*.5,Y+.4,zc-dl],[xc+s*.5,Y+.4,zc+dl],.008,M.ss,8);
-    rod(g,[xc+s*.52,Y+.47,zc-.06],[xc+s*.52,Y+.47,zc+.06],.006,M.ssMir,8); }
-  bx(g,xc-.52,xc-.49,Y+.585,Y+.61,zc-.34,zc+.02,M.alu); for(let k=0;k<4;k++){ const z=zc-.3+k*.09; bx(g,xc-.53,xc-.505,Y+.61,Y+.645,z-.014,z+.014,M.orange); rod(g,[xc-.518,Y+.645,z],[xc-.518,Y+.67,z],.009,M.ssMir,10); }
+  /* 열별 검은 유닛 줄 · 양쪽 긴 면의 알루미늄 레일 + 주황 속도 조절 밸브 10 · 흰 슬리브 */
+  for(const s of [-1,1]){ bx(g,xc+s*.4-.03,xc+s*.4+.03,Y+.07,Y+.115,zc-.44,zc+.44,M.alu); bx(g,xc+s*.33-.03,xc+s*.33+.03,Y+.02,Y+.07,zc-.46,zc+.46,M.ssD); }
+  for(let i=0;i<n;i++){ const z=pz(i); bx(g,xc-.34,xc+.34,Y+.115,fy0,z-.027,z+.027,M.black); rod(g,[xc,Y+.02,z],[xc,Y+.115,z],.018,M.cream,14);
+    for(const s of [-1,1]){ const xf=xc+s*.4; bx(g,xf-.016,xf+.016,Y+.115,Y+.155,z-.016,z+.016,M.orange); rod(g,[xf+s*.03,Y+.092,z],[xf+s*.07,Y+.092,z],.012,M.ssMir,12); rod(g,[xf+s*.03,Y+.092,z],[xf+s*.036,Y+.092,z],.016,M.ssD,12);
+      rod(g,[xc+s*.34,Y+.17,z-.012],[xc+s*.36,Y+.17,z-.012],.005,M.blue,8); rod(g,[xc+s*.34,Y+.17,z+.012],[xc+s*.36,Y+.17,z+.012],.005,M.blue,8); tube(g,[[xc+s*.36,Y+.17,z],[xc+s*.46,Y+.2,z+.01],[xc+s*.49,Y+.1,z+.03],[xc+s*.48,Y+.045,z+.06]],.0045,M.hose); } }
+  for(const s of [-1,1]) for(const dy of [0,.014]) tube(g,[[xc+s*.48,Y+.04+dy,zc-.4],[xc+s*.49,Y+.04+dy,zc],[xc+s*.48,Y+.04+dy,zc+.4],[xc+s*.2,Y+.05+dy,zc+.6]],.008,M.hose);
+  /* 위쪽 주황 밸브 4 (1번 호퍼 쪽 틀 위) */
+  bx(g,xc-fw-.03,xc-fw+.0,Y+.47,Y+.5,zc-.36,zc+.0,M.alu); for(let k=0;k<4;k++){ const z=zc-.32+k*.09; bx(g,xc-fw-.03,xc-fw-.004,Y+.5,Y+.535,z-.014,z+.014,M.orange); rod(g,[xc-fw-.017,Y+.535,z],[xc-fw-.017,Y+.56,z],.009,M.ssMir,10); }
   /* 남쪽 끝 : 게이트 · 셔터 실린더 · 고정 브래킷 · 덮개 천 */
   const cyl=(x,y0,y1,z)=>{ rod(g,[x,y0,z],[x,y1,z],.019,M.alu,14); rod(g,[x,y1,z],[x,y1+.012,z],.022,M.grey,14); rod(g,[x,y0-.012,z],[x,y0,z],.022,M.grey,14); rod(g,[x,y0-.07,z],[x,y0-.012,z],.006,M.ssMir,8); };
   for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,Y+.5,Y+.68,zc+D+.06);
@@ -59,7 +60,7 @@ function buildHoppers(g){
   for(const s of [-1,1]) tube(g,[[xc+s*.13,Y+.4,zc+fl+.06],[xc+s*.22,Y+.52,zc+fl+.12],[xc+s*.3,Y+.3,zc+fl+.16],[xc+s*.27,Y+.05,zc+fl+.1]],.0055,M.hose);
   { const pts=[]; for(let k=0;k<=10;k++){ const a=Math.PI*k/10; pts.push([xc+.3*Math.cos(a)+.08,Y+.06+.015*Math.sin(a*3),zc+fl+.1+.16*Math.sin(a)]); } tube(g,pts,.032,new T3.MeshStandardMaterial({color:0x9ea3a8,roughness:.95})); }
   /* ── 동쪽 데크 : 공압 밸브함(아크릴 전면) → 진공 생성기 2(검정 · 녹색 상판 · 크림색 필터 컵) → 집진 매니폴드(가지 4) → 주름 호스 ── */
-  const vx=xc+.36;
+  const vx=xc+.56;
   bx(g,vx,vx+.24,Y+.02,Y+.2,zc-.34,zc+.34,M.ss); bx(g,vx+.24,vx+.245,Y+.04,Y+.18,zc-.31,zc+.31,M.acryl);
   for(const z of [zc-.16,zc+.16]){ bx(g,vx+.12,vx+.22,Y+.07,Y+.15,z-.1,z+.1,M.grey); for(let k=0;k<6;k++) bx(g,vx+.22,vx+.232,Y+.08,Y+.14,z-.09+k*.03,z-.07+k*.03,M.white); }
   for(let k=0;k<10;k++){ rod(g,[vx+.06,Y+.2,zc-.27+k*.06],[vx+.06,Y+.225,zc-.27+k*.06],.007,M.brass,8); tube(g,[[vx+.06,Y+.225,zc-.27+k*.06],[vx,Y+.3,zc-.25+k*.055],[vx-.1,Y+.24,pz(k)],[xc+.15,Y+.19,pz(k)]],.004,M.hose); }
