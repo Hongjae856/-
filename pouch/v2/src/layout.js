@@ -7,6 +7,6 @@ FL.bz0=FL.z0+.6535; FL.bz1=FL.bz0+1.55; FL.bx0=FL.x0+.5; FL.bx1=FL.x0+1.25; FL.z
 const STR={ x0:FL.x1, x1:FL.x1+1.58647, z0:FL.z1-.63, z1:FL.z1, n:11 };      /* 계단 : 동쪽으로 내려감 */
 const COL={ x0:6.4, x1:7.1, z0:STR.z0-.62, z1:STR.z0-.02 };                 /* 건물 기둥 (계단 바로 북쪽) */
 /* 성형 · 배출 기준 : 10열 · 열 간격 69 → 70 mm = 배출 컨베이어 칸 간격. xf = 은박 · 노즐 면, 455 = 슈트 끝 높이(도면) */
-const FM={ n:10, P:.07, xf:FL.x0+.15, yCut:.7, beltY:.43, stickL:.11, stickW:.034, press:.022 };   /* 슈트 구간 0.455~0.69 (도면 · 사용자 지적 11/11 : 슈트 높이 2/3) */
+const FM={ n:10, P:.07, xf:FL.x0+.15, yCut:.7, beltY:.36, gateY:.445, stickL:.11, stickW:.034, press:.022 };   /* 슈트 구간 0.455~0.69 (도면 · 사용자 지적 11/11 : 슈트 높이 2/3) */
 FM.pz=i=>FL.zc-FM.n*FM.P/2+FM.P*(i+.5);
 const CVX=FM.xf-.27;                                                           /* 배출 컨베이어 · 포장 라인 중심선 (프레임 서쪽 기둥 바깥) */

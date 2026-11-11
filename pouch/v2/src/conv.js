@@ -1,6 +1,7 @@
-/* ═══ 배출 컨베이어 : 슈트 아래 검은 받침 칸(트레이) → 북쪽 일직선 → 경사 상승 → 벽 개구부 → 스틱공급장치 상단
-   멈추지 않고 연속 주행 (사용자 확정 11/11). 칸 간격 = 성형 열 간격 → 10열이 동시에 10칸에 1포씩 안착.
-   받침 칸 · 스틱은 경로 함수 CV.at(s) 로 배치해 한 몸으로 움직인다. 프레임 서쪽 기둥 바깥으로 지나간다 ═══ */
+/* ═══ 배출부 (현장 영상 + 사용자 확정 11/11)
+   슈트 → 고정된 검은 칸막이 사이 칸(바닥 게이트 위)에 10포 안착 → 바닥이 열려 동시에 낙하 →
+   바로 아래에서 멈추지 않고 연속 주행하는 컨베이어의 금속 U 자 받침에 1포씩 정확히 들어감 → 북쪽 일직선 → 경사 상승 → 벽 개구부.
+   받침 간격 = 성형 열 간격. 받침 · 스틱은 경로 함수 CV.at(s) 로 배치해 한 몸으로 움직인다. 프레임 서쪽 기둥 바깥으로 지나간다 ═══ */
 const CV={ w:.13, zS:FL.zc+.56, zB:FL.zc-.95, zE:-.45, yE:1.52, R:.16, hb:.008 };
 function buildConveyor(S){
   const g=new T3.Group(); S.add(g); const y0=FM.beltY, zS=CV.zS, zB=CV.zB, zE=CV.zE, yE=CV.yE, hw=CV.w/2, zc=FL.zc, X=CVX, zT=zc-.42;
@@ -11,22 +12,29 @@ function buildConveyor(S){
   /* 구간 틀 : 받침(알루미늄) · 벨트 · 옆 가이드 · 투명 커버 (트레이 구간은 동쪽이 슈트 쪽으로 열림) */
   const sect=(G,l0,l1,o)=>{ bx(G,-hw-.03,hw+.03,-.06,-.004,l0,l1,M.alu); bx(G,-hw,hw,-.004,0,l0,l1,M.belt);
     bx(G,-hw-.02,-hw-.003,0,.03,l0,l1,M.ss); if(!o.open) bx(G,hw+.003,hw+.02,0,.03,l0,l1,M.ss);
-    const lh=o.open?.125:.1;                                                    /* 트레이 구간 뚜껑은 슈트 끝 · 미끄러져 들어오는 스틱과 닿지 않게 높이고 동쪽 끝을 물림 */
+    const lh=o.open?FM.gateY-y0+.1:.1;                                                    /* 트레이 구간 뚜껑은 슈트 끝 · 미끄러져 들어오는 스틱과 닿지 않게 높이고 동쪽 끝을 물림 */
     bx(G,-hw-.034,-hw-.028,0,lh,l0,l1,M.acryl); if(!o.open) bx(G,hw+.028,hw+.034,0,.1,l0,l1,M.acryl);
     bx(G,-hw-.034,o.open?hw-.04:hw+.034,lh,lh+.006,l0,l1,M.acryl);
     for(const s of (o.open?[-1]:[-1,1])) for(let z=l0+.08;z<l1;z+=.42) bx(G,s*(hw+.036)-.004,s*(hw+.036)+.004,-.05,lh+.006,z-.012,z+.012,M.alu); };
   { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zT,zS,{open:true});
-    for(const z of [zc-.4,zc+.4]){ rod(G,[-.085,.165,z],[-.005,.165,z],.008,M.white,10); for(const d of [-.085,-.005]) rod(G,[d,.131,z],[d,.165,z],.007,M.white,8); }       /* 흰 손잡이 : 슈트 구간 바깥 양끝 */
-    for(const z of [zc,zc-.37,zc+.37]) bx(G,-hw-.034,hw-.04,.125,.137,z-.003,z+.003,M.acryl);
-    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,.133,zc-.19],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=-Math.PI/2; }
+    const lh=FM.gateY-y0+.1;
+    for(const z of [zc-.4,zc+.4]){ rod(G,[-.085,lh+.04,z],[-.005,lh+.04,z],.008,M.white,10); for(const d of [-.085,-.005]) rod(G,[d,lh+.006,z],[d,lh+.04,z],.007,M.white,8); }       /* 흰 손잡이 : 슈트 구간 바깥 양끝 */
+    for(const z of [zc,zc-.37,zc+.37]) bx(G,-hw-.034,hw-.04,lh,lh+.012,z-.003,z+.003,M.acryl);
+    const lb=plate(G,.26,.05,labelTex([["주 의","#111",46],["제품 제거 시 핀셋 사용","#111",46]],{w:640,h:130,border:"#888"}),[-hw+.0,lh+.008,zc-.19],0); lb.rotation.x=-Math.PI/2; lb.rotation.z=-Math.PI/2; }
+  /* 고정 칸막이(검정) 11 · 칸 바닥 게이트(열별 좌우 날개 2장) — 스틱이 잠깐 놓였다가 바닥이 열리며 아래 받침으로 낙하 */
+  { const yG=FM.gateY, n=FM.n, P=FM.P, e=k=>zc-n*P/2+P*k; FM.flaps=[];
+    for(let k=0;k<=n;k++){ bx(g,X-hw,X+hw,yG-.006,yG+.028,e(k)-.014,e(k)+.014,M.belt); rod(g,[X+hw,yG+.012,e(k)],[X+hw+.004,yG+.012,e(k)],.007,M.dark,10); rod(g,[X+hw+.004,yG+.012,e(k)],[X+hw+.006,yG+.012,e(k)],.003,M.ssMir,8); }
+    for(const x of [X-hw-.012,X-hw]) bx(g,x-.004,x+.004,yG-.02,yG+.03,e(0)-.03,e(n)+.03,M.ss);
+    for(const z of [e(0)-.03,e(n)+.03]) bx(g,X-hw-.016,X+hw,yG-.02,yG+.03,z-.004,z+.004,M.ss);
+    for(let i=0;i<n;i++) for(const sg of [1,-1]){ const pv=new T3.Group(); pv.position.set(X,yG-.002,sg>0?e(i)+.014:e(i+1)-.014); g.add(pv); const f=new T3.Mesh(new T3.BoxGeometry(CV.w-.004,.003,.0205),M.dark); f.position.z=sg*.0103; pv.add(f); FM.flaps.push({pv,sg}); } }
   { const G=new T3.Group(); G.position.set(X,y0,0); g.add(G); sect(G,zB,zT,{}); for(const z of [zB+.25]){ rod(G,[-.04,.135,z-.05],[.04,.135,z-.05],.007,M.white,8); } }
   { const G=new T3.Group(); G.position.set(X,(y0+yE)/2,(zB+zE)/2); G.rotation.x=A; g.add(G); sect(G,-L2/2,L2/2,{});
     for(const t of [-.3,0,.3]) for(const s of [-1,1]) rod(G,[s*(hw+.05),.07,t*L2-.05],[s*(hw+.05),.07,t*L2+.05],.007,M.ssMir,8); }
-  /* 받침 칸 (검은 U 자 받침) · 스틱 */
+  /* 금속 U 자 받침 · 스틱 */
   const P=FM.P, N=Math.ceil(CV.L/P)+1, o=new T3.Object3D();
   const sh=new T3.Shape(); [[-.03,0],[.03,0],[.03,.018],[.026,.018],[.026,CV.hb],[-.026,CV.hb],[-.026,.018],[-.03,.018]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b));
   const hg=new T3.ExtrudeGeometry(sh,{depth:CV.w-.012,bevelEnabled:false}); hg.translate(0,0,-(CV.w-.012)/2); hg.rotateY(Math.PI/2);
-  const cle=new T3.InstancedMesh(hg,M.belt,N); cle.castShadow=true; cle.frustumCulled=false; g.add(cle);
+  const cle=new T3.InstancedMesh(hg,M.ss,N); cle.castShadow=true; cle.frustumCulled=false; g.add(cle);
   const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.frustumCulled=false; g.add(stk);
   CV.N=N; CV.full=new Uint8Array(N+4); CV.out=0; CV.prev=null;
   CV.sOf=(k,u)=>{ const span=N*P; return ((k*P+u)%span+span)%span; };                                     /* 칸 k 중심의 경로 위치 */
