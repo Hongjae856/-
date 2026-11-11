@@ -100,7 +100,7 @@ function buildFiller(S){
   for(let k=0;k<7;k++){ const x=3.4+k*.26; tube(g,[[x,Y+.46,zc-.26],[x+.03,Y+.62,zc-.42],[x-.02,Y+.4,zc-.52],[x,Y+.24,zc-.46]],.006,k%2?M.hoseB:M.hose); }
   tube(g,[[F.bx1-.35,Y+.55,zc-.4],[F.bx1-.1,Y+.8,zc-.55],[F.bx1+.1,Y+.5,zc-.6],[F.bx1+.15,Y+.05,zc-.62]],.03,M.ssD);
   /* ── 컨트롤 판넬 : 데크에서 내려온 암 · 흰 함체 · 터치스크린 · RUN STOP JOG RESET FILLING BUZZER · 비상정지 ── */
-  const px=2.2, pzz=F.z0+.45;
+  const px=2.0, pzz=F.z0+.45;
   bx(g,px-.03,px+.03,1.72,Y-.1,pzz-.03,pzz+.03,M.white); bx(g,px-.18,px+.02,1.05,1.72,pzz-.27,pzz+.27,M.white);
   bx(g,px-.186,px-.18,1.38,1.68,pzz-.21,pzz+.21,M.dark); bx(g,px-.188,px-.186,1.4,1.66,pzz-.19,pzz+.19,M.scr);
   const btn=(dz,y,mat)=>{ rod(g,[px-.18,y,pzz+dz],[px-.2,y,pzz+dz],.022,mat,18); rod(g,[px-.18,y,pzz+dz],[px-.185,y,pzz+dz],.03,M.ssD,18); };

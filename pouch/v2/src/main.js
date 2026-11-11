@@ -11,11 +11,11 @@ const scene=new T3.Scene(); scene.background=new T3.Color(0xdfe4e1);
   { const c=new T3.Mesh(new T3.PlaneGeometry(12,7),new T3.MeshBasicMaterial({color:0x3c403e})); c.rotation.x=Math.PI/2; c.position.y=2.085; es.add(c); }
   for(const [x,z,w] of [[-3,-3.4,2.2],[2.5,3.4,3],[5.9,0,2]]){ const d=new T3.Mesh(new T3.PlaneGeometry(w,2.4),new T3.MeshBasicMaterial({color:0x2a2d30,side:T3.DoubleSide})); d.position.set(x,-.6,z); if(Math.abs(x)>5) d.rotation.y=Math.PI/2; es.add(d); }
   const pm=new T3.PMREMGenerator(renderer); scene.environment=pm.fromScene(es,.03).texture; }
-buildFillRoom(scene); buildFiller(scene);
+buildFillRoom(scene); buildFiller(scene); buildFillZone(scene); buildPackRoom(scene);
 /* 실제 장면을 다시 찍어 반사에 사용 (설비 · 바닥 · 조명이 스테인리스에 비침) */
 { const pm=new T3.PMREMGenerator(renderer), c=[4.6,1.7,5.4]; scene.position.set(-c[0],-c[1],-c[2]); scene.updateMatrixWorld(true); const rt=pm.fromScene(scene,.015,.05,40); scene.position.set(0,0,0); scene.updateMatrixWorld(true); scene.environment=rt.texture; }
 const camera=new T3.PerspectiveCamera(50,1,.05,60);
-const VIEWS={ sw:[[.35,2.3,6.6],[3.9,1.45,2.8]], west:[[.3,1.6,2.75],[4,1.5,2.75]], se:[[9.2,2.2,6.6],[4.6,1.5,2.9]], east:[[8.6,1.7,2.75],[4,1.5,2.75]], south:[[4.2,1.7,6.8],[4.2,1.5,2.7]], deck:[[2.2,3.7,5.3],[4.3,2.6,2.7]], top:[[4.3,11,2.76],[4.3,0,2.75]], form:[[1.55,1.45,2.75],[3.1,1.3,2.75]], southp:[[4.3,1.7,6.85],[4.2,1.75,2.7]], eastp:[[7.7,1.35,1.25],[5.7,1.05,2.6]], hop:[[4.25,3.55,4.6],[4.25,2.75,2.75]], nw:[[.6,1.7,.5],[3.2,1.5,2.6]] };
+const VIEWS={ sw:[[.35,2.3,6.6],[3.9,1.45,2.8]], west:[[.3,1.6,2.75],[4,1.5,2.75]], se:[[9.2,2.2,6.6],[4.6,1.5,2.9]], east:[[8.6,1.7,2.75],[4,1.5,2.75]], south:[[4.2,1.7,6.8],[4.2,1.5,2.7]], deck:[[2.2,3.7,5.3],[4.3,2.6,2.7]], top:[[4.3,11,2.76],[4.3,0,2.75]], form:[[1.55,1.45,2.75],[3.1,1.3,2.75]], southp:[[4.3,1.7,6.85],[4.2,1.75,2.7]], eastp:[[7.7,1.35,1.25],[5.7,1.05,2.6]], hop:[[4.25,3.55,4.6],[4.25,2.75,2.75]], nw:[[.9,1.75,.35],[3.2,1.3,2.7]], ne:[[11.2,2.6,.5],[5.5,1.2,3.2]], ibc:[[8.9,1.7,3.4],[6.4,1.1,1.7]], conv:[[1.0,1.7,3.6],[2.5,1.2,1.2]], all:[[11.3,3.4,6.7],[4.6,1.0,2.6]], pk1:[[6.6,2.3,-.6],[2.6,1.1,-4.2]], pk2:[[6.2,2.0,-11.4],[2.6,1.0,-7.6]], pk3:[[5.0,1.6,-1.1],[2.6,1.2,-1.1]], pk4:[[5.2,1.6,-7.2],[2.5,1.2,-7.2]] };
 function view(k){ const v=VIEWS[k]; camera.position.set(...v[0]); camera.lookAt(...v[1]); }
 function resize(){ const w=innerWidth,h=innerHeight; renderer.setPixelRatio(Math.min(2,devicePixelRatio)); renderer.setSize(w,h); camera.aspect=w/h; camera.updateProjectionMatrix(); }
 addEventListener("resize",resize); resize(); view("sw");
@@ -24,7 +24,7 @@ const GFX={high:{pr:2,sm:2048,sh:true},mid:{pr:1.25,sm:1024,sh:true},low:{pr:1,s
 function setGfx(k){ const q=GFX[k]; renderer.setPixelRatio(Math.min(q.pr,devicePixelRatio||1)); renderer.shadowMap.enabled=q.sh; POST.mat.uniforms.ao.value=k==='low'?0:1; scene.traverse(o=>{ if(o.isLight&&o.shadow&&o.castShadow!==undefined&&o.isDirectionalLight){ o.castShadow=q.sh; o.shadow.mapSize.set(q.sm,q.sm); if(o.shadow.map){ o.shadow.map.dispose(); o.shadow.map=null; } } if(o.material) o.material.needsUpdate=true; }); resize(); postSize(); }
 /* ── 후처리 : 틈 · 모서리 음영(SSAO, 깊이 기반) + ACES 톤매핑 + sRGB ── */
 const POST={on:true, rt:null, quad:null, cam:new T3.OrthographicCamera(-1,1,1,-1,0,1), scn:new T3.Scene()};
-POST.mat=new T3.ShaderMaterial({uniforms:{tC:{value:null},tD:{value:null},res:{value:new T3.Vector2()},nf:{value:new T3.Vector2(.05,60)},expo:{value:.74},ao:{value:1}},
+POST.mat=new T3.ShaderMaterial({uniforms:{tC:{value:null},tD:{value:null},res:{value:new T3.Vector2()},nf:{value:new T3.Vector2(.05,60)},expo:{value:.6},ao:{value:1}},
  vertexShader:"varying vec2 v; void main(){ v=uv; gl_Position=vec4(position.xy,0.,1.); }",
  fragmentShader:`precision highp float; varying vec2 v; uniform sampler2D tC,tD; uniform vec2 res,nf; uniform float expo,ao;
  float lin(float d){ float z=d*2.-1.; return 2.*nf.x*nf.y/(nf.y+nf.x-z*(nf.y-nf.x)); }
