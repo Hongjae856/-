@@ -9,9 +9,8 @@ function buildFillZone(S){
   bx(g,CVX-.16,CVX+.16,1.24,1.72,.024,.03,M.black);
   bx(g,CVX+.45,CVX+.55,1.35,1.6,.026,.06,M.white);
   /* ── 경사 컨베이어 : 배출 트레이 → 북쪽 일직선 상승 → 벽 개구부 (투명 커버 · 알루미늄 프레임 · A자 받침대) ── */
-  { const z0=zc-.86, z1=zc-1.35, zN=.05, y0=.92, y1=1.42, L=Math.hypot(z1-zN,y1-y0), ang=Math.atan2(y1-y0,z1-zN);
+  { const z0=zc-.8, z1=zc-1.3, zN=.05, y0=.9, y1=1.44, L=Math.hypot(z1-zN,y1-y0), ang=Math.atan2(y1-y0,z1-zN);
     bx(g,CVX-.13,CVX+.13,y0-.06,y0,z1,z0+.1,M.alu); bx(g,CVX-.1,CVX+.1,y0,y0+.006,z1,z0+.1,M.dark);
-    bx(g,CVX+.13,F.bx0-.46,y0-.04,y0,z0-.09,z0+.09,M.alu);                                    /* 트레이 → 컨베이어 연결부 */
     const G=new T3.Group(); G.position.set(CVX,(y0+y1)/2,(z1+zN)/2); G.rotation.x=ang; g.add(G);
     bx(G,-.13,.13,-.06,0,-L/2,L/2,M.alu); bx(G,-.1,.1,0,.006,-L/2,L/2,M.dark);
     for(const s of [-1,1]) bx(G,s*.13-.008,s*.13+.008,0,.14,-L/2,L/2,M.acryl); bx(G,-.13,.13,.14,.146,-L/2,L/2,M.acryl);
@@ -22,7 +21,7 @@ function buildFillZone(S){
     rod(g,[CVX-.2,.35,zs],[CVX+.2,.35,zs],.016,M.grey);
     plate(g,.2,.07,labelTex([["안전커버 임의 Open 금지!","#c00",44]],{w:640,h:150,bar:"#c2185b"}),[CVX+.14,ys+.12,zs+.5],Math.PI/2); }
   /* ── 프린터 컨트롤러 · 비전 PC 거치대 (알루미늄 프로파일 케이스) ── */
-  { const x0=2.62,x1=3.24,z0=.42,z1=.9; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-.02,x+.02,.05,1.55,z-.02,z+.02,M.alu);
+  { const x0=CVX+.35,x1=CVX+.97,z0=.42,z1=.9; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-.02,x+.02,.05,1.55,z-.02,z+.02,M.alu);
     for(const y of [.25,.95,1.55]){ bx(g,x0,x1,y-.015,y,z0,z1,M.white); }
     for(const dx of [.04,.33]) { bx(g,x0+dx,x0+dx+.26,.27,.72,z0+.06,z1-.08,M.blue); bx(g,x0+dx+.04,x0+dx+.22,.5,.64,z1-.08,z1-.075,M.scr); }
     bx(g,x0+.06,x1-.06,1.58,1.95,z0+.2,z0+.24,M.dark); bx(g,x0+.08,x1-.08,1.6,1.93,z0+.24,z0+.245,M.scr); bx(g,x0+.1,x1-.1,.96,.975,z1-.2,z1+.05,M.dark);
@@ -44,8 +43,8 @@ function buildFillZone(S){
   const oS=ibc(6.75,2.22,"백당",true), oA=ibc(6.75,.8,"첨가제",false);
   /* 진공호스 : 받침 호퍼 → 바닥 → 2층 데크 → 호퍼 1(첨가제) · 3(백당) 진공이송기 (두 가닥 함께) */
   const hz=F.z0-.12;
-  tube(g,[oA,[oA[0]-.25,.08,oA[2]],[5.9,.05,.95],[5.75,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[3.9,F.top+.1,zc-.5],[3.48+.1,F.top,zc]],.03,M.hose);
-  tube(g,[oS,[oS[0]-.3,.08,oS[2]-.2],[6.0,.05,1.2],[5.82,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[5.1,F.top+.12,zc-.4],[4.96+.1,F.top,zc]],.03,M.hose);
+  tube(g,[oA,[oA[0]-.25,.08,oA[2]],[5.9,.05,.95],[5.75,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[3.7,F.top+.1,zc-.5],[3.3+.1,F.top,zc]],.03,M.hose);
+  tube(g,[oS,[oS[0]-.3,.08,oS[2]-.2],[6.0,.05,1.2],[5.82,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.9,F.top+.12,zc-.4],[4.54+.1,F.top,zc]],.03,M.hose);
   /* ── 저울 작업대 2대 (북서 · 벽을 따라 세로) ── */
   for(const z0 of [.25,1.4]){ bx(g,.12,.72,.78,.82,z0,z0+1.0,M.ss); for(const x of [.16,.68]) for(const z of [z0+.05,z0+.95]) bx(g,x-.02,x+.02,.03,.78,z-.02,z+.02,M.ss);
     bx(g,.16,.68,.2,.22,z0+.05,z0+.95,M.ss); bx(g,.26,.56,.82,.88,z0+.3,z0+.62,M.white); bx(g,.3,.52,.88,.89,z0+.34,z0+.58,M.ssMir); bx(g,.3,.52,.82,.9,z0+.66,z0+.74,M.dark); }
