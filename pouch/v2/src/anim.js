@@ -1,7 +1,7 @@
 /* ═══ 스틱 흐름 : 10열 은박 인출 → 실링 → ③ 빔에서 커팅 → 엠보 슈트 미끄러짐 → 지나가는 받침 칸 10개에 1포씩 안착.
    배출 컨베이어는 연속 주행 (1주기에 10칸 전진) — 안착 순간에 칸이 각 열 바로 아래에 오도록 위상을 맞춘다.
-   1주기 : 커팅 0 → 안착 TL → 은박 인출 .45~.9 → 실링 ═══ */
-const AN={ T:1.25, ph:.9, cyc:0, run:true, made:0, TL:.33 };
+   1주기 : 커팅 0 → 안착 TL → 은박 인출 .45~.9 → 실링 · 무늬 · 커팅 빔 프레싱 .9~1.06 ═══ */
+const AN={ T:1.25, ph:.9, cyc:0, run:true, made:0, TL:.26 };
 function initAnim(S){
   const n=FM.n, L=FM.stickL, P=FM.P, pr=FM.chute, cum=[0]; for(let i=1;i<pr.length;i++) cum.push(cum[i-1]+Math.hypot(pr[i][0]-pr[i-1][0],pr[i][1]-pr[i-1][1]));
   AN.Lc=cum[cum.length-1];
@@ -29,4 +29,6 @@ function stepAnim(dt){
     o.scale.setScalar(vis?1:0); o.updateMatrix(); AN.im.setMatrixAt(i,o.matrix); }
   AN.im.instanceMatrix.needsUpdate=true;
   if(FM.stripTex) FM.stripTex.offset.y=AN.cyc+ez((t-.45)/.45);
+  /* 프레싱 : 인출이 끝난 뒤(.9) 눌렀다가 커팅(0) 직후 물러남 */
+  if(FM.pressG){ const pr=t>=.9?ez((t-.9)/.06):1-ez((t-.06)/.08); FM.pressG.position.x=FM.press*pr; }
 }

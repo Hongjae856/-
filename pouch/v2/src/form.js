@@ -4,7 +4,7 @@
    기준 : 은박 · 노즐 면 x = FM.xf, 열 간격 FM.P(70 mm), 커팅 높이 FM.yCut, 슈트 끝 약 455 mm ═══ */
 function buildForming(g,by1){
   const F=FL, zc=F.zc, n=FM.n, P=FM.P, W=n*P, pz=FM.pz, wx=FM.xf+.062, X=d=>wx-d, edge=k=>zc-W/2+P*k, WEST=-Math.PI/2, yC=FM.yCut, xn=FM.xf;
-  const warn=(x,y0,y1,z0,z1)=>{ const m=bx(g,x-.0012,x,y0,y1,z0,z1,M.warn); m.castShadow=false; };
+  let wg=g; const warn=(x,y0,y1,z0,z1)=>{ const m=bx(wg,x-.0012,x,y0,y1,z0,z1,M.warn); m.castShadow=false; };
   bx(g,wx,F.bx0,.5,by1,zc-.7,zc+.7,M.ss); bx(g,X(.03),X(0),.5,by1,zc-.7,zc+.7,M.grey);                  /* 성형부 틀 · 회색 뒤판 */
   bx(g,X(.3),X(.03),by1-.035,by1,zc-.62,zc+.62,M.ss);
   for(const dz of [-.05,.05]) rod(g,[X(.3),by1-.018,zc+dz],[X(.306),by1-.018,zc+dz],.018,M.ssD,18);
@@ -28,31 +28,34 @@ function buildForming(g,by1){
   /* 하부 죠 · 가이드 봉 */
   for(let i=0;i<n;i++){ const z=pz(i); bx(g,X(.2),X(.07),1.425,1.495,z-.024,z+.024,M.ss); bx(g,X(.205),X(.2),1.435,1.485,z-.017,z+.017,M.ssD); }
   for(let k=0;k<=n;k++) rod(g,[X(.14),1.41,edge(k)],[X(.14),1.495,edge(k)],.004,M.ssMir,8);
+  /* ── 프레싱 묶음 : ① 가로 실링 · ② 무늬 · ③ 커팅 빔은 은박이 멈춘 동안 함께 동쪽(파우치를 누르는 방향)으로 눌렀다가 물러난다 (사용자 설명 11/11) ── */
+  const tg=new T3.Group(); g.add(tg); FM.pressG=tg; wg=tg;
   /* 각형 공압 실린더 (모서리 볼트 · 가운데 캡) */
-  const cyl=(d0,y,z,sz)=>{ bx(g,X(d0+.07),X(d0),y-sz/2,y+sz/2,z-sz/2,z+sz/2,M.alu); rod(g,[X(d0+.07),y,z],[X(d0+.077),y,z],sz*.28,M.ssD,20); for(const a of [-1,1]) for(const b of [-1,1]) rod(g,[X(d0+.07),y+a*sz*.36,z+b*sz*.36],[X(d0+.075),y+a*sz*.36,z+b*sz*.36],.007,M.dark,8); };
+  const cyl=(d0,y,z,sz)=>{ bx(tg,X(d0+.07),X(d0),y-sz/2,y+sz/2,z-sz/2,z+sz/2,M.alu); rod(tg,[X(d0+.07),y,z],[X(d0+.077),y,z],sz*.28,M.ssD,20); for(const a of [-1,1]) for(const b of [-1,1]) rod(tg,[X(d0+.07),y+a*sz*.36,z+b*sz*.36],[X(d0+.075),y+a*sz*.36,z+b*sz*.36],.007,M.dark,8); };
   const cz=[-.375,-.125,.125,.375];
   /* ① 가로 실링 빔 */
-  bx(g,X(.27),X(.07),1.295,1.41,zc-.52,zc+.52,M.ss);
-  for(const c of cz){ cyl(.27,1.352,zc+c,.1); for(const b of [-1,1]){ rod(g,[X(.3),1.302,zc+c+b*.03],[X(.3),1.272,zc+c+b*.03],.006,M.alu,8); rod(g,[X(.3),1.272,zc+c+b*.03],[X(.26),1.245,zc+c+b*.045],.004,M.hose,6); } }
+  bx(tg,X(.27),X(.07),1.295,1.41,zc-.52,zc+.52,M.ss);
+  for(const c of cz){ cyl(.27,1.352,zc+c,.1); for(const b of [-1,1]){ rod(tg,[X(.3),1.302,zc+c+b*.03],[X(.3),1.272,zc+c+b*.03],.006,M.alu,8); rod(tg,[X(.3),1.272,zc+c+b*.03],[X(.26),1.245,zc+c+b*.045],.004,M.hose,6); } }
   for(const s of [-1,1]) warn(X(.27),1.325,1.38,zc+s*.47-.035,zc+s*.47+.035); warn(X(.27),1.39,1.408,zc-.025,zc+.025);
   /* ② 무늬 빔 (함 맨 아래) */
-  bx(g,X(.26),X(.07),1.03,1.14,zc-.52,zc+.52,M.ss); bx(g,X(.3),X(.26),1.0,1.03,zc-.5,zc+.5,M.alu);
-  for(const c of cz) bx(g,X(.31),X(.26),1.05,1.12,zc+c-.045,zc+c+.045,M.alu);
+  bx(tg,X(.26),X(.07),1.03,1.14,zc-.52,zc+.52,M.ss); bx(tg,X(.3),X(.26),1.0,1.03,zc-.5,zc+.5,M.alu);
+  for(const c of cz) bx(tg,X(.31),X(.26),1.05,1.12,zc+c-.045,zc+c+.045,M.alu);
   warn(X(.26),1.12,1.138,zc-.03,zc+.03); for(const s of [-1,1]) warn(X(.26),1.06,1.1,zc+s*.47-.03,zc+s*.47+.03);
-  for(let k=0;k<n;k+=2) rod(g,[X(.24),1.16,edge(k)+P*.5],[X(.2),1.185,edge(k)+P*.5],.006,M.dark,8);
+  for(let k=0;k<n;k+=2) rod(tg,[X(.24),1.16,edge(k)+P*.5],[X(.2),1.185,edge(k)+P*.5],.006,M.dark,8);
+  /* ③ 커팅 빔 (아크릴 함 아래) · 각형 실린더 4 · 위험 표지 */
+  bx(tg,X(.24),X(.03),yC+.01,yC+.19,zc-.5,zc+.5,M.ss); bx(tg,X(.25),X(.24),yC+.03,yC+.17,zc-.48,zc+.48,M.alu);
+  for(const c of cz) cyl(.25,yC+.1,zc+c,.11);
+  warn(X(.25),yC+.165,yC+.188,zc-.03,zc+.03); bx(tg,X(.2),X(.03),yC-.004,yC+.01,zc-.4,zc+.4,M.ssD);
+  wg=g;
   /* 은박 10열 (노즐 아래 ~ 커팅) */
   { const h=1.66-yC, sm=M.strip.clone(); sm.map=TX.strip.clone(); sm.map.repeat.set(1,h/FM.stickL); sm.map.needsUpdate=true; FM.stripTex=sm.map;
     for(let i=0;i<n;i++){ const m=new T3.Mesh(new T3.PlaneGeometry(FM.stickW,h),sm); m.rotation.y=WEST; m.position.set(xn,yC+h/2,pz(i)); add(g,m); } }
-  /* ③ 커팅 빔 (아크릴 함 아래) · 각형 실린더 4 · 위험 표지 */
-  bx(g,X(.24),X(.03),yC+.01,.93,zc-.5,zc+.5,M.ss); bx(g,X(.25),X(.24),yC+.03,.91,zc-.48,zc+.48,M.alu);
-  for(const c of cz) cyl(.25,yC+.075,zc+c,.11);
-  warn(X(.25),.905,.928,zc-.03,zc+.03); bx(g,X(.2),X(.03),yC-.004,yC+.01,zc-.4,zc+.4,M.ssD);
   /* 케이블 체인 (함 안 양옆) */
   for(const s of [-1,1]){ const z=a=>zc+s*a; chain(g,[[X(.17),1.38,z(.54)],[X(.17),1.22,z(.55)],[X(.17),1.08,z(.57)],[X(.17),1.04,z(.6)],[X(.17),1.1,z(.63)],[X(.17),1.26,z(.63)]],.06,.02,M.black,[1,0,0]);
     tube(g,[[X(.12),1.67,z(.5)],[X(.16),1.6,z(.57)],[X(.14),1.5,z(.6)],[X(.12),1.42,z(.55)]],.013,M.dark); }
   /* 엠보 곡면 슈트 10 : 커팅 아래 수직 → 서쪽으로 휘어 받침 칸 바로 위에서 끝남 (끝 높이 ≈ 455) */
-  const r=.2, cy=yC-.005, a1=.96, prof=[]; for(let k=0;k<=12;k++){ const a=k/12*a1; prof.push([xn-r+r*Math.cos(a),cy-r*Math.sin(a)]); }
-  { const e=prof[prof.length-1]; for(const t of [.14,.28]) prof.push([e[0]-t*Math.sin(a1),e[1]-t*Math.cos(a1)]); }
+  const r=.14, cy=yC-.005, a1=.96, prof=[]; for(let k=0;k<=12;k++){ const a=k/12*a1; prof.push([xn-r+r*Math.cos(a),cy-r*Math.sin(a)]); }
+  { const e=prof[prof.length-1]; for(const t of [.085,.17]) prof.push([e[0]-t*Math.sin(a1),e[1]-t*Math.cos(a1)]); }
   FM.chute=prof.map(q=>[q[0],q[1]]);
   const lip=prof.map((q,k)=>{ const a=prof[Math.max(0,k-1)], b=prof[Math.min(prof.length-1,k+1)], tx=b[0]-a[0], ty=b[1]-a[1], l=Math.hypot(tx,ty); return [q[0]+ty/l*.008,q[1]-tx/l*.008]; });
   for(let i=0;i<n;i++){ const z=pz(i); ribbon(g,prof,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(g,prof,lip,z+s*.02,M.sheet); bx(g,xn-.014,xn+.002,cy-.03,cy,z-.02,z+.02,M.white); }
