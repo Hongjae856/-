@@ -95,3 +95,7 @@ TX.web=tex(cvs(256,128,(g,w,h)=>{ g.fillStyle="#f1f2f2"; g.fillRect(0,0,w,h); g.
 M.web=new T3.MeshStandardMaterial({map:TX.web,metalness:.25,roughness:.35,side:T3.DoubleSide});
 M.cream=new T3.MeshStandardMaterial({color:0xe9e2c4,roughness:.6});
 M.brass=new T3.MeshStandardMaterial({color:0xb08d3c,metalness:.8,roughness:.4});
+/* 모서리가 둥근 사각 띠 · 판 (위에서 본 단면을 y0~y1 로 세움) */
+function rrect(g,cx,cz,hw,hd,r,y0,y1,mat){ const sh=new T3.Shape(); sh.moveTo(-hw+r,-hd); sh.lineTo(hw-r,-hd); sh.quadraticCurveTo(hw,-hd,hw,-hd+r); sh.lineTo(hw,hd-r); sh.quadraticCurveTo(hw,hd,hw-r,hd); sh.lineTo(-hw+r,hd); sh.quadraticCurveTo(-hw,hd,-hw,hd-r); sh.lineTo(-hw,-hd+r); sh.quadraticCurveTo(-hw,-hd,-hw+r,-hd);
+  const geo=new T3.ExtrudeGeometry(sh,{depth:y1-y0,bevelEnabled:false,curveSegments:8}); geo.rotateX(-Math.PI/2); const m=new T3.Mesh(geo,mat); m.position.set(cx,y0,cz); return add(g,m); }
+M.steel=new T3.MeshStandardMaterial({color:0x6c7177,metalness:.3,roughness:.55});

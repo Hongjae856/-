@@ -57,9 +57,14 @@ function buildConveyor(S){
     bx(g,bx0+.05,bx0+.17,.42,.48,bz-.06,bz+.06,M.yellow); rod(g,[bx0+.11,.48,bz],[bx0+.11,.51,bz],.03,M.red,18); rod(g,[bx0+.25,.42,bz+.08],[bx0+.25,.44,bz+.08],.012,M.dark,10);
     rod(g,[bx0+.34,.42,bz-.13],[bx0+.34,.86,bz-.13],.013,M.ssMir,12); for(const [k,m] of [[0,M.green],[1,M.orange],[2,M.red]]) rod(g,[bx0+.34,.86+k*.055,bz-.13],[bx0+.34,.912+k*.055,bz-.13],.028,m,18); rod(g,[bx0+.34,1.025,bz-.13],[bx0+.34,1.04,bz-.13],.03,M.ssD,18);
     plate(g,.1,.07,labelTex([["⚡","#111",90]],{w:128,h:100,bg:"#f5d400"}),[bx0-.001,.25,bz],-Math.PI/2); }
-  /* 경사부 A자 받침대 (회색 · 캐스터) · 표지 */
-  { const q=CV.at(L1+L2*.5), zs=q.z, ys=q.y-.07; for(const s of [-1,1]){ rod(g,[X+s*.22,.06,zs-.25],[X+s*.13,ys,zs],.02,M.grey); rod(g,[X+s*.22,.06,zs+.25],[X+s*.13,ys,zs],.02,M.grey); rod(g,[X+s*.22,.06,zs-.25],[X+s*.22,.06,zs+.25],.02,M.grey); for(const dz of [-.25,.25]) rod(g,[X+s*.22,0,zs+dz],[X+s*.22,.05,zs+dz],.025,M.dark,12); }
-    rod(g,[X-.22,.35,zs-.12],[X+.22,.35,zs-.12],.016,M.grey); rod(g,[X-.13,ys,zs],[X+.13,ys,zs],.016,M.grey);
-    const q2=CV.at(L1+.4); plate(g,.26,.06,labelTex([["안전커버 임의 Open 금지!","#c00",44]],{w:640,h:150,bar:"#c2185b"}),[X-hw-.037,q2.y+.05,q2.z],-Math.PI/2); }
+  /* 경사부 받침대 (회색 도장 강재 · 세로 기둥 + 비스듬한 보강 · 캐스터) · 아래쪽 원형 받침 · 표지 */
+  { const q=CV.at(L1+L2*.55), zs=q.z, ys=q.y-.07, q0=CV.at(L1+L2*.3);
+    for(const s of [-1,1]){ bx(g,X+s*.2-.025,X+s*.2+.025,.1,.15,zs-.2,zs+.6,M.steel); bx(g,X+s*.2-.03,X+s*.2+.03,.15,ys,zs-.06,zs+.0,M.steel);
+      const d=new T3.Mesh(new T3.BoxGeometry(.05,Math.hypot(.55,ys-.5),.05),M.steel); d.position.set(X+s*.2,(.15+ys-.35)/2+.1,zs+.25); d.rotation.x=-Math.atan2(.55,ys-.5); add(g,d);
+      for(const dz of [-.16,.56]){ rod(g,[X+s*.2,.03,zs+dz],[X+s*.2,.1,zs+dz],.018,M.ssD,10); rod(g,[X+s*.2,0,zs+dz],[X+s*.2,.03,zs+dz],.035,M.dark,14); } }
+    bx(g,X-.2,X+.2,.1,.15,zs+.2,zs+.25,M.steel); bx(g,X-.2,X+.2,ys-.05,ys,zs-.06,zs,M.steel);
+    rod(g,[X,0,q0.z],[X,.015,q0.z],.1,M.ss,24); rod(g,[X,.015,q0.z],[X,q0.y-.06,q0.z],.02,M.ss,12);
+    for(const t of [.35,.75]){ const q2=CV.at(L1+L2*t); plate(g,.24,.05,labelTex([["안전커버 임의 Open 금지!","#c00",44]],{w:640,h:130,border:"#c00"}),[X+hw+.037,q2.y+.05,q2.z],Math.PI/2); }
+    const q3=CV.at(L1+L2*.5); plate(g,.12,.09,labelTex([["불량 조치 시","#c00",50],["핀셋 사용","#c00",50]],{w:320,h:240,border:"#c00"}),[X+hw+.037,q3.y-.06,q3.z],Math.PI/2); }
   return g;
 }
