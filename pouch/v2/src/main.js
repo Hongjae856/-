@@ -21,6 +21,29 @@ function resize(){ const w=innerWidth,h=innerHeight; renderer.setPixelRatio(Math
 addEventListener("resize",resize); resize(); view("sw");
 /* 그래픽 옵션 : 상 · 중 · 하 (자동 조절은 본편 연결 시) */
 const GFX={high:{pr:2,sm:2048,sh:true},mid:{pr:1.25,sm:1024,sh:true},low:{pr:1,sm:512,sh:false}};
-function setGfx(k){ const q=GFX[k]; renderer.setPixelRatio(Math.min(q.pr,devicePixelRatio||1)); renderer.shadowMap.enabled=q.sh; scene.traverse(o=>{ if(o.isLight&&o.shadow&&o.castShadow!==undefined&&o.isDirectionalLight){ o.castShadow=q.sh; o.shadow.mapSize.set(q.sm,q.sm); if(o.shadow.map){ o.shadow.map.dispose(); o.shadow.map=null; } } if(o.material) o.material.needsUpdate=true; }); resize(); }
-function frame(){ requestAnimationFrame(frame); renderer.render(scene,camera); } frame();
-window.__V={view,scene,camera,renderer,setGfx};
+function setGfx(k){ const q=GFX[k]; renderer.setPixelRatio(Math.min(q.pr,devicePixelRatio||1)); renderer.shadowMap.enabled=q.sh; POST.mat.uniforms.ao.value=k==='low'?0:1; scene.traverse(o=>{ if(o.isLight&&o.shadow&&o.castShadow!==undefined&&o.isDirectionalLight){ o.castShadow=q.sh; o.shadow.mapSize.set(q.sm,q.sm); if(o.shadow.map){ o.shadow.map.dispose(); o.shadow.map=null; } } if(o.material) o.material.needsUpdate=true; }); resize(); postSize(); }
+/* ── 후처리 : 틈 · 모서리 음영(SSAO, 깊이 기반) + ACES 톤매핑 + sRGB ── */
+const POST={on:true, rt:null, quad:null, cam:new T3.OrthographicCamera(-1,1,1,-1,0,1), scn:new T3.Scene()};
+POST.mat=new T3.ShaderMaterial({uniforms:{tC:{value:null},tD:{value:null},res:{value:new T3.Vector2()},nf:{value:new T3.Vector2(.05,60)},expo:{value:.74},ao:{value:1}},
+ vertexShader:"varying vec2 v; void main(){ v=uv; gl_Position=vec4(position.xy,0.,1.); }",
+ fragmentShader:`precision highp float; varying vec2 v; uniform sampler2D tC,tD; uniform vec2 res,nf; uniform float expo,ao;
+ float lin(float d){ float z=d*2.-1.; return 2.*nf.x*nf.y/(nf.y+nf.x-z*(nf.y-nf.x)); }
+ vec3 aces(vec3 x){ x*=expo/0.6; mat3 a=mat3(.59719,.076,.0284,.35458,.90834,.13383,.04823,.01566,.83777), b=mat3(1.60475,-.10208,-.00327,-.53108,1.10813,-.07276,-.07367,-.00605,1.07602);
+   x=a*x; x=(x*(x+.0245786)-.000090537)/(x*(.983729*x+.432951)+.238081); return clamp(b*x,0.,1.); }
+ void main(){ vec3 c=texture2D(tC,v).rgb; float d=lin(texture2D(tD,v).x), occ=0.;
+   if(ao>.5){ float rad=clamp(.16/d,.004,.06); float a0=fract(sin(dot(gl_FragCoord.xy,vec2(12.9898,78.233)))*43758.5453)*6.283;
+     for(int i=0;i<14;i++){ float fi=float(i), r=rad*sqrt((fi+.5)/14.), an=a0+fi*2.39996; vec2 o=vec2(cos(an),sin(an))*r*vec2(res.y/res.x,1.);
+       float sd=lin(texture2D(tD,v+o).x), df=d-sd; occ+=smoothstep(.006,.05,df)*(1.-smoothstep(.12,.45,df)); }
+     occ=occ/14.; }
+   c*=1.-.78*occ; c=aces(c); c=pow(c,vec3(1./2.2)); gl_FragColor=vec4(c,1.); }`,depthTest:false,depthWrite:false});
+POST.scn.add(new T3.Mesh(new T3.PlaneGeometry(2,2),POST.mat));
+function postSize(){ const s=renderer.getDrawingBufferSize(new T3.Vector2()); if(POST.rt) POST.rt.dispose();
+  POST.rt=new T3.WebGLRenderTarget(s.x,s.y,{type:T3.HalfFloatType,samples:4}); POST.rt.depthTexture=new T3.DepthTexture(s.x,s.y); POST.rt.depthTexture.type=T3.UnsignedIntType;
+  POST.mat.uniforms.res.value.copy(s); }
+function draw(){ if(!POST.on){ renderer.toneMapping=T3.ACESFilmicToneMapping; renderer.outputEncoding=T3.sRGBEncoding; renderer.setRenderTarget(null); renderer.render(scene,camera); return; }
+  renderer.toneMapping=T3.NoToneMapping; renderer.outputEncoding=T3.LinearEncoding; renderer.setRenderTarget(POST.rt); renderer.render(scene,camera);
+  POST.mat.uniforms.tC.value=POST.rt.texture; POST.mat.uniforms.tD.value=POST.rt.depthTexture; POST.mat.uniforms.nf.value.set(camera.near,camera.far);
+  renderer.setRenderTarget(null); renderer.render(POST.scn,POST.cam); }
+addEventListener("resize",postSize); postSize();
+function frame(){ requestAnimationFrame(frame); draw(); } frame();
+window.__V={view,scene,camera,renderer,setGfx,POST};
