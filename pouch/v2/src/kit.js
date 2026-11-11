@@ -16,7 +16,7 @@ TX.foil=tex(cvs(256,256,(g,w,h)=>{ g.fillStyle="#cfd3d6"; g.fillRect(0,0,w,h); g
 function labelTex(lines,o){ o=o||{}; const W=o.w||512,H=o.h||192; return tex(cvs(W,H,(g)=>{ g.fillStyle=o.bg||"#fff"; g.fillRect(0,0,W,H); if(o.bar){ g.fillStyle=o.bar; g.fillRect(0,0,W*.05,H); } if(o.border){ g.strokeStyle=o.border; g.lineWidth=6; g.strokeRect(3,3,W-6,H-6); }
   g.textAlign="center"; g.textBaseline="middle"; const n=lines.length; lines.forEach((l,i)=>{ g.fillStyle=l[1]||"#111"; g.font=`bold ${l[2]||Math.floor(H/(n+.6))}px "Malgun Gothic","Noto Sans KR",sans-serif`; g.fillText(l[0],W/2,H*(i+.5)/n); }); }),1,1,true); }
 /* 타공 미끄럼 방지판 (계단 디딤판) */
-TX.perf=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#8a8a8a"; g.fillRect(0,0,w,h); for(let j=0;j<4;j++) for(let i=0;i<4;i++){ const x=i*32+16+(j%2)*16, y=j*32+16, gr=g.createRadialGradient(x,y,2,x,y,11); gr.addColorStop(0,"#1c1c1c"); gr.addColorStop(.55,"#f4f4f4"); gr.addColorStop(1,"#8a8a8a"); g.fillStyle=gr; g.beginPath(); g.arc(x,y,11,0,7); g.fill(); } }),8,3);
+TX.perf=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#8a8a8a"; g.fillRect(0,0,w,h); for(let j=0;j<4;j++) for(let i=0;i<4;i++){ const x=i*32+16+(j%2)*16, y=j*32+16, gr=g.createRadialGradient(x,y,2,x,y,11); gr.addColorStop(0,"#1c1c1c"); gr.addColorStop(.55,"#f4f4f4"); gr.addColorStop(1,"#8a8a8a"); g.fillStyle=gr; g.beginPath(); g.arc(x,y,11,0,7); g.fill(); } }),1.2,4.8);
 /* ── 재질 ── */
 const M={};
 M.ss   =new T3.MeshStandardMaterial({color:0xb9bdc0,metalness:1,roughness:.3,envMapIntensity:1.15,roughnessMap:TX.hair,bumpMap:TX.hair,bumpScale:.0006});
