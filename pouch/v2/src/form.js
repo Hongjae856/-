@@ -1,6 +1,6 @@
 /* ═══ 충전기 서쪽 정면 (도면 재판독 + 현장 사진 11/11 · DRAWING.md 9절)
    데크 밑 깔때기 노즐 10 → 은박 V 접힘 → [아크릴 함 0.97~1.88] 주황 손잡이 봉 → 세로 실링 유닛 → SOLPAC 커버 → 하부 죠 →
-   ① 가로 실링 빔(실린더 4) → 파우치 줄 → ② 무늬 빔 → [함 아래] ③ 커팅 빔(각형 실린더 4) → 엠보 곡면 슈트 10 → 배출 컨베이어 받침 칸
+   ① 가로 실링 빔(실린더 4) → 파우치 줄 → ② 무늬 빔 → [함 아래] ③ 커팅 빔(각형 실린더 4) → 엠보 곡면 슈트 10 → 검은 칸막이 사이 칸(바닥 게이트) → 배출 컨베이어 받침
    기준 : 은박 · 노즐 면 x = FM.xf, 열 간격 FM.P(70 mm), 커팅 높이 FM.yCut, 슈트 끝 약 455 mm ═══ */
 function buildForming(g,by1){
   const F=FL, zc=F.zc, n=FM.n, P=FM.P, W=n*P, pz=FM.pz, wx=FM.xf+.062, X=d=>wx-d, edge=k=>zc-W/2+P*k, WEST=-Math.PI/2, yC=FM.yCut, xn=FM.xf;
@@ -60,7 +60,6 @@ function buildForming(g,by1){
   const lip=prof.map((q,k)=>{ const a=prof[Math.max(0,k-1)], b=prof[Math.min(prof.length-1,k+1)], tx=b[0]-a[0], ty=b[1]-a[1], l=Math.hypot(tx,ty); return [q[0]+ty/l*.008,q[1]-tx/l*.008]; });
   for(let i=0;i<n;i++){ const z=pz(i); ribbon(g,prof,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(g,prof,lip,z+s*.02,M.sheet); bx(g,xn-.014,xn+.002,cy-.03,cy,z-.02,z+.02,M.white); }
   bx(g,xn+.004,xn+.03,cy-.12,cy,zc-.4,zc+.4,M.ssD);
-  bx(g,xn-.05,wx,.36,.39,zc-.42,zc+.42,M.blue);                                                          /* 슈트 뒤 파란 받이 */
   /* 아크릴 함 (알루미늄 틀) : 북쪽 판(SP303) · 가운데 문 2 · 남쪽 판(SOLPAC packaging machine) · 옆면 */
   const dd=.42, y0=.97, y1=by1-.02, zN=zc-.64, zS=zc+.64, xd=X(dd), fr=new T3.MeshStandardMaterial({color:0xe6e8ea,metalness:.6,roughness:.45});
   for(const z of [zN,zS]){ bx(g,xd-.02,xd+.02,y0,y1,z-.02,z+.02,fr); bx(g,xd+.02,X(.03),y0,y0+.03,z-.015,z+.015,fr); bx(g,xd+.02,X(.03),y1-.03,y1,z-.015,z+.015,fr); bx(g,xd,X(.03),y0+.03,y1-.03,z-.003,z+.003,M.acryl); }
