@@ -17,27 +17,28 @@ function buildFillZone(S){
     bx(g,x0+.06,x1-.06,.9,.915,z1+.06,z1+.3,M.ss); bx(g,x0+.12,x1-.12,.915,.93,z1+.1,z1+.24,M.dark); for(const x of [x0+.08,x1-.08]) for(const z of [z1+.08,z1+.28]) rod(g,[x,0,z],[x,.9,z],.012,M.ssMir,8); bx(g,x0+.08,x1-.08,.6,.61,z1+.08,z1+.28,M.deck);
     for(const x of [x0,x1]) for(const z of [z0,z1]) rod(g,[x,0,z],[x,.06,z],.03,M.dark,12); }
   /* ── IBC (GEA Buck Systems 형상) : 모서리 둥근 상부 띠 · 경사 뚜껑 + 원형 투입구 · 사각 역피라미드 · 버터플라이 밸브 · 원통 다리 4 · 하부 틀 + 포크 포켓 / 받침 호퍼 ── */
-  const ibc=(cx,cz,nm,mesh)=>{ const w=.55;
+  const ibc=(cx,cz,nm,mesh,sz)=>{ const w=.55;                          /* sz : 받침 호퍼 배출구 방향 (+1 남 · −1 북) */
     for(const sx of [-1,1]) for(const sz of [-1,1]){ rod(g,[cx+sx*(w-.04),.012,cz+sz*(w-.04)],[cx+sx*(w-.04),1.36,cz+sz*(w-.04)],.045,M.ss,24); rod(g,[cx+sx*(w-.04),0,cz+sz*(w-.04)],[cx+sx*(w-.04),.012,cz+sz*(w-.04)],.05,M.ssD,24); }
-    for(const sz of [-1,1]) bx(g,cx-w+.04,cx+w-.04,.2,.32,cz+sz*(w-.04)-.025,cz+sz*(w-.04)+.025,M.ss); for(const sx of [-1,1]){ bx(g,cx+sx*(w-.04)-.025,cx+sx*(w-.04)+.025,.2,.32,cz-w+.04,cz+w-.04,M.ss); bx(g,cx+sx*.28-.11,cx+sx*.28+.11,.06,.2,cz-w+.02,cz+w-.02,M.ssD); bx(g,cx+sx*.28-.095,cx+sx*.28+.095,.075,.185,cz-w+.015,cz+w-.015,M.dark); }
+    for(const sz of [-1,1]) bx(g,cx-w+.04,cx+w-.04,.2,.32,cz+sz*(w-.04)-.025,cz+sz*(w-.04)+.025,M.ss); for(const sx of [-1,1]){ bx(g,cx+sx*(w-.04)-.025,cx+sx*(w-.04)+.025,.2,.32,cz-w+.04,cz+w-.04,M.ss); bx(g,cx+sx*.385-.085,cx+sx*.385+.085,.06,.2,cz-w+.02,cz+w-.02,M.ssD); bx(g,cx+sx*.385-.07,cx+sx*.385+.07,.075,.185,cz-w+.015,cz+w-.015,M.dark); }      /* 포크 포켓 : 받침 호퍼가 사이에 들어가도록 바깥쪽 */
     rrect(g,cx,cz,w,w,.09,1.34,1.54,M.ss); frustum(g,cx,1.54,1.62,cz,.56,.56,2*w-.06,2*w-.06,M.ss); frustum(g,cx,.62,1.34,cz,2*w-.04,2*w-.04,.2,.2,M.ss);
     rod(g,[cx,1.62,cz],[cx,1.66,cz],.21,M.ssMir,36); rod(g,[cx,1.66,cz],[cx,1.672,cz],.225,M.ss,36); rod(g,[cx+.225,1.666,cz],[cx+.26,1.666,cz],.012,M.ssD,8);
     rod(g,[cx,.5,cz],[cx,.62,cz],.09,M.ssMir,28); rod(g,[cx,.53,cz],[cx,.57,cz],.105,M.ss,28); rod(g,[cx,.55,cz],[cx+.3,.55,cz+.14],.011,M.ssMir); rod(g,[cx+.3,.55,cz+.14],[cx+.34,.55,cz+.16],.016,M.dark,10);
     decal(g,.2,.05,textTex("GEA  Buck Systems","#2a2d30",512,128,44),[cx-w-.002,1.46,cz+.25],-Math.PI/2);
     plate(g,.24,.08,labelTex([[nm,"#111",70]],{w:512,h:170,border:"#333"}),[cx-w-.003,1.44,cz-.2],-Math.PI/2);
     decal(g,.3,.04,textTex("OPEN          CLOSED","#3a3d40",640,90,44),[cx-.2,.8,cz],-Math.PI/2);
-    /* 받침 호퍼 : 사각 함 · 흰 테두리 원형 개구부(백당 = 망 있음) · 앞면 위생 클램프 배출구 · 검은 받침발 */
-    bx(g,cx-.21,cx+.21,.12,.4,cz-.21,cz+.21,M.ssMir); for(const sx of [-1,1]) for(const sz of [-1,1]) bx(g,cx+sx*.17-.03,cx+sx*.17+.03,0,.12,cz+sz*.17-.03,cz+sz*.17+.03,M.dark);
-    rod(g,[cx,.4,cz],[cx,.412,cz],.19,M.white,36); rod(g,[cx,.412,cz],[cx,.415,cz],.15,mesh?M.emboss:M.dark,36); if(!mesh) cone(g,[cx,.3,cz],[cx,.41,cz],.04,.148,M.ssMir,28);
-    for(let k=0;k<8;k++){ const a=k*Math.PI/4+.3; rod(g,[cx+Math.cos(a)*.175,.412,cz+Math.sin(a)*.175],[cx+Math.cos(a)*.175,.418,cz+Math.sin(a)*.175],.007,M.dark,8); }
-    rod(g,[cx-.21,.2,cz],[cx-.3,.2,cz],.03,M.ssMir,18); rod(g,[cx-.3,.2,cz],[cx-.315,.2,cz],.042,M.ss,18);
-    return [cx-.315,.2,cz]; };
-  const oS=ibc(6.75,2.22,"백당",true), oA=ibc(6.75,.8,"첨가제",false);
+    /* 받침 호퍼 : IBC 하부 틀 안 · 포크 포켓 사이에 놓임. 사각 함 · 흰 테두리 원형 개구부(백당 = 망 있음) · 검은 받침발 ·
+       배출구는 함 바닥 앞쪽 아래(틀 가로대 밑)로 나와 두 IBC 사이 통로 쪽을 향함 → 진공호스가 틀과 겹치지 않음 (사용자 지적 11/12) */
+    const hh=.2; bx(g,cx-hh,cx+hh,.13,.4,cz-hh,cz+hh,M.ssMir); for(const sx of [-1,1]) for(const s2 of [-1,1]) bx(g,cx+sx*.16-.03,cx+sx*.16+.03,0,.13,cz+s2*.16-.03,cz+s2*.16+.03,M.dark);
+    rod(g,[cx,.4,cz],[cx,.412,cz],.185,M.white,36); rod(g,[cx,.412,cz],[cx,.415,cz],.148,mesh?M.emboss:M.dark,36); if(!mesh) cone(g,[cx,.3,cz],[cx,.41,cz],.04,.146,M.ssMir,28);
+    for(let k=0;k<8;k++){ const a=k*Math.PI/4+.3; rod(g,[cx+Math.cos(a)*.17,.412,cz+Math.sin(a)*.17],[cx+Math.cos(a)*.17,.418,cz+Math.sin(a)*.17],.007,M.dark,8); }
+    frustum(g,cx,.085,.13,cz,.2,.2,.07,.07,M.ssMir,0,sz*.04); rod(g,[cx,.085,cz+sz*.04],[cx,.085,cz+sz*(hh+.07)],.028,M.ssMir,18); rod(g,[cx,.085,cz+sz*(hh+.07)],[cx,.085,cz+sz*(hh+.085)],.04,M.ss,18);
+    return [cx,.085,cz+sz*(hh+.085)]; };
+  const oS=ibc(6.75,2.22,"백당",true,-1), oA=ibc(6.75,.8,"첨가제",false,1);
   for(const [dx,dz] of [[0,0],[.16,0],[.08,.14],[.24,.14]]) rod(g,[7.5+dx,0,.25+dz],[7.5+dx,.13,.25+dz],.07,M.white,24);          /* 흰 수지 마개 4 (받침 호퍼 보관용) */
   /* 진공호스 : 받침 호퍼 → 바닥 → 2층 데크 → 호퍼 1(첨가제) · 3(백당) 진공이송기 (두 가닥 함께) */
   const hz=F.z0-.12;
-  tube(g,[oA,[oA[0]-.25,.08,oA[2]],[5.9,.05,.95],[5.75,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[FM.xf+.3,F.top+.3,zc-.5],[FM.xf-.3,F.top+.22,zc-.2],[FM.xf-.37,F.top+.11,zc-.1]],.03,M.hose);
-  tube(g,[oS,[oS[0]-.3,.08,oS[2]-.2],[6.0,.05,1.2],[5.82,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.6,F.top+.2,zc-.4],[FM.xf+.6,F.top+.16,zc-.2],[FM.xf+.49,F.top+.11,zc-.1]],.03,M.hose);
+  tube(g,[oA,[oA[0],.06,oA[2]+.2],[oA[0]-.25,.05,1.5],[6.2,.05,1.5],[5.95,.06,1.4],[5.78,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[FM.xf+.3,F.top+.3,zc-.5],[FM.xf-.3,F.top+.22,zc-.2],[FM.xf-.37,F.top+.11,zc-.1]],.028,M.hose);
+  tube(g,[oS,[oS[0],.06,oS[2]-.14],[oS[0]-.25,.05,1.58],[6.2,.05,1.57],[5.98,.06,1.47],[5.84,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.6,F.top+.2,zc-.4],[FM.xf+.6,F.top+.16,zc-.2],[FM.xf+.49,F.top+.11,zc-.1]],.028,M.hose);
   /* ── 저울 작업대 2대 (북서 · 벽을 따라 세로) ── */
   for(const z0 of [.25,1.4]){ bx(g,.12,.72,.78,.82,z0,z0+1.0,M.ss); for(const x of [.16,.68]) for(const z of [z0+.05,z0+.95]) bx(g,x-.02,x+.02,.03,.78,z-.02,z+.02,M.ss);
     bx(g,.16,.68,.2,.22,z0+.05,z0+.95,M.ss); bx(g,.26,.56,.82,.88,z0+.3,z0+.62,M.white); bx(g,.3,.52,.88,.89,z0+.34,z0+.58,M.ssMir); bx(g,.3,.52,.82,.9,z0+.66,z0+.74,M.dark); }
