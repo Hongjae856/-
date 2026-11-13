@@ -5,7 +5,7 @@ const MP={ case:{x:.27,y:.08,z:.38}, z0:-9.32, zB1:-10.32, zG0:-10.5, spot:k=>-1
 function makeWorker(S,x,z,ry){ const G=new T3.Group(); G.position.set(x,0,z); G.rotation.y=ry; S.add(G);   /* 방진복(상하 일체) · 후드 · 마스크 · 방진화 */
   const gown=new T3.MeshStandardMaterial({color:0x8fb8e0,roughness:.9}), skin=new T3.MeshStandardMaterial({color:0xe2bc9c,roughness:.7}), hood=new T3.MeshStandardMaterial({color:0xf3f4f2,roughness:.92}), boot=new T3.MeshStandardMaterial({color:0xeef0f0,roughness:.8}), glove=new T3.MeshStandardMaterial({color:0xdfe9f2,roughness:.55});
   const lathe=(pts,mat,sx,sz,y0)=>{ const m=new T3.Mesh(new T3.LatheGeometry(pts.map(p=>new T3.Vector2(p[0],p[1])),32),mat); m.scale.set(sx,1,sz); m.position.y=y0||0; add(G,m); return m; };
-  for(const s of [-1,1]){ const L=new T3.Group(); L.position.set(s*.085,0,0); G.add(L);
+  const legs=[]; for(const s of [-1,1]){ const L0=new T3.Group(); L0.position.set(s*.085,.95,0); G.add(L0); legs.push(L0); const L=new T3.Group(); L.position.y=-.95; L0.add(L);   /* 고관절 기준 회전 (보행) */
     const leg=new T3.Mesh(new T3.LatheGeometry([[.0,.0],[.062,.0],[.064,.1],[.06,.42],[.07,.62],[.085,.88],[0,.9]].map(p=>new T3.Vector2(p[0],p[1])),20),gown); leg.position.y=.06; add(L,leg);
     const bt=new T3.Mesh(new T3.LatheGeometry([[.0,.0],[.07,.0],[.068,.3],[.064,.36],[0,.36]].map(p=>new T3.Vector2(p[0],p[1])),20),boot); bt.scale.z=1.15; add(L,bt);
     const toe=new T3.Mesh(new T3.SphereGeometry(.065,16,10,0,Math.PI*2,0,Math.PI/2),boot); toe.scale.set(1,.7,1.6); toe.position.set(0,0,.07); add(L,toe); }
@@ -22,7 +22,7 @@ function makeWorker(S,x,z,ry){ const G=new T3.Group(); G.position.set(x,0,z); G.
     const F=new T3.Group(); F.position.y=-.3; A.add(F); const el=new T3.Mesh(new T3.SphereGeometry(.05,14,8),gown); add(F,el);
     const lo=new T3.Mesh(new T3.CylinderGeometry(.05,.04,.25,16),gown); lo.position.y=-.125; add(F,lo);
     const hand=new T3.Mesh(new T3.SphereGeometry(.042,14,10),glove); hand.scale.set(.75,1.35,.95); hand.position.y=-.29; add(F,hand); arms.push({A,F,s}); }
-  return {G,arms}; }
+  return {G,arms,legs}; }
 function setArms(w,reach,bend){ for(const a of w.arms){ a.A.rotation.x=-reach; a.A.rotation.z=a.s*.12; a.F.rotation.x=-bend; } }
 function initManual(S){
   const X=CVX, C=MP.case, red=new T3.MeshStandardMaterial({color:0x9a1a14,roughness:.6,side:T3.DoubleSide}), kraft=new T3.MeshStandardMaterial({color:0xb08a5a,roughness:.85,side:T3.DoubleSide});
