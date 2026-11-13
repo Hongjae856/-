@@ -6,7 +6,7 @@
    앞 : 흰 프로파일 틀 + 아크릴 지붕판 + 힌지식 아크릴 문 3짝(흰 'Hoonga' · 회색 원통 힌지 인터락 · '금지' 표지).
    북쪽 끝 : 곡면 스테인리스 핫멜트 건 하우징(파란 꼬인 호스) · LS 판넬 · 노란 코일 호스 / 뒤 : 파란 핫멜트 유닛 ═══ */
 function buildCartoner(g){
-  const X=CVX, zs=PK2.lf[0], zn=PKZ.ct[0], zm=(zs+zn)/2, x0=X-.5, x1=X+.5, Hr=1.38, cx=PK2.cx, C=PK2.carton,
+  const X=CVX, zs=PK2.lf[0], zn=PKZ.ct[0], zm=(zs+zn)/2, x0=X-.5, x1=X+.5, Hr=1.38, cx=PK2.cx, C=PK2.carton, yC=PK2.yC, zl=l=>PK2.bz0-l,
         wf=new T3.MeshStandardMaterial({color:0xeef0f1,metalness:.35,roughness:.4});
   const ct=tex(cvs(256,128,(c)=>{ c.fillStyle="#f6f4ef"; c.fillRect(0,0,256,128); c.fillStyle="#d8342c"; c.fillRect(0,0,256,128); c.fillStyle="#fff"; c.fillRect(18,30,150,70); c.fillStyle="#d8342c"; c.font="bold 52px sans-serif"; c.fillText("H",28,86); c.font="bold 30px 'Malgun Gothic',sans-serif"; c.fillText("판콜",72,82); c.fillStyle="#f2c400"; c.fillRect(190,20,40,88); }),1,1,true);
   M.carton=new T3.MeshStandardMaterial({map:ct,roughness:.55}); M.cartonFlat=new T3.MeshStandardMaterial({color:0xe8b4b0,roughness:.6}); M.cartonEdge=new T3.MeshStandardMaterial({color:0xf3efe8,roughness:.7});
@@ -19,36 +19,41 @@ function buildCartoner(g){
   bx(g,x0+.03,X+.33,.42,.86,zn+.42,zm+.05,M.ss); bx(g,X+.33,X+.334,.46,.82,zn+.46,zm,M.ssD); rod(g,[X+.334,.76,zm-.25],[X+.35,.76,zm-.25],.012,M.dark,8);
   bx(g,x0+.03,X-.2,.15,.5,zs-.5,zs-.02,M.ss);                                                                       /* 남쪽 하부 함 */
   /* 카톤 체인 (녹색) · 러그 · 세워진 카톤 */
-  bx(g,cx-.08,cx+.08,.86,.9,zn+.05,zs-.2,M.ss); bx(g,cx-.07,cx+.07,.9,.915,zn+.05,zs-.2,M.green);
-  { const n=Math.floor((zs-.25-zn)/PK2.bucketP), lug=new T3.InstancedMesh(new T3.BoxGeometry(.14,.03,.008),M.ssD,n), o=new T3.Object3D(); for(let k=0;k<n;k++){ o.position.set(cx,.93,zs-.25-k*PK2.bucketP); o.updateMatrix(); lug.setMatrixAt(k,o.matrix); } g.add(lug); }
-  { const red=new T3.MeshStandardMaterial({color:0xd8342c,roughness:.55}), g2=new T3.BoxGeometry(C.L,C.H,C.W), mats=[M.carton,M.cartonEdge,red,red,M.carton,M.carton], n=Math.floor((zs-.6-zn)/PK2.bucketP), im=new T3.InstancedMesh(g2,mats,n), o=new T3.Object3D();   /* 정면(+x) · 옆면 인쇄, 뒤(−x) = 열린 끝 */
-    for(let k=0;k<n;k++){ o.position.set(cx,.915+C.H/2,zs-.6-k*PK2.bucketP); o.rotation.set(0,0,0); o.updateMatrix(); im.setMatrixAt(k,o.matrix); } im.castShadow=true; g.add(im); PK2.cartonIM=im; PK2.cartonN=n; }
-  /* 밀대(버킷 → 카톤) · 플랩 접기 레일 · 검은 레버 · 링크 암 2 · 빨간 블록 2 · 실린더 */
-  for(const y of [1.0,1.04]) bx(g,cx+.07,cx+.085,y-.005,y+.005,zn+.15,zs-.45,M.ssMir); for(const y of [.98]) bx(g,PK2.bx1,cx-.07,y-.004,y+.004,zn+.2,zs-.3,M.ssMir);
-  for(let k=0;k<6;k++) bx(g,PK2.bx1+.01,PK2.bx1+.05,.97,1.0,zs-.8-k*.3,zs-.78-k*.3,M.alu);
-  { const lv=bx(g,cx+.07,cx+.1,1.02,1.05,zm-.1,zm+.06,M.black); lv.rotation.x=.4; }
+  bx(g,cx-.08,cx+.08,yC-.055,yC-.015,zl(4.98),zl(2.68),M.ss); bx(g,cx-.07,cx+.07,yC-.015,yC,zl(4.98),zl(2.68),M.green);   /* 카톤 체인 (러그 · 카톤은 pack_anim) */
+  /* 밀대 캠 레일(뒤) · 버킷 → 카톤 다리판 · 앞 가이드 */
+  bx(g,X-.22,X-.18,.9,.92,zl(4.1),zl(2.9),M.ss); bx(g,PK2.bx1,cx-.064,.94,.95,zl(4.0),zl(2.95),M.ssMir);
+  bx(g,cx+.1,cx+.112,yC+.02,yC+.05,zl(3.9),zl(2.7),M.ssMir);
+  /* 접기 레일 : 작은 날개 접기(3.95~4.12) · 아래 큰 날개 올림(4.15~4.38) · 위 큰 날개 내림(4.5~4.72) · 압착 레일(4.74~4.98) — 양 끝 */
+  for(const s2 of [-1,1]){ const xe=cx+s2*C.L/2, a=C.H*.6;
+    tube(g,[[xe+s2*.045,yC+C.H/2,zl(3.9)],[xe+s2*.02,yC+C.H/2,zl(4.02)],[xe+s2*.006,yC+C.H/2,zl(4.14)]],.004,M.ssMir);
+    tube(g,[[xe+s2*(a+.004),yC-.006,zl(4.1)],[xe+s2*a*.7,yC+a*.35,zl(4.27)],[xe+s2*.007,yC+a*.85,zl(4.42)]],.004,M.ssMir);
+    tube(g,[[xe+s2*(a+.004),yC+C.H+.006,zl(4.46)],[xe+s2*a*.7,yC+C.H-a*.35,zl(4.62)],[xe+s2*.008,yC+C.H-a*.85,zl(4.76)]],.004,M.ssMir);
+    for(const y of [yC+.015,yC+C.H-.015]) bx(g,xe+s2*.004-.003,xe+s2*.004+.003,y-.006,y+.006,zl(4.98),zl(4.74),M.ssMir);
+    /* 핫멜트 노즐 (아래 큰 날개에 접착제) */
+    cone(g,[xe+s2*.03,yC+.014,zl(4.43)],[xe+s2*.008,yC+.014,zl(4.43)],.012,.003,M.brass,12); bx(g,xe+s2*.03-.012,xe+s2*.03+.012,yC+.0,yC+.03,zl(4.43)-.02,zl(4.43)+.02,M.dark); }
+  { const lv=bx(g,cx+.11,cx+.14,1.02,1.05,zm-.1,zm+.06,M.black); lv.rotation.x=.4; }
   for(const [z,a] of [[zs-.95,.7],[zm-.15,-.7]]){ const A=new T3.Group(); A.position.set(x0+.06,1.18,z); A.rotation.x=a; g.add(A); bx(A,0,.05,-.22,.22,-.035,.035,M.alu); rod(A,[.05,-.22,0],[.09,-.22,0],.03,M.ssMir,16); rod(A,[.05,.22,0],[.09,.22,0],.03,M.ssMir,16); bx(A,.09,.11,-.24,-.12,-.02,.02,M.alu); }
   for(const dz of [-.12,.12]){ bx(g,x0+.03,x0+.12,1.22,1.3,zm+.3+dz-.05,zm+.3+dz+.05,M.red); } rod(g,[x0+.12,1.26,zm+.3],[x0+.14,1.26,zm+.3],.02,M.ssMir,14);
   for(const z of [zs-1.3,zm+.6,zn+.6]){ bx(g,x0+.03,x0+.14,1.24,1.29,z-.1,z+.1,M.alu); rod(g,[x0+.08,1.265,z+.1],[x0+.08,1.265,z+.16],.01,M.ssMir,8); }
   tube(g,[[x0+.03,1.32,zn+.3],[x0+.12,1.25,zn+.6],[x0+.1,1.15,zn+.9],[x0+.03,1.1,zm]],.012,M.hoseB);
   /* 성형 회전부 : 노란 화살표 반원판 (남쪽 아래 앞) */
-  { const sh=new T3.Shape(); sh.absarc(0,0,.17,-Math.PI/2,Math.PI/2,false); sh.lineTo(0,-.17); const d=new T3.Mesh(new T3.ShapeGeometry(sh),M.ssMir); d.rotation.y=Math.PI/2; d.position.set(cx+.1,.82,zs-.38); g.add(d);
-    plate(g,.06,.06,labelTex([["↷","#111",110]],{w:128,h:128,bg:"#f5d400"}),[cx+.102,.84,zs-.4],Math.PI/2); bx(g,cx+.08,cx+.1,.62,.82,zs-.42,zs-.32,M.white); }
+  { const sh=new T3.Shape(); sh.absarc(0,0,.17,-Math.PI/2,Math.PI/2,false); sh.lineTo(0,-.17); const d=new T3.Mesh(new T3.ShapeGeometry(sh),M.ssMir); d.rotation.y=Math.PI/2; d.position.set(cx+.14,.8,zl(2.86)); g.add(d);
+    plate(g,.06,.06,labelTex([["↷","#111",110]],{w:128,h:128,bg:"#f5d400"}),[cx+.142,.82,zl(2.88)],Math.PI/2); bx(g,cx+.12,cx+.14,.6,.8,zl(2.92),zl(2.82),M.white); }
   /* 카톤 흡착 회전 암 (빨간 석션 컵) — 매거진 출구 ↔ 카톤 체인 (동작은 anim) */
-  { const P0=new T3.Group(); P0.position.set(cx-.02,1.18,zs-.3); g.add(P0); PK2.pick=P0; rod(g,[x0+.03,1.18,zs-.3],[cx-.02,1.18,zs-.3],.022,M.ssMir,16);
-    const A=new T3.Group(); P0.add(A); bx(A,-.02,.02,0,.16,-.02,.02,M.alu); for(const dz of [-.025,.025]){ rod(A,[0,.16,dz],[0,.18,dz],.008,M.ssMir,8); cone(A,[0,.18,dz],[0,.205,dz],.008,.018,M.red,14); } A.rotation.x=.9; PK2.pickArm=A; }
+  { const P0=new T3.Group(); P0.position.set(cx-.085,1.19,zl(2.8)); g.add(P0); PK2.pick=P0; rod(g,[x0+.03,1.19,zl(2.8)],[cx-.085,1.19,zl(2.8)],.022,M.ssMir,16);
+    const A=new T3.Group(); P0.add(A); bx(A,-.015,.015,0,.15,-.015,.015,M.alu); bx(A,-.015,.06,.15,.165,-.015,.015,M.alu); for(const dz of [-.025,.025]){ rod(A,[.05,.165,dz],[.05,.18,dz],.007,M.ssMir,8); cone(A,[.05,.18,dz],[.05,.198,dz],.007,.016,M.red,14); } A.rotation.x=.9; PK2.pickArm=A; }
   /* 위 : 스테인리스 함 · 규격 카운터 4 · 경사 매거진(남쪽 끝 꺾여 내려감) · 흰 U 손잡이 · 아크릴 덮개 */
-  const my=1.62; bx(g,X-.32,X+.36,Hr+.02,my,zn+.1,zs-.15,M.ss);
-  for(let k=0;k<4;k++){ const z=zs-.7-k*.5; bx(g,X+.36,X+.38,my-.14,my-.04,z-.04,z+.04,M.white); plate(g,.06,.018,labelTex([["1145","#111",80]],{w:200,h:60,bg:"#e8eaec"}),[X+.381,my-.07,z],Math.PI/2); rod(g,[X+.36,my-.17,z],[X+.39,my-.17,z],.018,M.ssMir,14); rod(g,[X+.39,my-.17,z],[X+.395,my-.17,z],.022,M.dark,14); }
-  for(const x of [X-.3,X+.3]) bx(g,x-.006,x+.006,my,my+.15,zn+.15,zs-.6,M.ss); bx(g,X-.3,X+.3,my,my+.008,zn+.15,zs-.6,M.ssD);
-  for(let z=zn+.2;z<zs-.6;z+=.04) bx(g,X-.29,X-.28,my+.008,my+.02,z-.006,z+.006,M.dark);
-  { const n=Math.floor((zs-.62-(zn+.2))/.009), im=new T3.InstancedMesh(new T3.BoxGeometry(.5,.17,.0035),M.cartonFlat,n+40), o=new T3.Object3D();
-    for(let k=0;k<n;k++){ o.position.set(X,my+.09,zs-.62-k*.009); o.rotation.set(.55,0,0); o.updateMatrix(); im.setMatrixAt(k,o.matrix); }
-    for(let k=0;k<40;k++){ const t=k/40, z=zs-.6+t*.32, y=my+.05-t*.26; o.position.set(X,y,z); o.rotation.set(.55+t*.35,0,0); o.updateMatrix(); im.setMatrixAt(n+k,o.matrix); } im.castShadow=true; g.add(im); }
-  for(const x of [X-.31,X+.31]){ const sh=new T3.Shape(); [[0,0],[.34,-.28],[.42,-.28],[.42,-.18],[.34,-.18],[0,.12]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b)); const m=new T3.Mesh(new T3.ShapeGeometry(sh),M.ss); m.material=M.ss.clone(); m.material.side=T3.DoubleSide; m.rotation.y=-Math.PI/2; m.position.set(x,my+.1,zs-.62); g.add(m); }
-  rod(g,[X+.33,my+.02,zs-.45],[X+.33,my-.22,zs-.45],.016,M.white,12); for(const y of [my+.02,my-.22]) rod(g,[X+.31,y,zs-.45],[X+.33,y,zs-.45],.014,M.white,10);
-  bx(g,X-.3,X+.34,my+.17,my+.176,zs-.75,zs-.15,M.acryl); bx(g,X+.34,X+.346,Hr,my+.17,zs-.75,zs-.15,M.acryl);
-  PB.sign(g,.14,.07,[["금 지","#fff",50],["장비 운전중에는 문을 열지 마시오.","#111",22]],{w:384,h:190,border:"#c00",bg:"#fff"},[X+.347,my+.05,zs-.3],Math.PI/2);
+  const my=1.62; bx(g,X-.32,X+.42,Hr+.02,my,zn+.1,zs-.15,M.ss);
+  for(let k=0;k<4;k++){ const z=zs-.7-k*.5; bx(g,X+.42,X+.44,my-.14,my-.04,z-.04,z+.04,M.white); plate(g,.06,.018,labelTex([["1145","#111",80]],{w:200,h:60,bg:"#e8eaec"}),[X+.441,my-.07,z],Math.PI/2); rod(g,[X+.42,my-.17,z],[X+.45,my-.17,z],.018,M.ssMir,14); rod(g,[X+.45,my-.17,z],[X+.455,my-.17,z],.022,M.dark,14); }
+  for(const x of [cx-.075,cx+.075]) bx(g,x-.005,x+.005,my,my+.17,zn+.15,zs-.6,M.ss); bx(g,cx-.07,cx+.07,my,my+.008,zn+.15,zs-.6,M.ssD);
+  for(let z=zn+.2;z<zs-.6;z+=.04) bx(g,cx-.068,cx-.06,my+.008,my+.02,z-.006,z+.006,M.dark);
+  { const n=Math.floor((zs-.62-(zn+.2))/.009), im=new T3.InstancedMesh(new T3.BoxGeometry(C.L,C.W+C.H,.0035),M.cartonFlat,n+40), o=new T3.Object3D();
+    for(let k=0;k<n;k++){ o.position.set(cx,my+.09,zs-.62-k*.009); o.rotation.set(.55,0,0); o.updateMatrix(); im.setMatrixAt(k,o.matrix); }
+    for(let k=0;k<40;k++){ const t=k/40, z=zs-.6+t*.32, y=my+.05-t*.26; o.position.set(cx,y,z); o.rotation.set(.55+t*.35,0,0); o.updateMatrix(); im.setMatrixAt(n+k,o.matrix); } im.castShadow=true; g.add(im); }
+  for(const x of [cx-.082,cx+.082]){ const sh=new T3.Shape(); [[0,0],[.34,-.28],[.42,-.28],[.42,-.18],[.34,-.18],[0,.12]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b)); const m=new T3.Mesh(new T3.ShapeGeometry(sh),M.ss); m.material=M.ss.clone(); m.material.side=T3.DoubleSide; m.rotation.y=-Math.PI/2; m.position.set(x,my+.1,zs-.62); g.add(m); }
+  rod(g,[cx+.12,my+.02,zs-.45],[cx+.12,my-.22,zs-.45],.016,M.white,12); for(const y of [my+.02,my-.22]) rod(g,[cx+.09,y,zs-.45],[cx+.12,y,zs-.45],.014,M.white,10);
+  bx(g,cx-.1,cx+.13,my+.19,my+.196,zs-.75,zs-.15,M.acryl); bx(g,cx+.13,cx+.136,Hr,my+.19,zs-.75,zs-.15,M.acryl);
+  PB.sign(g,.14,.07,[["금 지","#fff",50],["장비 운전중에는 문을 열지 마시오.","#111",22]],{w:384,h:190,border:"#c00",bg:"#fff"},[cx+.137,my+.05,zs-.3],Math.PI/2);
   /* 아크릴 지붕판 · 흰 프로파일 틀 · 아크릴 문 3짝 · 'Hoonga' · 회색 원통 힌지 인터락 · 표지 */
   bx(g,x0+.03,x1,Hr,Hr+.012,zn,zs,M.acryl); PB.frame(g,x1-.02,x1+.02,.15,Hr,zn,zs,wf);
   const dz=[zs,zs-(zs-zn)/3,zn+(zs-zn)/3,zn];
@@ -62,14 +67,14 @@ function buildCartoner(g){
   PB.sign(g,.17,.07,[["불량 조치 시","#c00",50],["핀셋 사용","#c00",50]],{w:384,h:150,border:"#c00"},[X+.302,.6,zs-.95],Math.PI/2);
   PB.beacon(g,x0+.1,my,zs-.25);
   /* 북쪽 끝 : 곡면 핫멜트 건 하우징 · 파란 꼬인 호스 · LS 판넬 · 파란 핫멜트 유닛(뒤) · 노란 코일 에어호스 · 출구 슈트 */
-  { const hz=zn+.25; bx(g,X-.1,X+.36,.62,.98,hz-.18,hz+.18,M.ssMir); const c=new T3.Mesh(new T3.CylinderGeometry(.16,.16,.46,32,1,false,0,Math.PI),M.ssMir); c.rotation.z=Math.PI/2; c.rotation.y=Math.PI/2; c.position.set(X+.13,.98,hz); c.rotation.set(0,0,Math.PI/2); add(g,c);
-    bx(g,X+.36,X+.362,.66,.9,hz-.12,hz+.06,M.ss); bx(g,X+.362,X+.364,.7,.76,hz+.02,hz+.05,M.dark); PB.warn(g,X+.364,.84,hz-.06,Math.PI/2);
-    for(const k of [0,1]) tube(g,[[X+.0,1.05,hz-.08+k*.06],[X-.1,1.25,hz-.1+k*.06],[x0+.1,1.33,hz+.1],[x0+.03,1.3,hz+.4]],.016,M.hoseB);
+  { const hz=zl(4.43); bx(g,cx+.1,cx+.36,.55,.86,hz-.16,hz+.16,M.ssMir); const c=new T3.Mesh(new T3.CylinderGeometry(.13,.13,.32,32,1,false,0,Math.PI),M.ssMir); c.rotation.set(Math.PI/2,0,Math.PI/2); c.position.set(cx+.23,.86,hz); c.rotation.set(0,0,0); c.rotation.x=Math.PI/2; c.rotation.z=Math.PI/2; add(g,c);
+    bx(g,cx+.36,cx+.362,.6,.82,hz-.12,hz+.06,M.ss); bx(g,cx+.362,cx+.364,.64,.7,hz+.02,hz+.05,M.dark); PB.warn(g,cx+.364,.78,hz-.06,Math.PI/2);
+    for(const k of [0,1]) tube(g,[[cx+.15,.99,hz-.08+k*.06],[cx+.05,1.25,hz-.1+k*.06],[x0+.1,1.33,hz+.1],[x0+.03,1.3,hz+.4]],.016,M.hoseB);
     bx(g,x0-.48,x0-.06,.05,.95,zn+.05,zn+.55,M.blue); bx(g,x0-.48,x0-.06,.95,1.0,zn+.05,zn+.55,M.dark); for(const dz2 of [.15,.35]) rod(g,[x0-.05,.78,zn+dz2],[x0-.02,.78,zn+dz2],.035,M.white,18);
     tube(g,[[x0-.27,1.0,zn+.3],[x0-.2,1.25,zn+.25],[x0+.01,1.3,zn+.3]],.018,M.hoseB);
     bx(g,x1+.08,x1+.46,.05,1.1,zn-.05,zn+.35,M.ss); rod(g,[x1+.27,1.1,zn+.15],[x1+.27,1.22,zn+.15],.03,M.ssMir,14); PB.panel(g,x1+.3,1.45,zn+.15,0,"Hoonga");
     { const pts=[], hx=x1+.52, hz2=zn+.45; for(let i=0;i<=120;i++){ const t=i/120, a=t*Math.PI*2*14; pts.push([hx+Math.cos(a)*.03,1.1-t*.6,hz2+Math.sin(a)*.03]); } tube(g,pts,.005,M.yellow); }
-    const r=new T3.Mesh(new T3.BoxGeometry(.2,.01,.3),M.ssMir); r.position.set((cx+X)/2,.9,zn-.12); r.rotation.x=-.15; add(g,r); }
+    { const r=new T3.Mesh(new T3.BoxGeometry(.42,.006,.28),M.ssMir); r.position.set((cx+X)/2,PKZ.y-.004,zl(4.98)-.14); r.rotation.y=.55; add(g,r); } }   /* 체인 끝 → 프린터 벨트 이송판 */
   /* ── 설명서 공급 구간 (스틱공급장치 ↔ 카토너, 흰 버킷 위) ── */
   { const [la,lb]=PK2.lf, lz=(la+lb)/2, lx=X+.04;
     bx(g,lx-.28,lx+.3,1.12,1.42,lz-.3,lz+.2,M.ss); bx(g,lx-.28,lx+.3,1.1,1.12,lz-.3,lz+.2,M.ssD);
@@ -85,5 +90,5 @@ function buildCartoner(g){
     const hd=new T3.Mesh(new T3.BoxGeometry(.006,.42,.5),M.acryl); hd.position.set(lx+.34,1.55,la+.05); hd.rotation.x=.5; g.add(hd);
     PB.sign(g,.14,.06,[["금 지","#fff",50],["장비 운전중에는 손을 넣지 마시오","#111",22]],{w:384,h:170,border:"#c00",bg:"#fff"},[lx+.302,1.15,lz+.12],Math.PI/2);
     bx(g,lx+.0,lx+.3,.08,.42,lz-.15,lz+.15,M.acryl); bx(g,lx+.0,lx+.3,.42,.44,lz-.15,lz+.15,M.ss); PB.sign(g,.18,.06,[["포장실","#111",40],["설명서 불량","#111",44]],{w:384,h:130,border:"#333"},[lx+.302,.3,lz],Math.PI/2);
-    const sp=new T3.Mesh(new T3.CylinderGeometry(.07,.07,.02,24),new T3.MeshStandardMaterial({color:0x2a6e3e,roughness:.5})); sp.rotation.z=Math.PI/2; sp.position.set(PK2.bx0-.04,PK2.bucketY-.12,la+.08); add(g,sp); PK2.leaflet=[lx,lz]; }
+    PK2.leaflet=[lx,lz]; }
 }

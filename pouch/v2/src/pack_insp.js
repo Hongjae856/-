@@ -3,11 +3,11 @@
 function buildInspection(g){
   const X=CVX, Y=PKZ.y;
   const belt=(z0,z1,w,mat,frame)=>{ bx(g,X-w/2-.03,X+w/2+.03,Y-.07,Y-.006,z0,z1,frame||M.ss); bx(g,X-w/2,X+w/2,Y-.006,Y,z0,z1,mat); for(const z of [z0,z1]){ const r=new T3.Mesh(new T3.CylinderGeometry(.03,.03,w,16),M.ssD); r.rotation.z=Math.PI/2; r.position.set(X,Y-.03,z); add(g,r); } };
-  const curtain=(z)=>{ for(let k=0;k<7;k++) bx(g,X-.12+k*.035,X-.09+k*.035,Y,Y+.22,z-.003,z+.003,M.blue); };
+  PK2.curt=[]; const curtain=(z)=>{ for(let k=0;k<7;k++){ const x=X-.105+k*.035, G=new T3.Group(); G.position.set(x,Y+.22,z); g.add(G); bx(G,-.015,.015,-.215,0,-.003,.003,M.blue); PK2.curt.push({G,x,z}); } };
   /* 카토너 출구 → 프린터 : 화살표 슈트 끝 아래 투명 아크릴 함(라벨 · 용도 확인 필요) */
   /* ── 케이스 프린터 · 비전 (Domino) ── */
   { const [z0,z1]=PKZ.pr, zc=(z0+z1)/2;
-    belt(z0-.1,z1+.25,.14,M.green); bx(g,X-.08,X+.08,Y+.14,Y+.16,z0,z1,M.green); for(const x of [X-.1,X+.1]) bx(g,x-.008,x+.008,Y,Y+.1,z0-.1,z1+.25,M.ss);       /* 녹색 벨트 · 위 누름 벨트 · 옆 가이드 */
+    belt(z0-.1,z1+.25,.14,M.green); bx(g,X-.08,X+.08,Y+.068,Y+.085,z0,z1,M.green); for(const x of [X-.1,X+.1]) bx(g,x-.008,x+.008,Y,Y+.1,z0-.1,z1+.25,M.ss);       /* 녹색 벨트 · 위 누름 벨트 · 옆 가이드 */
     for(const [dz,y] of [[-.3,Y-.12],[-.12,Y-.12],[.1,Y-.12],[-.05,Y+.22]]){ rod(g,[X+.1,y,zc+dz],[X+.17,y,zc+dz],.022,M.orange,14); bx(g,X+.17,X+.2,y-.02,y+.02,zc+dz-.03,zc+dz+.03,M.dark); }
     bx(g,X-.14,X+.22,.08,Y-.07,z0-.05,z1+.05,M.ss); bx(g,X+.22,X+.224,.42,.7,zc-.13,zc+.13,M.dark); bx(g,X+.224,X+.226,.45,.67,zc-.11,zc+.11,M.scr);
     PB.sign(g,.22,.05,[["DOMINO","#fff",80]],{w:512,h:110,bg:"#9aa0a6"},[X+.226,.3,zc],Math.PI/2); for(const dx of [-.1,.18]) for(const dz of [-.4,.4]) rod(g,[X+dx,0,zc+dz],[X+dx,.08,zc+dz],.03,M.dark,12);
@@ -47,6 +47,8 @@ function buildInspection(g){
       rod(g,[xb+s*.18,.82,z-.08],[xb+s*.22,.82,z-.08],.008,M.ssMir,8); rod(g,[xb+s*.18,.82,z+.08],[xb+s*.22,.82,z+.08],.008,M.ssMir,8); rod(g,[xb+s*.22,.82,z-.08],[xb+s*.22,.82,z+.08],.008,M.ssMir,8);
       bx(g,xb+s*.18-.01,xb+s*.18+.03,.92,.98,z-.025,z+.025,M.brass); PB.legs(g,xb-.15,xb+.15,z-.17,z+.17,.5);
       PB.sign(g,.18,.06,[["포장실",'#111',40],[s>0?"기준 중량 불량":"X-ray 불량","#111",42]],{w:384,h:130,border:"#333"},[xb+s*.182,.68,z],s>0?Math.PI/2:-Math.PI/2); } }
+  /* ── 중량선별기 뒤 모음 벨트 · 끝 멈춤판 (카톤 8개가 모이면 작업자가 대케이스에 담음) ── */
+  { const z0=-9.1, z1=PKZ.cw[0]; belt(z0,z1,.14,M.belt); bx(g,X-.08,X+.08,Y,Y+.08,z0-.006,z0,M.ss); for(const x of [X-.085,X+.085]) bx(g,x-.005,x+.005,Y,Y+.05,z0,z1,M.ss); PB.legs(g,X-.08,X+.08,z0+.05,z1-.05,Y-.07); }
   /* ── 대케이스 잉크젯 프린터 : 알루미늄 프레임 · 캐스터 · 검은 벨트 · 주황 노브 가이드 · Domino 소형 헤드 박스(서쪽) · 기둥 암 터치화면 · 경광등 ── */
   { const [z0,z1]=PKZ.cp, w=.42; bx(g,X-w/2-.04,X+w/2+.04,Y-.1,Y-.006,z0,z1,M.alu); bx(g,X-w/2,X+w/2,Y-.006,Y,z0,z1,M.belt);
     for(const x of [X-w/2-.02,X+w/2+.02]) for(const z of [z0+.08,(z0+z1)/2,z1-.08]){ bx(g,x-.02,x+.02,.07,Y-.1,z-.02,z+.02,M.alu); rod(g,[x,.035,z],[x,.035,z+.02],.035,M.dark,12); }
