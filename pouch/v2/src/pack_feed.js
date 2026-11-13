@@ -10,7 +10,7 @@ const PB={ beacon(g,x,y,z){ rod(g,[x,y,z],[x,y+.32,z],.011,M.ssMir,10); for(cons
     for(const [k,m] of [[0,M.white],[1,M.dark],[2,M.blue]]) { rod(G,[.05,-.08,-.12+k*.07],[.065,-.08,-.12+k*.07],.016,m,14); rod(G,[.05,-.08,-.12+k*.07],[.054,-.08,-.12+k*.07],.022,M.ssD,14); }
     rod(G,[.05,-.08,.13],[.072,-.08,.13],.026,M.red,16); rod(G,[.05,-.08,.13],[.056,-.08,.13],.036,M.yellow,16);
     if(brand) plate(G,.12,.03,labelTex([[brand,"#2d55a8",70]],{w:320,h:80}),[.052,-.19,0],Math.PI/2); return G; } };
-const PK2={ bucketP:.1, bucketY:.88, carton:{L:.125,W:.07,H:.035} };          /* 버킷 간격 · 버킷 윗면 높이 · 카톤 (추정, 확인 필요) */
+const PK2={ bucketP:.1, bucketY:.96, bx0:CVX-.2, bx1:CVX+.06, cx:CVX+.25, carton:{L:.12,W:.09,H:.065}, lf:[-2.85,-2.05] };   /* 버킷 간격 · 버킷 윗면 · 버킷 줄(뒤) · 카톤 줄(앞) 중심 · 카톤 · 설명서 구간 (추정, 확인 필요) */
 function buildStickFeeder(g){
   const X=CVX, [z0,z1]=PKZ.sf, zm=(z0+z1)/2, x0=X-.46, x1=X+.42, Hf=1.86, wf=new T3.MeshStandardMaterial({color:0xeef0f1,metalness:.35,roughness:.4});
   /* 받침 · 흰 프로파일 틀 · 뒤판 · 하부 함 */
@@ -20,14 +20,16 @@ function buildStickFeeder(g){
   for(const z of [z0+.45,zm,z1-.45]) bx(g,X-.001,X+.001,.2,.6,z-.002,z+.002,M.ssD);
   /* 흰 버킷 컨베이어 : 흰 체인 벨트 · 흰 칸막이 날개 · 남쪽 스프로킷 · 아래 복귀 구간(날개가 아래로) — 카토너까지 이어짐 */
   const bz0=z1-.12, bz1=PKZ.ct[0]+.15, Lb=bz0-bz1, bw=new T3.MeshStandardMaterial({color:0xf3f4f2,roughness:.45});
-  bx(g,X+.02,X+.3,PK2.bucketY-.04,PK2.bucketY-.01,bz1,bz0,bw); bx(g,X+.02,X+.3,PK2.bucketY-.1,PK2.bucketY-.04,bz1,bz0,M.ss);
-  bx(g,X+.02,X+.3,.5,.53,bz1,bz0,bw);
+  bx(g,PK2.bx0,PK2.bx1,PK2.bucketY-.04,PK2.bucketY-.01,bz1,bz0,bw); bx(g,PK2.bx0,PK2.bx1,PK2.bucketY-.1,PK2.bucketY-.04,bz1,bz0,M.ss);
+  bx(g,PK2.bx0,PK2.bx1,.5,.53,bz1,bz0,bw);
   { const n=Math.floor(Lb/PK2.bucketP), fin=new T3.InstancedMesh(new T3.BoxGeometry(.26,.075,.006),bw,n*2), o=new T3.Object3D();
-    for(let k=0;k<n;k++){ const z=bz0-k*PK2.bucketP; o.position.set(X+.16,PK2.bucketY+.0275,z); o.rotation.set(0,0,0); o.updateMatrix(); fin.setMatrixAt(k,o.matrix); o.position.set(X+.16,.5-.0375,z); o.updateMatrix(); fin.setMatrixAt(n+k,o.matrix); }
+    for(let k=0;k<n;k++){ const z=bz0-k*PK2.bucketP; o.position.set((PK2.bx0+PK2.bx1)/2,PK2.bucketY+.0275,z); o.rotation.set(0,0,0); o.updateMatrix(); fin.setMatrixAt(k,o.matrix); o.position.set((PK2.bx0+PK2.bx1)/2,.5-.0375,z); o.updateMatrix(); fin.setMatrixAt(n+k,o.matrix); }
     fin.castShadow=true; g.add(fin); PK2.fins=fin; PK2.finN=n; PK2.bz0=bz0; }
-  for(const [z,r] of [[bz0,.19]]){ const c=new T3.Mesh(new T3.CylinderGeometry(r,r,.28,40),bw); c.rotation.z=Math.PI/2; c.position.set(X+.16,(PK2.bucketY+.5)/2-.02,z+.02); add(g,c); rod(g,[X+.3,(PK2.bucketY+.5)/2-.02,z+.02],[X+.34,(PK2.bucketY+.5)/2-.02,z+.02],.05,M.ssMir,20); }
-  for(let k=0;k<12;k++){ const a=k/12*Math.PI*2, zz=bz0+.02+Math.cos(a)*.2, yy=(PK2.bucketY+.5)/2-.02+Math.sin(a)*.2; if(Math.cos(a)>0) bx(g,X+.03,X+.29,yy-.003,yy+.003,zz-.035,zz+.035,bw).rotation.x=a; }
-  bx(g,X-.06,X+.02,PK2.bucketY-.08,PK2.bucketY+.1,bz1,bz0,M.ss); bx(g,X+.3,X+.32,PK2.bucketY-.08,PK2.bucketY+.03,z0+.05,bz0,M.ss);      /* 버킷 양옆 가이드 */
+  for(const [z,r] of [[bz0,.19]]){ const c=new T3.Mesh(new T3.CylinderGeometry(r,r,.28,40),bw); c.rotation.z=Math.PI/2; c.position.set((PK2.bx0+PK2.bx1)/2,(PK2.bucketY+.5)/2-.02,z+.02); add(g,c); rod(g,[PK2.bx1,(PK2.bucketY+.5)/2-.02,z+.02],[PK2.bx1+.04,(PK2.bucketY+.5)/2-.02,z+.02],.05,M.ssMir,20); }
+  for(let k=0;k<12;k++){ const a=k/12*Math.PI*2, zz=bz0+.02+Math.cos(a)*.2, yy=(PK2.bucketY+.5)/2-.02+Math.sin(a)*.2; if(Math.cos(a)>0) bx(g,PK2.bx0+.01,PK2.bx1-.01,yy-.003,yy+.003,zz-.035,zz+.035,bw).rotation.x=a; }
+  bx(g,PK2.bx0-.03,PK2.bx0,PK2.bucketY-.08,PK2.bucketY+.1,PK2.lf[0],bz0,M.ss); bx(g,PK2.bx1,PK2.bx1+.02,PK2.bucketY-.08,PK2.bucketY+.03,PK2.lf[0],bz0,M.ss);      /* 버킷 양옆 가이드 */
+  bx(g,PK2.bx0-.03,PK2.bx1+.02,.16,PK2.bucketY-.1,PK2.lf[0]+.05,z0-.02,M.ss); bx(g,PK2.bx0-.05,PK2.bx1+.04,.08,.16,PK2.lf[0]+.03,z0,M.steel);   /* 설명서 구간 받침 */
+  bx(g,x0+.04,X+.42,.12,Hf-.02,z0-.006,z0+.004,M.steel); for(let k=0;k<6;k++) bx(g,x0+.12,x0+.26,1.62+k*.022,1.632+k*.022,z0-.012,z0-.006,M.dark);   /* 북쪽 진회색 옆판 · 환기 팬 */
   /* 상단 핀 벨트 (경사 컨베이어 → 북쪽) · 'Hoonga' 띠 · 북쪽 회전 휠(노란 화살표 커버) */
   const ty=1.5; bx(g,X-.12,X+.1,ty-.12,ty,z0+.12,z1+.05,M.alu); bx(g,X-.1,X+.08,ty,ty+.012,z0+.16,z1+.05,bw);
   for(let z=z1;z>z0+.18;z-=.05) bx(g,X-.1,X-.09,ty+.012,ty+.03,z-.004,z+.004,M.dark);
