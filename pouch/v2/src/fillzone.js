@@ -6,7 +6,7 @@ function buildFillZone(S){
   /* ── 북쪽 벽 : 유리창 2 (컨베이어 양옆) · 사각 개구부(스테인리스 테두리) · 인터폰 ── */
   const glass=new T3.MeshPhysicalMaterial({color:0x9fc4d6,roughness:.05,metalness:0,transparent:true,opacity:.45});
   for(const x0 of [CVX-1.25,CVX+.3]){ bx(g,x0,x0+.95,1.05,2.15,.026,.034,glass); for(const [a,b,c,d] of [[x0-.04,x0+.99,1.01,1.05],[x0-.04,x0+.99,2.15,2.19],[x0-.04,x0,1.01,2.19],[x0+.95,x0+.99,1.01,2.19]]) bx(g,a,b,c,d,.02,.045,M.alu); }
-  for(const [a,b,c,d] of [[CVX-.2,CVX+.2,1.2,1.24],[CVX-.2,CVX+.2,1.62,1.66],[CVX-.2,CVX-.16,1.2,1.66],[CVX+.16,CVX+.2,1.2,1.66]]) bx(g,a,b,c,d,.0,.09,M.ss);
+  for(const [a,b,c,d] of [[CVX-.2,CVX+.2,.94,.98],[CVX-.2,CVX+.2,1.62,1.66],[CVX-.2,CVX-.16,.94,1.66],[CVX+.16,CVX+.2,.94,1.66]]) bx(g,a,b,c,d,.0,.09,M.ss);
   bx(g,CVX-.5,CVX-.4,1.3,1.56,.026,.06,M.white); bx(g,CVX-.485,CVX-.455,1.32,1.54,.06,.085,M.white); tube(g,[[CVX-.47,1.32,.07],[CVX-.46,1.2,.09],[CVX-.48,1.1,.07],[CVX-.47,1.02,.08]],.006,M.white);   /* 인터폰 (개구부 서쪽) */
   /* ── 프린터 컨트롤러 · 비전 PC 거치대 : 알루미늄 프로파일 함 (위 칸 파란 컨트롤러 2 · 아래 회색 문) · 위 모니터 · 앞 키보드 받침 ── */
   { const x0=CVX+.4,x1=CVX+1.05,z0=.4,z1=.92; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-.02,x+.02,.06,1.5,z-.02,z+.02,M.alu);

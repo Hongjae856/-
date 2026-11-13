@@ -9,8 +9,20 @@ function buildConveyor(S){
   CV.at=s=>{ if(s<L1-R) return {y:y0,z:zS-s,a:0}; if(s>L1+R){ const d=s-L1; return {y:y0+d*Math.sin(A),z:zB-d*Math.cos(A),a:A}; }
     const t=(s-(L1-R))/(2*R), p0=[zB+R,y0], p1=[zB,y0], p2=[zB-R*Math.cos(A),y0+R*Math.sin(A)], u=1-t;
     const z=u*u*p0[0]+2*u*t*p1[0]+t*t*p2[0], y=u*u*p0[1]+2*u*t*p1[1]+t*t*p2[1], dz=2*u*(p1[0]-p0[0])+2*t*(p2[0]-p1[0]), dy=2*u*(p1[1]-p0[1])+2*t*(p2[1]-p1[1]); return {y,z,a:Math.atan2(dy,-dz)}; };
+  /* 체인톱처럼 감기는 무한 루프 (사용자 설명 11/13) : 트레이 → 경사 → 벽 → 포장실 수평 위 줄(A) → 북쪽 스프로킷(B, 180° 감김) →
+     아래 줄(C, 칸이 뒤집힌 채 정렬기 위를 지나며 스틱을 떨어뜨림) → 같은 길을 아래로 되돌아 → 트레이 남쪽 스프로킷 → 다시 트레이 */
+  const atC=CV.at, Lb=.12, cA=Math.cos(A), sA=Math.sin(A), zN=-1.5, z2=zE-cA*Lb/2-Lb/2, yT=yE+sA*Lb/2, Lh=z2-zN, Lc=CV.L+Lb+Lh;
+  const carry=s=>{ if(s<=CV.L) return atC(s); if(s<CV.L+Lb){ const t=(s-CV.L)/Lb, u=1-t, p0=[zE,yE], p1=[zE-cA*Lb/2,yE+sA*Lb/2], p2=[z2,yT];
+      const z=u*u*p0[0]+2*u*t*p1[0]+t*t*p2[0], y=u*u*p0[1]+2*u*t*p1[1]+t*t*p2[1], dz=2*u*(p1[0]-p0[0])+2*t*(p2[0]-p1[0]), dy=2*u*(p1[1]-p0[1])+2*t*(p2[1]-p1[1]); return {y,z,a:Math.atan2(dy,-dz)}; }
+    return {y:yT,z:z2-(s-CV.L-Lb),a:0}; };
+  const Nl=Math.round((2*Lc+2*Math.PI*.1)/FM.P), r=(Nl*FM.P-2*Lc)/(2*Math.PI); Object.assign(CV,{Lb,zN,z2,topY:yT,Lc,r,loop:Nl*FM.P,Nl});
+  CV.path=s=>{ s=((s%CV.loop)+CV.loop)%CV.loop; if(s<Lc) return carry(s);
+    if(s<Lc+Math.PI*r){ const f=(s-Lc)/r; return {y:yT-r+r*Math.cos(f),z:zN-r*Math.sin(f),a:-f}; }
+    if(s<2*Lc+Math.PI*r){ const q=carry(Lc-(s-Lc-Math.PI*r)); return {y:q.y-2*r*Math.cos(q.a),z:q.z-2*r*Math.sin(q.a),a:q.a+Math.PI}; }
+    const f=(s-2*Lc-Math.PI*r)/r; return {y:y0-r-r*Math.cos(f),z:zS+r*Math.sin(f),a:Math.PI-f}; };
+  CV.sDrop=zc2=>{ const sc=CV.L+Lb+(z2-zc2); return Lc+Math.PI*r+(Lc-sc); };
   /* 구간 틀 : 받침(알루미늄) · 벨트 · 옆 가이드 · 투명 커버 (트레이 구간은 동쪽이 슈트 쪽으로 열림) */
-  const sect=(G,l0,l1,o)=>{ bx(G,-hw-.03,hw+.03,-.06,-.004,l0,l1,M.alu); bx(G,-hw,hw,-.004,0,l0,l1,M.belt);
+  const sect=(G,l0,l1,o)=>{ bx(G,-hw-.03,hw+.03,-2*CV.r-.05,-.004,l0,l1,M.alu); bx(G,-hw-.032,-hw-.03,-2*CV.r-.04,-.02,l0,l1,M.ssD); bx(G,-hw,hw,-.004,0,l0,l1,M.belt);
     bx(G,-hw-.02,-hw-.003,0,.03,l0,l1,M.ss); if(!o.open) bx(G,hw+.003,hw+.02,0,.03,l0,l1,M.ss);
     const lh=o.open?FM.gateY-y0+.1:.1;                                                    /* 트레이 구간 뚜껑은 슈트 끝 · 미끄러져 들어오는 스틱과 닿지 않게 높이고 동쪽 끝을 물림 */
     bx(G,-hw-.034,-hw-.028,0,lh,l0,l1,M.acryl); if(!o.open) bx(G,hw+.028,hw+.034,0,.1,l0,l1,M.acryl);
@@ -31,16 +43,16 @@ function buildConveyor(S){
   { const G=new T3.Group(); G.position.set(X,(y0+yE)/2,(zB+zE)/2); G.rotation.x=A; g.add(G); sect(G,-L2/2,L2/2,{});
     for(const t of [-.3,0,.3]) for(const s of [-1,1]) rod(G,[s*(hw+.05),.07,t*L2-.05],[s*(hw+.05),.07,t*L2+.05],.007,M.ssMir,8); }
   /* 금속 U 자 받침 · 스틱 */
-  const P=FM.P, N=Math.ceil(CV.L/P)+1, o=new T3.Object3D();
+  const P=FM.P, N=CV.Nl, o=new T3.Object3D();
   const sh=new T3.Shape(); [[-.03,0],[.03,0],[.03,.018],[.026,.018],[.026,CV.hb],[-.026,CV.hb],[-.026,.018],[-.03,.018]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b));
   const hg=new T3.ExtrudeGeometry(sh,{depth:CV.w-.012,bevelEnabled:false}); hg.translate(0,0,-(CV.w-.012)/2); hg.rotateY(Math.PI/2);
   const cle=new T3.InstancedMesh(hg,M.ss,N); cle.castShadow=true; cle.frustumCulled=false; g.add(cle);
   const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.frustumCulled=false; g.add(stk);
   CV.N=N; CV.full=new Uint8Array(N+4); CV.out=0; CV.prev=null;
   CV.sOf=(k,u)=>{ const span=N*P; return ((k*P+u)%span+span)%span; };                                     /* 칸 k 중심의 경로 위치 */
-  CV.set=u=>{ for(let k=0;k<N;k++){ const s=CV.sOf(k,u); if(CV.prev){ if(s<CV.prev[k]-P){ CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; }
-      const vis=s<=CV.L, q=CV.at(Math.min(s,CV.L)), c=Math.cos(q.a), sn=Math.sin(q.a);
-      o.position.set(X,q.y,q.z); o.rotation.set(q.a,0,0); o.scale.setScalar(vis?1:0); o.updateMatrix(); cle.setMatrixAt(k,o.matrix);
+  CV.set=u=>{ for(let k=0;k<N;k++){ const s=CV.sOf(k,u); if(CV.prev){ if(CV.prev[k]>=0&&CV.prev[k]<=CV.L&&(s>CV.L||s<CV.prev[k])){ CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; }
+      const vis=s<=CV.L, q=CV.path(s), c=Math.cos(q.a), sn=Math.sin(q.a);
+      o.position.set(X,q.y,q.z); o.rotation.set(q.a,0,0); o.scale.setScalar(1); o.updateMatrix(); cle.setMatrixAt(k,o.matrix);
       const h=CV.hb+.0052; o.position.set(X,q.y+c*h,q.z+sn*h); o.scale.setScalar(vis&&CV.full[k]?1:0); o.updateMatrix(); stk.setMatrixAt(k,o.matrix); }
     cle.instanceMatrix.needsUpdate=true; stk.instanceMatrix.needsUpdate=true; };
   CV.set(0);

@@ -28,11 +28,12 @@ function buildStickFeeder(g){
   for(const z of [z1-.3,zm,z0+.3,-2.5,-3.4,-4.3,-5.0]) bx(g,PK2.bx0-.03,PK2.bx1,.12,.89,z-.02,z+.02,M.ss);
   /* 상단 버킷 체인 (Hoonga) : 경사 컨베이어 끝(z0)에서 스틱을 1칸에 1포씩 받아 북쪽으로 → 북쪽 스프로킷(노란 화살표)을 돌아
      아래 줄(뒤집힌 칸)로 남쪽 복귀 → 정렬기 위 투입구에서 칸에서 그대로 떨어짐. 칸막이는 pack_anim (간격 = 경사 컨베이어 칸 간격) */
+  PK2.topY=CV.topY; PK2.tc.z0=CV.z2; PK2.tc.z1=CV.zN; PK2.tc.r=CV.r;                   /* 상단 체인 = 배출 컨베이어 루프의 포장실 구간 */
   const T=PK2.tc, yU=PK2.topY, yL=yU-2*T.r;
   bx(g,xb-.09,xb+.09,yU-.012,yU-.004,T.z1,T.z0,bw); bx(g,xb-.09,xb+.09,yL+.012,yL+.02,T.z1,T.z0,bw);                 /* 위 · 아래 체인 바닥 */
   bx(g,xb-.1,xb+.1,yL+.03,yU-.02,T.z1+.02,T.z0-.02,M.ss);                                                              /* 체인 몸체 */
   bx(g,xb-.07,xb+.07,yL-.012,yL-.008,T.z1-.02,PK2.ch[0]+.06,M.ssMir);                                                   /* 아래 줄 받침 안내판 (투입구 앞에서 끝) */
-  for(const z of [T.z0,T.z1]){ for(const x of [xb-.1,xb+.1]){ const d=new T3.Mesh(new T3.CylinderGeometry(T.r+.02,T.r+.02,.008,40),M.ss); d.rotation.z=Math.PI/2; d.position.set(x,yU-T.r,z); add(g,d); } rod(g,[xb-.12,yU-T.r,z],[xb+.12,yU-T.r,z],.016,M.ssMir,14); }
+  for(const z of [T.z1]){ for(const x of [xb-.1,xb+.1]){ const d=new T3.Mesh(new T3.CylinderGeometry(T.r+.02,T.r+.02,.008,40),M.ss); d.rotation.z=Math.PI/2; d.position.set(x,yU-T.r,z); add(g,d); } rod(g,[xb-.12,yU-T.r,z],[xb+.12,yU-T.r,z],.016,M.ssMir,14); }
   plate(g,.08,.08,labelTex([["⟳","#111",150]],{w:160,h:160,bg:"#f5d400"}),[xb+.105,yU-T.r,T.z1],Math.PI/2); rod(g,[xb+.105,yU-T.r,T.z1],[xb+.13,yU-T.r,T.z1],.035,M.ssMir,18);
   bx(g,xb+.1,xb+.104,yU-.05,yU+.04,T.z1,T.z0,M.acryl); bx(g,xb-.104,xb-.1,yU-.05,yU+.04,T.z1,T.z0,M.ss);
   decal(g,.42,.08,textTex("Hoonga","#ffffff",512,100,84),[xb+.106,yU-.01,(T.z0+T.z1)/2+.15],Math.PI/2);

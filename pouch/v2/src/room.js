@@ -8,9 +8,9 @@ function buildFillRoom(S){
     const w=new T3.Mesh(new T3.BoxGeometry(L,H,.05),M.wall); w.position.set((x0+x1)/2,H/2,(z0+z1)/2); w.rotation.y=-Math.atan2(az,ax); w.receiveShadow=true; g.add(w);
     for(let i=1;i<n;i++){ const t=i/n, m=new T3.Mesh(new T3.BoxGeometry(.012,H,.062),M.alu); m.position.set(x0+(x1-x0)*t,H/2,z0+(z1-z0)*t); m.rotation.y=-Math.atan2(az,ax); g.add(m); }
     const cv=new T3.Mesh(new T3.CylinderGeometry(.05,.05,L,10,1,false,0,Math.PI/2),M.alu); cv.rotation.z=Math.PI/2; cv.position.set((x0+x1)/2,.0,(z0+z1)/2); cv.rotation.y=-Math.atan2(az,ax); g.add(cv); };
-  /* 북쪽 벽 : 컨베이어 통과 개구부 (CVX ± .16 · 높이 1.24 ~ 1.62) 를 남기고 나눠 세움 */
+  /* 북쪽 벽 : 컨베이어 통과 개구부 (CVX ± .16 · 높이 0.98 ~ 1.62 · 위 줄 + 되돌아가는 아래 줄) 를 남기고 나눠 세움 */
   wall(R.x0,R.z0,CVX-.16,R.z0); wall(CVX+.16,R.z0,R.x1,R.z0);
-  for(const [a,b] of [[0,1.24],[1.62,H]]){ const m=new T3.Mesh(new T3.BoxGeometry(.32,b-a,.05),M.wall); m.position.set(CVX,(a+b)/2,R.z0); m.receiveShadow=true; g.add(m); }
+  for(const [a,b] of [[0,.98],[1.62,H]]){ const m=new T3.Mesh(new T3.BoxGeometry(.32,b-a,.05),M.wall); m.position.set(CVX,(a+b)/2,R.z0); m.receiveShadow=true; g.add(m); }
   wall(R.x0,R.z1,R.x1,R.z1); wall(R.x0,R.z0,R.x0,R.z1); wall(R.x1,R.z0,R.x1,R.z1);
   /* 실 사이 벽기둥 · 상부 보 (경고 테이프) */
   bx(g,RM.pier-.13,RM.pier+.13,0,H,R.z0,R.z0+.6,M.wall); bx(g,RM.pier-.13,RM.pier+.13,0,H,R.z1-.65,R.z1,M.wall);

@@ -11,7 +11,7 @@ function initAnim(S){
   AN.o=new T3.Object3D(); AN.ld=new Uint8Array(n).fill(1);
   AN.u0=((CV.zS-FM.pz(0))%P+P)%P;                                         /* 안착 순간 칸 중심 = 열 위치 */
   AN.u=()=>AN.u0+n*P*(AN.cyc+AN.ph-AN.TG);
-  { const u=AN.u(), fr=((AN.ph-AN.TG)%1+1)%1, sF=CV.zS-FM.pz(n-1)+n*P*fr-P*.5; for(let k=0;k<CV.N;k++) CV.full[k]=CV.sOf(k,u)>sF?1:0; }
+  { const u=AN.u(), fr=((AN.ph-AN.TG)%1+1)%1, sF=CV.zS-FM.pz(n-1)+n*P*fr-P*.5; for(let k=0;k<CV.N;k++){ const sk=CV.sOf(k,u); CV.full[k]=sk>sF&&sk<=CV.L?1:0; } }
   CV.prev=new Float32Array(CV.N).fill(-1); stepAnim(0);
 }
 function stepAnim(dt){

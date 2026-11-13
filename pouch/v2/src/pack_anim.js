@@ -8,7 +8,7 @@ const PA={};
 function initPackAnim(S){
   const P=PK2.P, C=PK2.carton, Pf=FM.P, T=PK2.tc, o=new T3.Object3D(); PA.o=o;
   PA.Lt=T.z0-T.z1; PA.La=Math.PI*T.r; PA.Lf=.08; PA.loopT=2*PA.Lt+2*PA.La;
-  PA.D=c=>(PA.Lt+PA.La+(PK2.ch[c]-T.z1)+PA.Lf)/Pf;                     /* 스틱이 정렬기 위단 칸에 닿기까지 (σs) */
+  PA.D=c=>(CV.sDrop(PK2.ch[c])-CV.L+PA.Lf)/Pf;                          /* 스틱이 정렬기 위단 칸에 닿기까지 (σs) */
   PA.sA=PK2.bz0-PK2.ch[0]; PA.c0=(6*PA.sA/P-5-PA.D(0)-9.6)/6; PA.Lu=PK2.bz0-PK2.bz1; PA.loop=110*P;
   const im=(geo,mat,n)=>{ const m=new T3.InstancedMesh(geo,mat,n); m.frustumCulled=false; m.castShadow=true; m.receiveShadow=true; S.add(m); return m; };
   PA.stk=im(stickGeo(FM.stickL,FM.stickW,.009),M.stick,360);
@@ -49,11 +49,7 @@ function stepPackAnim(){
   /* ── 카톤 체인 러그 (버킷 칸막이와 같은 위치) ── */
   { let k=0,w=0; for(let b=Math.floor(sb-PZ.cEnd/P);k<30;b++){ const l=bl0(b); if(l<2.68) break; if(l>PZ.cEnd) continue; const z=zl(l); put(PA.lug,k++,cx,yC-.003,z); for(const s2 of [-1,1]) put(PA.lugW,w++,cx,yC+.021-.003,z+s2*.0485); }
     PA.lug.count=k; PA.lugW.count=w; PA.lug.instanceMatrix.needsUpdate=true; PA.lugW.instanceMatrix.needsUpdate=true; }
-  /* ── 상단 버킷 체인 칸막이 (위 줄 → 북쪽 스프로킷 → 아래 줄 → 남쪽 스프로킷) ── */
-  { const yU=PK2.topY, r=T.r, yc=yU-r, Lt=PA.Lt, La=PA.La; for(let m=0;m<39;m++){ let l=((m+.5+ss)*Pf)%PA.loopT; if(l<0) l+=PA.loopT; let z,y,a;
-      if(l<Lt){ z=T.z0-l; y=yU; a=0; } else if(l<Lt+La){ const f=(l-Lt)/r; z=T.z1-r*Math.sin(f); y=yc+r*Math.cos(f); a=-f; }
-      else if(l<2*Lt+La){ z=T.z1+(l-Lt-La); y=yU-2*r; a=-Math.PI; } else { const f=(l-2*Lt-La)/r; z=T.z0+r*Math.sin(f); y=yc-r*Math.cos(f); a=Math.PI-f; }
-      put(PA.pin,m,xb,y+Math.cos(a)*.013,z+Math.sin(a)*.013,a); } PA.pin.count=39; PA.pin.instanceMatrix.needsUpdate=true; }
+  PA.pin.count=0;
   /* ── 버킷 b 의 중심 위치 · 상태 ── */
   const bl=b=>(sb-b)*P;
   const drop=b=>6*(b+(PK2.bz0-PK2.ch[b&1])/P-PA.c0);                  /* 칸 b 의 게이트가 열리는 σs */
@@ -63,11 +59,9 @@ function stepPackAnim(){
   let k=0; const jMax=Math.floor(ss), bMin=Math.floor(sb-PZ.t1/P)-1, jMin=6*bMin;
   for(let j=jMax;j>=jMin&&k<360;j--){ const b=Math.floor(j/6), i=j-6*b, d=(ss-j)*Pf, c=b&1, zc=PK2.ch[c], sl=(i-2.5)*.0125, ds=drop(b), cp=comp(b);
     let x=xb,y,z,rx;
-    if(ss<ds){ const r=T.r, yS=PK2.topY+.0052;
-      if(d<PA.Lt){ const t=cl(d/.06); y=lerp(CV.yE+.006,yS,t); z=T.z0-d; rx=CV.A*(1-t); }
-      else if(d<PA.Lt+PA.La){ const al=(d-PA.Lt)/r; y=(yS-r)+Math.cos(al)*r; z=T.z1-Math.sin(al)*r; rx=-al; }
-      else if(d<PA.Lt+PA.La+(zc-T.z1)){ y=yS-2*r; z=T.z1+(d-PA.Lt-PA.La); rx=-Math.PI; }
-      else if(ss<cp+.6){ const w=cl((d-PA.Lt-PA.La-(zc-T.z1))/PA.Lf); z=lerp(zc,zc+sl,ez(w)); y=lerp(yS-2*r,tY[2]+hs,w*w); rx=lerp(-Math.PI,-Math.PI/2,ez(w)); }
+    if(ss<ds){ const sD=CV.sDrop(zc)-CV.L, hh=CV.hb+.0052;
+      if(d<sD){ const q=CV.path(CV.L+d); y=q.y+Math.cos(q.a)*hh; z=q.z+Math.sin(q.a)*hh; rx=q.a; }
+      else if(ss<cp+.6){ const q=CV.path(CV.L+sD), y0=q.y-hh, w=cl((d-sD)/PA.Lf); z=lerp(zc,zc+sl,ez(w)); y=lerp(y0,tY[2]+hs,w*w); rx=lerp(-Math.PI,-Math.PI/2,ez(w)); }
       else if(ss<cp+6.6){ const f=cl((ss-cp-.6)/.6); z=zc+sl; y=lerp(tY[2],tY[1],f*f)+hs; rx=-Math.PI/2; }
       else { const f=cl((ss-cp-6.6)/.6); z=zc+sl; y=lerp(tY[1],tY[0],f*f)+hs; rx=-Math.PI/2; } }
     else { const l=bl(b), zt=zl(l)+sl, f=cl((ss-ds)/1.0), yb=.95+hs;
