@@ -6,14 +6,16 @@
    → ⑨ 프린터 · X-ray · 중량선별기 벨트 → ⑩ 끝에 8개 모이면 작업자가 가져감 ═══ */
 const PA={};
 function initPackAnim(S){
-  const P=PK2.P, C=PK2.carton, Pf=FM.P, rw=PK2.wheel.r, o=new T3.Object3D(); PA.o=o;
-  PA.Lt=CV.zE-PK2.wheel.z; PA.Ls=.4; PA.Dch=(PA.Lt+Math.PI*rw+PA.Ls)/Pf; PA.sA=PK2.bz0-PK2.ch[0];
-  PA.c0=(6*PA.sA/P-5-PA.Dch-.6)/6; PA.Lu=PK2.bz0-PK2.bz1; PA.loop=110*P;
+  const P=PK2.P, C=PK2.carton, Pf=FM.P, T=PK2.tc, o=new T3.Object3D(); PA.o=o;
+  PA.Lt=T.z0-T.z1; PA.La=Math.PI*T.r; PA.Lf=.08; PA.loopT=2*PA.Lt+2*PA.La;
+  PA.D=c=>(PA.Lt+PA.La+(PK2.ch[c]-T.z1)+PA.Lf)/Pf;                     /* 스틱이 정렬기 위단 칸에 닿기까지 (σs) */
+  PA.sA=PK2.bz0-PK2.ch[0]; PA.c0=(6*PA.sA/P-5-PA.D(0)-9.6)/6; PA.Lu=PK2.bz0-PK2.bz1; PA.loop=110*P;
   const im=(geo,mat,n)=>{ const m=new T3.InstancedMesh(geo,mat,n); m.frustumCulled=false; m.castShadow=true; m.receiveShadow=true; S.add(m); return m; };
   PA.stk=im(stickGeo(FM.stickL,FM.stickW,.009),M.stick,360);
   PA.fin=im(new T3.BoxGeometry(.26,.075,.006),PK2.bw,110);
-  PA.pin=im(new T3.BoxGeometry(.012,.014,.006),M.dark,40);
-  PA.lug=im(new T3.BoxGeometry(.14,.03,.008),M.ssD,30);
+  PA.pin=im(new T3.BoxGeometry(.17,.026,.005),PK2.bw,40);
+  /* 카톤 포켓 (체인 위 칸마다 : 진회색 받침 + 앞 · 뒤 벽 — 카톤이 꼭 맞게 들어감) */
+  const pk=new T3.MeshStandardMaterial({color:0x3b4146,metalness:.4,roughness:.45}); PA.lug=im(new T3.BoxGeometry(.15,.006,.097),pk,30); PA.lugW=im(new T3.BoxGeometry(.15,.042,.006),pk,60);
   PA.push=im(new T3.BoxGeometry(.008,.03,.07),M.ssMir,16);
   { const g=new T3.CylinderGeometry(.005,.005,1,8); g.rotateZ(Math.PI/2); g.translate(.5,0,0); PA.rod=im(g,M.ssMir,16); }
   PA.lfl=im(new T3.BoxGeometry(.1,.004,.066),new T3.MeshStandardMaterial({map:tex(cvs(128,96,(c)=>{ c.fillStyle="#fbfbf8"; c.fillRect(0,0,128,96); c.fillStyle="#999"; for(let k=0;k<7;k++) c.fillRect(10,10+k*11,100-(k%3)*18,3); c.fillStyle="#c8201c"; c.fillRect(10,82,30,6); }),1,1,true),roughness:.8}),60);
@@ -36,7 +38,7 @@ const PZ={ lfL:2.06, pk0:2.5, pk1:2.8, ps0:3.05, ps1:3.75, rt1:4.02, m0:3.95, m1
 function stepPackAnim(){
   if(!PA.stk) return;
   const P=PK2.P, Pf=FM.P, C=PK2.carton, X=CVX, xb=PK2.xb, cx=PK2.cx, yC=PK2.yC, o=PA.o, ez=x=>x<=0?0:x>=1?1:x*x*(3-2*x), cl=x=>x<0?0:x>1?1:x, lerp=(a,b,t)=>a+(b-a)*t;
-  const ss=(AN.u()-CV.L)/Pf, sb=ss/6+PA.c0, zl=l=>PK2.bz0-l, W=PK2.wheel, rw=W.r;
+  const ss=(AN.u()-CV.L)/Pf, sb=ss/6+PA.c0, zl=l=>PK2.bz0-l, T=PK2.tc, bl0=b=>(sb-b)*P;
   const put=(m,i,x,y,z,rx,sc)=>{ o.position.set(x,y,z); o.rotation.set(rx||0,0,0); o.scale.setScalar(sc===undefined?1:sc); o.updateMatrix(); m.setMatrixAt(i,o.matrix); };
   /* ── 버킷 칸막이 (위 · 아래 · 양 끝 원호) ── */
   { const r=PK2.loopR, Lu=PA.Lu, yc=.95-r; for(let m=0;m<110;m++){ let l=((m+.5+sb)*P)%PA.loop; if(l<0) l+=PA.loop; let z,y,a;
@@ -45,30 +47,39 @@ function stepPackAnim(){
       put(PA.fin,m,xb,y+Math.cos(a)*.0375,z+Math.sin(a)*.0375,a); }
     PA.fin.instanceMatrix.needsUpdate=true; }
   /* ── 카톤 체인 러그 (버킷 칸막이와 같은 위치) ── */
-  { let k=0; for(let m=Math.floor(-sb-.5+2.68/P);k<30;m++){ const l=(m+.5+sb)*P; if(l>PZ.cEnd) break; if(l<2.68) continue; put(PA.lug,k++,cx,yC+.015,zl(l)); } PA.lug.count=k; PA.lug.instanceMatrix.needsUpdate=true; }
-  /* ── 상단 핀 벨트 핀 ── */
-  { let k=0; const f=ss-Math.floor(ss); for(let n=0;k<40;n++){ const d=(n+.5+f)*Pf; if(d>PA.Lt-.02) break; for(const s2 of [-1,1]) if(k<40) put(PA.pin,k++,xb+s2*.088,PK2.topY+.007,CV.zE-d); } PA.pin.count=k; PA.pin.instanceMatrix.needsUpdate=true; }
-  if(PK2.wheelG) PK2.wheelG.rotation.x=-(ss*Pf)/rw;
+  { let k=0,w=0; for(let b=Math.floor(sb-PZ.cEnd/P);k<30;b++){ const l=bl0(b); if(l<2.68) break; if(l>PZ.cEnd) continue; const z=zl(l); put(PA.lug,k++,cx,yC-.003,z); for(const s2 of [-1,1]) put(PA.lugW,w++,cx,yC+.021-.003,z+s2*.0485); }
+    PA.lug.count=k; PA.lugW.count=w; PA.lug.instanceMatrix.needsUpdate=true; PA.lugW.instanceMatrix.needsUpdate=true; }
+  /* ── 상단 버킷 체인 칸막이 (위 줄 → 북쪽 스프로킷 → 아래 줄 → 남쪽 스프로킷) ── */
+  { const yU=PK2.topY, r=T.r, yc=yU-r, Lt=PA.Lt, La=PA.La; for(let m=0;m<39;m++){ let l=((m+.5+ss)*Pf)%PA.loopT; if(l<0) l+=PA.loopT; let z,y,a;
+      if(l<Lt){ z=T.z0-l; y=yU; a=0; } else if(l<Lt+La){ const f=(l-Lt)/r; z=T.z1-r*Math.sin(f); y=yc+r*Math.cos(f); a=-f; }
+      else if(l<2*Lt+La){ z=T.z1+(l-Lt-La); y=yU-2*r; a=-Math.PI; } else { const f=(l-2*Lt-La)/r; z=T.z0+r*Math.sin(f); y=yc-r*Math.cos(f); a=Math.PI-f; }
+      put(PA.pin,m,xb,y+Math.cos(a)*.013,z+Math.sin(a)*.013,a); } PA.pin.count=39; PA.pin.instanceMatrix.needsUpdate=true; }
   /* ── 버킷 b 의 중심 위치 · 상태 ── */
   const bl=b=>(sb-b)*P;
   const drop=b=>6*(b+(PK2.bz0-PK2.ch[b&1])/P-PA.c0);                  /* 칸 b 의 게이트가 열리는 σs */
   const pushX=l=>ez((l-PZ.ps0)/(PZ.ps1-PZ.ps0));
-  /* ── 스틱 ── */
+  /* ── 스틱 : 상단 체인 위 줄 → 스프로킷 → 아래 줄(뒤집힘) → 투입구에서 정렬기 위단으로 낙하 → 6포 모이면 가운데단 → 아래단 → 버킷 ── */
+  const comp=b=>6*b+5+PA.D(b&1), tY=PK2.tiers, hs=FM.stickW/2+.001;
   let k=0; const jMax=Math.floor(ss), bMin=Math.floor(sb-PZ.t1/P)-1, jMin=6*bMin;
-  for(let j=jMax;j>=jMin&&k<360;j--){ const b=Math.floor(j/6), i=j-6*b, d=(ss-j)*Pf, zc=PK2.ch[b&1], sl=(i-2.5)*.0125, ds=drop(b);
+  for(let j=jMax;j>=jMin&&k<360;j--){ const b=Math.floor(j/6), i=j-6*b, d=(ss-j)*Pf, c=b&1, zc=PK2.ch[c], sl=(i-2.5)*.0125, ds=drop(b), cp=comp(b);
     let x=xb,y,z,rx;
-    if(ss<ds){ if(d<PA.Lt){ const t=cl(d/.06); y=lerp(CV.yE+.006,PK2.topY+.0052,t); z=CV.zE-d; rx=CV.A*(1-t); }
-      else if(d<PA.Lt+Math.PI*rw){ const al=(d-PA.Lt)/rw; y=W.y+Math.cos(al)*(rw+.006); z=W.z-Math.sin(al)*(rw+.006); rx=-al; }
-      else { const w=cl((d-PA.Lt-Math.PI*rw)/PA.Ls), zt=zc+sl, w1=cl(w/.75), w2=cl((w-.75)/.25);
-        z=lerp(W.z,zt,ez(w1)); y=lerp(W.y-rw-.006,1.215,w1)-(1.215-(PK2.chY+FM.stickW/2+.001))*w2*w2; rx=lerp(-Math.PI,-Math.PI/2,ez(w1)); } }
-    else { const l=bl(b), zt=zl(l)+sl, f=cl((ss-ds)/1.0), yb=.95+FM.stickW/2+.001;
+    if(ss<ds){ const r=T.r, yS=PK2.topY+.0052;
+      if(d<PA.Lt){ const t=cl(d/.06); y=lerp(CV.yE+.006,yS,t); z=T.z0-d; rx=CV.A*(1-t); }
+      else if(d<PA.Lt+PA.La){ const al=(d-PA.Lt)/r; y=(yS-r)+Math.cos(al)*r; z=T.z1-Math.sin(al)*r; rx=-al; }
+      else if(d<PA.Lt+PA.La+(zc-T.z1)){ y=yS-2*r; z=T.z1+(d-PA.Lt-PA.La); rx=-Math.PI; }
+      else if(ss<cp+.6){ const w=cl((d-PA.Lt-PA.La-(zc-T.z1))/PA.Lf); z=lerp(zc,zc+sl,ez(w)); y=lerp(yS-2*r,tY[2]+hs,w*w); rx=lerp(-Math.PI,-Math.PI/2,ez(w)); }
+      else if(ss<cp+6.6){ const f=cl((ss-cp-.6)/.6); z=zc+sl; y=lerp(tY[2],tY[1],f*f)+hs; rx=-Math.PI/2; }
+      else { const f=cl((ss-cp-6.6)/.6); z=zc+sl; y=lerp(tY[1],tY[0],f*f)+hs; rx=-Math.PI/2; } }
+    else { const l=bl(b), zt=zl(l)+sl, f=cl((ss-ds)/1.0), yb=.95+hs;
       if(l>=PZ.t1) continue; rx=-Math.PI/2;
-      if(f<1){ z=lerp(zc+sl,zt,ez(f)); y=lerp(PK2.chY+FM.stickW/2+.001,yb,f*f); }
+      if(f<1){ z=lerp(zc+sl,zt,ez(f)); y=lerp(tY[0]+hs,yb,f*f); }
       else { z=zt; const p=pushX(l); x=xb+p*(cx-xb); y=yb-p*.0055; } }
     put(PA.stk,k++,x,y,z,rx); }
   PA.stk.count=k; PA.stk.instanceMatrix.needsUpdate=true;
-  /* ── 적재부 게이트 ── */
-  if(PK2.gates) for(let c=0;c<2;c++){ let op=0; for(let b=Math.floor(sb)-12;b<=Math.floor(sb)+12;b++){ if((b&1)!==c) continue; const t=ss-drop(b); if(t>-.3&&t<1.8) op=Math.max(op,ez((t+.3)/.4)*(1-ez((t-1.1)/.7))); } for(const gt of PK2.gates[c]) gt.G.rotation.x=gt.s*op*1.3; }
+  /* ── 정렬기 게이트 : 위단(cp+.6) · 가운데단(cp+6.6) · 아래단(버킷 낙하) ── */
+  if(PK2.gates) for(let c=0;c<2;c++){ const op=[0,0,0]; for(let b=Math.floor(sb)-14;b<=Math.floor(sb)+14;b++){ if((b&1)!==c) continue; const cp=comp(b), ev=[drop(b),cp+6.6,cp+.6];
+      for(let ti=0;ti<3;ti++){ const t=ss-ev[ti]; if(t>-.3&&t<1.8) op[ti]=Math.max(op[ti],ez((t+.3)/.4)*(1-ez((t-1.1)/.7))); } }
+    for(let ti=0;ti<3;ti++) for(const gt of PK2.gates[c][ti]) gt.G.rotation.x=gt.s*op[ti]*1.3; }
   /* ── 설명서 · 밀대 ── */
   { let n=0, pn=0; for(let b=Math.floor(sb-PZ.t1/P);b<=Math.floor(sb-PZ.lfL/P)+1;b++){ const l=bl(b); if(l<PZ.lfL||l>=PZ.t1) continue; const q=cl((l-PZ.lfL)/.1), p=pushX(l), zt=zl(l), yt=.95+FM.stickW+.004;
       put(PA.lfl,n++,xb+p*(cx-xb),lerp(1.09,yt-p*.0055,ez(q)),lerp(zl(PZ.lfL),zt,ez(q)),0);
@@ -82,13 +93,13 @@ function stepPackAnim(){
   const flap=(m,idx,mat)=>{ Mf.multiplyMatrices(Mc,mat); m.setMatrixAt(idx,Mf); };
   const loc=(x,y,z,ry,rz,ryy)=>{ PA.e.set(0,ry,0); PA.q.setFromEuler(PA.e); const A=new T3.Matrix4().compose(PA.v.set(x,y,z),PA.q,PA.one); const R=new T3.Matrix4(); if(rz) R.makeRotationZ(rz); else if(ryy) R.makeRotationY(ryy); return A.multiply(R); };
   for(let b=Math.floor(sb-7.4/P);b<=Math.floor(sb-PZ.pk0/P);b++){ const l=bl(b); if(l<PZ.pk0) continue;
-    let px,py,pz,rx=0,th=Math.PI/2, fm=0,fb=0,ft=0, glue=false, prt=false;
+    let px,py,pz,rx=0,th=Math.PI/2, fm=-.5,fb=-.2,ft=-.6, glue=false, prt=false;
     if(l<PZ.pk1){ const q=(l-PZ.pk0)/(PZ.pk1-PZ.pk0), zt=zl(l); const mx=[cx,1.41,zl(PK2.lf[0]+.28-PK2.bz0+PK2.bz0)];
       const pm=[cx,1.405,-3.13];
       if(q<.3){ arm=lerp(-.25,1.05,ez(q/.3)); continue; }
-      if(q<.65){ const t=ez((q-.3)/.35); px=cx; py=lerp(pm[1],yC+.11,t); pz=lerp(pm[2],zt,t); rx=lerp(.9+Math.PI/2,0,t); th=.06; arm=lerp(1.05,-.1,t); }
-      else { const t=ez((q-.65)/.35); px=cx; py=lerp(yC+.11,yC+C.H/2,t); pz=zt; th=lerp(.06,Math.PI/2,t); arm=lerp(-.1,-.25,t); } }
-    else if(l<=PZ.cEnd){ px=cx; py=yC+C.H/2; pz=zl(l); fm=ez((l-PZ.m0)/(PZ.m1-PZ.m0))*Math.PI/2; fb=ez((l-PZ.b0)/(PZ.b1-PZ.b0))*Math.PI/2; ft=ez((l-PZ.t0)/(PZ.t1-PZ.t0))*Math.PI/2; glue=l>=PZ.gl; }
+      if(q<.65){ fm=fb=ft=0; const t=ez((q-.3)/.35); px=cx; py=lerp(pm[1],yC+.11,t); pz=lerp(pm[2],zt,t); rx=lerp(.9+Math.PI/2,0,t); th=.06; arm=lerp(1.05,-.1,t); }
+      else { const t=ez((q-.65)/.35); px=cx; py=lerp(yC+.11,yC+C.H/2,t); pz=zt; th=lerp(.06,Math.PI/2,t); arm=lerp(-.1,-.25,t); fm=-.5*t; fb=-.2*t; ft=-.6*t; } }
+    else if(l<=PZ.cEnd){ px=cx; py=yC+C.H/2; pz=zl(l); fm=-.5+ez((l-PZ.m0)/(PZ.m1-PZ.m0))*(Math.PI/2+.5); fb=-.2+ez((l-PZ.b0)/(PZ.b1-PZ.b0))*(Math.PI/2+.2); ft=-.6+ez((l-PZ.t0)/(PZ.t1-PZ.t0))*(Math.PI/2+.6); glue=l>=PZ.gl; }
     else { const e=Math.min(eOf(b),stopOf(b)), last=8*Math.floor(b/8)+7; if(eOf(last)>stopOf(last)+.12) continue;
       fm=fb=ft=Math.PI/2; prt=true;
       if(e<L1){ const t=e/L1, u=1-t; px=u*u*cx+2*u*t*cx+t*t*X; pz=u*u*zl(PZ.cEnd)+2*u*t*(zl(PZ.cEnd)-.22)+t*t*zT; py=lerp(yC,PKZ.y,ez(t))+C.H/2; }
