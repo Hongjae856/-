@@ -56,11 +56,10 @@ function buildConveyor(S){
       const h=CV.hb+.0052; o.position.set(X,q.y+c*h,q.z+sn*h); o.scale.setScalar(vis&&CV.full[k]?1:0); o.updateMatrix(); stk.setMatrixAt(k,o.matrix); }
     cle.instanceMatrix.needsUpdate=true; stk.instanceMatrix.needsUpdate=true; };
   CV.set(0);
-  /* 트레이 하부 함체 (핀셋 거치 · 압력계 2 · 케이블 체인) · 다리 · 남쪽 구동부 (곡면 커버) */
+  /* 트레이 하부 함체 (핀셋 거치 · 압력계 2) · 다리 · 남쪽 구동부 (곡면 커버) */
   bx(g,X-hw-.16,X+hw+.03,.14,y0-.06,zT+.04,zS,M.ss); bx(g,X-hw-.2,X-hw-.16,y0-.16,y0-.04,zT+.06,zS-.04,M.ssMir);
   plate(g,.07,.03,labelTex([["핀셋","#111",70]],{w:256,h:100}),[X-hw-.201,y0-.07,zS-.12],-Math.PI/2);
   for(const dz of [-.08,.02]){ rod(g,[X-hw-.16,.24,zc+dz],[X-hw-.175,.24,zc+dz],.02,M.white,16); rod(g,[X-hw-.175,.24,zc+dz],[X-hw-.178,.24,zc+dz],.022,M.ssD,16); }
-  chain(g,[[X-hw-.18,.3,zc+.2],[X-hw-.2,.2,zc+.21],[X-hw-.21,.08,zc+.24],[X-hw-.2,.03,zc+.3]],.04,.016,M.black,[1,0,0]);
   for(const z of [zT+.1,zS-.06]) for(const x of [X-hw-.12,X+hw]){ rod(g,[x,.03,z],[x,.14,z],.014,M.ssD,10); rod(g,[x,0,z],[x,.03,z],.032,M.ss,16); }
   bx(g,X-hw-.07,X+hw+.07,.14,y0+.04,zS,zS+.26,M.ssMir); { const c=new T3.Mesh(new T3.CylinderGeometry(.13,.13,CV.w+.14,28,1,false,0,Math.PI),M.ssMir); c.rotation.z=Math.PI/2; c.position.set(X,y0+.04,zS+.13); add(g,c); }
   bx(g,X+hw+.07,X+hw+.2,.2,.34,zS+.04,zS+.2,M.dark); rod(g,[X+hw+.2,.27,zS+.12],[X+hw+.24,.27,zS+.12],.05,M.blue,18);
