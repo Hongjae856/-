@@ -12,7 +12,7 @@ const scene=new T3.Scene(); scene.background=new T3.Color(0xdfe4e1);
   { const c=new T3.Mesh(new T3.PlaneGeometry(12,7),new T3.MeshBasicMaterial({color:0x3c403e})); c.rotation.x=Math.PI/2; c.position.y=2.085; es.add(c); }
   for(const [x,z,w] of [[-3,-3.4,2.2],[2.5,3.4,3],[5.9,0,2]]){ const d=new T3.Mesh(new T3.PlaneGeometry(w,2.4),new T3.MeshBasicMaterial({color:0x2a2d30,side:T3.DoubleSide})); d.position.set(x,-.6,z); if(Math.abs(x)>5) d.rotation.y=Math.PI/2; es.add(d); }
   const pm=new T3.PMREMGenerator(renderer); scene.environment=pm.fromScene(es,.03).texture; }
-buildFillRoom(scene); buildFiller(scene); buildConveyor(scene); buildFillZone(scene); buildPackRoom(scene); initAnim(scene); initPackAnim(scene);
+buildFillRoom(scene); buildFiller(scene); buildConveyor(scene); buildFillZone(scene); buildPackRoom(scene); initAnim(scene); initManual(scene); initPackAnim(scene);
 /* 실제 장면을 다시 찍어 반사에 사용 (설비 · 바닥 · 조명이 스테인리스에 비침) */
 { const pm=new T3.PMREMGenerator(renderer), c=[4.6,1.7,5.4]; scene.position.set(-c[0],-c[1],-c[2]); scene.updateMatrixWorld(true); M.led.emissiveIntensity=ENVLED; const rt=pm.fromScene(scene,.015,.05,40); M.led.emissiveIntensity=1.6; scene.position.set(0,0,0); scene.updateMatrixWorld(true); scene.environment=rt.texture; }
 const camera=new T3.PerspectiveCamera(50,1,.05,60);

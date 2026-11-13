@@ -53,7 +53,7 @@ function buildInspection(g){
   { const [z0,z1]=PKZ.cp, w=.42; bx(g,X-w/2-.04,X+w/2+.04,Y-.1,Y-.006,z0,z1,M.alu); bx(g,X-w/2,X+w/2,Y-.006,Y,z0,z1,M.belt);
     for(const x of [X-w/2-.02,X+w/2+.02]) for(const z of [z0+.08,(z0+z1)/2,z1-.08]){ bx(g,x-.02,x+.02,.07,Y-.1,z-.02,z+.02,M.alu); rod(g,[x,.035,z],[x,.035,z+.02],.035,M.dark,12); }
     for(const y of [.3,Y-.14]) for(const x of [X-w/2-.02,X+w/2+.02]) bx(g,x-.02,x+.02,y-.02,y+.02,z0+.08,z1-.08,M.alu);
-    for(const z of [z1-.4,z1-.8]){ rod(g,[X-w/2-.04,Y+.06,z],[X+.05,Y+.06,z],.006,M.ssMir,8); rod(g,[X+.05,Y+.06,z],[X+.05,Y+.12,z],.014,M.orange,10); }
+    for(const z of [z1-.4,z1-.8]){ rod(g,[X-w/2-.04,Y+.13,z],[X-.16,Y+.13,z],.006,M.ssMir,8); rod(g,[X-.16,Y+.03,z],[X-.16,Y+.13,z],.014,M.orange,10);   /* 케이스 측면 가이드 · 감지 (케이스 통과 폭 밖) */ }
     bx(g,X-w/2-.25,X-w/2-.05,Y-.02,Y+.16,z1-.6,z1-.25,M.dark); bx(g,X-w/2-.25,X-w/2-.05,Y+.16,Y+.18,z1-.6,z1-.25,M.ss); PB.sign(g,.14,.03,[["DOMINO","#fff",60]],{w:320,h:70,bg:"#9aa0a6"},[X-w/2-.049,Y+.1,z1-.42],Math.PI/2);
     bx(g,X-w/2-.14,X-w/2-.1,.07,1.55,z1-.1,z1-.06,M.alu); rod(g,[X-w/2-.12,1.4,z1-.08],[X+.0,1.4,z1-.08],.015,M.alu,10); bx(g,X-.02,X+.02,1.2,1.42,z1-.2,z1+.04,M.dark); bx(g,X+.02,X+.022,1.23,1.4,z1-.17,z1+.01,M.scr);
     PB.beacon(g,X-w/2-.12,1.55,z1-.08); }
