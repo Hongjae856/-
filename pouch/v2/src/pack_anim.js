@@ -18,7 +18,7 @@ function initPackAnim(S){
   { const g=new T3.CylinderGeometry(.005,.005,1,8); g.rotateZ(Math.PI/2); g.translate(.5,0,0); PA.rod=im(g,M.ssMir,16); }
   PA.lfl=im(new T3.BoxGeometry(.1,.004,.066),new T3.MeshStandardMaterial({map:tex(cvs(128,96,(c)=>{ c.fillStyle="#fbfbf8"; c.fillRect(0,0,128,96); c.fillStyle="#999"; for(let k=0;k<7;k++) c.fillRect(10,10+k*11,100-(k%3)*18,3); c.fillStyle="#c8201c"; c.fillRect(10,82,30,6); }),1,1,true),roughness:.8}),60);
   /* 카톤 : 슬리브(양 끝 열림) + 끝마다 큰 날개 2 · 작은 날개 2 + 접착점 + 인쇄 표시 */
-  const hid=new T3.MeshBasicMaterial({visible:false}), cm=M.carton.clone(); cm.side=T3.DoubleSide; const red=new T3.MeshStandardMaterial({color:0xb8231c,roughness:.5,side:T3.DoubleSide});
+  const hid=new T3.MeshBasicMaterial({visible:false}), cm=M.carton.clone(); cm.side=T3.DoubleSide; const red=new T3.MeshStandardMaterial({color:0x8e130e,roughness:.55,envMapIntensity:.45,side:T3.DoubleSide}); cm.envMapIntensity=.45; cm.color.setHex(0xb0b0b0);
   const inner=new T3.MeshStandardMaterial({color:0xf1ece2,roughness:.8,side:T3.DoubleSide});
   PA.cb=im(new T3.BoxGeometry(C.L,C.H,C.W),[hid,hid,red,red,cm,cm],64);
   const a=C.H*.6, b=C.W*.33; PA.fa=a; PA.fb=b;

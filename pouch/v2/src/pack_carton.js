@@ -8,7 +8,7 @@
 function buildCartoner(g){
   const X=CVX, zs=PK2.lf[0], zn=PKZ.ct[0], zm=(zs+zn)/2, x0=X-.5, x1=X+.5, Hr=1.38, cx=PK2.cx, C=PK2.carton, yC=PK2.yC, zl=l=>PK2.bz0-l,
         wf=new T3.MeshStandardMaterial({color:0xeef0f1,metalness:.35,roughness:.4});
-  const ct=tex(cvs(256,128,(c)=>{ c.fillStyle="#f6f4ef"; c.fillRect(0,0,256,128); c.fillStyle="#d8342c"; c.fillRect(0,0,256,128); c.fillStyle="#fff"; c.fillRect(18,30,150,70); c.fillStyle="#d8342c"; c.font="bold 52px sans-serif"; c.fillText("H",28,86); c.font="bold 30px 'Malgun Gothic',sans-serif"; c.fillText("판콜",72,82); c.fillStyle="#f2c400"; c.fillRect(190,20,40,88); }),1,1,true);
+  const ct=tex(cvs(256,128,(c)=>{ c.fillStyle="#f6f4ef"; c.fillRect(0,0,256,128); c.fillStyle="#b3201a"; c.fillRect(0,0,256,128); c.fillStyle="#fff"; c.fillRect(18,30,150,70); c.fillStyle="#d8342c"; c.font="bold 52px sans-serif"; c.fillText("H",28,86); c.font="bold 30px 'Malgun Gothic',sans-serif"; c.fillText("판콜",72,82); c.fillStyle="#f2c400"; c.fillRect(190,20,40,88); }),1,1,true);
   M.carton=new T3.MeshStandardMaterial({map:ct,roughness:.55}); M.cartonFlat=new T3.MeshStandardMaterial({color:0xe8b4b0,roughness:.6}); M.cartonEdge=new T3.MeshStandardMaterial({color:0xf3efe8,roughness:.7});
   /* 받침판 · 발 · 가운데 바닥 브래킷 */
   bx(g,x0-.05,x1+.02,.08,.15,zn,zs,M.steel); for(const z of [zs-.1,zm,zn+.1]) for(const x of [x0+.02,x1-.06]) { rod(g,[x,0,z],[x,.08,z],.04,M.ssD,16); }
