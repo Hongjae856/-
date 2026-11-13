@@ -13,6 +13,8 @@ const scene=new T3.Scene(); scene.background=new T3.Color(0xdfe4e1);
   for(const [x,z,w] of [[-3,-3.4,2.2],[2.5,3.4,3],[5.9,0,2]]){ const d=new T3.Mesh(new T3.PlaneGeometry(w,2.4),new T3.MeshBasicMaterial({color:0x2a2d30,side:T3.DoubleSide})); d.position.set(x,-.6,z); if(Math.abs(x)>5) d.rotation.y=Math.PI/2; es.add(d); }
   const pm=new T3.PMREMGenerator(renderer); scene.environment=pm.fromScene(es,.03).texture; }
 buildFillRoom(scene); buildFiller(scene); buildConveyor(scene); buildFillZone(scene); buildPackRoom(scene); initAnim(scene); initManual(scene); initPackAnim(scene);
+/* 색 지도(map)는 모두 sRGB 로 해석 (색 관리 일괄 보정) */
+scene.traverse(o=>{ if(!o.material) return; for(const m of [].concat(o.material)) for(const k of ["map","emissiveMap"]) if(m[k]&&m[k].encoding!==T3.sRGBEncoding){ m[k].encoding=T3.sRGBEncoding; m[k].needsUpdate=true; } });
 /* 실제 장면을 다시 찍어 반사에 사용 (설비 · 바닥 · 조명이 스테인리스에 비침) */
 { const pm=new T3.PMREMGenerator(renderer), c=[4.6,1.7,5.4]; scene.position.set(-c[0],-c[1],-c[2]); scene.updateMatrixWorld(true); M.led.emissiveIntensity=ENVLED; const rt=pm.fromScene(scene,.015,.05,40); M.led.emissiveIntensity=1.6; scene.position.set(0,0,0); scene.updateMatrixWorld(true); scene.environment=rt.texture; }
 const camera=new T3.PerspectiveCamera(50,1,.05,60);
@@ -32,7 +34,7 @@ POST.matA=new T3.ShaderMaterial({uniforms:{tD:{value:null},res:{value:new T3.Vec
    for(int i=0;i<12;i++){ float fi=float(i), r=rad*sqrt((fi+.5)/12.), an=a0+fi*2.39996; vec2 o=vec2(cos(an),sin(an))*r*vec2(res.y/res.x,1.);
      float df=d-lin(texture2D(tD,v+o).x); occ+=smoothstep(.005,.045,df)*(1.-smoothstep(.12,.42,df)); }
    gl_FragColor=vec4(vec3(1.-occ/12.),1.); }`,depthTest:false,depthWrite:false});
-POST.mat=new T3.ShaderMaterial({uniforms:{tC:{value:null},tA:{value:null},resA:{value:new T3.Vector2()},expo:{value:.5},ao:{value:1},con:{value:.42}},vertexShader:VS,
+POST.mat=new T3.ShaderMaterial({uniforms:{tC:{value:null},tA:{value:null},resA:{value:new T3.Vector2()},expo:{value:.62},ao:{value:1},con:{value:.42}},vertexShader:VS,
  fragmentShader:`precision highp float; varying vec2 v; uniform sampler2D tC,tA; uniform vec2 resA; uniform float expo,ao,con;
  vec3 aces(vec3 x){ x*=expo/0.6; mat3 a=mat3(.59719,.076,.0284,.35458,.90834,.13383,.04823,.01566,.83777), b=mat3(1.60475,-.10208,-.00327,-.53108,1.10813,-.07276,-.07367,-.00605,1.07602);
    x=a*x; x=(x*(x+.0245786)-.000090537)/(x*(.983729*x+.432951)+.238081); return clamp(b*x,0.,1.); }

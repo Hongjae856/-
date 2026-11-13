@@ -1,5 +1,6 @@
 /* ═══ 3D 기본 도구 (Three.js r147) — 단위 m · X 동쪽 · Z 남쪽 · Y 위 ═══ */
 const T3=THREE;
+T3.ColorManagement.legacyMode=false;   /* 색상값(hex)을 sRGB 로 해석 → 선형 변환 (이중 감마로 색이 바래는 문제 보정 11/13) */
 const mm=v=>v/1000;
 function cvs(w,h,fn){ const c=document.createElement("canvas"); c.width=w; c.height=h; fn(c.getContext("2d"),w,h); return c; }
 function tex(c,rx,ry,srgb){ const t=new T3.CanvasTexture(c); t.wrapS=t.wrapT=T3.RepeatWrapping; t.repeat.set(rx||1,ry||1); t.anisotropy=8; if(srgb) t.encoding=T3.sRGBEncoding; return t; }
@@ -19,16 +20,16 @@ function labelTex(lines,o){ o=o||{}; const W=o.w||512,H=o.h||192; return tex(cvs
 TX.perf=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#8a8a8a"; g.fillRect(0,0,w,h); for(let j=0;j<4;j++) for(let i=0;i<4;i++){ const x=i*32+16+(j%2)*16, y=j*32+16, gr=g.createRadialGradient(x,y,2,x,y,11); gr.addColorStop(0,"#1c1c1c"); gr.addColorStop(.55,"#f4f4f4"); gr.addColorStop(1,"#8a8a8a"); g.fillStyle=gr; g.beginPath(); g.arc(x,y,11,0,7); g.fill(); } }),1.2,4.8);
 /* ── 재질 ── */
 const M={};
-M.ss   =new T3.MeshStandardMaterial({color:0xb9bdc0,metalness:1,roughness:.3,envMapIntensity:1.15,roughnessMap:TX.hair,bumpMap:TX.hair,bumpScale:.0006});
-M.ssMir=new T3.MeshStandardMaterial({color:0xe0e3e6,metalness:1,roughness:.07,envMapIntensity:1.45});
-M.ssD  =new T3.MeshStandardMaterial({color:0x9da2a6,metalness:1,roughness:.45,roughnessMap:TX.hair});
-M.deck =new T3.MeshStandardMaterial({color:0xa9adb0,metalness:1,roughness:.42,bumpMap:TX.checker,bumpScale:.0022,roughnessMap:TX.checker});
+M.ss   =new T3.MeshStandardMaterial({color:0xd2d6d9,metalness:1,roughness:.24,envMapIntensity:1.7,roughnessMap:TX.hair,bumpMap:TX.hair,bumpScale:.0006});
+M.ssMir=new T3.MeshStandardMaterial({color:0xeef0f2,metalness:1,roughness:.06,envMapIntensity:1.9});
+M.ssD  =new T3.MeshStandardMaterial({color:0xb6bbbf,metalness:1,roughness:.4,envMapIntensity:1.5,roughnessMap:TX.hair});
+M.deck =new T3.MeshStandardMaterial({color:0xc2c6c9,metalness:1,roughness:.38,envMapIntensity:1.6,bumpMap:TX.checker,bumpScale:.0022,roughnessMap:TX.checker});
 M.grey =new T3.MeshStandardMaterial({color:0x8d9297,metalness:.1,roughness:.55});
 M.dark =new T3.MeshStandardMaterial({color:0x1d2023,metalness:.2,roughness:.5});
 M.black=new T3.MeshStandardMaterial({color:0x0c0d0e,metalness:.1,roughness:.6});
 M.white=new T3.MeshStandardMaterial({color:0xf2f3f1,metalness:0,roughness:.5});
 M.wall =new T3.MeshStandardMaterial({color:0xd3dad5,metalness:0,roughness:.6,envMapIntensity:.35});
-M.alu  =new T3.MeshStandardMaterial({color:0xc4c8cb,metalness:.9,roughness:.5});
+M.alu  =new T3.MeshStandardMaterial({color:0xd8dbde,metalness:.9,roughness:.45,envMapIntensity:1.5});
 M.floor=new T3.MeshStandardMaterial({color:0xc6cdbf,map:TX.floor,metalness:0,roughness:.14,envMapIntensity:.85});
 M.ceil =new T3.MeshStandardMaterial({color:0xe4e7e4,roughness:.9,envMapIntensity:.2,emissive:0xeef2ee,emissiveIntensity:.5});
 M.haz  =new T3.MeshStandardMaterial({map:TX.hazard,roughness:.6});
@@ -79,7 +80,7 @@ TX.stick=tex(cvs(256,64,(g)=>stickArt(g,256,64,false)),1,1,true);
 TX.strip=tex(cvs(64,256,(g)=>stickArt(g,256,64,true)),1,1,true);
 M.stick=new T3.MeshStandardMaterial({map:TX.stick,metalness:.3,roughness:.36,envMapIntensity:1.3});
 M.strip=new T3.MeshStandardMaterial({map:TX.strip,metalness:.3,roughness:.36,side:T3.DoubleSide});
-M.sheet=new T3.MeshStandardMaterial({color:0xcdd0d3,metalness:1,roughness:.14,envMapIntensity:1.25,side:T3.DoubleSide});
+M.sheet=new T3.MeshStandardMaterial({color:0xdde0e3,metalness:1,roughness:.14,envMapIntensity:1.7,side:T3.DoubleSide});
 M.belt =new T3.MeshStandardMaterial({color:0x17191b,metalness:0,roughness:.75});
 M.warn =new T3.MeshStandardMaterial({color:0xf5d400,roughness:.55});
 function stickGeo(L,W,T){ const nu=12,nv=4,p=[],uv=[],idx=[]; for(const s of [1,-1]){ const b=p.length/3; for(let i=0;i<=nu;i++) for(let j=0;j<=nv;j++){ const u=i/nu,v=j/nv, q=Math.min(1,Math.max(0,(u-.08)/.84));
@@ -90,7 +91,7 @@ function stickGeo(L,W,T){ const nu=12,nv=4,p=[],uv=[],idx=[]; for(const s of [1,
 function fin(g,pa,pb,z,mat){ const p=[],idx=[]; for(let i=0;i<pa.length;i++){ p.push(pa[i][0],pa[i][1],z, pb[i][0],pb[i][1],z); if(i<pa.length-1){ const k=i*2; idx.push(k,k+1,k+3,k,k+3,k+2); } } const geo=new T3.BufferGeometry(); geo.setAttribute("position",new T3.Float32BufferAttribute(p,3)); geo.setIndex(idx); geo.computeVertexNormals(); const m=new T3.Mesh(geo,mat); g.add(m); return m; }
 /* 엠보(마름모) 슈트 · 인쇄 은박 웹 · 크림색 수지 */
 TX.emboss=tex(cvs(64,64,(g,w,h)=>{ g.fillStyle="#808080"; g.fillRect(0,0,w,h); for(let j=-1;j<3;j++) for(let i=-1;i<3;i++){ const x=i*32+(j%2?16:0), y=j*16; const gr=g.createRadialGradient(x+16,y+8,1,x+16,y+8,13); gr.addColorStop(0,"#ffffff"); gr.addColorStop(1,"#606060"); g.fillStyle=gr; g.beginPath(); g.moveTo(x+16,y-4); g.lineTo(x+30,y+8); g.lineTo(x+16,y+20); g.lineTo(x+2,y+8); g.fill(); } }),1/.012,1/.012);
-M.emboss=new T3.MeshStandardMaterial({color:0xd2d5d8,metalness:1,roughness:.22,envMapIntensity:1.25,side:T3.DoubleSide,bumpMap:TX.emboss,bumpScale:.0016,roughnessMap:TX.emboss});
+M.emboss=new T3.MeshStandardMaterial({color:0xdfe2e5,metalness:1,roughness:.22,envMapIntensity:1.7,side:T3.DoubleSide,bumpMap:TX.emboss,bumpScale:.0016,roughnessMap:TX.emboss});
 TX.web=tex(cvs(256,128,(g,w,h)=>{ g.fillStyle="#f1f2f2"; g.fillRect(0,0,w,h); g.fillStyle="#d8342c"; g.fillRect(8,0,84,h); g.fillRect(226,0,18,h); g.fillStyle="#fff"; g.font="bold 30px sans-serif"; g.save(); g.translate(50,h/2); g.rotate(-Math.PI/2); g.textAlign="center"; g.fillText("판콜",0,10); g.restore(); g.fillStyle="#777"; for(let k=0;k<5;k++) g.fillRect(118,14+k*22,86,5); g.strokeStyle="#b9bcc0"; g.lineWidth=2; g.strokeRect(0,0,w,h); }),1/.11,1/.08,true);
 M.web=new T3.MeshStandardMaterial({map:TX.web,metalness:.25,roughness:.35,side:T3.DoubleSide});
 M.cream=new T3.MeshStandardMaterial({color:0xe9e2c4,roughness:.6});
