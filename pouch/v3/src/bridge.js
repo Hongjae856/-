@@ -87,7 +87,7 @@ function v3PostSize(w,h){
 function v3CutSets(scene){
   const walls=[ /* 축 · 위치 · 실 안쪽 방향 · 범위 */
     {ax:"x",v:0,in:1,r:[0,7]},{ax:"x",v:11.8,in:-1,r:[0,7]},{ax:"z",v:7,in:-1,r:[0,11.8]},{ax:"z",v:0,in:1,r:[8.05,11.8]},
-    {ax:"x",v:0,in:1,r:[-12,0],pack:1},{ax:"x",v:8,in:-1,r:[-12,0],pack:1},{ax:"z",v:-12,in:1,r:[0,8],pack:1}];
+    {ax:"x",v:0,in:1,r:[RM.pack.z0,0],pack:1},{ax:"x",v:8,in:-1,r:[RM.pack.z0,0],pack:1},{ax:"z",v:RM.pack.z0,in:1,r:[0,8],pack:1}];
   for(const w of walls) w.list=[];
   const ceil={F:[],P:[]}, bb=new T3.Box3();
   scene.updateMatrixWorld(true);
@@ -101,7 +101,7 @@ function v3CutSets(scene){
   return {walls,ceil,state:""};
 }
 function v3Cut(){
-  const C=V3.cut, e=R3.eye, inF=e[0]>0&&e[0]<11.8&&e[2]>0&&e[2]<7&&e[1]<RM.fill.h, inP=e[0]>0&&e[0]<8&&e[2]>-12&&e[2]<0&&e[1]<RM.pack.h;
+  const C=V3.cut, e=R3.eye, inF=e[0]>0&&e[0]<11.8&&e[2]>0&&e[2]<7&&e[1]<RM.fill.h, inP=e[0]>0&&e[0]<8&&e[2]>RM.pack.z0&&e[2]<0&&e[1]<RM.pack.h;
   let key=""; const hide=[];
   for(const w of C.walls){ const c=w.ax==="x"?e[0]:e[2], out=(c-w.v)*w.in<0, mine=w.pack?inP:inF; const h=out&&!mine; hide.push(h); key+=h?1:0; }
   const hc={F:e[1]>RM.fill.h-.02&&!inF, P:e[1]>RM.pack.h-.02&&!inP}; key+=(hc.F?1:0)+""+(hc.P?1:0);
@@ -155,7 +155,7 @@ function camSet(v){
   $$("#v3Grp [data-v]").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
 }
 /* 라인 방향(충전기 → 포장 라인 끝 = −z) 으로 이동 */
-function camPanLine(d){ cam.tzT=clamp(cam.tzT-d*Math.max(.7,cam.dist*.25),-11.5,6.5); }
+function camPanLine(d){ cam.tzT=clamp(cam.tzT-d*Math.max(.7,cam.dist*.25),-15.5,6.5); }
 function bindOrbit(cv,onClick,onHover){
   let down=false,moved=false,lx=0,ly=0,pan=false;
   const toCv=e=>{const r=cv.getBoundingClientRect();return {x:(e.clientX-r.left)*cv.width/r.width,y:(e.clientY-r.top)*cv.height/r.height};};
@@ -172,7 +172,7 @@ function bindOrbit(cv,onClick,onHover){
   cv.addEventListener("pointerup",e=>{ if(cam.fp){ down=false; return; } const wm=moved; down=false; try{cv.releasePointerCapture(e.pointerId);}catch(_){}
     if(!wm&&onClick) onClick(toCv(e)); });
   cv.addEventListener("contextmenu",e=>e.preventDefault());
-  cv.addEventListener("wheel",e=>{ e.preventDefault(); if(cam.fp) return; cam.distT=clamp(cam.distT*(1+Math.sign(e.deltaY)*.12),.4,32); },{passive:false});
+  cv.addEventListener("wheel",e=>{ e.preventDefault(); if(cam.fp) return; cam.distT=clamp(cam.distT*(1+Math.sign(e.deltaY)*.12),.4,38); },{passive:false});
 }
 
 /* ── 크기 · 그리기 ── */

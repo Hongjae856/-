@@ -15,7 +15,7 @@ SRC = H / "src"
 OUT = H / "test_idt.html"   # 검증 전까지 시험 출력 (전환 시 파우치라인_IDT.html)
 
 V2_SCRIPTS = ("kit.js", "layout.js", "room.js", "form.js", "unwind.js", "hopper.js", "filler.js", "conv.js",
-              "fillzone.js", "pack_feed.js", "pack_carton.js", "pack_insp.js", "packzone.js", "pack_manual.js",
+              "fillzone.js", "pack_feed.js", "pack_carton.js", "pack_insp.js", "packzone.js", "human.js", "pack_manual.js",
               "pack_anim.js", "anim.js")
 ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),

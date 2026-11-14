@@ -12,8 +12,8 @@ const NAV={
   F:{n:{a:[1.4,.9,0],b:[1.4,2.7,0],c:[1.4,4.9,0],m:[2.35,2.73,0],d:[3.9,4.9,0],e:[5.25,4.9,0],k:[5.25,2.9,0],f:[7.5,4.9,0],g:[7.5,3.84,0],h:[8.0,2.0,0],i:[9.6,3.2,0],j:[9.5,5.3,0],
         T:[5.3,3.84,1],B:[5.2,1.75,1],C:[2.15,1.6,1],D:[2.15,3.9,1],E:[3.05,3.95,1],G:[4.15,2.0,1]},
      e:"a-b b-c b-m c-d d-e e-k e-f f-g f-j g-h h-i i-j g-T T-B T-E E-D D-C C-B B-G G-T"},
-  P:{n:{p0:[4.3,-.6,0],p1:[4.3,-2.4,0],p2:[4.3,-4.0,0],p3:[4.3,-6.0,0],p4:[4.3,-7.6,0],p5:[4.3,-9.0,0],p6:[4.6,-10.4,0]},
-     e:"p0-p1 p1-p2 p2-p3 p3-p4 p4-p5 p5-p6"}
+  P:{n:{p0:[4.3,-.6,0],p1:[4.3,-2.4,0],p2:[4.3,-4.0,0],p3:[4.3,-6.0,0],p4:[4.3,-7.6,0],p5:[4.3,-9.0,0],p6:[4.45,-11.2,0],p7:[5.7,-12.9,0],p8:[7.3,-14.6,0]},
+     e:"p0-p1 p1-p2 p2-p3 p3-p4 p4-p5 p5-p6 p6-p7 p7-p8"}
 };
 for(const R of Object.values(NAV)){ R.adj={}; for(const k in R.n) R.adj[k]=[]; for(const s of R.e.split(" ")){ const [a,b]=s.split("-"); R.adj[a].push(b); R.adj[b].push(a); } }
 const STAIRY=x=>clamp((STR.x1-x)/(STR.x1-STR.x0),0,1)*FL.deckY;
@@ -75,7 +75,7 @@ function wkTick(dt){
   }
 }
 function reachAmt(J){ const t=J.t-.15, e=J.j.dur-.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/.45):1); }
-/* ── 3D 표현 : 방진복 작업자 (pack_manual.js makeWorker) · 들고 가는 물건 ── */
+/* ── 3D 표현 : 방진복 작업자 (human.js makeHuman · poseHuman) · 들고 가는 물건 ── */
 function wkCarryMesh(kind){
   const G=new T3.Group();
   if(kind==="sts"){ const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.y=.21; G.add(m); }
@@ -89,18 +89,19 @@ function wkCarryMesh(kind){
 function wkDraw(dt){
   if(!V3) return;
   for(const w of WK){
-    if(!w.m){ w.m=makeWorker(V3.scene,w.x,w.z,w.face); w.cm={}; }
-    const G=w.m.G; G.visible=!cam.fp;
+    if(!w.m){ w.m=makeHuman(V3.scene); w.cm={}; }
+    const H=w.m; H.G.visible=!cam.fp;
     let da=w.face-w.yaw; da=Math.atan2(Math.sin(da),Math.cos(da)); w.yaw+=da*Math.min(1,dt*9);
-    G.position.set(w.x,w.y,w.z); G.rotation.y=w.yaw;
-    w.walk+=((w.walking?1:0)-w.walk)*Math.min(1,dt*8);
-    const sw=Math.sin(w.gait)*.42*w.walk;
-    w.m.legs[0].rotation.x=sw; w.m.legs[1].rotation.x=-sw;
-    const J=w.job, work=J&&J.phase==="work"&&J.j.reach, r=work?reachAmt(J):0;
-    if(w.carry){ setArms(w.m,1.15,.55); }
-    else if(r>0){ const ry=J.j.reach[1]-w.y; setArms(w.m,.2+r*(ry>1.6?2.3:ry>1.1?1.45:ry>.7?.95:.6),.35*r); }
-    else { for(const a of w.m.arms){ a.A.rotation.x=a.s*sw*.6; a.A.rotation.z=a.s*.08; a.F.rotation.x=-.15; } }
+    const f=[Math.sin(w.yaw),Math.cos(w.yaw)], lf=[Math.cos(w.yaw),-Math.sin(w.yaw)], J=w.job, work=J&&J.phase==="work"&&J.j.reach;
+    const P={x:w.x,z:w.z,y0:w.y,yaw:w.yaw,dt,L:null,R:null};
     for(const k in w.cm) w.cm[k].visible=false;
-    if(w.carry){ if(!w.cm[w.carry]){ w.cm[w.carry]=wkCarryMesh(w.carry); G.add(w.cm[w.carry]); } const c=w.cm[w.carry]; c.visible=true; c.position.set(0,w.carry==="sts"?.62:1.02,.36); }
+    if(w.carry){ if(!w.cm[w.carry]){ w.cm[w.carry]=wkCarryMesh(w.carry); V3.scene.add(w.cm[w.carry]); }
+      const c=w.cm[w.carry], hw=w.carry==="roll"?.2:w.carry==="sts"?.21:w.carry==="cartons"?.16:.08, cy=w.y+(w.carry==="sts"?.78:1.02);
+      let cp=[w.x+f[0]*.36,cy+(w.carry==="sts"?.21:0),w.z+f[1]*.36];
+      if(work&&reachAmt(J)>0){ const r=reachAmt(J), q=J.j.reach; cp=[cp[0]+(q[0]-cp[0])*r*.8,cp[1]+(q[1]-cp[1])*r*.8,cp[2]+(q[2]-cp[2])*r*.8]; }
+      c.visible=!cam.fp; c.position.set(cp[0],cp[1]-(w.carry==="sts"?.21:0),cp[2]); c.rotation.y=w.yaw;
+      P.L=[cp[0]+lf[0]*hw,cp[1],cp[2]+lf[1]*hw]; P.R=[cp[0]-lf[0]*hw,cp[1],cp[2]-lf[1]*hw]; P.gL=P.gR=.5; }
+    else if(work&&J.t>.12&&J.t<J.j.dur-.35){ P.R=J.j.reach.slice(); P.gR=.3; P.nR="down"; if(J.j.dur>2.2){ P.L=[J.j.reach[0]+lf[0]*.22,J.j.reach[1],J.j.reach[2]+lf[1]*.22]; P.gL=.3; P.nL="down"; } }
+    poseHuman(H,P);
   }
 }

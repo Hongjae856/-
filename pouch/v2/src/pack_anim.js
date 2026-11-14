@@ -81,13 +81,13 @@ function stepPackAnim(){
         put(PA.push,pn,xh,.97,zt); o.position.set(X-.2,.965,zt); o.rotation.set(0,0,0); o.scale.set(Math.max(.01,xh-(X-.2)),1,1); o.updateMatrix(); PA.rod.setMatrixAt(pn,o.matrix); pn++; } }
     PA.lfl.count=n; PA.push.count=pn; PA.rod.count=pn; PA.lfl.instanceMatrix.needsUpdate=true; PA.push.instanceMatrix.needsUpdate=true; PA.rod.instanceMatrix.needsUpdate=true; }
   /* ── 흡착 암 · 카톤 ── */
-  const v2r=.3/(P*(8/6)), L1=.5, Lst=-(PKZ.y? (-9.03):0), zQ=-9.03, zT=zl(PZ.cEnd)-.32, Ltot=L1+(zT-zQ);
-  const eOf=b=>(bl(b)-PZ.cEnd)*v2r, stopOf=b=>Ltot-(((b%8)+8)%8)*.094;
+  const v2r=.3/(P*(8/6)), L1=.5, zQ=MP.zQ, zT=zl(PZ.cEnd)-.32, Ltot=L1+(zT-zQ);
+  const eOf=b=>(bl(b)-PZ.cEnd)*v2r, stopOf=b=>Ltot-(((b%4)+4)%4)*.094;   /* 모음 벨트 끝 : 4개 묶음 단위로 집어 감 */
+  manualPrep(eOf(0)/.3,Ltot);
   const M4=PA.M4, Mc=PA.Mc, Sh=PA.Sh, Mf=PA.Mf; let nc=0, nf=0, nm=0, ng=0, np=0, arm=null;
   const flap=(m,idx,mat)=>{ Mf.multiplyMatrices(Mc,mat); m.setMatrixAt(idx,Mf); };
   const loc=(x,y,z,ry,rz,ryy)=>{ PA.e.set(0,ry,0); PA.q.setFromEuler(PA.e); const A=new T3.Matrix4().compose(PA.v.set(x,y,z),PA.q,PA.one); const R=new T3.Matrix4(); if(rz) R.makeRotationZ(rz); else if(ryy) R.makeRotationY(ryy); return A.multiply(R); };
-  const tmOf=m=>{ const last=8*m+7; return (eOf(last)-stopOf(last)-.12)/.3; };
-  for(let b=Math.floor(sb-7.9/P);b<=Math.floor(sb-PZ.pk0/P);b++){ const l=bl(b); if(l<PZ.pk0) continue;
+  for(let b=Math.floor(sb-8.6/P);b<=Math.floor(sb-PZ.pk0/P);b++){ const l=bl(b); if(l<PZ.pk0) continue;
     let px,py,pz,rx=0,th=Math.PI/2, fm=-.5,fb=-.2,ft=-.6, glue=false, prt=false;
     if(l<PZ.pk1){ const q=(l-PZ.pk0)/(PZ.pk1-PZ.pk0), zt=zl(l); const mx=[cx,1.41,zl(PK2.lf[0]+.28-PK2.bz0+PK2.bz0)];
       const pm=[cx,1.405,-3.13];
@@ -95,11 +95,11 @@ function stepPackAnim(){
       if(q<.65){ fm=fb=ft=0; const t=ez((q-.3)/.35); px=cx; py=lerp(pm[1],yC+.11,t); pz=lerp(pm[2],zt,t); rx=lerp(.9+Math.PI/2,0,t); th=.06; arm=lerp(1.05,-.1,t); }
       else { const t=ez((q-.65)/.35); px=cx; py=lerp(yC+.11,yC+C.H/2,t); pz=zt; th=lerp(.06,Math.PI/2,t); arm=lerp(-.1,-.25,t); fm=-.5*t; fb=-.2*t; ft=-.6*t; } }
     else if(l<=PZ.cEnd){ px=cx; py=yC+C.H/2; pz=zl(l); fm=-.5+ez((l-PZ.m0)/(PZ.m1-PZ.m0))*(Math.PI/2+.5); fb=-.2+ez((l-PZ.b0)/(PZ.b1-PZ.b0))*(Math.PI/2+.2); ft=-.6+ez((l-PZ.t0)/(PZ.t1-PZ.t0))*(Math.PI/2+.6); glue=l>=PZ.gl; }
-    else { const e=Math.min(eOf(b),stopOf(b)), m=Math.floor(b/8), tm=tmOf(m);
+    else { const e=Math.min(eOf(b),stopOf(b));
       fm=fb=ft=Math.PI/2; prt=true;
       if(e<L1){ const t=e/L1, u=1-t; px=u*u*cx+2*u*t*cx+t*t*X; pz=u*u*zl(PZ.cEnd)+2*u*t*(zl(PZ.cEnd)-.22)+t*t*zT; py=lerp(yC,PKZ.y,ez(t))+C.H/2; }
       else { px=X; pz=zT-(e-L1); py=PKZ.y+C.H/2; } prt=pz<-6.05;
-      const mp=manualCarton(tm,((b%8)+8)%8,[px,py,pz]); if(mp==='hide') continue; [px,py,pz]=mp; }
+      const mp=manualCarton(b,[px,py,pz]); if(mp==='hide') continue; [px,py,pz]=mp; }
     Sh.set(1,0,0,0, 0,Math.sin(th),0,0, 0,Math.cos(th),1,0, 0,0,0,1);
     PA.e.set(rx,0,0); PA.q.setFromEuler(PA.e); M4.compose(PA.v.set(px,py,pz),PA.q,PA.one); Mc.multiplyMatrices(M4,Sh);
     PA.cb.setMatrixAt(nc,Mc);
@@ -111,7 +111,7 @@ function stepPackAnim(){
     nc++; }
   for(const [m,n] of [[PA.cb,nc],[PA.fT,nf],[PA.fB,nf],[PA.fm,nm],[PA.glue,ng],[PA.prt,np]]){ m.count=n; m.instanceMatrix.needsUpdate=true; }
   if(PK2.pickArm&&arm!==null) PK2.pickArm.rotation.x=arm;
-  stepManual(tmOf,Math.floor((sb-PZ.cEnd/P)/8));
+  stepManual();
   /* ── X-ray 커튼 ── */
   if(PA.curt.length){ const zs=[]; for(let b=Math.floor(sb-7.4/P);b<=Math.floor(sb-PZ.cEnd/P);b++){ const e=Math.min(eOf(b),stopOf(b)); if(e>L1) zs.push(zT-(e-L1)); }
     for(const c of PA.curt){ let a=0; for(const z of zs){ const dz=z-c.z; if(dz>-.06&&dz<.12) a=Math.max(a,(1-Math.abs(dz-.03)/.09)*(Math.abs(c.x-X)<.07?1.1:.35)); } c.G.rotation.x=Math.max(0,a); } }

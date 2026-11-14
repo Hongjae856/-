@@ -47,21 +47,22 @@ function buildInspection(g){
       rod(g,[xb+s*.18,.82,z-.08],[xb+s*.22,.82,z-.08],.008,M.ssMir,8); rod(g,[xb+s*.18,.82,z+.08],[xb+s*.22,.82,z+.08],.008,M.ssMir,8); rod(g,[xb+s*.22,.82,z-.08],[xb+s*.22,.82,z+.08],.008,M.ssMir,8);
       bx(g,xb+s*.18-.01,xb+s*.18+.03,.92,.98,z-.025,z+.025,M.brass); PB.legs(g,xb-.15,xb+.15,z-.17,z+.17,.5);
       PB.sign(g,.18,.06,[["포장실",'#111',40],[s>0?"기준 중량 불량":"X-ray 불량","#111",42]],{w:384,h:130,border:"#333"},[xb+s*.182,.68,z],s>0?Math.PI/2:-Math.PI/2); } }
-  /* ── 중량선별기 뒤 모음 벨트 · 끝 멈춤판 (카톤 8개가 모이면 작업자가 대케이스에 담음) ── */
-  { const z0=-9.1, z1=PKZ.cw[0]; belt(z0,z1,.14,M.belt); bx(g,X-.08,X+.08,Y,Y+.08,z0-.006,z0,M.ss); for(const x of [X-.085,X+.085]) bx(g,x-.005,x+.005,Y,Y+.05,z0,z1,M.ss); PB.legs(g,X-.08,X+.08,z0+.05,z1-.05,Y-.07); }
+  /* ── 중량선별기 뒤 모음 벨트 · 끝 멈춤판 (끝 양옆 받침대에서 작업자 2명이 마주 보고 대케이스 포장 — pack_manual.js) ── */
+  { const z0=MP.zS, z1=PKZ.cw[0]; belt(z0,z1,.14,M.belt); bx(g,X-.08,X+.08,Y,Y+.08,z0-.006,z0,M.ss); for(const x of [X-.085,X+.085]) bx(g,x-.005,x+.005,Y,Y+.05,z0,z1,M.ss); PB.legs(g,X-.08,X+.08,z0+.05,z1-.05,Y-.07); }
   /* ── 대케이스 잉크젯 프린터 : 알루미늄 프레임 · 캐스터 · 검은 벨트 · 주황 노브 가이드 · Domino 소형 헤드 박스(서쪽) · 기둥 암 터치화면 · 경광등 ── */
   { const [z0,z1]=PKZ.cp, w=.42; bx(g,X-w/2-.04,X+w/2+.04,Y-.1,Y-.006,z0,z1,M.alu); bx(g,X-w/2,X+w/2,Y-.006,Y,z0,z1,M.belt);
     for(const x of [X-w/2-.02,X+w/2+.02]) for(const z of [z0+.08,(z0+z1)/2,z1-.08]){ bx(g,x-.02,x+.02,.07,Y-.1,z-.02,z+.02,M.alu); rod(g,[x,.035,z],[x,.035,z+.02],.035,M.dark,12); }
     for(const y of [.3,Y-.14]) for(const x of [X-w/2-.02,X+w/2+.02]) bx(g,x-.02,x+.02,y-.02,y+.02,z0+.08,z1-.08,M.alu);
-    for(const z of [z1-.4,z1-.8]){ rod(g,[X-w/2-.04,Y+.13,z],[X-.16,Y+.13,z],.006,M.ssMir,8); rod(g,[X-.16,Y+.03,z],[X-.16,Y+.13,z],.014,M.orange,10);   /* 케이스 측면 가이드 · 감지 (케이스 통과 폭 밖) */ }
-    bx(g,X-w/2-.25,X-w/2-.05,Y-.02,Y+.16,z1-.6,z1-.25,M.dark); bx(g,X-w/2-.25,X-w/2-.05,Y+.16,Y+.18,z1-.6,z1-.25,M.ss); PB.sign(g,.14,.03,[["DOMINO","#fff",60]],{w:320,h:70,bg:"#9aa0a6"},[X-w/2-.049,Y+.1,z1-.42],Math.PI/2);
-    bx(g,X-w/2-.14,X-w/2-.1,.07,1.55,z1-.1,z1-.06,M.alu); rod(g,[X-w/2-.12,1.4,z1-.08],[X+.0,1.4,z1-.08],.015,M.alu,10); bx(g,X-.02,X+.02,1.2,1.42,z1-.2,z1+.04,M.dark); bx(g,X+.02,X+.022,1.23,1.4,z1-.17,z1+.01,M.scr);
-    PB.beacon(g,X-w/2-.12,1.55,z1-.08); }
+    for(const z of [z1-.75,z1-1.3,z1-1.85]){ rod(g,[X-w/2-.04,Y+.13,z],[X-.16,Y+.13,z],.006,M.ssMir,8); rod(g,[X-.16,Y+.03,z],[X-.16,Y+.13,z],.014,M.orange,10);   /* 케이스 측면 가이드 · 감지 (케이스 통과 폭 밖) */ }
+    bx(g,X-w/2-.25,X-w/2-.05,Y-.02,Y+.16,z1-1.15,z1-.8,M.dark); bx(g,X-w/2-.25,X-w/2-.05,Y+.16,Y+.18,z1-1.15,z1-.8,M.ss); PB.sign(g,.14,.03,[["DOMINO","#fff",60]],{w:320,h:70,bg:"#9aa0a6"},[X-w/2-.049,Y+.1,z1-.97],Math.PI/2);
+    { const zp=z1-1.5; bx(g,X-w/2-.14,X-w/2-.1,.07,1.55,zp-.02,zp+.02,M.alu); rod(g,[X-w/2-.12,1.4,zp],[X+.0,1.4,zp],.015,M.alu,10); bx(g,X-.02,X+.02,1.2,1.42,zp-.12,zp+.12,M.dark); bx(g,X+.02,X+.022,1.23,1.4,zp-.09,zp+.09,M.scr);
+      PB.beacon(g,X-w/2-.12,1.55,zp); } }
   /* ── 라인 끝 작업대 : 긴 스테인리스 상판 · 가운데 녹색 벨트 · 2단 다리 ── */
-  { const [z0,z1]=PKZ.tb; bx(g,X-.5,X+.5,Y-.14,Y-.1,z0,z1,M.ssMir); bx(g,X-.12,X+.12,Y-.1,Y-.094,z0+.02,z1,M.green); bx(g,X-.15,X+.15,Y-.2,Y-.14,z0,z1,M.ss);
+  { const [z0,z1]=PKZ.tb; bx(g,X-.5,X+.5,Y-.14,Y-.1,z0,z1,M.ssMir); bx(g,X-.12,X+.12,Y-.1,Y-.094,MP.zGE,z1,M.green); bx(g,X-.13,X+.13,Y-.1,Y-.06,MP.zGE-.012,MP.zGE,M.ss);   /* 녹색 벨트 끝 멈춤턱 · 그 뒤 상판 = 대박스 자리 */ bx(g,X-.15,X+.15,Y-.2,Y-.14,z0,z1,M.ss);
     PB.legs(g,X-.46,X+.46,z0+.08,z1-.08,Y-.14); for(const z of [z0+.08,z1-.08]) bx(g,X-.46,X+.46,.22,.26,z-.02,z+.02,M.ss); for(const x of [X-.46,X+.46]) bx(g,x-.02,x+.02,.22,.26,z0+.08,z1-.08,M.ss); }
   /* ── 수동 포장 자재 : 동쪽 벽 쪽 대박스 · 대케이스 적재 (색 · 규격 추정) ── */
   { const kr=new T3.MeshStandardMaterial({color:0xb48a5a,roughness:.85}), rc=new T3.MeshStandardMaterial({color:0xc8201c,roughness:.6});
-    for(let i=0;i<3;i++) for(let j=0;j<4;j++) bx(g,7.0+i*.0,7.55,j*.32,j*.32+.3,-10.9+i*.48,-10.46+i*.48,kr);
-    for(let j=0;j<6;j++) bx(g,6.1,6.6,.0+j*.04,.035+j*.04,-11.2,-10.8,rc); }
+    for(let i=0;i<3;i++) for(let j=0;j<5;j++) bx(g,7.05,7.6,.1+j*.035,.13+j*.035,-12.3+i*.62,-11.76+i*.62,kr);          /* 접힌 대박스 묶음 */
+    for(let i=0;i<2;i++) for(let j=0;j<8;j++) bx(g,7.0,7.6,.1+j*.03,.125+j*.03,-9.9+i*.5,-9.5+i*.5,rc);                 /* 접힌 대케이스 묶음 */
+    for(const z of [-11.9,-9.45]) bx(g,6.95,7.65,0,.1,z-.75+.0,z+.75,M.grey); }
 }
