@@ -1,6 +1,6 @@
 /* ═══ 포장실 : 스틱공급장치 → 카토너(설명서 공급장치 · 핫멜트) → 케이스 프린터 · 비전 → X-ray → 중량선별기 → 배출함 2
        → 대케이스 잉크젯 프린터 → 녹색 벨트 작업대 — DRAWING.md 7절 · 라인 중심 x=CVX, 남 → 북, 작업자 통로 동쪽 ═══ */
-const PKZ={ sf:[-1.95,-.25], ct:[-5.4,-2.05], pr:[-6.5,-5.55], xr:[-7.7,-6.7], cw:[-8.6,-7.8], bin:-8.85, cp:[-12.2,-9.95], tb:[-15.0,-12.25], y:.92 };
+const PKZ={ sf:[-1.95,-.25], ct:[-5.4,-2.05], pr:[-6.5,-5.55], xr:[-7.7,-6.7], cw:[-8.6,-7.8], bin:-8.85, cp:[-12.2,-10.4], tb:[-15.0,-12.25], y:.92 };
 function buildPackRoom(S){
   const g=new T3.Group(); S.add(g); const R=RM.pack, H=R.h, X=CVX, P=PKZ;
   const fl=new T3.Mesh(new T3.PlaneGeometry(R.x1-R.x0,R.z1-R.z0),M.floor); fl.rotation.x=-Math.PI/2; fl.position.set((R.x0+R.x1)/2,0,(R.z0+R.z1)/2); fl.receiveShadow=true; g.add(fl);

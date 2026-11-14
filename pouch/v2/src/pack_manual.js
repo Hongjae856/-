@@ -6,9 +6,9 @@
      → 파렛트 적재(한 단 3개 × 8단 가정) → 성형 대박스를 가져와 작업대에 놓음
    [사용자 확인 11/14] 카톤은 세워서 담음 → 대케이스는 좁고 높음 · 대박스는 1층에 대케이스 4개를 2열 × 2줄 · 칸막이 없음
    [추정 · 확인 필요] 대케이스 375 × 140 × 125 · 대박스 770 × 300 × 150 · 받침대 · 자재대 · 파렛트 · 성형 박스 보관 위치 · 동작 시간 ═══ */
-const MP={ a:.375, b:.14, h:.125, zQ:-9.68, zS:-9.75, uC:.24, uW:.61, zB:-10.22, vB:.25, vG:.2, zK:-12.0, zG0:-12.42, zGE:-14.15, zE:-13.94, sp:.39,
-  box:{x:.30,y:.15,z:.77}, zBx:-14.6, xBx:.08, open:1.95, pk:[.6,3.0,5.4,10.2], pal:[1.75,-14.2], t:0, t0:0, tp:null };
-MP.zC=MP.zQ+.141;
+const MP={ a:.375, b:.14, h:.125, zQ:-9.68, zS:-9.75, uC:.24, uW:.61, zB:-10.65, vB:.25, vG:.2, zK:-12.0, zG0:-12.42, zGE:-14.15, zE:-13.94, sp:.39,
+  box:{x:.30,y:.15,z:.77}, zBx:-14.6, xBx:.08, open:4.4, pk:[.6,3.0,5.4,10.2], pal:[1.75,-14.2], t:0, t0:0, tp:null };
+MP.zC=MP.zQ+.141; MP.zKc=MP.zC-.46; MP.zSt=-10.78; MP.dispZ=s=>s>0?MP.zC+.2:MP.zKc-.3;   /* zC : 카톤 묶음 중심 · zKc : 받침대 위 케이스 자리(묶음 자리 북쪽 옆 — 팔 · 카톤이 뚜껑을 지나지 않도록) */
 const mod=(a,n)=>((a%n)+n)%n, ez3=x=>x<=0?0:x>=1?1:x*x*(3-2*x), mixA=(a,b,e)=>a.map((v,i)=>v+(b[i]-v)*e);
 /* ── 대케이스 : 턱인 뚜껑 · 양끝 날개 · 자동 바닥. 몸체는 평면 전단으로 접힌 상태(φ≈0) ↔ 펼친 상태(φ=90°) ── */
 function makeCase(S){
@@ -46,11 +46,11 @@ function initManual(S){
   MP.red=new T3.MeshStandardMaterial({color:0xa01a14,roughness:.62,side:T3.DoubleSide}); MP.kraft=new T3.MeshStandardMaterial({color:0xb48a5a,roughness:.88,side:T3.DoubleSide});
   MP.blue=new T3.MeshStandardMaterial({color:0x4f9bdc,roughness:.4}); MP.tape=new T3.MeshStandardMaterial({color:0xd8b77c,roughness:.3,transparent:true,opacity:.92});
   MP.prt=new T3.MeshBasicMaterial({map:tex(cvs(256,64,(c)=>{ c.fillStyle="#a01a14"; c.fillRect(0,0,256,64); c.fillStyle="#141414"; c.font="bold 20px monospace"; c.fillText("LOT 2F010  x8",8,26); c.fillText("EXP 2028.11.01",8,52); }),1,1,true)});
-  /* 받침대(양옆) · 봉함스티커 · 접힌 대케이스 자재대 */
-  for(const s of [-1,1]){ const wx=u=>X+s*u, x0=Math.min(wx(.1),wx(.46)), x1=Math.max(wx(.1),wx(.46)), zr=s>0?-1:1;
-    bx(S,x0,x1,Y-.03,Y,-9.9,-9.2,M.ssMir); for(const u of [.14,.42]) for(const z of [-9.86,-9.24]){ bx(S,wx(u)-.015,wx(u)+.015,.03,Y-.03,z-.015,z+.015,M.ss); foot(S,wx(u),z,.03,.02); } bx(S,x0+.02,x1-.02,.3,.32,-9.86,-9.24,M.ss);
-    { const dz=MP.zC+zr*.31, dx=wx(.40); bx(S,dx-.03,dx+.03,Y,Y+.012,dz-.04,dz+.04,M.ss); rod(S,[dx-.022,Y+.045,dz],[dx+.022,Y+.045,dz],.032,MP.blue,20); rod(S,[dx-.026,Y+.045,dz],[dx+.026,Y+.045,dz],.012,M.dark,10); for(const q of [-.026,.026]) bx(S,dx+q-.002,dx+q+.002,Y+.012,Y+.05,dz-.006,dz+.006,M.ss); }
-    { const cx=wx(.84), cz=-10.27; bx(S,cx-.36,cx+.36,.82,.85,cz-.23,cz+.23,M.ss); for(const dx of [-.33,.33]) for(const dz of [-.2,.2]){ bx(S,cx+dx-.015,cx+dx+.015,.06,.82,cz+dz-.015,cz+dz+.015,M.ss); rod(S,[cx+dx,.03,cz+dz],[cx+dx,.03,cz+dz+.02],.03,M.dark,12); } bx(S,cx-.33,cx+.33,.25,.27,cz-.2,cz+.2,M.ss);
+  /* 받침대(양옆, 묶음 자리 ~ 케이스 자리) · 봉함스티커 · 접힌 대케이스 자재대(북쪽 옆) */
+  for(const s of [-1,1]){ const wx=u=>X+s*u, x0=Math.min(wx(.1),wx(.46)), x1=Math.max(wx(.1),wx(.46)), z0=-10.36, z1=-9.22;
+    bx(S,x0,x1,Y-.03,Y,z0,z1,M.ssMir); for(const u of [.14,.42]) for(const z of [z0+.04,(z0+z1)/2,z1-.04]){ bx(S,wx(u)-.015,wx(u)+.015,.03,Y-.03,z-.015,z+.015,M.ss); foot(S,wx(u),z,.03,.02); } bx(S,x0+.02,x1-.02,.3,.32,z0+.04,z1-.04,M.ss);
+    { const dz=MP.dispZ(s), dx=wx(.41); bx(S,dx-.03,dx+.03,Y,Y+.012,dz-.04,dz+.04,M.ss); rod(S,[dx-.022,Y+.045,dz],[dx+.022,Y+.045,dz],.032,MP.blue,20); rod(S,[dx-.026,Y+.045,dz],[dx+.026,Y+.045,dz],.012,M.dark,10); for(const q of [-.026,.026]) bx(S,dx+q-.002,dx+q+.002,Y+.012,Y+.05,dz-.006,dz+.006,M.ss); }
+    { const cx=wx(.84), cz=MP.zSt; bx(S,cx-.36,cx+.36,.82,.85,cz-.23,cz+.23,M.ss); for(const dx of [-.33,.33]) for(const dz of [-.2,.2]){ bx(S,cx+dx-.015,cx+dx+.015,.06,.82,cz+dz-.015,cz+dz+.015,M.ss); rod(S,[cx+dx,.03,cz+dz],[cx+dx,.03,cz+dz+.02],.03,M.dark,12); } bx(S,cx-.33,cx+.33,.25,.27,cz-.2,cz+.2,M.ss);
       for(let k=0;k<8;k++) bx(S,cx-.258,cx+.258,.85+k*.007,.856+k*.007,cz-.145,cz+.145,MP.red); for(const q of [-.14,.14]) bx(S,cx+q-.12,cx+q+.12,.27,.4,cz-.15,cz+.15,MP.red); } }
   MP.ystk=.85+8*.007+.008;
   /* 파렛트 · 성형 대박스 보관 대차 · 테이프 커터 */
@@ -65,54 +65,58 @@ function initManual(S){
 }
 /* ── 작업자 1 · 2 : 한 케이스 주기 장면 (sd = +1 동쪽 · −1 서쪽, τ = 첫 카톤 묶음을 집는 순간 기준 초, −3.5 ≤ τ < 8.5) ── */
 function packScene(sd,ta){
-  const X=CVX, Y=PKZ.y, a=MP.a, b=MP.b, h=MP.h, zC=MP.zC, zr=sd>0?-1:1, wx=u=>X+sd*u, PI=Math.PI, Ll=b-.008;
-  const Sc=[wx(.84),MP.ystk,-10.27], Pc=[wx(.31),1.04,zC], Pw=[wx(MP.uC),Y,zC], Pb=[X,Y,MP.zB];
-  /* 케이스 */
+  const X=CVX, Y=PKZ.y, a=MP.a, b=MP.b, h=MP.h, zC=MP.zC, zK=MP.zKc, zr=sd>0?-1:1, wx=u=>X+sd*u, PI=Math.PI, Ll=b-.008, DO=-1.25;
+  const Sc=[wx(.84),MP.ystk,MP.zSt], Pc=[wx(.33),1.04,zK+.06], Pw=[wx(MP.uC),Y,zK], Pb=[X,Y,MP.zB];
+  /* 케이스 : 뚜껑은 먼 쪽(벨트 쪽)에 세워 두고, 양끝 날개는 바깥으로 젖혀 둠 → 카톤은 옆(남쪽)에서 위로 들어와 내려감 */
   const cs={ yaw:KF(ta,[[-2.3,PI/2],[-1.5,sd>0?PI:0]]), tilt:KF(ta,[[-2.3,PI/2],[-1.6,0]]), phi:KF(ta,[[-1.5,.05],[-.9,PI/2]]),
-    lid:KF(ta,[[-.9,0],[-.5,-.22],[4.9,-.22],[5.4,PI/2]]), tuck:KF(ta,[[5.15,0],[5.45,PI/2]]), dust:KF(ta,[[-.9,0],[-.5,-.15],[4.3,-.15],[4.7,PI/2]]), stk:ta>=6.5, vis:ta>=-2.9 };
+    lid:KF(ta,[[-.9,0],[-.5,-.22],[5.2,-.22],[5.7,PI/2]]), tuck:KF(ta,[[5.45,0],[5.75,PI/2]]), dust:KF(ta,[[-.9,0],[-.5,DO],[4.75,DO],[5.1,PI/2]]), stk:ta>=6.7, vis:ta>=-2.9 };
   const yref=KF(ta,[[-1.5,.145],[-.9,.06],[-.5,0]]), Pr=KF(ta,[[-2.6,Sc],[-2.3,[Sc[0],Sc[1]+.14,Sc[2]]],[-1.5,Pc],[-.9,Pc],[-.5,Pw],[7.3,Pw],[8.2,Pb,.09]]);
   cs.p=[Pr[0]+yref*Math.sin(cs.tilt)*Math.cos(cs.yaw), Pr[1]-yref*Math.cos(cs.tilt), Pr[2]-yref*Math.sin(cs.tilt)*Math.sin(cs.yaw)];
   const yh=KF(ta,[[-1.5,.145],[-.9,.0625]]), zh=a/2+b/2*Math.cos(cs.phi)+.012, end=s=>caseW(cs,0,yh,s*zh);
-  /* 카톤 묶음(4개) 중심 : 벨트 → 케이스 안 (A = 벨트 쪽 열, B = 작업자 쪽 열) */
-  const rowAt=(t0,u)=>KF(ta,[[t0+.15,[X,Y+.0325,zC]],[t0+.85,[wx(u),Y+.065,zC],.11]]), uA=MP.uC-.033, uB=MP.uC+.033;
-  const row={A:ta>=0&&ta<1.0?rowAt(0,uA):null, B:ta>=3&&ta<4.0?rowAt(3,uB):null, pA:[wx(uA),Y+.065,zC], pB:[wx(uB),Y+.065,zC], sq:Math.max(ez3(ta/.15)*(ta<2?1:0),ez3((ta-3)/.15))};
+  /* 카톤 묶음(4개) 중심 : 벨트에서 들어 올리며 세움 → 몸 쪽으로 당김 → 케이스 위로 옆걸음 → 입구에 걸침 → 위에서 눌러 넣음 */
+  const uA=MP.uC-.033, uB=MP.uC+.033, YP=Y+h+.035, YF=Y+.065;
+  const rowAt=(t0,u)=>KF(ta,[[t0+.15,[X,Y+.0325,zC]],[t0+.45,[wx(u),Y+.29,zC]],[t0+.8,[wx(u),Y+.29,zK]],[t0+.98,[wx(u),YP,zK]],[t0+1.2,[wx(u),YP,zK]],[t0+1.45,[wx(u),YF,zK]]]);
+  const row={A:ta>=0&&ta<1.5?rowAt(0,uA):null, B:ta>=3&&ta<4.5?rowAt(3,uB):null, pA:[wx(uA),YF,zK], pB:[wx(uB),YF,zK]};
   /* 손 (R = 케이스 로컬 +z 끝 · L = −z 끝) */
-  const RE=s=>[X,Y+.12,MP.zB+zr*s*.24], RA=s=>[X,Y+.04,zC+zr*s*.205], R0=s=>[wx(.44),Y+.03,zC+zr*s*.25];
-  const hand=s=>{ const g=(k)=>k;
-    if(ta<-2.9) return {p:KF(ta,[[-3.5,RE(s)],[-3.1,[Sc[0]+s*.33,Sc[1]+.12,Sc[2]]],[-2.9,end(s)]]), g:.1, n:"in"};
+  const RE=s=>[X,Y+.19,MP.zB+zr*s*.24], RA=s=>[X,Y+.055,zC+zr*s*.205], zm=(zC+zK)/2, R0=s=>[wx(.44),Y+.03,zm+zr*s*.2];
+  const grab=(t0,u,s,from)=>{ const q=ta-t0, c=rowAt(t0,u);
+    if(q<.15) return {p:KF(q,[[-.5,from],[-.1,RA(s)],[.15,[X,Y+.055,zC+zr*s*.188]]]), g:.2+.3*ez3(q/.15), n:"in"};
+    if(q<1.0) return {p:[c[0],c[1]+.02,c[2]+zr*s*.188], g:.5, n:"in"};                                             /* 양 끝을 눌러 잡고 옮김 — 손바닥은 케이스 입구 위에 머묾 */
+    const tp=[c[0],c[1]+.06+.012,zK+zr*s*.09];                                                                    /* 손을 떼어 묶음 윗면에 올리고 눌러 넣음 */
+    if(q<1.2) return {p:KF(q,[[1.0,[c[0],c[1]+.02,zK+zr*s*.188]],[1.08,[c[0],c[1]+.1,zK+zr*s*.2]],[1.2,tp]]), g:.1, n:"down"};
+    if(q<1.45) return {p:tp, g:.05, n:"down"};
+    return {p:KF(q,[[1.45,tp],[1.62,[tp[0],tp[1]+.1,tp[2]]],[2.0,R0(s)]]), g:.15, n:"down"}; };
+  const hand=s=>{
+    if(ta<-2.9) return {p:KF(ta,[[-3.5,RE(s)],[-3.1,[Sc[0]+s*.27,Sc[1]+.12,Sc[2]]],[-2.9,end(s)]]), g:.1, n:"in"};
     if(ta<-.5) return {p:end(s), g:.55, n:"in"};
-    const grab=(t0,u)=>{ const q=ta-t0; if(q<.15) return {p:KF(q,[[-.5,end(s)],[-.12,RA(s)],[.15,[X,Y+.04,zC+zr*s*.188]]]), g:.2+.3*ez3(q/.15), n:"in"};
-      if(q<.85){ const c=rowAt(t0,u); return {p:[c[0],c[1]+.006,c[2]+zr*s*.188], g:.5, n:"in"}; }
-      return {p:KF(q,[[.85,[wx(u),Y+.071,zC+zr*s*.188]],[1.05,[wx(u)+sd*.02,Y+.22,zC+zr*s*.215]],[1.7,R0(s)]]), g:.15, n:q>1.2?"down":"in"}; };
-    if(ta<1.7){ if(ta<0&&ta>=-.5){ return {p:KF(ta,[[-.5,end(s)],[-.12,RA(s)],[0,RA(s)]]), g:.15, n:"in"}; } return grab(0,uA); }
+    if(ta<2.0) return grab(0,uA,s,end(s));
     if(ta<2.5) return {p:R0(s), g:.2, n:"down"};
-    if(ta<4.05){ const q=ta-3; if(q<.15) return {p:KF(q,[[-.5,R0(s)],[-.1,RA(s)],[.15,[X,Y+.04,zC+zr*s*.188]]]), g:.2+.3*ez3(q/.15), n:"in"}; return grab(3,uB); }
-    if(ta<4.72){ const dl=Math.max(0,cs.dust), tip=caseW(cs,0,h+.06*Math.cos(dl)+.012,s*(a/2-.06*Math.sin(dl))); return {p:KF(ta,[[4.05,[wx(uB)+sd*.02,Y+.22,zC+zr*s*.215]],[4.3,tip]]).map((v,i)=>ta>=4.3?tip[i]:v), g:.1, n:"down"}; }
+    if(ta<4.7) return grab(3,uB,s,R0(s));
+    if(ta<5.12){ const dl=cs.dust, tip=caseW(cs,0,h+.06*Math.cos(dl)+.014,s*(a/2-.06*Math.sin(dl))); return {p:ta<4.75?KF(ta,[[4.7,[wx(uB),YF+.172,zK+zr*s*.09]],[4.75,tip]]):tip, g:.1, n:dl<.3?"in":"down"}; }
     const lt=(th,z)=>caseW(cs,b/2-Ll*Math.sin(th),h+Ll*Math.cos(th)+.012,z);
-    if(ta<5.6){ const z=s*.1, p0=caseW(cs,0,h+.012,s*(a/2-.06)); if(ta<4.9) return {p:KF(ta,[[4.72,p0],[4.9,lt(-.22,z)]]), g:.15, n:"down"}; if(ta<5.4) return {p:lt(cs.lid,z), g:.25, n:"down"}; return {p:KF(ta,[[5.4,lt(PI/2,z)],[5.6,caseW(cs,-b/2+.03,h+.012,z)]]), g:.05, n:"down"}; }
-    const hold=caseW(cs,-.02,h+.012,-.09), disp=[wx(.40),Y+.075,zC+zr*.31], sp0=caseW(cs,-b/2+.012,h+.014,0), sp1=caseW(cs,-b/2-.014,h-.008,0), ce=caseW(cs,0,.065,s*(a/2+.012));
-    if(ta<6.8){ if(s<0) return {p:KF(ta,[[5.6,caseW(cs,-b/2+.03,h+.012,-.1)],[5.8,hold]]), g:.05, n:"down"};
-      return {p:KF(ta,[[5.6,caseW(cs,-b/2+.03,h+.012,.1)],[6.0,disp,.04],[6.5,sp0,.05],[6.65,sp1],[6.8,sp0]]), g:ta>5.9&&ta<6.5?.75:.2, n:"down"}; }
-    if(ta<7.3) return {p:KF(ta,[[6.8,s<0?hold:sp0],[7.2,ce,.03]]), g:.3, n:"in"};
+    if(ta<5.9){ const z=s*.1, p0=caseW(cs,0,h+.014,s*(a/2-.06)); if(ta<5.2) return {p:KF(ta,[[5.12,p0],[5.2,lt(-.22,z),.03]]), g:.15, n:"down"}; if(ta<5.7) return {p:lt(cs.lid,z), g:.25, n:"down"}; return {p:KF(ta,[[5.7,lt(PI/2,z)],[5.9,caseW(cs,-b/2+.03,h+.012,z)]]), g:.05, n:"down"}; }
+    const hold=caseW(cs,.0,h+.012,.1), disp=[wx(.41),Y+.075,MP.dispZ(sd)], sp0=caseW(cs,-b/2+.012,h+.014,0), sp1=caseW(cs,-b/2-.014,h-.008,0), ce=caseW(cs,0,.065,s*(a/2+.012));
+    if(ta<6.95){ if(s>0) return {p:KF(ta,[[5.9,caseW(cs,-b/2+.03,h+.012,.1)],[6.1,hold]]), g:.05, n:"down"};                   /* R : 뚜껑 누름 · L : 봉함스티커 */
+      return {p:KF(ta,[[5.9,caseW(cs,-b/2+.03,h+.012,-.1)],[6.25,disp,.05],[6.7,sp0,.06],[6.82,sp1],[6.95,sp0]]), g:ta>6.2&&ta<6.7?.75:.2, n:"down"}; }
+    if(ta<7.3) return {p:KF(ta,[[6.95,s>0?hold:sp0],[7.25,ce,.03]]), g:.3, n:"in"};
     if(ta<8.3) return {p:ce, g:.5, n:"in"};
     return {p:KF(ta,[[8.3,ce],[8.5,RE(s)]]), g:.15, n:"in"}; };
-  const hR=hand(1), hL=hand(-1);
-  const rt=KF(ta,[[-3.5,[.60,-9.98,.6]],[-2.95,[.72,-9.95,1.45]],[-2.3,[.72,-9.95,1.45]],[-1.55,[MP.uW,zC,0]],[7.3,[MP.uW,zC,0]],[8.1,[.60,-9.98,.6]],[8.5,[.60,-9.98,.6]]]);
-  const stkPt=ta>=6.0&&ta<6.5?hR.p:null;
-  return {cs,row, pose:{x:wx(rt[0]),z:rt[1],yaw:sd>0?-PI/2-rt[2]:PI/2+rt[2],L:hL.p,R:hR.p,gL:hL.g,gR:hR.g,nL:hL.n,nR:hR.n}, stkPt};
+  const hR=hand(1), hL=hand(-1), zN=MP.zB+.24, zS2=MP.zSt+.34;
+  const rt=KF(ta,[[-3.5,[.60,zN,.6]],[-2.95,[.72,zS2,1.45]],[-2.3,[.72,zS2,1.45]],[-1.55,[MP.uW,zK+.03,0]],[-.7,[MP.uW,zK+.03,0]],[-.25,[MP.uW,zC-.2,0]],[.35,[MP.uW,zC-.2,0]],[.8,[MP.uW,zK+.05,0]],[2.55,[MP.uW,zK+.05,0]],[2.95,[MP.uW,zC-.2,0]],[3.35,[MP.uW,zC-.2,0]],[3.8,[MP.uW,zK+.05,0]],[7.3,[MP.uW,zK+.05,0]],[8.1,[.60,zN,.6]],[8.5,[.60,zN,.6]]]);
+  return {cs,row, pose:{x:wx(rt[0]),z:rt[1],yaw:sd>0?-PI/2-rt[2]:PI/2+rt[2],L:hL.p,R:hR.p,gL:hL.g,gR:hR.g,nL:hL.n,nR:hR.n}};
 }
 /* 카톤 b 의 위치 : 벨트(base) · 손 안 · 케이스 안 · 숨김 */
 function manualCarton(b,base){
-  const k=Math.floor(b/4), i=b-4*k, m=Math.floor(k/2), col=k-2*m, ta=MP.t-(MP.t0+6*m), g=col*3, q=ta-g; if(q<0) return base; if(ta>=5.5) return "hide";
-  const sc=packSceneC(m,ta), c=q<1.0?(col?sc.row.B:sc.row.A):(col?sc.row.pB:sc.row.pA); if(!c) return base;
-  const pitch=.094-.004*ez3(q/.15), sd=mod(m,2)?-1:1; return [c[0],c[1],c[2]+(i-1.5)*pitch,sd*Math.PI/2*ez3((q-.15)/.5)];   /* 옮기면서 90° 세움 */
+  const k=Math.floor(b/4), i=b-4*k, m=Math.floor(k/2), col=k-2*m, ta=MP.t-(MP.t0+6*m), g=col*3, q=ta-g; if(q<0) return base; if(ta>=5.62) return "hide";
+  const sc=packSceneC(m,ta), c=q<1.5?(col?sc.row.B:sc.row.A):(col?sc.row.pB:sc.row.pA); if(!c) return base;
+  const pitch=.094-.004*ez3(q/.15), sd=mod(m,2)?-1:1; return [c[0],c[1],c[2]+(i-1.5)*pitch,sd*Math.PI/2*ez3((q-.15)/.3)];   /* 들어 올리면서 90° 세움 */
 }
 function packSceneC(m,ta){ const key=m+"|"+ta, C=MP.pc||(MP.pc={}); if(C.key===key) return C.v; C.key=key; C.v=packScene(mod(m,2)?-1:1,ta); return C.v; }
 /* ── 작업자 3 : 대박스 한 개 주기 (c = 0 ~ 24 초, n = 박스 번호) ── */
 function slotOf(i){ const X=CVX, q=mod(i,3), L=Math.floor(mod(i,24)/3), r=[1,0,2][q], x=X+MP.pal[0], pz=MP.pal[1], z=pz+[.3,0,-.3][r];      /* 한 단 3개 : 가운데 → 남 → 북 */
   return {p:[x,.15+L*MP.box.y,z], st:r<2?[x,pz+(r?.66:.74),Math.PI]:[x,pz-.74,0], wp:r<2?[X+1.05,pz+.78]:[X+1.02,-15.0]}; }
 const boxSlot=j=>[CVX+MP.xBx+(j%2?.0715:-.0715), MP.zBx+(j<2?-.19:.19)];                                          /* 2열 × 2줄 : 북쪽 줄(먼 쪽 → 가까운 쪽) → 남쪽 줄 */
-function pickTrack(j,q){ const X=CVX, Yt=PKZ.y-.1, d=MP.box, b=boxSlot(j); return KF(q,[[.15,[X,PKZ.y-.094,MP.zE]],[.95,[b[0],Yt+d.y+.05,b[1]],.06],[1.35,[b[0],Yt+.006,b[1]]]]); }
+function pickTrack(j,q){ const X=CVX, Yt=PKZ.y-.1, d=MP.box, b=boxSlot(j); return KF(q,[[.15,[X,PKZ.y-.094,MP.zE]],[.95,[b[0],Yt+d.y+.06,b[1]],.06],[1.2,[b[0],Yt+d.y-.03,b[1]]],[1.42,[b[0],Yt+d.y-.03,b[1]]],[1.7,[b[0],Yt+.006,b[1]]]]); }
 function boxScene(c,n){
   const X=CVX, Y=PKZ.y, Yt=Y-.1, d=MP.box, zBx=MP.zBx, xw=X+.69, PI=Math.PI, top=Yt+d.y, fl=d.x/2, XB=X+MP.xBx, TP=[XB,Yt,zBx], R0=[xw,zBx], SG=[X+.75,-15.03], sl=slotOf(n), OPEN=MP.open;
   /* 걷기 구간 시간 */
@@ -121,7 +125,7 @@ function boxScene(c,n){
   const v=Math.max(1.1,(d1+d1b+d2+d3)/4.4), t0=17.1, twp=t0+d1/v, ta=twp+d1b/v, tb=ta+.9+d2/v, tc=tb+.8+d3/v;
   /* 몸 (x · z · 방향) */
   const rk=[[0,[R0[0],R0[1],-PI/2]]], addR=(t,x,z,yw)=>{ const p=rk[rk.length-1][1]; rk.push([t,[x,z,yw==null?p[2]:p[2]+Math.atan2(Math.sin(yw-p[2]),Math.cos(yw-p[2]))]]); };
-  MP.pk.forEach((c0,j)=>{ const zs=boxSlot(j)[1]; addR(c0-.45,xw,MP.zE-.1); addR(c0+.2,xw,MP.zE-.1); addR(c0+.95,xw,zs); addR(c0+1.6,xw,zs); });
+  MP.pk.forEach((c0,j)=>{ const zs=boxSlot(j)[1]; addR(c0-.45,xw,MP.zE-.1); addR(c0+.2,xw,MP.zE-.1); addR(c0+.95,xw,zs); addR(c0+1.9,xw,zs); });
   addR(12.3,R0[0],R0[1]); addR(14.7,R0[0],R0[1]-.14); addR(15.6,R0[0],R0[1]+.14); addR(16.2,R0[0],R0[1]); addR(t0,R0[0],R0[1]); addR(twp,sl.wp[0],sl.wp[1],Math.atan2(sl.wp[0]-R0[0],sl.wp[1]-R0[1])); addR(ta,sl.st[0],sl.st[1],sl.st[2]); addR(ta+.9,sl.st[0],sl.st[1]);
   { let tt=ta+.9, pq=[sl.st[0],sl.st[1]]; for(const q of back){ tt+=Math.hypot(q[0]-pq[0],q[1]-pq[1])/v; addR(tt,q[0],q[1],Math.atan2(SG[0]-q[0],SG[1]-q[1])); pq=q; } }
   addR(tb,SG[0],SG[1],PI); addR(tb+.8,SG[0],SG[1]); addR(tc,R0[0],R0[1],-PI/2); addR(24,R0[0],R0[1]);
@@ -137,16 +141,17 @@ function boxScene(c,n){
   /* 손 (L = 박스 로컬 +z 끝 = 남쪽 · R = 북쪽) */
   const bw=(o,x,y,z)=>{ const cs=Math.cos(o.yaw), sn=Math.sin(o.yaw); return [o.p[0]+x*cs+z*sn,o.p[1]+y,o.p[2]-x*sn+z*cs]; }, GR=[X+.40,Yt+.07,zBx-.3], HY=.075;
   const hand=s=>{ /* s : +1 L(남) · −1 R(북) */
-    for(let j=0;j<4;j++){ const q=c-MP.pk[j]; if(q>=-.4&&q<1.6){ if(q<.15) return {p:[X,Y-.094+.07,MP.zE+s*.2-s*.008*ez3(q/.15)],g:.2+.3*ez3(q/.15),n:"in"};
-        const cp=pickTrack(j,q); if(q<1.35) return {p:[cp[0],cp[1]+.07,cp[2]+s*.192],g:.5,n:"in"}; const b=boxSlot(j); return {p:[b[0],Yt+.08+.14*ez3((q-1.35)/.25),b[1]+s*.2],g:.15,n:"in"}; } }
-    if(c>=12.1&&c<13.1){ const be=c<12.45?OPEN:b1, tip=[XB+.02,top+fl*Math.sin(be)+.016,zBx+s*(d.z/2-fl*Math.cos(be))]; return {p:tip,g:.1,n:be>1.6?"in":"down"}; }                    /* 끝 날개(먼저) : L = 남 · R = 북 */
-    if(c>=13.1&&c<13.9){ const sx=s>0?1:-1, be=c<13.2?OPEN:b2, k=.7, tip=[XB+sx*(d.x/2-k*fl*Math.cos(be)),top+k*fl*Math.sin(be)+.016,zBx+s*.12]; return {p:tip,g:.1,n:be>1.6?[-sx,0,0]:"down"}; }   /* 옆 날개 : L = 가까운(동) · R = 먼(서) */
+    for(let j=0;j<4;j++){ const q=c-MP.pk[j]; if(q>=-.4&&q<1.95){ if(q<.15) return {p:[X,Y-.094+.07,MP.zE+s*.2-s*.008*ez3(q/.15)],g:.2+.3*ez3(q/.15),n:"in"};
+        const cp=pickTrack(j,q), tp=[cp[0],cp[1]+MP.h+.012,cp[2]+s*.1]; if(q<1.2) return {p:[cp[0],cp[1]+.0825,cp[2]+s*.192],g:.5,n:"in"};
+        if(q<1.42) return {p:KF(q,[[1.2,[cp[0],cp[1]+.0825,cp[2]+s*.192]],[1.3,[cp[0],cp[1]+.19,cp[2]+s*.2]],[1.42,tp]]),g:.1,n:"down"}; if(q<1.7) return {p:tp,g:.05,n:"down"}; return {p:[tp[0],tp[1]+.12*ez3((q-1.7)/.25),tp[2]],g:.15,n:"down"}; } }
+    if(c>=12.1&&c<13.1){ const be=c<12.45?OPEN:b1, tip=[XB+.02,top+fl*Math.sin(be)+.016,zBx+s*(d.z/2-fl*Math.cos(be))]; return {p:tip,g:.1,n:be>2.6?[0,0,-s]:be>1.2?"in":"down"}; }                    /* 끝 날개(먼저) : L = 남 · R = 북 */
+    if(c>=13.1&&c<13.9){ const sx=s>0?1:-1, be=c<13.2?OPEN:b2, k=.7, tip=[XB+sx*(d.x/2-k*fl*Math.cos(be)),top+k*fl*Math.sin(be)+.016,zBx+s*.12]; return {p:tip,g:.1,n:be>1.2?[-sx,0,0]:"down"}; }   /* 옆 날개 : L = 가까운(동) · R = 먼(서) */
     const seam=[XB+(s>0?.06:-.03),top+.018,zBx+s*.12];
     if(c>=13.9&&c<16.1){ if(s>0) return {p:KF(c,[[13.9,seam],[14.9,seam],[15.15,[XB+.11,top+.018,zBx+.22]]]),g:.05,n:"down"};
       return {p:KF(c,[[13.9,seam],[14.35,GR,.05],[14.75,[XB,top-.03,zBx-d.z/2-.03],.08],[14.9,[XB,top+.035,zBx-d.z/2+.01]],[15.6,[XB,top+.035,zBx+d.z/2-.01]],[15.75,[XB,top-.03,zBx+d.z/2+.03]],[16.1,GR,.08]]),g:c>14.3&&c<16.05?.8:.2,n:"down"}; }
-    if(c>=16.1&&c<ta+.55&&bxA){ const e=bw(bxA,0,HY,s*(d.z/2+.012)); return {p:c<16.6?KF(c,[[16.1,s>0?[XB+.11,top+.018,zBx+.22]:GR],[16.55,e,.04]]):e,g:.5,n:"in"}; }
-    if(c>=ta+.55&&c<ta+.8) return {p:mixA(bw(slotP,0,HY,s*(d.z/2+.012)),bw(slotP,0,HY+.12,s*(d.z/2+.06)),ez3((c-ta-.55)/.25)),g:.15,n:"in"};
-    if(c>=tb-.05&&c<tc+.6){ const e=bw(bxB,0,HY,s*(d.z/2+.012)); return {p:e,g:c<tb+.3?.2:.5,n:"in"}; }
+    if(c>=16.1&&c<ta+.55&&bxA){ const e=bw(bxA,0,HY,s*(d.z/2+.018)); return {p:c<16.6?KF(c,[[16.1,s>0?[XB+.11,top+.018,zBx+.22]:GR],[16.55,e,.04]]):e,g:.5,n:"in"}; }
+    if(c>=ta+.55&&c<ta+.8) return {p:mixA(bw(slotP,0,HY,s*(d.z/2+.018)),bw(slotP,0,HY+.12,s*(d.z/2+.06)),ez3((c-ta-.55)/.25)),g:.15,n:"in"};
+    if(c>=tb-.05&&c<tc+.6){ const e=bw(bxB,0,HY,s*(d.z/2+.018)); return {p:e,g:c<tb+.3?.2:.5,n:"in"}; }
     if(c>=tc+.6&&c<tc+.8) return {p:bw(bxB,0,HY+.14*ez3((c-tc-.6)/.2),s*(d.z/2+.05)),g:.15,n:"in"};
     return {p:null}; };
   const hL=hand(1), hR=hand(-1);
@@ -175,12 +180,12 @@ function stepManual(){
   for(let m=mTop;m>mTop-14&&ci<MP.cases.length;m--){ const ta=t-Tm(m), sd=mod(m,2)?-1:1, yaw=sd>0?PI:0, n=Math.floor(m/4), j=m-4*n; let o=null;
     if(ta<8.3){ const sc=packScene(sd,ta); if(sc.cs.vis) o=sc.cs; }
     else { const tb=ta-8.3, z=MP.zB-MP.vB*tb, pk=pkT(m);
-      if(z>MP.zK) o={p:[X,Y,z],yaw,stk:1,lab:z<-10.5};
+      if(z>MP.zK) o={p:[X,Y,z],yaw,stk:1,lab:z<-11.4};
       else { const tt=tb-(MP.zB-MP.zK)/MP.vB;
         if(tt<.6){ const e=ez3(tt/.6); o={p:[X,Y-.094*e,MP.zK+(MP.zG0-MP.zK)*e],yaw,stk:1,lab:1}; }
         else if(t<pk+.15){ let q=0, tp=-1e9; for(let k=1;k<=4;k++){ const pp=pkT(m-k)+.15; if(pp>t) q++; else if(pp>tp) tp=pp; }
           o={p:[X,Y-.094,Math.max(MP.zG0-MP.vG*(tt-.6),MP.zE+MP.sp*q,MP.zE+MP.sp*(q+1)-MP.vG*(t-tp))],yaw,stk:1,lab:1}; }
-        else { const q=t-pk, cB=t-Bn(n); if(cB<13.9&&n===n3) o={p:q<1.35?pickTrack(j,q):[boxSlot(j)[0],Yt+.006,boxSlot(j)[1]],yaw,stk:1,lab:1}; } } }
+        else { const q=t-pk, cB=t-Bn(n); if(cB<13.9&&n===n3) o={p:q<1.7?pickTrack(j,q):[boxSlot(j)[0],Yt+.006,boxSlot(j)[1]],yaw,stk:1,lab:1}; } } }
     if(o) MP.cases[ci++].set(o); }
   for(;ci<MP.cases.length;ci++) MP.cases[ci].G.visible=false;
 }

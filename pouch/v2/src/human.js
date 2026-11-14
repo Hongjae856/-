@@ -6,7 +6,7 @@
 const HU={ hip:.93, hw:.09, uL:.44, lL:.44, ank:.07, sp:.46, sw:.19, uA:.30, fA:.33, reach:.565 };
 const _hv=()=>new T3.Vector3();
 /* 복장 색 (현장 복장 확인 후 조정) · 원단 결 · 얼굴(눈 · 눈썹) · 마스크 주름 무늬 */
-const HUC={ gown:0x9cc3e6, hood:0xf4f5f3, glove:0x6fa9d6, shoe:0xf1f2f2, sole:0xc9ced2, skin:0xe6c3a4 };
+const HUC={ gown:0x3ea5de, cap:0x93d2ee, hood:0xf4f5f3, glove:0xf3f5f6, shoe:0xf1f2f2, sole:0xc9ced2, skin:0xe6c3a4 };
 let HUT=null;
 function humanTex(){
   if(HUT) return HUT; HUT={};
@@ -21,6 +21,18 @@ function humanTex(){
       g.strokeStyle="#2a1c15"; g.lineWidth=2.6; g.beginPath(); g.moveTo(cx-18,cy+1); g.quadraticCurveTo(cx,cy-10.5,cx+18,cy+1); g.stroke();
       g.strokeStyle="rgba(120,80,60,.55)"; g.lineWidth=1.2; g.beginPath(); g.moveTo(cx-16,cy+3); g.quadraticCurveTo(cx,cy+9,cx+16,cy+3); g.stroke();
       g.strokeStyle="#2e221b"; g.lineWidth=6; g.lineCap="round"; g.beginPath(); g.moveTo(cx-sx*20,cy-21); g.quadraticCurveTo(cx,cy-29,cx+sx*22,cy-23); g.stroke(); } }),1,1,true);
+  HUT.faceFull=tex(cvs(256,256,(g,w,h)=>{ const sk=g.createLinearGradient(0,0,0,h); sk.addColorStop(0,"#eccdb0"); sk.addColorStop(1,"#dfb999"); g.fillStyle=sk; g.fillRect(0,0,w,h);
+    for(const sx of [-1,1]){ const cx=w/2+sx*46, cy=h*.3;
+      g.fillStyle="rgba(150,105,85,.22)"; g.beginPath(); g.ellipse(cx,cy+2,26,13,0,0,7); g.fill();
+      g.fillStyle="#f6f3ee"; g.beginPath(); g.ellipse(cx,cy,17,7,sx*-.05,0,7); g.fill();
+      g.fillStyle="#2b1d14"; g.beginPath(); g.arc(cx-sx,cy,6.4,0,7); g.fill(); g.fillStyle="#0b0806"; g.beginPath(); g.arc(cx-sx,cy,3.1,0,7); g.fill(); g.fillStyle="rgba(255,255,255,.85)"; g.beginPath(); g.arc(cx-sx+2,cy-2,1.4,0,7); g.fill();
+      g.strokeStyle="#2a1c15"; g.lineWidth=2.4; g.beginPath(); g.moveTo(cx-18,cy+1); g.quadraticCurveTo(cx,cy-10,cx+18,cy+1); g.stroke();
+      g.strokeStyle="#2e221b"; g.lineWidth=5.5; g.lineCap="round"; g.beginPath(); g.moveTo(cx-sx*20,cy-21); g.quadraticCurveTo(cx,cy-28,cx+sx*22,cy-22); g.stroke();
+      g.fillStyle="rgba(225,140,120,.16)"; g.beginPath(); g.ellipse(cx+sx*6,h*.56,24,17,0,0,7); g.fill(); }
+    g.strokeStyle="rgba(150,100,80,.5)"; g.lineWidth=2; g.beginPath(); g.moveTo(w/2-9,h*.5); g.quadraticCurveTo(w/2,h*.55,w/2+9,h*.5); g.stroke();
+    g.fillStyle="rgba(120,75,60,.35)"; for(const sx of [-1,1]){ g.beginPath(); g.ellipse(w/2+sx*6,h*.505,3.2,2,0,0,7); g.fill(); }
+    g.fillStyle="#c9837a"; g.beginPath(); g.moveTo(w/2-19,h*.68); g.quadraticCurveTo(w/2-8,h*.655,w/2,h*.67); g.quadraticCurveTo(w/2+8,h*.655,w/2+19,h*.68); g.quadraticCurveTo(w/2,h*.735,w/2-19,h*.68); g.fill();
+    g.strokeStyle="rgba(110,55,50,.75)"; g.lineWidth=1.6; g.beginPath(); g.moveTo(w/2-19,h*.68); g.quadraticCurveTo(w/2,h*.695,w/2+19,h*.68); g.stroke(); }),1,1,true);
   HUT.mask=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#f3f6f7"; g.fillRect(0,0,w,h); for(const y of [34,62,90]){ g.strokeStyle="rgba(150,165,175,.75)"; g.lineWidth=2; g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke(); g.strokeStyle="rgba(255,255,255,.9)"; g.beginPath(); g.moveTo(0,y+3); g.lineTo(w,y+3); g.stroke(); }
     g.strokeStyle="rgba(140,155,165,.8)"; g.lineWidth=3; g.strokeRect(2,2,w-4,h-4); }),1,1,true);
   HUT.net=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#000"; g.fillRect(0,0,w,h); g.strokeStyle="#f4f4f2"; g.lineWidth=3.2; for(let i=-h;i<w+h;i+=16){ g.beginPath(); g.moveTo(i,0); g.lineTo(i+h,h); g.stroke(); g.beginPath(); g.moveTo(i+h,0); g.lineTo(i,h); g.stroke(); } }),7,5,true);
@@ -31,7 +43,7 @@ function humanTex(){
 function makeHuman(S,kind){
   kind=kind||"wear"; const suit=kind==="suit", G=new T3.Group(); S.add(G); const TX2=humanTex(), V2=(a)=>a.map(p=>new T3.Vector2(p[0],p[1]));
   const gown=new T3.MeshStandardMaterial({color:suit?0xf1f3f4:HUC.gown,roughness:.93,bumpMap:TX2.weave,bumpScale:.0007}), skin=new T3.MeshStandardMaterial({color:HUC.skin,roughness:.65}), hood=new T3.MeshStandardMaterial({color:HUC.hood,roughness:.94,bumpMap:TX2.weave,bumpScale:.0005,side:T3.DoubleSide}),
-        shoe=new T3.MeshStandardMaterial({color:HUC.shoe,roughness:.6}), sole=new T3.MeshStandardMaterial({color:HUC.sole,roughness:.8}), glove=new T3.MeshStandardMaterial({color:suit?0xe9eef2:HUC.glove,roughness:.38}), elas=new T3.MeshStandardMaterial({color:0xdfe6ee,roughness:.9});
+        shoe=new T3.MeshStandardMaterial({color:HUC.shoe,roughness:.6}), sole=new T3.MeshStandardMaterial({color:HUC.sole,roughness:.8}), glove=new T3.MeshStandardMaterial({color:HUC.glove,roughness:.45}), elas=new T3.MeshStandardMaterial({color:0xdfe6ee,roughness:.9});
   const limb=(pts,mat)=>add(G,new T3.Mesh(new T3.LatheGeometry(V2(pts),20),mat));           /* 길이 1 기준 윤곽 [반지름, 0~1] */
   const ball=(r,mat)=>add(G,new T3.Mesh(new T3.SphereGeometry(r,16,12),mat));
   const H={G, t:0, lean:0, crouch:0, twist:0, ft:null, vel:[0,0], prev:null};
@@ -42,26 +54,27 @@ function makeHuman(S,kind){
     const bd=new T3.Mesh(new T3.PlaneGeometry(.062,.04),new T3.MeshBasicMaterial({map:TX2.badge})); bd.position.set(.085,.36,.1195); bd.rotation.set(-.08,.22,0); TG.add(bd);
     if(suit){ const cape=new T3.Mesh(new T3.LatheGeometry(V2([[.14,.485],[.132,.51],[.105,.54],[.08,.565],[.07,.6]]),28),hood); cape.scale.set(1.1,1,.84); add(TG,cape); }
     else { const nk=new T3.Mesh(new T3.CylinderGeometry(.05,.056,.1,16),skin); nk.position.y=.585; add(TG,nk);                                   /* 목 · 둥근 깃 · 상의 밑단(바지 위로 내려옴) */
-      const col=new T3.Mesh(new T3.TorusGeometry(.066,.011,8,24),gown); col.rotation.x=Math.PI/2; col.scale.set(1.1,.9,1); col.position.y=.548; add(TG,col);
+      const col=new T3.Mesh(new T3.CylinderGeometry(.061,.07,.045,20,1,true),gown); col.material.side=T3.DoubleSide; col.scale.set(1.05,1,.92); col.position.y=.562; add(TG,col);
       const hem=new T3.Mesh(new T3.LatheGeometry(V2([[.17,-.02],[.182,-.1],[.186,-.175],[.178,-.18],[.168,-.1]]),32),gown); hem.scale.set(1.13,1,.74); add(TG,hem);
       for(const sx of [-1,1]){ const pk=new T3.Mesh(new T3.BoxGeometry(.085,.075,.004),gown); pk.position.set(sx*.085,-.07,.127); pk.rotation.x=.06; add(TG,pk); } } }
   /* 머리 : 얼굴(눈 · 눈썹) · 후드(얼굴만 열림 · 고무줄 테) · 3단 주름 마스크 · 코 */
   const HG=new T3.Group(); G.add(HG); H.HG=HG;
   { const sk=new T3.Mesh(new T3.SphereGeometry(.094,28,20),skin); sk.scale.set(.9,1.12,1); add(HG,sk);
-    const fc=new T3.Mesh(new T3.SphereGeometry(.0952,32,16,Math.PI/2-.95,1.9,Math.PI*.27,Math.PI*.36),new T3.MeshStandardMaterial({map:TX2.face,roughness:.6})); fc.scale.set(.9,1.12,1); HG.add(fc);
+    if(suit){ const fc=new T3.Mesh(new T3.SphereGeometry(.0952,32,16,Math.PI/2-.95,1.9,Math.PI*.27,Math.PI*.36),new T3.MeshStandardMaterial({map:TX2.face,roughness:.6})); fc.scale.set(.9,1.12,1); HG.add(fc); }
+    else { const fc=new T3.Mesh(new T3.SphereGeometry(.0952,32,24,Math.PI/2-1.0,2.0,Math.PI*.3,Math.PI*.52),new T3.MeshStandardMaterial({map:TX2.faceFull,roughness:.6})); fc.scale.set(.9,1.12,1); HG.add(fc);
+      const ns=new T3.Mesh(new T3.SphereGeometry(.014,12,10),skin); ns.scale.set(.85,1.5,1.05); ns.position.set(0,-.012,.092); add(HG,ns); const jw=new T3.Mesh(new T3.SphereGeometry(.07,20,14),skin); jw.scale.set(.86,.7,.92); jw.position.set(0,-.062,.018); add(HG,jw); }
     if(suit){ const hd=new T3.Mesh(new T3.SphereGeometry(.108,36,24,Math.PI/2+.78,Math.PI*2-1.56,0,Math.PI),hood); hd.scale.set(.96,1.14,1.06); hd.position.set(0,.004,-.006); add(HG,hd);
       const br=new T3.Mesh(new T3.SphereGeometry(.108,24,10,Math.PI/2-.8,1.6,0,Math.PI*.34),hood); br.scale.set(.96,1.14,1.06); br.position.set(0,.004,-.006); add(HG,br);
       const ch=new T3.Mesh(new T3.SphereGeometry(.108,24,8,Math.PI/2-.8,1.6,Math.PI*.8,Math.PI*.2),hood); ch.scale.set(.96,1.14,1.06); ch.position.set(0,.004,-.006); add(HG,ch);
       const rim=new T3.Mesh(new T3.TorusGeometry(.079,.0055,8,36),hood); rim.scale.set(.95,1.2,1); rim.position.set(0,-.004,.07); add(HG,rim); }
-    else { /* 망 위생모 : 머리카락을 감싸는 망(뒤 · 위) + 앞 흰 천 띠 + 짧은 챙 · 귀 · 마스크 끈 */
-      const hair=new T3.Mesh(new T3.SphereGeometry(.099,24,16,0,Math.PI*2,0,Math.PI*.62),new T3.MeshStandardMaterial({color:0x1d1a18,roughness:.8})); hair.scale.set(.93,1.1,1.04); hair.position.set(0,.006,-.012); add(HG,hair);
-      const net=new T3.Mesh(new T3.SphereGeometry(.108,28,18,0,Math.PI*2,0,Math.PI*.66),new T3.MeshStandardMaterial({map:TX2.net,alphaMap:TX2.net,transparent:true,roughness:.9,side:T3.DoubleSide,alphaTest:.3})); net.scale.set(.96,1.1,1.1); net.position.set(0,.008,-.018); HG.add(net);
-      const band=new T3.Mesh(new T3.SphereGeometry(.1095,32,10,Math.PI/2-1.25,2.5,Math.PI*.17,Math.PI*.19),hood); band.scale.set(.95,1.1,1.05); band.position.set(0,.008,-.008); add(HG,band);
-      const bb=new T3.Mesh(new T3.SphereGeometry(.1085,32,6,0,Math.PI*2,Math.PI*.6,Math.PI*.07),hood); bb.scale.set(.96,1.1,1.1); bb.position.set(0,.008,-.018); add(HG,bb);
-      const brim=new T3.Mesh(new T3.CylinderGeometry(.072,.072,.005,24,1,false,-Math.PI/2+.3,Math.PI-.6),hood); brim.scale.set(1,1,.5); brim.position.set(0,.07,.074); brim.rotation.x=.12; add(HG,brim);
-      for(const s2 of [-1,1]){ const ear=new T3.Mesh(new T3.SphereGeometry(.02,12,10),skin); ear.scale.set(.45,1.15,.8); ear.position.set(s2*.086,-.002,-.004); add(HG,ear); } }
-    const mk=new T3.Mesh(new T3.SphereGeometry(.0975,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.06); mk.position.set(0,-.002,.001); add(HG,mk);
-    for(const s of [-1,1]){ const lp=new T3.Mesh(new T3.CylinderGeometry(.0015,.0015,.06,6),elas); lp.position.set(s*.074,-.03,.05); lp.rotation.set(.9,0,s*.25); HG.add(lp); } }
+    else { /* 부풀린 위생모(부직포 · 연하늘) : 이마 위 ~ 뒤통수 아래까지 머리 전체를 감싸고 가장자리에 고무줄 · 귀는 일부 보임 (사용자 제공 사진 11/14) */
+      const capM=new T3.MeshStandardMaterial({color:HUC.cap,roughness:.95,bumpMap:TX2.weave,bumpScale:.0012,side:T3.DoubleSide}), CG=new T3.Group(); CG.position.set(0,.03,-.018); CG.rotation.x=-.42; HG.add(CG);
+      const c1=new T3.Mesh(new T3.SphereGeometry(.117,32,20,0,Math.PI*2,0,Math.PI*.7),capM); c1.scale.set(.98,.98,1.13); add(CG,c1);
+      const c2=new T3.Mesh(new T3.SphereGeometry(.075,20,14),capM); c2.scale.set(1.25,.8,1.1); c2.position.set(0,.045,-.05); add(CG,c2);
+      const rim=new T3.Mesh(new T3.TorusGeometry(.0945,.006,8,36),capM); rim.rotation.x=Math.PI/2; rim.scale.set(.98,1.13,1); rim.position.y=-.0688; add(CG,rim);
+      for(const s2 of [-1,1]){ const ear=new T3.Mesh(new T3.SphereGeometry(.02,12,10),skin); ear.scale.set(.45,1.15,.8); ear.position.set(s2*.085,-.012,-.002); add(HG,ear); } }
+    if(suit){ const mk=new T3.Mesh(new T3.SphereGeometry(.0975,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.06); mk.position.set(0,-.002,.001); add(HG,mk);
+    for(const s of [-1,1]){ const lp=new T3.Mesh(new T3.CylinderGeometry(.0015,.0015,.06,6),elas); lp.position.set(s*.074,-.03,.05); lp.rotation.set(.9,0,s*.25); HG.add(lp); } } }
   /* 팔 · 손(손가락 4 + 엄지, 마디별 굽힘) · 다리 · 작업화 */
   H.arm={}; H.leg={};
   for(const k of ["L","R"]){
@@ -106,7 +119,7 @@ function poseHuman(H,p){
     const pel=root.clone().addScaledVector(f,-.11*Math.sin(ln)-.05*c).setY(y0+HU.hip-c-.015*ln), sp=_hv().copy(up).multiplyScalar(Math.cos(ln)).addScaledVector(ft,Math.sin(ln));
     const cs=pel.clone().addScaledVector(sp,HU.sp); return {pel,sp,ft,lt,sL:cs.clone().addScaledVector(lt,HU.sw),sR:cs.clone().addScaledVector(lt,-HU.sw)}; };
   for(let i=0;i<22;i++){ const F=frame(lean,cr,tw); let need=0, low=false;
-    for(const k of ["L","R"]) if(T[k]){ const s=k==="L"?F.sL:F.sR, d=s.distanceTo(T[k])-HU.reach; if(d>need) need=d; if(T[k].y<y0+.7) low=true; }
+    for(const k of ["L","R"]) if(T[k]){ const s=k==="L"?F.sL:F.sR, d=s.distanceTo(T[k])-HU.reach; if(d>need) need=d; if(T[k].y<y0+.9) low=true; }
     if(need<=.002) break; if(lean<(low?1.15:1.05)) lean+=Math.min(.08,need*1.2+.008); else if(low&&cr<.45) cr+=Math.min(.05,need*.8+.006); else break; if(low&&cr<.45) cr+=Math.min(.04,need*.5+.004); }
   if(p.lean!=null) lean=p.lean; if(p.crouch!=null) cr=p.crouch;
   const k=Math.min(1,dt*11); H.lean+=(lean-H.lean)*k; H.crouch+=(cr-H.crouch)*k; H.twist+=(tw-H.twist)*k;
@@ -124,12 +137,13 @@ function poseHuman(H,p){
   { const X=F.lt.clone().addScaledVector(F.sp,-F.lt.dot(F.sp)).normalize(), Z=X.clone().cross(F.sp); basisSet(H.TG,pel,X,F.sp,Z); }
   H.pel.position.copy(pel).y-=.03; H.pel.rotation.y=yaw;
   /* 머리 */
-  { const nk=pel.clone().addScaledVector(F.sp,.575), hc=nk.clone().addScaledVector(F.sp.clone().multiplyScalar(.55).addScaledVector(up,.45).normalize(),.105);
-    let ly=yaw+H.twist, lp=-.12-H.lean*.35;
+  { const nk=pel.clone().addScaledVector(F.sp,.575), hc0=nk.clone().addScaledVector(F.sp.clone().multiplyScalar(.55).addScaledVector(up,.45).normalize(),.105);
+    let ly=yaw+H.twist, lp=-.1-H.lean*.3;
     const tgt=p.look?_hv().fromArray(p.look):(T.L||T.R?_hv().copy(T.L||T.R).add(T.R||T.L).multiplyScalar(.5):null);
-    if(tgt){ const d=tgt.sub(hc); let a=Math.atan2(d.x,d.z)-(yaw+H.twist); a=Math.atan2(Math.sin(a),Math.cos(a)); ly=yaw+H.twist+Math.max(-1.1,Math.min(1.1,a)); lp=Math.max(-1.0,Math.min(.45,Math.atan2(d.y,Math.hypot(d.x,d.z)))); }
+    if(tgt){ const d=tgt.sub(hc0); let a=Math.atan2(d.x,d.z)-(yaw+H.twist); a=Math.atan2(Math.sin(a),Math.cos(a)); ly=yaw+H.twist+Math.max(-.85,Math.min(.85,a)); lp=Math.max(-.62,Math.min(.3,Math.atan2(d.y,Math.hypot(d.x,d.z))*.8)); }
     if(H.ly==null){ H.ly=ly; H.lp=lp; } let dq=ly-H.ly; dq=Math.atan2(Math.sin(dq),Math.cos(dq)); const kh=Math.min(1,dt*8); H.ly+=dq*kh; H.lp+=(lp-H.lp)*kh;
-    const Z=_hv().set(Math.sin(H.ly)*Math.cos(H.lp),Math.sin(H.lp),Math.cos(H.ly)*Math.cos(H.lp)), X=_hv().copy(up).cross(Z).normalize(), Yv=Z.clone().cross(X); basisSet(H.HG,hc,X,Yv,Z); }
+    const fh=_hv().set(Math.sin(H.ly),0,Math.cos(H.ly)), nd=F.sp.clone().multiplyScalar(.55).addScaledVector(up,.45).addScaledVector(fh,-H.lp*.45).normalize(), hc=nk.clone().addScaledVector(nd,.105), hp=H.lp*.8;
+    const Z=_hv().set(Math.sin(H.ly)*Math.cos(hp),Math.sin(hp),Math.cos(H.ly)*Math.cos(hp)), X=_hv().copy(up).cross(Z).normalize(), Yv=Z.clone().cross(X); basisSet(H.HG,hc,X,Yv,Z); }
   /* 팔 · 손 */
   H.hand={};
   for(const kk of ["L","R"]){ const A=H.arm[kk], s=kk==="L"?1:-1, sh=kk==="L"?F.sL:F.sR;
