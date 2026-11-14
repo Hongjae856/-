@@ -38,7 +38,7 @@ function makeHuman(S){
   { const m=new T3.Mesh(new T3.LatheGeometry(V2([[0,-.12],[.12,-.115],[.165,-.06],[.172,.02],[.162,.1],[.152,.17],[.158,.25],[.172,.33],[.182,.4],[.176,.455],[.15,.5],[.1,.535],[.06,.55],[0,.552]]),32),gown); m.scale.set(1.13,1,.68); add(TG,m);
     const zf=new T3.Mesh(new T3.BoxGeometry(.026,.36,.006),gown); zf.position.set(0,.3,.113); zf.rotation.x=-.07; add(TG,zf);
     const bd=new T3.Mesh(new T3.PlaneGeometry(.062,.04),new T3.MeshBasicMaterial({map:TX2.badge})); bd.position.set(.085,.36,.1195); bd.rotation.set(-.08,.22,0); TG.add(bd);
-    const cape=new T3.Mesh(new T3.LatheGeometry(V2([[.118,.505],[.108,.53],[.085,.56],[.068,.59],[.062,.63]]),28),hood); cape.scale.set(1.08,1,.84); add(TG,cape); }
+    const cape=new T3.Mesh(new T3.LatheGeometry(V2([[.14,.485],[.132,.51],[.105,.54],[.08,.565],[.07,.6]]),28),hood); cape.scale.set(1.1,1,.84); add(TG,cape); }
   /* 머리 : 얼굴(눈 · 눈썹) · 후드(얼굴만 열림 · 고무줄 테) · 3단 주름 마스크 · 코 */
   const HG=new T3.Group(); G.add(HG); H.HG=HG;
   { const sk=new T3.Mesh(new T3.SphereGeometry(.094,28,20),skin); sk.scale.set(.9,1.12,1); add(HG,sk);
@@ -52,7 +52,7 @@ function makeHuman(S){
   /* 팔 · 손(손가락 4 + 엄지, 마디별 굽힘) · 다리 · 작업화 */
   H.arm={}; H.leg={};
   for(const k of ["L","R"]){
-    const A={up:limb([[0,0],[.055,0],[.057,.25],[.052,.7],[.045,1],[0,1]],gown), lo:limb([[0,0],[.045,0],[.049,.25],[.045,.6],[.04,.9],[.043,.95],[.04,1],[0,1]],gown), sh:ball(.072,gown), el:ball(.053,gown), HG:new T3.Group()}; G.add(A.HG);
+    const A={up:limb([[0,0],[.055,0],[.057,.25],[.052,.7],[.045,1],[0,1]],gown), lo:limb([[0,0],[.045,0],[.049,.25],[.045,.6],[.04,.9],[.043,.95],[.04,1],[0,1]],gown), sh:ball(.064,gown), el:ball(.053,gown), HG:new T3.Group()}; G.add(A.HG);
     { const sx=k==="R"?1:-1, hg=A.HG; A.sx=sx; A.fing=[];
       const pm=new T3.Mesh(new T3.SphereGeometry(1,16,12),glove); pm.scale.set(.043,.05,.017); pm.position.set(0,-.012,-.015); add(hg,pm);
       const cf=new T3.Mesh(new T3.CylinderGeometry(.035,.042,.075,14),glove); cf.position.set(0,-.088,-.012); add(hg,cf);
@@ -111,7 +111,7 @@ function poseHuman(H,p){
   { const X=F.lt.clone().addScaledVector(F.sp,-F.lt.dot(F.sp)).normalize(), Z=X.clone().cross(F.sp); basisSet(H.TG,pel,X,F.sp,Z); }
   H.pel.position.copy(pel).y-=.03; H.pel.rotation.y=yaw;
   /* 머리 */
-  { const nk=pel.clone().addScaledVector(F.sp,.6), hc=nk.clone().addScaledVector(F.sp.clone().multiplyScalar(.55).addScaledVector(up,.45).normalize(),.12);
+  { const nk=pel.clone().addScaledVector(F.sp,.575), hc=nk.clone().addScaledVector(F.sp.clone().multiplyScalar(.55).addScaledVector(up,.45).normalize(),.105);
     let ly=yaw+H.twist, lp=-.12-H.lean*.35;
     const tgt=p.look?_hv().fromArray(p.look):(T.L||T.R?_hv().copy(T.L||T.R).add(T.R||T.L).multiplyScalar(.5):null);
     if(tgt){ const d=tgt.sub(hc); let a=Math.atan2(d.x,d.z)-(yaw+H.twist); a=Math.atan2(Math.sin(a),Math.cos(a)); ly=yaw+H.twist+Math.max(-1.1,Math.min(1.1,a)); lp=Math.max(-1.0,Math.min(.45,Math.atan2(d.y,Math.hypot(d.x,d.z)))); }
