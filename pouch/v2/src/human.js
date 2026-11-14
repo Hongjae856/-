@@ -70,7 +70,6 @@ function makeHuman(S,kind){
     else { /* 부풀린 위생모(부직포 · 연하늘) : 이마 위 ~ 뒤통수 아래까지 머리 전체를 감싸고 가장자리에 고무줄 · 귀는 일부 보임 (사용자 제공 사진 11/14) */
       const capM=new T3.MeshStandardMaterial({color:HUC.cap,roughness:.95,bumpMap:TX2.weave,bumpScale:.0012,side:T3.DoubleSide}), CG=new T3.Group(); CG.position.set(0,.03,-.018); CG.rotation.x=-.42; HG.add(CG);
       const c1=new T3.Mesh(new T3.SphereGeometry(.117,32,20,0,Math.PI*2,0,Math.PI*.7),capM); c1.scale.set(.98,.98,1.13); add(CG,c1);
-      const c2=new T3.Mesh(new T3.SphereGeometry(.075,20,14),capM); c2.scale.set(1.25,.8,1.1); c2.position.set(0,.045,-.05); add(CG,c2);
       const rim=new T3.Mesh(new T3.TorusGeometry(.0945,.006,8,36),capM); rim.rotation.x=Math.PI/2; rim.scale.set(.98,1.13,1); rim.position.y=-.0688; add(CG,rim);
       for(const s2 of [-1,1]){ const ear=new T3.Mesh(new T3.SphereGeometry(.02,12,10),skin); ear.scale.set(.45,1.15,.8); ear.position.set(s2*.085,-.012,-.002); add(HG,ear); } }
     if(suit){ const mk=new T3.Mesh(new T3.SphereGeometry(.0975,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.06); mk.position.set(0,-.002,.001); add(HG,mk);
