@@ -88,7 +88,7 @@ function stepPackAnim(){
   const flap=(m,idx,mat)=>{ Mf.multiplyMatrices(Mc,mat); m.setMatrixAt(idx,Mf); };
   const loc=(x,y,z,ry,rz,ryy)=>{ PA.e.set(0,ry,0); PA.q.setFromEuler(PA.e); const A=new T3.Matrix4().compose(PA.v.set(x,y,z),PA.q,PA.one); const R=new T3.Matrix4(); if(rz) R.makeRotationZ(rz); else if(ryy) R.makeRotationY(ryy); return A.multiply(R); };
   for(let b=Math.floor(sb-8.6/P);b<=Math.floor(sb-PZ.pk0/P);b++){ const l=bl(b); if(l<PZ.pk0) continue;
-    let px,py,pz,rx=0,th=Math.PI/2, fm=-.5,fb=-.2,ft=-.6, glue=false, prt=false;
+    let px,py,pz,rx=0,rz=0,th=Math.PI/2, fm=-.5,fb=-.2,ft=-.6, glue=false, prt=false;
     if(l<PZ.pk1){ const q=(l-PZ.pk0)/(PZ.pk1-PZ.pk0), zt=zl(l); const mx=[cx,1.41,zl(PK2.lf[0]+.28-PK2.bz0+PK2.bz0)];
       const pm=[cx,1.405,-3.13];
       if(q<.3){ arm=lerp(-.25,1.05,ez(q/.3)); continue; }
@@ -99,9 +99,9 @@ function stepPackAnim(){
       fm=fb=ft=Math.PI/2; prt=true;
       if(e<L1){ const t=e/L1, u=1-t; px=u*u*cx+2*u*t*cx+t*t*X; pz=u*u*zl(PZ.cEnd)+2*u*t*(zl(PZ.cEnd)-.22)+t*t*zT; py=lerp(yC,PKZ.y,ez(t))+C.H/2; }
       else { px=X; pz=zT-(e-L1); py=PKZ.y+C.H/2; } prt=pz<-6.05;
-      const mp=manualCarton(b,[px,py,pz]); if(mp==='hide') continue; [px,py,pz]=mp; }
+      const mp=manualCarton(b,[px,py,pz]); if(mp==='hide') continue; [px,py,pz]=mp; rz=mp[3]||0; }
     Sh.set(1,0,0,0, 0,Math.sin(th),0,0, 0,Math.cos(th),1,0, 0,0,0,1);
-    PA.e.set(rx,0,0); PA.q.setFromEuler(PA.e); M4.compose(PA.v.set(px,py,pz),PA.q,PA.one); Mc.multiplyMatrices(M4,Sh);
+    PA.e.set(rx,0,rz); PA.q.setFromEuler(PA.e); M4.compose(PA.v.set(px,py,pz),PA.q,PA.one); Mc.multiplyMatrices(M4,Sh);
     PA.cb.setMatrixAt(nc,Mc);
     for(const s2 of [-1,1]){ const xe=s2*C.L/2, ry=s2<0?Math.PI:0;
       flap(PA.fT,nf,loc(xe,C.H/2,0,ry,-ft)); flap(PA.fB,nf,loc(xe,-C.H/2,0,ry,fb)); nf++;
