@@ -3,11 +3,11 @@
      옆 자재대의 접힌 대케이스를 집어 펼침(바닥 자동 맞물림) → 받침대에 놓음 → 카톤을 양손으로 4개씩 2회 담음(2열 × 4)
      → 양끝 날개 접기 → 뚜껑 턱인 닫기 → 봉함스티커 부착 → 검은 벨트에 올림(대케이스 잉크젯 인쇄) → 녹색 벨트
    작업자 3 (녹색 벨트 끝 동쪽) : 미리 성형된 대박스에 대케이스 4개를 담고 날개를 접어 수동 테이프 커터로 테이핑
-     → 파렛트 적재(한 단 2 × 2 = 4, 6단 가정) → 성형 대박스를 가져와 작업대에 놓음
-   [사용자 확인 11/14] 카톤은 세워서 담음 → 대케이스는 좁고 높음 · 대박스는 1층에 대케이스 4개를 나란히
-   [추정 · 확인 필요] 대케이스 375 × 140 × 125 · 대박스 590 × 400 × 150 · 받침대 · 자재대 · 파렛트 · 성형 박스 보관 위치 · 동작 시간 ═══ */
-const MP={ a:.375, b:.14, h:.125, zQ:-9.68, zS:-9.75, uC:.24, uW:.61, zB:-10.22, vB:.25, vG:.2, zK:-12.0, zG0:-12.42, zGE:-14.5, zE:-14.29, sp:.39,
-  box:{x:.59,y:.15,z:.40}, zBx:-14.77, xBx:.08, open:1.95, pk:[.6,3.0,5.4,10.2], pal:[1.75,-14.2], t:0, t0:0, tp:null };
+     → 파렛트 적재(한 단 3개 × 8단 가정) → 성형 대박스를 가져와 작업대에 놓음
+   [사용자 확인 11/14] 카톤은 세워서 담음 → 대케이스는 좁고 높음 · 대박스는 1층에 대케이스 4개를 2열 × 2줄 · 칸막이 없음
+   [추정 · 확인 필요] 대케이스 375 × 140 × 125 · 대박스 770 × 300 × 150 · 받침대 · 자재대 · 파렛트 · 성형 박스 보관 위치 · 동작 시간 ═══ */
+const MP={ a:.375, b:.14, h:.125, zQ:-9.68, zS:-9.75, uC:.24, uW:.61, zB:-10.22, vB:.25, vG:.2, zK:-12.0, zG0:-12.42, zGE:-14.15, zE:-13.94, sp:.39,
+  box:{x:.30,y:.15,z:.77}, zBx:-14.6, xBx:.08, open:1.95, pk:[.6,3.0,5.4,10.2], pal:[1.75,-14.2], t:0, t0:0, tp:null };
 MP.zC=MP.zQ+.141;
 const mod=(a,n)=>((a%n)+n)%n, ez3=x=>x<=0?0:x>=1?1:x*x*(3-2*x), mixA=(a,b,e)=>a.map((v,i)=>v+(b[i]-v)*e);
 /* ── 대케이스 : 턱인 뚜껑 · 양끝 날개 · 자동 바닥. 몸체는 평면 전단으로 접힌 상태(φ≈0) ↔ 펼친 상태(φ=90°) ── */
@@ -32,14 +32,14 @@ function caseW(o,x,y,z){ _ce.set(0,o.yaw,o.tilt||0); _cv.set(x,y,z).applyEuler(_
 function makeBox(S){
   const d=MP.box, t=.004, kr=MP.kraft, G=new T3.Group(); S.add(G);
   bx(G,-d.x/2,d.x/2,0,t,-d.z/2,d.z/2,kr); for(const s of [-1,1]){ bx(G,-d.x/2,d.x/2,0,d.y,s*d.z/2-t/2,s*d.z/2+t/2,kr); bx(G,s*d.x/2-t/2,s*d.x/2+t/2,0,d.y,-d.z/2,d.z/2,kr); }
-  const fl=d.z/2, fx=[], fz=[];
-  for(const s of [-1,1]){ const F=new T3.Group(); F.position.set(s*d.x/2,d.y,0); G.add(F); bx(F,s>0?-fl:0,s>0?0:fl,-t,0,-d.z/2+.004,d.z/2-.004,kr); fx.push({F,s}); }      /* 안쪽(먼저 접는) 날개 : 짧은 변 */
-  for(const s of [-1,1]){ const F=new T3.Group(); F.position.set(0,d.y+t,s*d.z/2); G.add(F); bx(F,-d.x/2,d.x/2,-t,0,s>0?-fl:0,s>0?0:fl,kr); fz.push({F,s}); }                 /* 바깥(나중) 날개 : 긴 변 → 가운데 이음선 */
-  const tp=new T3.Group(); G.add(tp); const g1=new T3.BoxGeometry(1,.0012,.05); g1.translate(.5,0,0); const top=new T3.Mesh(g1,MP.tape); top.position.set(-d.x/2,d.y+t+.001,0); tp.add(top);
-  const tabs=[]; for(const s of [-1,1]) tabs.push(bx(tp,s*d.x/2+(s>0?.0005:-.0017),s*d.x/2+(s>0?.0017:-.0005),d.y-.055,d.y+t,-.025,.025,MP.tape));
+  const fl=d.x/2, fz=[], fx=[];
+  for(const s of [-1,1]){ const F=new T3.Group(); F.position.set(0,d.y,s*d.z/2); G.add(F); bx(F,-d.x/2+.004,d.x/2-.004,-t,0,s>0?-fl:0,s>0?0:fl,kr); fz.push({F,s}); }     /* 안쪽(먼저) 날개 : 짧은 변(양 끝) */
+  for(const s of [-1,1]){ const F=new T3.Group(); F.position.set(s*d.x/2,d.y+t,0); G.add(F); bx(F,s>0?-fl:0,s>0?0:fl,-t,0,-d.z/2,d.z/2,kr); fx.push({F,s}); }                /* 바깥(나중) 날개 : 긴 변 → 길이 방향 이음선 */
+  const tp=new T3.Group(); G.add(tp); const g1=new T3.BoxGeometry(.05,.0012,1); g1.translate(0,0,.5); const top=new T3.Mesh(g1,MP.tape); top.position.set(0,d.y+t+.001,-d.z/2); tp.add(top);
+  const tabs=[]; for(const s of [-1,1]) tabs.push(bx(tp,-.025,.025,d.y-.055,d.y+t,s*d.z/2+(s>0?.0005:-.0017),s*d.z/2+(s>0?.0017:-.0005),MP.tape));
   G.visible=false;
-  return {G, set(o){ G.visible=true; G.position.fromArray(o.p); G.rotation.y=o.yaw; for(const f of fx) f.F.rotation.z=-f.s*o.b1; for(const f of fz) f.F.rotation.x=f.s*o.b2;
-    const p=o.tape||0; tp.visible=p>0; top.scale.x=Math.max(.001,Math.min(1,p)*d.x); tabs[0].visible=p>0; tabs[1].visible=p>=1; } };
+  return {G, set(o){ G.visible=true; G.position.fromArray(o.p); G.rotation.y=o.yaw; for(const f of fz) f.F.rotation.x=f.s*o.b1; for(const f of fx) f.F.rotation.z=-f.s*o.b2;
+    const p=o.tape||0; tp.visible=p>0; top.scale.z=Math.max(.001,Math.min(1,p)*d.z); tabs[0].visible=p>0; tabs[1].visible=p>=1; } };
 }
 function initManual(S){
   const X=CVX, Y=PKZ.y, Yt=Y-.1, d=MP.box;
@@ -54,14 +54,14 @@ function initManual(S){
       for(let k=0;k<8;k++) bx(S,cx-.258,cx+.258,.85+k*.007,.856+k*.007,cz-.145,cz+.145,MP.red); for(const q of [-.14,.14]) bx(S,cx+q-.12,cx+q+.12,.27,.4,cz-.15,cz+.15,MP.red); } }
   MP.ystk=.85+8*.007+.008;
   /* 파렛트 · 성형 대박스 보관 대차 · 테이프 커터 */
-  { const [px,pz]=[X+MP.pal[0],MP.pal[1]], pl=new T3.MeshStandardMaterial({color:0x2f5fae,roughness:.7}); bx(S,px-.5,px+.5,.12,.15,pz-.6,pz+.6,pl); for(const dx of [-.45,0,.45]) bx(S,px+dx-.05,px+dx+.05,0,.12,pz-.6,pz+.6,pl); for(const dz of [-.55,0,.55]) bx(S,px-.5,px+.5,.0,.02,pz+dz-.05,pz+dz+.05,pl);
-    MP.palB=new T3.InstancedMesh(new T3.BoxGeometry(d.z,d.y,d.x),MP.kraft,24); MP.palT=new T3.InstancedMesh(new T3.BoxGeometry(.05,.05,d.x+.004),MP.tape,24); for(const m of [MP.palB,MP.palT]){ m.count=0; m.castShadow=true; m.receiveShadow=true; m.frustumCulled=false; S.add(m); } }
-  { const cx=X+.75, cz=-15.5; bx(S,cx-.24,cx+.24,.16,.2,cz-.32,cz+.32,M.ss); for(const dx of [-.2,.2]) for(const dz of [-.27,.27]){ rod(S,[cx+dx,.045,cz+dz],[cx+dx,.045,cz+dz+.03],.045,M.dark,14); bx(S,cx+dx-.015,cx+dx+.015,.08,.16,cz+dz-.015,cz+dz+.015,M.ssD); }
-    rod(S,[cx-.24,.2,cz-.32],[cx-.24,.95,cz-.32],.012,M.ssMir,8); rod(S,[cx+.24,.2,cz-.32],[cx+.24,.95,cz-.32],.012,M.ssMir,8); rod(S,[cx-.24,.95,cz-.32],[cx+.24,.95,cz-.32],.012,M.ssMir,8); MP.sup=[cx,.2,cz]; }
+  { const [px,pz]=[X+MP.pal[0],MP.pal[1]], pl=new T3.MeshStandardMaterial({color:0x2f5fae,roughness:.7}); bx(S,px-.55,px+.55,.12,.15,pz-.55,pz+.55,pl); for(const dx of [-.5,0,.5]) bx(S,px+dx-.05,px+dx+.05,0,.12,pz-.55,pz+.55,pl); for(const dz of [-.5,0,.5]) bx(S,px-.55,px+.55,.0,.02,pz+dz-.05,pz+dz+.05,pl);
+    MP.palB=new T3.InstancedMesh(new T3.BoxGeometry(d.z,d.y,d.x),MP.kraft,24); MP.palT=new T3.InstancedMesh(new T3.BoxGeometry(d.z+.004,.05,.05),MP.tape,24); for(const m of [MP.palB,MP.palT]){ m.count=0; m.castShadow=true; m.receiveShadow=true; m.frustumCulled=false; S.add(m); } }
+  { const cx=X+.75, cz=-15.5; bx(S,cx-.42,cx+.42,.16,.2,cz-.18,cz+.18,M.ss); for(const dx of [-.37,.37]) for(const dz of [-.14,.14]){ rod(S,[cx+dx,.045,cz+dz],[cx+dx,.045,cz+dz+.03],.045,M.dark,14); bx(S,cx+dx-.015,cx+dx+.015,.08,.16,cz+dz-.015,cz+dz+.015,M.ssD); }
+    rod(S,[cx-.42,.2,cz-.18],[cx-.42,.95,cz-.18],.012,M.ssMir,8); rod(S,[cx+.42,.2,cz-.18],[cx+.42,.95,cz-.18],.012,M.ssMir,8); rod(S,[cx-.42,.95,cz-.18],[cx+.42,.95,cz-.18],.012,M.ssMir,8); MP.sup=[cx,.2,cz]; }
   MP.gun=new T3.Group(); S.add(MP.gun); { const g=MP.gun; bx(g,-.012,.012,.0,.1,-.015,.015,M.red); bx(g,-.03,.03,-.03,.0,-.02,.05,M.red); const r=new T3.Mesh(new T3.CylinderGeometry(.04,.04,.05,20),MP.tape); r.rotation.z=Math.PI/2; r.position.set(0,.0,.07); add(g,r); const c=new T3.Mesh(new T3.CylinderGeometry(.012,.012,.056,10),M.dark); c.rotation.z=Math.PI/2; c.position.set(0,-.035,-.025); add(g,c); }
   MP.cases=[]; for(let i=0;i<12;i++) MP.cases.push(makeCase(S));
   MP.boxes=[makeBox(S),makeBox(S)]; MP.supB=[makeBox(S),makeBox(S),makeBox(S)];
-  MP.w=[makeHuman(S),makeHuman(S),makeHuman(S)];
+  MP.w=[makeHuman(S,"wear"),makeHuman(S,"wear"),makeHuman(S,"wear")];
 }
 /* ── 작업자 1 · 2 : 한 케이스 주기 장면 (sd = +1 동쪽 · −1 서쪽, τ = 첫 카톤 묶음을 집는 순간 기준 초, −3.5 ≤ τ < 8.5) ── */
 function packScene(sd,ta){
@@ -109,23 +109,23 @@ function manualCarton(b,base){
 }
 function packSceneC(m,ta){ const key=m+"|"+ta, C=MP.pc||(MP.pc={}); if(C.key===key) return C.v; C.key=key; C.v=packScene(mod(m,2)?-1:1,ta); return C.v; }
 /* ── 작업자 3 : 대박스 한 개 주기 (c = 0 ~ 24 초, n = 박스 번호) ── */
-function slotOf(i){ const X=CVX, q=mod(i,4), L=Math.floor(mod(i,24)/4), col=q%2, r=q>>1, x=X+MP.pal[0]+(col?.205:-.205), z=MP.pal[1]+(r?-.3:.3);
-  return {p:[x,.15+L*MP.box.y,z], st:r?[x,MP.pal[1]-.82,0]:[x,MP.pal[1]+.82,Math.PI], wp:r?[X+1.02,-15.0]:[X+1.05,MP.pal[1]+.8]}; }
-const boxSlot=j=>CVX+MP.xBx+(j-1.5)*.143;
-function pickTrack(j,q){ const X=CVX, Yt=PKZ.y-.1, d=MP.box; return KF(q,[[.15,[X,PKZ.y-.094,MP.zE]],[.95,[boxSlot(j),Yt+d.y+.05,MP.zBx],.06],[1.35,[boxSlot(j),Yt+.006,MP.zBx]]]); }
+function slotOf(i){ const X=CVX, q=mod(i,3), L=Math.floor(mod(i,24)/3), r=[1,0,2][q], x=X+MP.pal[0], pz=MP.pal[1], z=pz+[.3,0,-.3][r];      /* 한 단 3개 : 가운데 → 남 → 북 */
+  return {p:[x,.15+L*MP.box.y,z], st:r<2?[x,pz+(r?.66:.74),Math.PI]:[x,pz-.74,0], wp:r<2?[X+1.05,pz+.78]:[X+1.02,-15.0]}; }
+const boxSlot=j=>[CVX+MP.xBx+(j%2?.0715:-.0715), MP.zBx+(j<2?-.19:.19)];                                          /* 2열 × 2줄 : 북쪽 줄(먼 쪽 → 가까운 쪽) → 남쪽 줄 */
+function pickTrack(j,q){ const X=CVX, Yt=PKZ.y-.1, d=MP.box, b=boxSlot(j); return KF(q,[[.15,[X,PKZ.y-.094,MP.zE]],[.95,[b[0],Yt+d.y+.05,b[1]],.06],[1.35,[b[0],Yt+.006,b[1]]]]); }
 function boxScene(c,n){
-  const X=CVX, Y=PKZ.y, Yt=Y-.1, d=MP.box, zBx=MP.zBx, xw=X+.69, PI=Math.PI, top=Yt+d.y, fl=d.z/2, XB=X+MP.xBx, TP=[XB,Yt,zBx], R0=[xw,-14.74], SG=[X+.75,-15.03], sl=slotOf(n), OPEN=MP.open;
+  const X=CVX, Y=PKZ.y, Yt=Y-.1, d=MP.box, zBx=MP.zBx, xw=X+.69, PI=Math.PI, top=Yt+d.y, fl=d.x/2, XB=X+MP.xBx, TP=[XB,Yt,zBx], R0=[xw,zBx], SG=[X+.75,-15.03], sl=slotOf(n), OPEN=MP.open;
   /* 걷기 구간 시간 */
   const d1=Math.hypot(sl.wp[0]-R0[0],sl.wp[1]-R0[1]), d1b=Math.hypot(sl.st[0]-sl.wp[0],sl.st[1]-sl.wp[1]), back=sl.st[1]>-14?[[sl.wp[0],sl.wp[1]]]:[];
   let d2=0, pv=[sl.st[0],sl.st[1]]; for(const q of back.concat([SG])){ d2+=Math.hypot(q[0]-pv[0],q[1]-pv[1]); pv=q; } const d3=Math.hypot(SG[0]-R0[0],SG[1]-R0[1]);
   const v=Math.max(1.1,(d1+d1b+d2+d3)/4.4), t0=17.1, twp=t0+d1/v, ta=twp+d1b/v, tb=ta+.9+d2/v, tc=tb+.8+d3/v;
   /* 몸 (x · z · 방향) */
   const rk=[[0,[R0[0],R0[1],-PI/2]]], addR=(t,x,z,yw)=>{ const p=rk[rk.length-1][1]; rk.push([t,[x,z,yw==null?p[2]:p[2]+Math.atan2(Math.sin(yw-p[2]),Math.cos(yw-p[2]))]]); };
-  for(const c0 of MP.pk){ addR(c0-.45,xw,-14.42); addR(c0+.2,xw,-14.42); addR(c0+.9,xw,-14.68); addR(c0+1.6,xw,-14.68); }
-  addR(12.3,R0[0],R0[1]); addR(t0,R0[0],R0[1]); addR(twp,sl.wp[0],sl.wp[1],Math.atan2(sl.wp[0]-R0[0],sl.wp[1]-R0[1])); addR(ta,sl.st[0],sl.st[1],sl.st[2]); addR(ta+.9,sl.st[0],sl.st[1]);
+  MP.pk.forEach((c0,j)=>{ const zs=boxSlot(j)[1]; addR(c0-.45,xw,MP.zE-.1); addR(c0+.2,xw,MP.zE-.1); addR(c0+.95,xw,zs); addR(c0+1.6,xw,zs); });
+  addR(12.3,R0[0],R0[1]); addR(14.7,R0[0],R0[1]-.14); addR(15.6,R0[0],R0[1]+.14); addR(16.2,R0[0],R0[1]); addR(t0,R0[0],R0[1]); addR(twp,sl.wp[0],sl.wp[1],Math.atan2(sl.wp[0]-R0[0],sl.wp[1]-R0[1])); addR(ta,sl.st[0],sl.st[1],sl.st[2]); addR(ta+.9,sl.st[0],sl.st[1]);
   { let tt=ta+.9, pq=[sl.st[0],sl.st[1]]; for(const q of back){ tt+=Math.hypot(q[0]-pq[0],q[1]-pq[1])/v; addR(tt,q[0],q[1],Math.atan2(SG[0]-q[0],SG[1]-q[1])); pq=q; } }
   addR(tb,SG[0],SG[1],PI); addR(tb+.8,SG[0],SG[1]); addR(tc,R0[0],R0[1],-PI/2); addR(24,R0[0],R0[1]);
-  const rt=KF(c,rk), fw=[Math.sin(rt[2]),Math.cos(rt[2])], carry={p:[rt[0]+fw[0]*.47,1.0,rt[1]+fw[1]*.47],yaw:rt[2]+PI/2};
+  const rt=KF(c,rk), fw=[Math.sin(rt[2]),Math.cos(rt[2])], carry={p:[rt[0]+fw[0]*.35,1.0,rt[1]+fw[1]*.35],yaw:rt[2]+PI/2};
   const blend=(A,B,e)=>({p:mixA(A.p,B.p,e),yaw:angLerp(A.yaw,B.yaw,e)});
   /* 이번 박스(n) · 다음 박스(n+1) */
   const slotP={p:sl.p,yaw:sl.st[2]+PI/2};
@@ -135,22 +135,22 @@ function boxScene(c,n){
   const bxB=c<tb+.3?supP:c<tb+.8?blend(supP,carry,ez3((c-tb-.3)/.5)):c<tc?carry:c<tc+.6?blend(carry,{p:TP,yaw:0},ez3((c-tc)/.6)):{p:TP,yaw:0};
   const b1=KF(c,[[12.45,OPEN],[13.05,0]]), b2=KF(c,[[13.2,OPEN],[13.8,0]]), tape=KF(c,[[14.9,0],[15.6,1]]);
   /* 손 (L = 박스 로컬 +z 끝 = 남쪽 · R = 북쪽) */
-  const bw=(o,x,y,z)=>{ const cs=Math.cos(o.yaw), sn=Math.sin(o.yaw); return [o.p[0]+x*cs+z*sn,o.p[1]+y,o.p[2]-x*sn+z*cs]; }, GR=[X+.42,Yt+.07,zBx+.33], HY=.075;
+  const bw=(o,x,y,z)=>{ const cs=Math.cos(o.yaw), sn=Math.sin(o.yaw); return [o.p[0]+x*cs+z*sn,o.p[1]+y,o.p[2]-x*sn+z*cs]; }, GR=[X+.40,Yt+.07,zBx-.3], HY=.075;
   const hand=s=>{ /* s : +1 L(남) · −1 R(북) */
     for(let j=0;j<4;j++){ const q=c-MP.pk[j]; if(q>=-.4&&q<1.6){ if(q<.15) return {p:[X,Y-.094+.07,MP.zE+s*.2-s*.008*ez3(q/.15)],g:.2+.3*ez3(q/.15),n:"in"};
-        const cp=pickTrack(j,q); if(q<1.35) return {p:[cp[0],cp[1]+.07,cp[2]+s*.192],g:.5,n:"in"}; return {p:[boxSlot(j),Yt+.08+.14*ez3((q-1.35)/.25),zBx+s*.2],g:.15,n:"in"}; } }
-    if(c>=12.1&&c<13.1){ const sx=s>0?1:-1, be=c<12.45?OPEN:b1, k=.62, tip=[XB+sx*(d.x/2-k*fl*Math.cos(be)),top+k*fl*Math.sin(be)+.016,zBx+s*.07]; return {p:tip,g:.1,n:be>1.6?[-sx,0,0]:"down"}; }   /* 옆 날개 : L = 가까운(동) · R = 먼(서) */
-    if(c>=13.1&&c<13.9){ const be=c<13.2?OPEN:b2, tip=[XB+.06,top+fl*Math.sin(be)+.016,zBx+s*(d.z/2-fl*Math.cos(be))]; return {p:tip,g:.1,n:be>1.6?"in":"down"}; }                        /* 끝 날개 : L = 남 · R = 북 */
-    const seam=[XB+(s>0?.14:-.04),top+.018,zBx+s*.07];
-    if(c>=13.9&&c<16.1){ if(s>0) return {p:KF(c,[[13.9,seam],[15.0,seam],[15.25,[XB+.14,top+.018,zBx+.16]]]),g:.05,n:"down"};
-      return {p:KF(c,[[13.9,seam],[14.35,GR,.05],[14.75,[XB-d.x/2-.03,top-.03,zBx],.08],[14.9,[XB-d.x/2+.01,top+.035,zBx]],[15.6,[XB+d.x/2-.01,top+.035,zBx]],[15.75,[XB+d.x/2+.03,top-.03,zBx]],[16.1,GR,.08]]),g:c>14.3&&c<16.05?.8:.2,n:"down"}; }
-    if(c>=16.1&&c<ta+.55&&bxA){ const e=bw(bxA,0,HY,s*(d.z/2+.012)); return {p:c<16.6?KF(c,[[16.1,s>0?[XB+.14,top+.018,zBx+.16]:GR],[16.55,e,.04]]):e,g:.5,n:"in"}; }
+        const cp=pickTrack(j,q); if(q<1.35) return {p:[cp[0],cp[1]+.07,cp[2]+s*.192],g:.5,n:"in"}; const b=boxSlot(j); return {p:[b[0],Yt+.08+.14*ez3((q-1.35)/.25),b[1]+s*.2],g:.15,n:"in"}; } }
+    if(c>=12.1&&c<13.1){ const be=c<12.45?OPEN:b1, tip=[XB+.02,top+fl*Math.sin(be)+.016,zBx+s*(d.z/2-fl*Math.cos(be))]; return {p:tip,g:.1,n:be>1.6?"in":"down"}; }                    /* 끝 날개(먼저) : L = 남 · R = 북 */
+    if(c>=13.1&&c<13.9){ const sx=s>0?1:-1, be=c<13.2?OPEN:b2, k=.7, tip=[XB+sx*(d.x/2-k*fl*Math.cos(be)),top+k*fl*Math.sin(be)+.016,zBx+s*.12]; return {p:tip,g:.1,n:be>1.6?[-sx,0,0]:"down"}; }   /* 옆 날개 : L = 가까운(동) · R = 먼(서) */
+    const seam=[XB+(s>0?.06:-.03),top+.018,zBx+s*.12];
+    if(c>=13.9&&c<16.1){ if(s>0) return {p:KF(c,[[13.9,seam],[14.9,seam],[15.15,[XB+.11,top+.018,zBx+.22]]]),g:.05,n:"down"};
+      return {p:KF(c,[[13.9,seam],[14.35,GR,.05],[14.75,[XB,top-.03,zBx-d.z/2-.03],.08],[14.9,[XB,top+.035,zBx-d.z/2+.01]],[15.6,[XB,top+.035,zBx+d.z/2-.01]],[15.75,[XB,top-.03,zBx+d.z/2+.03]],[16.1,GR,.08]]),g:c>14.3&&c<16.05?.8:.2,n:"down"}; }
+    if(c>=16.1&&c<ta+.55&&bxA){ const e=bw(bxA,0,HY,s*(d.z/2+.012)); return {p:c<16.6?KF(c,[[16.1,s>0?[XB+.11,top+.018,zBx+.22]:GR],[16.55,e,.04]]):e,g:.5,n:"in"}; }
     if(c>=ta+.55&&c<ta+.8) return {p:mixA(bw(slotP,0,HY,s*(d.z/2+.012)),bw(slotP,0,HY+.12,s*(d.z/2+.06)),ez3((c-ta-.55)/.25)),g:.15,n:"in"};
     if(c>=tb-.05&&c<tc+.6){ const e=bw(bxB,0,HY,s*(d.z/2+.012)); return {p:e,g:c<tb+.3?.2:.5,n:"in"}; }
     if(c>=tc+.6&&c<tc+.8) return {p:bw(bxB,0,HY+.14*ez3((c-tc-.6)/.2),s*(d.z/2+.05)),g:.15,n:"in"};
     return {p:null}; };
   const hL=hand(1), hR=hand(-1);
-  const gun=c>=14.35&&c<16.1?KF(c,[[14.35,GR],[14.75,[XB-d.x/2-.03,top-.03,zBx],.08],[14.9,[XB-d.x/2+.01,top+.035,zBx]],[15.6,[XB+d.x/2-.01,top+.035,zBx]],[15.75,[XB+d.x/2+.03,top-.03,zBx]],[16.1,GR,.08]]):GR;
+  const gun=c>=14.35&&c<16.1?KF(c,[[14.35,GR],[14.75,[XB,top-.03,zBx-d.z/2-.03],.08],[14.9,[XB,top+.035,zBx-d.z/2+.01]],[15.6,[XB,top+.035,zBx+d.z/2-.01]],[15.75,[XB,top-.03,zBx+d.z/2+.03]],[16.1,GR,.08]]):GR;
   return {pose:{x:rt[0],z:rt[1],yaw:rt[2],L:hL.p,R:hR.p,gL:hL.g,gR:hR.g,nL:hL.n,nR:hR.n}, bxA,bxB,b1:c<12.45?OPEN:b1,b2:c<13.2?OPEN:b2,tape,gun,gunUse:c>=14.35&&c<16.1,ta,placed:c>=ta+.55,sIdx};
 }
 function manualPrep(t,Ltot){ MP.t=t; MP.t0=(Ltot-.282)/.3+2.25; }
@@ -180,7 +180,7 @@ function stepManual(){
         if(tt<.6){ const e=ez3(tt/.6); o={p:[X,Y-.094*e,MP.zK+(MP.zG0-MP.zK)*e],yaw,stk:1,lab:1}; }
         else if(t<pk+.15){ let q=0, tp=-1e9; for(let k=1;k<=4;k++){ const pp=pkT(m-k)+.15; if(pp>t) q++; else if(pp>tp) tp=pp; }
           o={p:[X,Y-.094,Math.max(MP.zG0-MP.vG*(tt-.6),MP.zE+MP.sp*q,MP.zE+MP.sp*(q+1)-MP.vG*(t-tp))],yaw,stk:1,lab:1}; }
-        else { const q=t-pk, cB=t-Bn(n); if(cB<13.9&&n===n3) o={p:q<1.35?pickTrack(j,q):[boxSlot(j),Yt+.006,MP.zBx],yaw,stk:1,lab:1}; } } }
+        else { const q=t-pk, cB=t-Bn(n); if(cB<13.9&&n===n3) o={p:q<1.35?pickTrack(j,q):[boxSlot(j)[0],Yt+.006,boxSlot(j)[1]],yaw,stk:1,lab:1}; } } }
     if(o) MP.cases[ci++].set(o); }
   for(;ci<MP.cases.length;ci++) MP.cases[ci].G.visible=false;
 }

@@ -89,7 +89,7 @@ function wkCarryMesh(kind){
 function wkDraw(dt){
   if(!V3) return;
   for(const w of WK){
-    if(!w.m){ w.m=makeHuman(V3.scene); w.cm={}; }
+    if(!w.m){ w.m=makeHuman(V3.scene,w.id==="F"?"suit":"wear"); w.cm={}; }
     const H=w.m; H.G.visible=!cam.fp;
     let da=w.face-w.yaw; da=Math.atan2(Math.sin(da),Math.cos(da)); w.yaw+=da*Math.min(1,dt*9);
     const f=[Math.sin(w.yaw),Math.cos(w.yaw)], lf=[Math.cos(w.yaw),-Math.sin(w.yaw)], J=w.job, work=J&&J.phase==="work"&&J.j.reach;
