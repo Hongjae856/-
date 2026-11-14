@@ -35,7 +35,7 @@ function humanTex(){
     g.strokeStyle="rgba(110,55,50,.75)"; g.lineWidth=1.6; g.beginPath(); g.moveTo(w/2-19,h*.68); g.quadraticCurveTo(w/2,h*.695,w/2+19,h*.68); g.stroke(); }),1,1,true);
   HUT.mask=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#f3f6f7"; g.fillRect(0,0,w,h); for(const y of [34,62,90]){ g.strokeStyle="rgba(150,165,175,.75)"; g.lineWidth=2; g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke(); g.strokeStyle="rgba(255,255,255,.9)"; g.beginPath(); g.moveTo(0,y+3); g.lineTo(w,y+3); g.stroke(); }
     g.strokeStyle="rgba(140,155,165,.8)"; g.lineWidth=3; g.strokeRect(2,2,w-4,h-4); }),1,1,true);
-  HUT.net=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#000"; g.fillRect(0,0,w,h); g.strokeStyle="#f4f4f2"; g.lineWidth=3.2; for(let i=-h;i<w+h;i+=16){ g.beginPath(); g.moveTo(i,0); g.lineTo(i+h,h); g.stroke(); g.beginPath(); g.moveTo(i+h,0); g.lineTo(i,h); g.stroke(); } }),7,5,true);
+  HUT.net=tex(cvs(128,128,(g,w,h)=>{ g.clearRect(0,0,w,h); g.fillStyle="rgba(250,250,248,.10)"; g.fillRect(0,0,w,h); g.strokeStyle="rgba(252,252,250,.96)"; g.lineWidth=1.9; for(let i=-h;i<w+h;i+=16){ g.beginPath(); g.moveTo(i,0); g.lineTo(i+h,h); g.stroke(); g.beginPath(); g.moveTo(i+h,0); g.lineTo(i,h); g.stroke(); } }),11,6,true);   /* 흰 망 : 실은 불투명 · 사이는 반투명 */
   HUT.badge=tex(cvs(128,80,(g,w,h)=>{ g.fillStyle="#fff"; g.fillRect(0,0,w,h); g.fillStyle="#1f5fb8"; g.fillRect(0,0,w,22); g.fillStyle="#222"; g.font="bold 20px sans-serif"; g.fillText("포장2팀",24,52); g.fillStyle="#888"; g.fillRect(16,62,96,6); }),1,1,true);
   return HUT;
 }
@@ -67,10 +67,11 @@ function makeHuman(S,kind){
       const br=new T3.Mesh(new T3.SphereGeometry(.108,24,10,Math.PI/2-.8,1.6,0,Math.PI*.34),hood); br.scale.set(.96,1.14,1.06); br.position.set(0,.004,-.006); add(HG,br);
       const ch=new T3.Mesh(new T3.SphereGeometry(.108,24,8,Math.PI/2-.8,1.6,Math.PI*.8,Math.PI*.2),hood); ch.scale.set(.96,1.14,1.06); ch.position.set(0,.004,-.006); add(HG,ch);
       const rim=new T3.Mesh(new T3.TorusGeometry(.079,.0055,8,36),hood); rim.scale.set(.95,1.2,1); rim.position.set(0,-.004,.07); add(HG,rim); }
-    else { /* 부풀린 위생모(부직포 · 연하늘) : 이마 위 ~ 뒤통수 아래까지 머리 전체를 감싸고 가장자리에 고무줄 · 귀는 일부 보임 (사용자 제공 사진 11/14) */
-      const capM=new T3.MeshStandardMaterial({color:HUC.cap,roughness:.95,bumpMap:TX2.weave,bumpScale:.0012,side:T3.DoubleSide}), CG=new T3.Group(); CG.position.set(0,.03,-.018); CG.rotation.x=-.42; HG.add(CG);
-      const c1=new T3.Mesh(new T3.SphereGeometry(.117,32,20,0,Math.PI*2,0,Math.PI*.7),capM); c1.scale.set(.98,.98,1.13); add(CG,c1);
-      const rim=new T3.Mesh(new T3.TorusGeometry(.0945,.006,8,36),capM); rim.rotation.x=Math.PI/2; rim.scale.set(.98,1.13,1); rim.position.y=-.0688; add(CG,rim);
+    else { /* 흰 망 위생모 : 머리에 맞게 감싸는 흰 망(검은 머리카락이 비침) · 이마 위 ~ 뒤통수 아래 · 가장자리 흰 고무줄 · 귀는 일부 보임 (사용자 지시 11/14) */
+      const netM=new T3.MeshStandardMaterial({map:TX2.net,transparent:true,roughness:.9}), bandM=new T3.MeshStandardMaterial({color:0xf4f5f3,roughness:.9}), CG=new T3.Group(); CG.position.set(0,.03,-.014); CG.rotation.x=-.5; HG.add(CG);
+      const hair=new T3.Mesh(new T3.SphereGeometry(.1,28,18,0,Math.PI*2,0,Math.PI*.68),new T3.MeshStandardMaterial({color:0x17140f,roughness:.75})); hair.scale.set(.95,1,1.1); add(CG,hair);
+      const net=new T3.Mesh(new T3.SphereGeometry(.105,36,22,0,Math.PI*2,0,Math.PI*.7),netM); net.scale.set(.96,1,1.1); net.renderOrder=2; CG.add(net);
+      const rim=new T3.Mesh(new T3.TorusGeometry(.0852,.0045,8,36),bandM); rim.rotation.x=Math.PI/2; rim.scale.set(.96,1.1,1); rim.position.y=-.0617; add(CG,rim);
       for(const s2 of [-1,1]){ const ear=new T3.Mesh(new T3.SphereGeometry(.02,12,10),skin); ear.scale.set(.45,1.15,.8); ear.position.set(s2*.085,-.012,-.002); add(HG,ear); } }
     if(suit){ const mk=new T3.Mesh(new T3.SphereGeometry(.0975,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.06); mk.position.set(0,-.002,.001); add(HG,mk);
     for(const s of [-1,1]){ const lp=new T3.Mesh(new T3.CylinderGeometry(.0015,.0015,.06,6),elas); lp.position.set(s*.074,-.03,.05); lp.rotation.set(.9,0,s*.25); HG.add(lp); } } }
