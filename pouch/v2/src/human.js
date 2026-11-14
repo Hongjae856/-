@@ -28,7 +28,7 @@ function humanTex(){
       g.fillStyle="#2b1d14"; g.beginPath(); g.arc(cx-sx,cy,6.4,0,7); g.fill(); g.fillStyle="#0b0806"; g.beginPath(); g.arc(cx-sx,cy,3.1,0,7); g.fill(); g.fillStyle="rgba(255,255,255,.85)"; g.beginPath(); g.arc(cx-sx+2,cy-2,1.4,0,7); g.fill();
       g.strokeStyle="#2a1c15"; g.lineWidth=2.4; g.beginPath(); g.moveTo(cx-18,cy+1); g.quadraticCurveTo(cx,cy-10,cx+18,cy+1); g.stroke();
       g.strokeStyle="#2e221b"; g.lineWidth=5.5; g.lineCap="round"; g.beginPath(); g.moveTo(cx-sx*20,cy-21); g.quadraticCurveTo(cx,cy-28,cx+sx*22,cy-22); g.stroke();
-      g.fillStyle="rgba(225,140,120,.16)"; g.beginPath(); g.ellipse(cx+sx*6,h*.56,24,17,0,0,7); g.fill(); }
+      g.fillStyle="rgba(225,150,130,.07)"; g.beginPath(); g.ellipse(cx+sx*6,h*.56,26,18,0,0,7); g.fill(); }
     g.strokeStyle="rgba(150,100,80,.5)"; g.lineWidth=2; g.beginPath(); g.moveTo(w/2-9,h*.5); g.quadraticCurveTo(w/2,h*.55,w/2+9,h*.5); g.stroke();
     g.fillStyle="rgba(120,75,60,.35)"; for(const sx of [-1,1]){ g.beginPath(); g.ellipse(w/2+sx*6,h*.505,3.2,2,0,0,7); g.fill(); }
     g.fillStyle="#c9837a"; g.beginPath(); g.moveTo(w/2-19,h*.68); g.quadraticCurveTo(w/2-8,h*.655,w/2,h*.67); g.quadraticCurveTo(w/2+8,h*.655,w/2+19,h*.68); g.quadraticCurveTo(w/2,h*.735,w/2-19,h*.68); g.fill();
@@ -62,16 +62,16 @@ function makeHuman(S,kind){
   { const sk=new T3.Mesh(new T3.SphereGeometry(.094,28,20),skin); sk.scale.set(.9,1.12,1); add(HG,sk);
     if(suit){ const fc=new T3.Mesh(new T3.SphereGeometry(.0952,32,16,Math.PI/2-.95,1.9,Math.PI*.27,Math.PI*.36),new T3.MeshStandardMaterial({map:TX2.face,roughness:.6})); fc.scale.set(.9,1.12,1); HG.add(fc); }
     else { const fc=new T3.Mesh(new T3.SphereGeometry(.0952,32,24,Math.PI/2-1.0,2.0,Math.PI*.3,Math.PI*.52),new T3.MeshStandardMaterial({map:TX2.faceFull,roughness:.6})); fc.scale.set(.9,1.12,1); HG.add(fc);
-      const ns=new T3.Mesh(new T3.SphereGeometry(.014,12,10),skin); ns.scale.set(.85,1.5,1.05); ns.position.set(0,-.012,.092); add(HG,ns); const jw=new T3.Mesh(new T3.SphereGeometry(.07,20,14),skin); jw.scale.set(.86,.7,.92); jw.position.set(0,-.062,.018); add(HG,jw); }
+      const ns=new T3.Mesh(new T3.SphereGeometry(.011,12,10),skin); ns.scale.set(.95,1.35,.8); ns.position.set(0,-.014,.09); add(HG,ns); const jw=new T3.Mesh(new T3.SphereGeometry(.07,20,14),skin); jw.scale.set(.86,.7,.92); jw.position.set(0,-.062,.018); add(HG,jw); }
     if(suit){ const hd=new T3.Mesh(new T3.SphereGeometry(.108,36,24,Math.PI/2+.78,Math.PI*2-1.56,0,Math.PI),hood); hd.scale.set(.96,1.14,1.06); hd.position.set(0,.004,-.006); add(HG,hd);
       const br=new T3.Mesh(new T3.SphereGeometry(.108,24,10,Math.PI/2-.8,1.6,0,Math.PI*.34),hood); br.scale.set(.96,1.14,1.06); br.position.set(0,.004,-.006); add(HG,br);
       const ch=new T3.Mesh(new T3.SphereGeometry(.108,24,8,Math.PI/2-.8,1.6,Math.PI*.8,Math.PI*.2),hood); ch.scale.set(.96,1.14,1.06); ch.position.set(0,.004,-.006); add(HG,ch);
       const rim=new T3.Mesh(new T3.TorusGeometry(.079,.0055,8,36),hood); rim.scale.set(.95,1.2,1); rim.position.set(0,-.004,.07); add(HG,rim); }
     else { /* 흰 망 위생모 : 머리에 맞게 감싸는 흰 망(검은 머리카락이 비침) · 이마 위 ~ 뒤통수 아래 · 가장자리 흰 고무줄 · 귀는 일부 보임 (사용자 지시 11/14) */
-      const netM=new T3.MeshStandardMaterial({map:TX2.net,transparent:true,roughness:.9}), bandM=new T3.MeshStandardMaterial({color:0xf4f5f3,roughness:.9}), CG=new T3.Group(); CG.position.set(0,.03,-.014); CG.rotation.x=-.5; HG.add(CG);
-      const hair=new T3.Mesh(new T3.SphereGeometry(.1,28,18,0,Math.PI*2,0,Math.PI*.68),new T3.MeshStandardMaterial({color:0x17140f,roughness:.75})); hair.scale.set(.95,1,1.1); add(CG,hair);
-      const net=new T3.Mesh(new T3.SphereGeometry(.105,36,22,0,Math.PI*2,0,Math.PI*.7),netM); net.scale.set(.96,1,1.1); net.renderOrder=2; CG.add(net);
-      const rim=new T3.Mesh(new T3.TorusGeometry(.0852,.0045,8,36),bandM); rim.rotation.x=Math.PI/2; rim.scale.set(.96,1.1,1); rim.position.y=-.0617; add(CG,rim);
+      const netM=new T3.MeshStandardMaterial({map:TX2.net,transparent:true,roughness:.9}), bandM=new T3.MeshStandardMaterial({color:0xf4f5f3,roughness:.9}), CG=new T3.Group(); CG.position.set(0,.012,-.008); CG.rotation.x=-.7; HG.add(CG);   /* 앞 가장자리 = 이마 머리선(눈 · 눈썹은 가리지 않음) · 뒤 = 뒤통수 아래 */
+      const hair=new T3.Mesh(new T3.SphereGeometry(.1,28,18,0,Math.PI*2,0,Math.PI*.565),new T3.MeshStandardMaterial({color:0x17140f,roughness:.75})); hair.scale.set(.95,1,1.1); add(CG,hair);
+      const net=new T3.Mesh(new T3.SphereGeometry(.105,36,22,0,Math.PI*2,0,Math.PI*.58),netM); net.scale.set(.96,1,1.1); net.renderOrder=2; CG.add(net);
+      const rim=new T3.Mesh(new T3.TorusGeometry(.1017,.0045,8,36),bandM); rim.rotation.x=Math.PI/2; rim.scale.set(.96,1.1,1); rim.position.y=-.0261; add(CG,rim);
       for(const s2 of [-1,1]){ const ear=new T3.Mesh(new T3.SphereGeometry(.02,12,10),skin); ear.scale.set(.45,1.15,.8); ear.position.set(s2*.085,-.012,-.002); add(HG,ear); } }
     if(suit){ const mk=new T3.Mesh(new T3.SphereGeometry(.0975,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.06); mk.position.set(0,-.002,.001); add(HG,mk);
     for(const s of [-1,1]){ const lp=new T3.Mesh(new T3.CylinderGeometry(.0015,.0015,.06,6),elas); lp.position.set(s*.074,-.03,.05); lp.rotation.set(.9,0,s*.25); HG.add(lp); } } }
