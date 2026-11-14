@@ -58,9 +58,9 @@ function makeHuman(S,kind){
       const net=new T3.Mesh(new T3.SphereGeometry(.108,28,18,0,Math.PI*2,0,Math.PI*.66),new T3.MeshStandardMaterial({map:TX2.net,alphaMap:TX2.net,transparent:true,roughness:.9,side:T3.DoubleSide,alphaTest:.3})); net.scale.set(.96,1.1,1.1); net.position.set(0,.008,-.018); HG.add(net);
       const band=new T3.Mesh(new T3.SphereGeometry(.1095,32,10,Math.PI/2-1.25,2.5,Math.PI*.17,Math.PI*.19),hood); band.scale.set(.95,1.1,1.05); band.position.set(0,.008,-.008); add(HG,band);
       const bb=new T3.Mesh(new T3.SphereGeometry(.1085,32,6,0,Math.PI*2,Math.PI*.6,Math.PI*.07),hood); bb.scale.set(.96,1.1,1.1); bb.position.set(0,.008,-.018); add(HG,bb);
-      const brim=new T3.Mesh(new T3.CylinderGeometry(.085,.085,.006,24,1,false,-Math.PI/2+.25,Math.PI-.5),hood); brim.scale.set(1,1,.62); brim.position.set(0,.058,.078); brim.rotation.x=.22; add(HG,brim);
+      const brim=new T3.Mesh(new T3.CylinderGeometry(.072,.072,.005,24,1,false,-Math.PI/2+.3,Math.PI-.6),hood); brim.scale.set(1,1,.5); brim.position.set(0,.07,.074); brim.rotation.x=.12; add(HG,brim);
       for(const s2 of [-1,1]){ const ear=new T3.Mesh(new T3.SphereGeometry(.02,12,10),skin); ear.scale.set(.45,1.15,.8); ear.position.set(s2*.086,-.002,-.004); add(HG,ear); } }
-    const mk=new T3.Mesh(new T3.SphereGeometry(.101,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.09); mk.position.set(0,-.002,.002); add(HG,mk);
+    const mk=new T3.Mesh(new T3.SphereGeometry(.0975,24,12,Math.PI/2-.8,1.6,Math.PI*.515,Math.PI*.33),new T3.MeshStandardMaterial({map:TX2.mask,roughness:.9,side:T3.DoubleSide})); mk.scale.set(.92,1.12,1.06); mk.position.set(0,-.002,.001); add(HG,mk);
     for(const s of [-1,1]){ const lp=new T3.Mesh(new T3.CylinderGeometry(.0015,.0015,.06,6),elas); lp.position.set(s*.074,-.03,.05); lp.rotation.set(.9,0,s*.25); HG.add(lp); } }
   /* 팔 · 손(손가락 4 + 엄지, 마디별 굽힘) · 다리 · 작업화 */
   H.arm={}; H.leg={};
