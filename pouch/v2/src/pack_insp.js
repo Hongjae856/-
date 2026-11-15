@@ -26,7 +26,7 @@ function buildInspection(g){
     for(const z of [z0,z1]){ bx(g,X+.13,xf,Y-.04,Y+.2,z-.02,z+.02,M.ssMir); bx(g,X-.13,X+.13,Y-.04,Y+.2,z-.003,z+.003,M.dark); }
     curtain(z0-.01); curtain(z1+.01); bx(g,X-.42,X+.2,1.86,1.9,z0+.06,z1-.06,M.ss);
     { const sh=new T3.Shape(); [[-.31,-.29],[.31,-.29],[.31,.2],[.2,.31],[-.31,.31]].forEach(([a,b],i)=>i?sh.lineTo(a,b):sh.moveTo(a,b)); const m=new T3.Mesh(new T3.ShapeGeometry(sh),M.black); m.rotation.y=Math.PI/2; m.position.set(xf+.004,1.5,zc); g.add(m); }
-    bx(g,xf+.005,xf+.007,1.33,1.72,zc-.22,zc+.18,M.scr); decal(g,.12,.08,textTex("IX","#e8eaec",256,160,120),[xf+.008,1.27,zc-.21],Math.PI/2);
+    { const cv2=cvs(512,480,()=>{}), tx=new T3.CanvasTexture(cv2); tx.encoding=T3.sRGBEncoding; tx.anisotropy=8; const m=bx(g,xf+.005,xf+.007,1.33,1.72,zc-.22,zc+.18,new T3.MeshBasicMaterial({map:tx})); PK2.xr={on:true,cv:cv2,tex:tx,mesh:m,list:[],n:0,last:null,tDraw:0}; } decal(g,.12,.08,textTex("IX","#e8eaec",256,160,120),[xf+.008,1.27,zc-.21],Math.PI/2);
     PB.sign(g,.1,.03,[["X-RAY ON","#fff",70]],{w:320,h:90,bg:"#d81b1b"},[xf+.008,1.25,zc+.17],Math.PI/2); decal(g,.12,.03,textTex("ISHIDA","#2a2d30",320,80,60),[xf+.006,1.82,zc-.18],Math.PI/2);
     bx(g,xf,xf+.03,Y+.22,Y+.34,z0+.06,z1-.06,M.ss); rod(g,[xf+.03,Y+.28,zc-.08],[xf+.05,Y+.28,zc-.08],.018,M.dark,14); PB.sign(g,.08,.025,[["X-RAY POWER","#111",40]],{w:320,h:80},[xf+.032,Y+.315,zc-.08],Math.PI/2);
     bx(g,xf+.03,xf+.033,Y+.24,Y+.32,zc+.12,zc+.2,M.yellow); rod(g,[xf+.033,Y+.28,zc+.16],[xf+.05,Y+.28,zc+.16],.022,M.red,16); rod(g,[xf+.03,Y+.28,zc+.32],[xf+.05,Y+.28,zc+.32],.01,M.dark,8);
@@ -65,4 +65,34 @@ function buildInspection(g){
     for(let i=0;i<3;i++) for(let j=0;j<5;j++) bx(g,7.05,7.6,.1+j*.035,.13+j*.035,-12.3+i*.62,-11.76+i*.62,kr);          /* 접힌 대박스 묶음 */
     for(let i=0;i<2;i++) for(let j=0;j<8;j++) bx(g,7.0,7.6,.1+j*.03,.125+j*.03,-9.9+i*.5,-9.5+i*.5,rc);                 /* 접힌 대케이스 묶음 */
     for(const z of [-11.9,-9.45]) bx(g,6.95,7.65,0,.1,z-.75+.0,z+.75,M.grey); }
+}
+
+/* ═══ X-ray 조작 화면 (Ishida IX) — 검사기 ON 이면 통과하는 카톤 내부 투과 영상이 흐름 (품목 · 감도 설정 화면은 구현하지 않음 — 사용자 지시 11/15)
+   원리(사용자 제공 자료) : X선이 제품을 투과 → 밀도가 높은 부분일수록 투과 강도가 낮아 어둡게 보임. 정상 기준보다 어두운 부분이 있으면 불량.
+   화면 : 밝은 바탕 위에 카톤(옅은 회색) · 스틱 6포(2줄 × 3겹, 더 어두움) · 판독 윤곽선(제품 = 보라, 내용물 = 초록) · 판정 OK ═══ */
+function xrDraw(){
+  const R=PK2.xr; if(!R) return; const now=performance.now(); if(now-R.tDraw<70) return; R.tDraw=now;
+  const g=R.cv.getContext("2d"), W=512, H=480, F='"Malgun Gothic","Noto Sans KR",sans-serif';
+  if(!R.on){ g.fillStyle="#0b0e11"; g.fillRect(0,0,W,H); g.fillStyle="#3a4148"; g.font="bold 30px "+F; g.textAlign="center"; g.fillText("X-RAY OFF",W/2,H/2); g.font="16px "+F; g.fillText("ISHIDA IX-EN",W/2,H/2+34); R.tex.needsUpdate=true; return; }
+  g.textAlign="left"; g.fillStyle="#1d2b3a"; g.fillRect(0,0,W,44); g.fillStyle="#fff"; g.font="bold 20px "+F; g.fillText("ISHIDA  IX-EN",14,29); g.font="15px "+F; g.fillStyle="#b9d2ea"; g.fillText("예약 002  판콜에이치건조시럽",190,28);
+  g.fillStyle="#e23b2e"; g.beginPath(); g.arc(W-70,22,8,0,7); g.fill(); g.fillStyle="#fff"; g.font="bold 13px "+F; g.fillText("X-RAY",W-56,27);
+  const y0=44, y1=366, bg=g.createLinearGradient(0,y0,0,y1); bg.addColorStop(0,"#d6d6d6"); bg.addColorStop(.5,"#dedede"); bg.addColorStop(1,"#d2d2d2"); g.fillStyle=bg; g.fillRect(0,y0,W,y1-y0);
+  g.fillStyle="rgba(120,120,120,.10)"; for(let y=y0+6;y<y1;y+=9) g.fillRect(0,y,W,1);
+  const K=1140, zA=-6.97, cy=(y0+y1)/2, cw=.09*K, ch=.12*K;
+  g.save(); g.beginPath(); g.rect(0,y0,W,y1-y0); g.clip();
+  for(const [b,pz] of R.list){ const cx=(zA-pz)*K, q=((b%7)+7)%7, jx=(q-3)*.6, jy=((b*5%9)-4)*.5;
+    g.fillStyle="rgba(150,150,150,.42)"; g.fillRect(cx-cw/2,cy-ch/2,cw,ch);                                        /* 카톤 지함 */
+    g.fillStyle="rgba(120,120,120,.30)"; g.fillRect(cx-cw/2,cy-ch/2,cw,7); g.fillRect(cx-cw/2,cy+ch/2-7,cw,7);       /* 접착된 날개(겹침) */
+    g.fillStyle="rgba(135,135,135,.16)"; g.fillRect(cx-cw/2+5,cy-ch/2+12,cw-10,ch-24);                              /* 설명서 */
+    for(const s of [-1,1]){ const sx=cx+s*.021*K+jx, sw=.034*K, sl=.108*K, x0=sx-sw/2, yy=cy-sl/2+jy;               /* 스틱 2줄 (각 3겹) */
+      const gr=g.createLinearGradient(x0,0,x0+sw,0); gr.addColorStop(0,"rgba(80,80,80,.45)"); gr.addColorStop(.5,"rgba(52,52,52,.74)"); gr.addColorStop(1,"rgba(80,80,80,.45)"); g.fillStyle=gr; g.fillRect(x0,yy+9,sw,sl-18);
+      g.fillStyle="rgba(110,110,110,.38)"; g.fillRect(x0,yy,sw,9); g.fillRect(x0,yy+sl-9,sw,9);
+      g.strokeStyle="#22c04a"; g.lineWidth=2; g.strokeRect(x0-2,yy-2,sw+4,sl+4); }
+    g.strokeStyle="#8a3fd0"; g.lineWidth=2.2; g.strokeRect(cx-cw/2-3,cy-ch/2-3,cw+6,ch+6);
+    if(cx>cw/2+30){ g.fillStyle="#19a03c"; g.font="bold 15px "+F; g.fillText("OK",cx-cw/2-2,cy-ch/2-9); } }
+  g.restore();
+  g.fillStyle="#f4f6f7"; g.fillRect(0,y1,W,H-y1); g.fillStyle="#19a03c"; g.fillRect(14,y1+14,150,H-y1-28); g.fillStyle="#fff"; g.font="bold 54px "+F; g.textAlign="center"; g.fillText("OK",89,y1+76); g.textAlign="left";
+  g.fillStyle="#25313d"; g.font="bold 17px "+F; g.fillText("검사 수",186,y1+38); g.fillText("NG",186,y1+72); g.fillText("감도",346,y1+38); g.font="bold 22px "+F; g.fillText(String(R.n),262,y1+40); g.fillStyle="#c0392b"; g.fillText("0",262,y1+74);
+  g.fillStyle="#cfd6dc"; g.fillRect(346,y1+52,150,14); g.fillStyle="#2f7fd0"; g.fillRect(346,y1+52,96,14); g.fillStyle="#6b7782"; g.font="13px "+F; g.fillText("이물 LV · 결품 검사",346,y1+92);
+  R.tex.needsUpdate=true;
 }

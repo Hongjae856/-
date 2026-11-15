@@ -12,27 +12,20 @@ function humanTex(){
   if(HUT) return HUT; HUT={};
   HUT.weave=tex(cvs(256,256,(g,w,h)=>{ g.fillStyle="#808080"; g.fillRect(0,0,w,h); for(let y=0;y<h;y+=2){ g.fillStyle=y%4?"rgba(150,150,150,.5)":"rgba(105,105,105,.5)"; g.fillRect(0,y,w,1); } for(let x=0;x<w;x+=2){ g.fillStyle=x%4?"rgba(140,140,140,.35)":"rgba(112,112,112,.35)"; g.fillRect(x,0,1,h); }
     for(let i=0;i<70;i++){ const x=rnd()*w, y=rnd()*h, l=30+rnd()*90, a=rnd()*3.14, v=rnd()<.5?70:180; g.strokeStyle=`rgba(${v},${v},${v},.22)`; g.lineWidth=3+rnd()*6; g.beginPath(); g.moveTo(x,y); g.quadraticCurveTo(x+Math.cos(a)*l*.5+10,y+Math.sin(a)*l*.5-8,x+Math.cos(a)*l,y+Math.sin(a)*l); g.stroke(); } }),3,3);
-  HUT.face=tex(cvs(256,160,(g,w,h)=>{ const sk=g.createLinearGradient(0,0,0,h); sk.addColorStop(0,"#e9c8aa"); sk.addColorStop(1,"#dfb898"); g.fillStyle=sk; g.fillRect(0,0,w,h);
-    g.fillStyle="rgba(190,140,110,.25)"; g.beginPath(); g.ellipse(w/2,h*.78,26,40,0,0,7); g.fill();
-    for(const sx of [-1,1]){ const cx=w/2+sx*44, cy=h*.56;
-      g.fillStyle="rgba(150,105,85,.28)"; g.beginPath(); g.ellipse(cx,cy+2,25,13,0,0,7); g.fill();
-      g.fillStyle="#f6f3ee"; g.beginPath(); g.ellipse(cx,cy,17,7.5,sx*-.06,0,7); g.fill();
-      g.fillStyle="#2b1d14"; g.beginPath(); g.arc(cx+sx*-1,cy,6.6,0,7); g.fill(); g.fillStyle="#0b0806"; g.beginPath(); g.arc(cx+sx*-1,cy,3.2,0,7); g.fill(); g.fillStyle="rgba(255,255,255,.85)"; g.beginPath(); g.arc(cx+sx*-1+2,cy-2,1.4,0,7); g.fill();
-      g.strokeStyle="#2a1c15"; g.lineWidth=2.6; g.beginPath(); g.moveTo(cx-18,cy+1); g.quadraticCurveTo(cx,cy-10.5,cx+18,cy+1); g.stroke();
-      g.strokeStyle="rgba(120,80,60,.55)"; g.lineWidth=1.2; g.beginPath(); g.moveTo(cx-16,cy+3); g.quadraticCurveTo(cx,cy+9,cx+16,cy+3); g.stroke();
-      g.strokeStyle="#2e221b"; g.lineWidth=6; g.lineCap="round"; g.beginPath(); g.moveTo(cx-sx*20,cy-21); g.quadraticCurveTo(cx,cy-29,cx+sx*22,cy-23); g.stroke(); } }),1,1,true);
-  HUT.faceFull=tex(cvs(256,256,(g,w,h)=>{ const sk=g.createLinearGradient(0,0,0,h); sk.addColorStop(0,"#eccdb0"); sk.addColorStop(1,"#dfb999"); g.fillStyle=sk; g.fillRect(0,0,w,h);
-    for(const sx of [-1,1]){ const cx=w/2+sx*46, cy=h*.3;
-      g.fillStyle="rgba(150,105,85,.22)"; g.beginPath(); g.ellipse(cx,cy+2,26,13,0,0,7); g.fill();
-      g.fillStyle="#f6f3ee"; g.beginPath(); g.ellipse(cx,cy,17,7,sx*-.05,0,7); g.fill();
-      g.fillStyle="#2b1d14"; g.beginPath(); g.arc(cx-sx,cy,6.4,0,7); g.fill(); g.fillStyle="#0b0806"; g.beginPath(); g.arc(cx-sx,cy,3.1,0,7); g.fill(); g.fillStyle="rgba(255,255,255,.85)"; g.beginPath(); g.arc(cx-sx+2,cy-2,1.4,0,7); g.fill();
-      g.strokeStyle="#2a1c15"; g.lineWidth=2.4; g.beginPath(); g.moveTo(cx-18,cy+1); g.quadraticCurveTo(cx,cy-10,cx+18,cy+1); g.stroke();
-      g.strokeStyle="#2e221b"; g.lineWidth=5.5; g.lineCap="round"; g.beginPath(); g.moveTo(cx-sx*20,cy-21); g.quadraticCurveTo(cx,cy-28,cx+sx*22,cy-22); g.stroke();
-      g.fillStyle="rgba(225,150,130,.07)"; g.beginPath(); g.ellipse(cx+sx*6,h*.56,26,18,0,0,7); g.fill(); }
+  /* 얼굴 : 모두 밝게 웃는 표정 (사용자 지시 11/15) — 눈웃음(초승달 눈) · 올라간 눈썹 · 볼 · 활짝 웃는 입 */
+  const smileEyes=(g,w,cy)=>{ for(const sx of [-1,1]){ const cx=w/2+sx*46;
+      g.fillStyle="rgba(235,150,135,.2)"; g.beginPath(); g.ellipse(cx+sx*5,cy+26,24,13,0,0,7); g.fill();
+      g.strokeStyle="#231813"; g.lineCap="round"; g.lineWidth=5; g.beginPath(); g.moveTo(cx-17,cy+5); g.quadraticCurveTo(cx,cy-13,cx+17,cy+5); g.stroke();
+      g.lineWidth=1.6; for(const k of [-1,0,1]){ g.beginPath(); g.moveTo(cx+sx*(13+k*3),cy+1-Math.abs(k)); g.lineTo(cx+sx*(18+k*3),cy-3+k*2); g.stroke(); }
+      g.strokeStyle="rgba(150,105,85,.5)"; g.lineWidth=1.3; g.beginPath(); g.moveTo(cx-14,cy+10); g.quadraticCurveTo(cx,cy+15,cx+14,cy+10); g.stroke();
+      g.strokeStyle="#2e221b"; g.lineWidth=5.5; g.beginPath(); g.moveTo(cx-sx*19,cy-25); g.quadraticCurveTo(cx,cy-35,cx+sx*22,cy-25); g.stroke(); } };
+  HUT.face=tex(cvs(256,160,(g,w,h)=>{ const sk=g.createLinearGradient(0,0,0,h); sk.addColorStop(0,"#e9c8aa"); sk.addColorStop(1,"#dfb898"); g.fillStyle=sk; g.fillRect(0,0,w,h); smileEyes(g,w,h*.56); }),1,1,true);
+  HUT.faceFull=tex(cvs(256,256,(g,w,h)=>{ const sk=g.createLinearGradient(0,0,0,h); sk.addColorStop(0,"#eccdb0"); sk.addColorStop(1,"#dfb999"); g.fillStyle=sk; g.fillRect(0,0,w,h); smileEyes(g,w,h*.3);
     g.strokeStyle="rgba(150,100,80,.5)"; g.lineWidth=2; g.beginPath(); g.moveTo(w/2-9,h*.5); g.quadraticCurveTo(w/2,h*.55,w/2+9,h*.5); g.stroke();
-    g.fillStyle="rgba(120,75,60,.35)"; for(const sx of [-1,1]){ g.beginPath(); g.ellipse(w/2+sx*6,h*.505,3.2,2,0,0,7); g.fill(); }
-    g.fillStyle="#c9837a"; g.beginPath(); g.moveTo(w/2-19,h*.68); g.quadraticCurveTo(w/2-8,h*.655,w/2,h*.67); g.quadraticCurveTo(w/2+8,h*.655,w/2+19,h*.68); g.quadraticCurveTo(w/2,h*.735,w/2-19,h*.68); g.fill();
-    g.strokeStyle="rgba(110,55,50,.75)"; g.lineWidth=1.6; g.beginPath(); g.moveTo(w/2-19,h*.68); g.quadraticCurveTo(w/2,h*.695,w/2+19,h*.68); g.stroke(); }),1,1,true);
+    g.strokeStyle="rgba(160,105,90,.4)"; g.lineWidth=1.6; for(const sx of [-1,1]){ g.beginPath(); g.moveTo(w/2+sx*30,h*.56); g.quadraticCurveTo(w/2+sx*40,h*.63,w/2+sx*34,h*.71); g.stroke(); }
+    g.fillStyle="#7a2f2c"; g.beginPath(); g.moveTo(w/2-30,h*.645); g.quadraticCurveTo(w/2,h*.675,w/2+30,h*.645); g.quadraticCurveTo(w/2+22,h*.765,w/2,h*.775); g.quadraticCurveTo(w/2-22,h*.765,w/2-30,h*.645); g.fill();
+    g.fillStyle="#fbfaf6"; g.beginPath(); g.moveTo(w/2-25,h*.656); g.quadraticCurveTo(w/2,h*.682,w/2+25,h*.656); g.quadraticCurveTo(w/2+18,h*.712,w/2,h*.716); g.quadraticCurveTo(w/2-18,h*.712,w/2-25,h*.656); g.fill();
+    g.strokeStyle="#c0746c"; g.lineWidth=3.2; g.lineCap="round"; g.beginPath(); g.moveTo(w/2-31,h*.643); g.quadraticCurveTo(w/2,h*.674,w/2+31,h*.643); g.stroke(); g.beginPath(); g.moveTo(w/2-27,h*.7); g.quadraticCurveTo(w/2,h*.795,w/2+27,h*.7); g.stroke(); }),1,1,true);
   HUT.mask=tex(cvs(128,128,(g,w,h)=>{ g.fillStyle="#f3f6f7"; g.fillRect(0,0,w,h); for(const y of [34,62,90]){ g.strokeStyle="rgba(150,165,175,.75)"; g.lineWidth=2; g.beginPath(); g.moveTo(0,y); g.lineTo(w,y); g.stroke(); g.strokeStyle="rgba(255,255,255,.9)"; g.beginPath(); g.moveTo(0,y+3); g.lineTo(w,y+3); g.stroke(); }
     g.strokeStyle="rgba(140,155,165,.8)"; g.lineWidth=3; g.strokeRect(2,2,w-4,h-4); }),1,1,true);
   HUT.net=tex(cvs(128,128,(g,w,h)=>{ g.clearRect(0,0,w,h); g.fillStyle="rgba(250,250,248,.10)"; g.fillRect(0,0,w,h); g.strokeStyle="rgba(252,252,250,.96)"; g.lineWidth=1.9; for(let i=-h;i<w+h;i+=16){ g.beginPath(); g.moveTo(i,0); g.lineTo(i+h,h); g.stroke(); g.beginPath(); g.moveTo(i+h,0); g.lineTo(i,h); g.stroke(); } }),11,6,true);   /* 흰 망 : 실은 불투명 · 사이는 반투명 */

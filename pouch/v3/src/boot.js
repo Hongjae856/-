@@ -25,8 +25,11 @@ function frame(){
     if(STATIC_KEY!==staticKey()) buildStatic();
     gfxAdapt(now); r3Resize(); camPrep(R3.W,R3.H); drawRoom(); r3Paint(); drawOverlay(); fpPlaceMonitor();
   }
-  applyHint();
+  applyHint(); xrMirror();
 }
+/* 설비 화면(HMI)의 X-ray 홈 화면에 3D 모니터와 같은 투과 영상을 보여 줌 */
+let XRM=null;
+function xrMirror(){ const d=$("#xrView"); if(!d||!d.classList.contains("on")||typeof PK2==="undefined"||!PK2.xr) return; if(!XRM){ XRM=document.createElement("canvas"); XRM.width=512; XRM.height=322; } if(XRM.parentNode!==d) d.appendChild(XRM); XRM.getContext("2d").drawImage(PK2.xr.cv,0,44,512,322,0,0,512,322); }
 function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 /* 그래픽 단계 버튼 (자동 → 상 → 중 → 하) */

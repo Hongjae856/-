@@ -1,2 +1,5 @@
 /* 새 3D 연결판 추가 스타일 */
 #gqBtn{min-width:86px}
+#xrView{display:none}
+#xrView.on{display:block;margin:6px 0 8px;border-radius:8px;overflow:hidden;border:1px solid #c9d3dc;background:#d8d8d8}
+#xrView canvas{display:block;width:100%;height:auto}

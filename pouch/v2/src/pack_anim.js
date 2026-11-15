@@ -83,7 +83,7 @@ function stepPackAnim(){
   /* ── 흡착 암 · 카톤 ── */
   const v2r=.3/(P*(8/6)), L1=.5, zQ=MP.zQ, zT=zl(PZ.cEnd)-.32, Ltot=L1+(zT-zQ);
   const eOf=b=>(bl(b)-PZ.cEnd)*v2r, stopOf=b=>Ltot-(((b%4)+4)%4)*.094;   /* 모음 벨트 끝 : 4개 묶음 단위로 집어 감 */
-  manualPrep(eOf(0)/.3,Ltot);
+  manualPrep(eOf(0)/.3,Ltot); const xl=[];
   const M4=PA.M4, Mc=PA.Mc, Sh=PA.Sh, Mf=PA.Mf; let nc=0, nf=0, nm=0, ng=0, np=0, arm=null;
   const flap=(m,idx,mat)=>{ Mf.multiplyMatrices(Mc,mat); m.setMatrixAt(idx,Mf); };
   const loc=(x,y,z,ry,rz,ryy)=>{ PA.e.set(0,ry,0); PA.q.setFromEuler(PA.e); const A=new T3.Matrix4().compose(PA.v.set(x,y,z),PA.q,PA.one); const R=new T3.Matrix4(); if(rz) R.makeRotationZ(rz); else if(ryy) R.makeRotationY(ryy); return A.multiply(R); };
@@ -99,6 +99,7 @@ function stepPackAnim(){
       fm=fb=ft=Math.PI/2; prt=true;
       if(e<L1){ const t=e/L1, u=1-t; px=u*u*cx+2*u*t*cx+t*t*X; pz=u*u*zl(PZ.cEnd)+2*u*t*(zl(PZ.cEnd)-.22)+t*t*zT; py=lerp(yC,PKZ.y,ez(t))+C.H/2; }
       else { px=X; pz=zT-(e-L1); py=PKZ.y+C.H/2; } prt=pz<-6.05;
+      if(pz<-6.9&&pz>-7.5){ xl.push([b,pz]); if(pz<-7.2&&(PK2.xr.last==null||b>PK2.xr.last)){ PK2.xr.last=b; PK2.xr.n++; } }
       const mp=manualCarton(b,[px,py,pz]); if(mp==='hide') continue; [px,py,pz]=mp; rz=mp[3]||0; }
     Sh.set(1,0,0,0, 0,Math.sin(th),0,0, 0,Math.cos(th),1,0, 0,0,0,1);
     PA.e.set(rx,0,rz); PA.q.setFromEuler(PA.e); M4.compose(PA.v.set(px,py,pz),PA.q,PA.one); Mc.multiplyMatrices(M4,Sh);
@@ -111,7 +112,7 @@ function stepPackAnim(){
     nc++; }
   for(const [m,n] of [[PA.cb,nc],[PA.fT,nf],[PA.fB,nf],[PA.fm,nm],[PA.glue,ng],[PA.prt,np]]){ m.count=n; m.instanceMatrix.needsUpdate=true; }
   if(PK2.pickArm&&arm!==null) PK2.pickArm.rotation.x=arm;
-  stepManual();
+  stepManual(); PK2.xr.list=xl; xrDraw();
   /* ── X-ray 커튼 ── */
   if(PA.curt.length){ const zs=[]; for(let b=Math.floor(sb-7.4/P);b<=Math.floor(sb-PZ.cEnd/P);b++){ const e=Math.min(eOf(b),stopOf(b)); if(e>L1) zs.push(zT-(e-L1)); }
     for(const c of PA.curt){ let a=0; for(const z of zs){ const dz=z-c.z; if(dz>-.06&&dz<.12) a=Math.max(a,(1-Math.abs(dz-.03)/.09)*(Math.abs(c.x-X)<.07?1.1:.35)); } c.G.rotation.x=Math.max(0,a); } }

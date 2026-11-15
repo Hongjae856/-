@@ -29,6 +29,9 @@ PATCH = {
     "layout.js": [
         (r"R3.lo=[-9900,-10,-3300]; R3.hi=[12900,4300,2700];", "", 1),
     ],
+    "hmi.js": [
+        ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
+    ],
     "ui.js": [
         ("const pan=d=>{ cam.txT=clamp(cam.txT+d*Math.max(700,cam.dist*0.25),-9500,12500); };", "const pan=d=>camPanLine(d);", 1),
         ("cam.dist>6000", "cam.dist>6", 1),

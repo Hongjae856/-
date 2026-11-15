@@ -116,6 +116,8 @@ function v3Sync(dt){
   const run=!!(S&&S.session&&S.f&&S.f.run);
   V3.k+=((run?1:0)-V3.k)*Math.min(1,dt*3);             /* 기동 · 정지 시 부드럽게 가 · 감속 */
   if(V3.k>.002) stepAnim(dt*V3.k);
+  if(PK2.xr) PK2.xr.on=!(S&&S.session&&S.session.active)||!!(S.p&&S.p.xrX);      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
+  if(V3.k<=.002) xrDraw();
   if(typeof wkDraw==="function") wkDraw(dt);
 }
 
