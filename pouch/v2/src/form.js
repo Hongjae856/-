@@ -65,14 +65,19 @@ function buildForming(g,by1){
   for(const z of [zN,zS]){ bx(g,xd-.02,xd+.02,y0,y1,z-.02,z+.02,fr); bx(g,xd+.02,X(.03),y0,y0+.03,z-.015,z+.015,fr); bx(g,xd+.02,X(.03),y1-.03,y1,z-.015,z+.015,fr); bx(g,xd,X(.03),y0+.03,y1-.03,z-.003,z+.003,M.acryl); }
   bx(g,xd-.02,xd+.02,y1-.04,y1,zN,zS,fr); bx(g,xd-.02,xd+.02,y0,y0+.035,zN,zS,fr);
   const sp=[zN+.02,zc-.42,zc-.08,zc+.26,zS-.02];
-  for(let k=0;k<4;k++){ bx(g,xd-.003,xd+.003,y0+.035,y1-.04,sp[k]+.004,sp[k+1]-.004,M.acryl); if(k) bx(g,xd-.006,xd+.006,y0+.035,y1-.04,sp[k]-.004,sp[k]+.004,fr); }
-  for(const z of [zc-.115,zc-.045]){ rod(g,[xd-.04,1.28,z],[xd-.04,1.44,z],.008,fr,10); for(const y of [1.28,1.44]) rod(g,[xd,y,z],[xd-.04,y,z],.006,fr,8); }
+  /* 가운데 문 2짝 : 경첩(sp[1] · sp[3]) 기준으로 바깥(서쪽)으로 열림 — 교육에서 [안전도어] 조작 시 실제로 열리고 닫힘 */
+  const D1=new T3.Group(), D2=new T3.Group(); D1.position.set(xd,0,sp[1]); D2.position.set(xd,0,sp[3]); g.add(D1); g.add(D2); FM.doors=[{G:D1,s:-1},{G:D2,s:1}];
+  for(const k of [0,3]) bx(g,xd-.003,xd+.003,y0+.035,y1-.04,sp[k]+.004,sp[k+1]-.004,M.acryl);
+  bx(D1,-.003,.003,y0+.035,y1-.04,.004,sp[2]-sp[1]-.004,M.acryl); bx(D2,-.003,.003,y0+.035,y1-.04,sp[2]-sp[3]+.004,-.004,M.acryl);
+  for(const k of [1,3]) bx(g,xd-.006,xd+.006,y0+.035,y1-.04,sp[k]-.004,sp[k]+.004,fr); bx(D1,-.006,.006,y0+.035,y1-.04,sp[2]-sp[1]-.004,sp[2]-sp[1]+.002,fr);
+  for(const [y,h] of [[y0+.035,.022],[y1-.062,.022]]){ bx(D1,-.007,.007,y,y+h,.004,sp[2]-sp[1]-.004,fr); bx(D2,-.007,.007,y,y+h,sp[2]-sp[3]+.004,-.004,fr); }                 /* 문짝 위 · 아래 알루미늄 테 (열림이 보이도록) */
+  for(const [D,z0,z] of [[D1,sp[1],zc-.115],[D2,sp[3],zc-.045]]){ rod(D,[-.04,1.28,z-z0],[-.04,1.44,z-z0],.008,fr,10); for(const y of [1.28,1.44]) rod(D,[0,y,z-z0],[-.04,y,z-z0],.006,fr,8); }
   for(const z of [sp[1],sp[3]]) for(const y of [1.12,1.7]) bx(g,xd-.012,xd-.004,y-.03,y+.03,z-.025,z+.025,fr);                 /* 경첩 */
   decal(g,.2,.075,textTex("SP303","#ffffff",512,190,170),[xd-.005,1.76,(sp[0]+sp[1])/2],WEST);
   decal(g,.3,.075,textTex("SOLPAC","#ffffff",512,128,112),[xd-.005,1.3,(sp[3]+sp[4])/2],WEST);
   decal(g,.3,.1,tex(cvs(512,170,(c)=>{ c.clearRect(0,0,512,170); c.fillStyle="#fff"; c.font='72px Arial'; c.textAlign="left"; c.fillText("packaging",30,70); c.fillText("machine",30,150); }),1,1,true),[xd-.005,1.19,(sp[3]+sp[4])/2],WEST);
-  plate(g,.17,.13,labelTex([["금 지","#fff",64],["도어 인터락 작동중","#111",40],["운전중 개방금지","#c00",40]],{w:512,h:390,border:"#c00",bg:"#fff"}),[xd-.006,1.54,zc+.07],WEST);
-  plate(g,.12,.07,labelTex([["고온주의","#c8201c",100]],{w:512,h:290,border:"#c8201c"}),[xd-.006,1.54,zc+.23],WEST);
+  plate(D2,.17,.13,labelTex([["금 지","#fff",64],["도어 인터락 작동중","#111",40],["운전중 개방금지","#c00",40]],{w:512,h:390,border:"#c00",bg:"#fff"}),[-.006,1.54,zc+.07-sp[3]],WEST);
+  plate(D2,.12,.07,labelTex([["고온주의","#c8201c",100]],{w:512,h:290,border:"#c8201c"}),[-.006,1.54,zc+.23-sp[3]],WEST);
   /* 계단형 스테인리스 발판 (남서) */
   { const x0=xd-.95, z0=zc+.95; bx(g,x0,x0+.36,.2,.215,z0,z0+.28,M.deck); for(const dx of [.02,.34]) for(const dz of [.02,.26]) rod(g,[x0+dx,0,z0+dz],[x0+dx,.2,z0+dz],.012,M.ssMir,10); rod(g,[x0+.02,.08,z0+.02],[x0+.34,.08,z0+.02],.008,M.ssMir,8); rod(g,[x0+.02,.08,z0+.26],[x0+.34,.08,z0+.26],.008,M.ssMir,8); }
 }

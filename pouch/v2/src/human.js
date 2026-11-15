@@ -3,7 +3,7 @@
    · 손이 멀거나 낮으면 허리를 숙이고 무릎을 굽힘 · 몸통은 손 쪽으로 틀고 고개는 작업 지점을 봄
    · 발은 바닥에 디딘 채 있다가 몸이 움직이면 한 발씩 떼어 옮김 (보행 · 옆걸음 · 제자리 돌기)
    치수(m) : 키 약 1.76 · 어깨 높이 1.39 · 팔 0.30 + 0.33(손바닥 중심까지) · 다리 0.44 + 0.44 ═══ */
-const HU={ hip:.93, hw:.09, uL:.44, lL:.44, ank:.07, sp:.46, sw:.19, uA:.30, fA:.33, reach:.565 };
+const HU={ S:.958, hip:.93, hw:.09, uL:.44, lL:.44, ank:.07, sp:.46, sw:.19, uA:.30, fA:.33, reach:.565 };
 const _hv=()=>new T3.Vector3();
 /* 복장 색 (현장 복장 확인 후 조정) · 원단 결 · 얼굴(눈 · 눈썹) · 마스크 주름 무늬 */
 const HUC={ gown:0x3ea5de, cap:0x93d2ee, hood:0xf4f5f3, glove:0xf3f5f6, shoe:0xf1f2f2, sole:0xc9ced2, skin:0xe6c3a4 };
@@ -100,7 +100,12 @@ const _Y=new T3.Vector3(0,1,0), _m4=new T3.Matrix4();
 function segSet(m,a,b){ const d=b.clone().sub(a), l=d.length()||1e-6; m.position.copy(a); m.quaternion.setFromUnitVectors(_Y,d.multiplyScalar(1/l)); m.scale.set(1,l,1); }
 function basisSet(o,pos,X,Yv,Z){ _m4.makeBasis(X,Yv,Z); o.quaternion.setFromRotationMatrix(_m4); o.position.copy(pos); }
 /* 자세 적용.  p = { x, z, yaw, y0(바닥 높이), L · R : [x,y,z] | null(내림), gL · gR : 쥠 0~1, nL · nR : 손바닥 방향 "in" | "down" | "up" | [x,y,z], look : [x,y,z], dt } */
+/* 몸 크기 HU.S : 모델 원치수(위생모 포함 1,775 mm) × 0.958 ≈ 1,700 mm (사용자 지적 11/15 : 키가 현실보다 큼) — 좌표를 1/S 로 바꿔 자세를 푼 뒤 전체를 S 배로 그림 */
 function poseHuman(H,p){
+  const s=HU.S, d=a=>Array.isArray(a)?a.map(v=>v/s):a, q=Object.assign({},p,{x:p.x/s,z:p.z/s,y0:(p.y0||0)/s,L:d(p.L),R:d(p.R),look:d(p.look)});
+  H.G.scale.setScalar(s); return poseHumanRaw(H,q);
+}
+function poseHumanRaw(H,p){
   const dt=p.dt==null?1/60:p.dt, y0=p.y0||0, yaw=p.yaw, f=_hv().set(Math.sin(yaw),0,Math.cos(yaw)), lf=_hv().set(Math.cos(yaw),0,-Math.sin(yaw)), up=_Y;
   const root=_hv().set(p.x,y0,p.z), T={L:p.L?_hv().fromArray(p.L):null, R:p.R?_hv().fromArray(p.R):null};
   /* 몸통 틀기 : 손 중점 방향 */

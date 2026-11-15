@@ -848,14 +848,19 @@ function buildForming(g,by1){
   for(const z of [zN,zS]){ bx(g,xd-.02,xd+.02,y0,y1,z-.02,z+.02,fr); bx(g,xd+.02,X(.03),y0,y0+.03,z-.015,z+.015,fr); bx(g,xd+.02,X(.03),y1-.03,y1,z-.015,z+.015,fr); bx(g,xd,X(.03),y0+.03,y1-.03,z-.003,z+.003,M.acryl); }
   bx(g,xd-.02,xd+.02,y1-.04,y1,zN,zS,fr); bx(g,xd-.02,xd+.02,y0,y0+.035,zN,zS,fr);
   const sp=[zN+.02,zc-.42,zc-.08,zc+.26,zS-.02];
-  for(let k=0;k<4;k++){ bx(g,xd-.003,xd+.003,y0+.035,y1-.04,sp[k]+.004,sp[k+1]-.004,M.acryl); if(k) bx(g,xd-.006,xd+.006,y0+.035,y1-.04,sp[k]-.004,sp[k]+.004,fr); }
-  for(const z of [zc-.115,zc-.045]){ rod(g,[xd-.04,1.28,z],[xd-.04,1.44,z],.008,fr,10); for(const y of [1.28,1.44]) rod(g,[xd,y,z],[xd-.04,y,z],.006,fr,8); }
+  /* 가운데 문 2짝 : 경첩(sp[1] · sp[3]) 기준으로 바깥(서쪽)으로 열림 — 교육에서 [안전도어] 조작 시 실제로 열리고 닫힘 */
+  const D1=new T3.Group(), D2=new T3.Group(); D1.position.set(xd,0,sp[1]); D2.position.set(xd,0,sp[3]); g.add(D1); g.add(D2); FM.doors=[{G:D1,s:-1},{G:D2,s:1}];
+  for(const k of [0,3]) bx(g,xd-.003,xd+.003,y0+.035,y1-.04,sp[k]+.004,sp[k+1]-.004,M.acryl);
+  bx(D1,-.003,.003,y0+.035,y1-.04,.004,sp[2]-sp[1]-.004,M.acryl); bx(D2,-.003,.003,y0+.035,y1-.04,sp[2]-sp[3]+.004,-.004,M.acryl);
+  for(const k of [1,3]) bx(g,xd-.006,xd+.006,y0+.035,y1-.04,sp[k]-.004,sp[k]+.004,fr); bx(D1,-.006,.006,y0+.035,y1-.04,sp[2]-sp[1]-.004,sp[2]-sp[1]+.002,fr);
+  for(const [y,h] of [[y0+.035,.022],[y1-.062,.022]]){ bx(D1,-.007,.007,y,y+h,.004,sp[2]-sp[1]-.004,fr); bx(D2,-.007,.007,y,y+h,sp[2]-sp[3]+.004,-.004,fr); }                 /* 문짝 위 · 아래 알루미늄 테 (열림이 보이도록) */
+  for(const [D,z0,z] of [[D1,sp[1],zc-.115],[D2,sp[3],zc-.045]]){ rod(D,[-.04,1.28,z-z0],[-.04,1.44,z-z0],.008,fr,10); for(const y of [1.28,1.44]) rod(D,[0,y,z-z0],[-.04,y,z-z0],.006,fr,8); }
   for(const z of [sp[1],sp[3]]) for(const y of [1.12,1.7]) bx(g,xd-.012,xd-.004,y-.03,y+.03,z-.025,z+.025,fr);                 /* 경첩 */
   decal(g,.2,.075,textTex("SP303","#ffffff",512,190,170),[xd-.005,1.76,(sp[0]+sp[1])/2],WEST);
   decal(g,.3,.075,textTex("SOLPAC","#ffffff",512,128,112),[xd-.005,1.3,(sp[3]+sp[4])/2],WEST);
   decal(g,.3,.1,tex(cvs(512,170,(c)=>{ c.clearRect(0,0,512,170); c.fillStyle="#fff"; c.font='72px Arial'; c.textAlign="left"; c.fillText("packaging",30,70); c.fillText("machine",30,150); }),1,1,true),[xd-.005,1.19,(sp[3]+sp[4])/2],WEST);
-  plate(g,.17,.13,labelTex([["금 지","#fff",64],["도어 인터락 작동중","#111",40],["운전중 개방금지","#c00",40]],{w:512,h:390,border:"#c00",bg:"#fff"}),[xd-.006,1.54,zc+.07],WEST);
-  plate(g,.12,.07,labelTex([["고온주의","#c8201c",100]],{w:512,h:290,border:"#c8201c"}),[xd-.006,1.54,zc+.23],WEST);
+  plate(D2,.17,.13,labelTex([["금 지","#fff",64],["도어 인터락 작동중","#111",40],["운전중 개방금지","#c00",40]],{w:512,h:390,border:"#c00",bg:"#fff"}),[-.006,1.54,zc+.07-sp[3]],WEST);
+  plate(D2,.12,.07,labelTex([["고온주의","#c8201c",100]],{w:512,h:290,border:"#c8201c"}),[-.006,1.54,zc+.23-sp[3]],WEST);
   /* 계단형 스테인리스 발판 (남서) */
   { const x0=xd-.95, z0=zc+.95; bx(g,x0,x0+.36,.2,.215,z0,z0+.28,M.deck); for(const dx of [.02,.34]) for(const dz of [.02,.26]) rod(g,[x0+dx,0,z0+dz],[x0+dx,.2,z0+dz],.012,M.ssMir,10); rod(g,[x0+.02,.08,z0+.02],[x0+.34,.08,z0+.02],.008,M.ssMir,8); rod(g,[x0+.02,.08,z0+.26],[x0+.34,.08,z0+.26],.008,M.ssMir,8); }
 }
@@ -1515,7 +1520,7 @@ function buildPackRoom(S){
    · 손이 멀거나 낮으면 허리를 숙이고 무릎을 굽힘 · 몸통은 손 쪽으로 틀고 고개는 작업 지점을 봄
    · 발은 바닥에 디딘 채 있다가 몸이 움직이면 한 발씩 떼어 옮김 (보행 · 옆걸음 · 제자리 돌기)
    치수(m) : 키 약 1.76 · 어깨 높이 1.39 · 팔 0.30 + 0.33(손바닥 중심까지) · 다리 0.44 + 0.44 ═══ */
-const HU={ hip:.93, hw:.09, uL:.44, lL:.44, ank:.07, sp:.46, sw:.19, uA:.30, fA:.33, reach:.565 };
+const HU={ S:.958, hip:.93, hw:.09, uL:.44, lL:.44, ank:.07, sp:.46, sw:.19, uA:.30, fA:.33, reach:.565 };
 const _hv=()=>new T3.Vector3();
 /* 복장 색 (현장 복장 확인 후 조정) · 원단 결 · 얼굴(눈 · 눈썹) · 마스크 주름 무늬 */
 const HUC={ gown:0x3ea5de, cap:0x93d2ee, hood:0xf4f5f3, glove:0xf3f5f6, shoe:0xf1f2f2, sole:0xc9ced2, skin:0xe6c3a4 };
@@ -1612,7 +1617,12 @@ const _Y=new T3.Vector3(0,1,0), _m4=new T3.Matrix4();
 function segSet(m,a,b){ const d=b.clone().sub(a), l=d.length()||1e-6; m.position.copy(a); m.quaternion.setFromUnitVectors(_Y,d.multiplyScalar(1/l)); m.scale.set(1,l,1); }
 function basisSet(o,pos,X,Yv,Z){ _m4.makeBasis(X,Yv,Z); o.quaternion.setFromRotationMatrix(_m4); o.position.copy(pos); }
 /* 자세 적용.  p = { x, z, yaw, y0(바닥 높이), L · R : [x,y,z] | null(내림), gL · gR : 쥠 0~1, nL · nR : 손바닥 방향 "in" | "down" | "up" | [x,y,z], look : [x,y,z], dt } */
+/* 몸 크기 HU.S : 모델 원치수(위생모 포함 1,775 mm) × 0.958 ≈ 1,700 mm (사용자 지적 11/15 : 키가 현실보다 큼) — 좌표를 1/S 로 바꿔 자세를 푼 뒤 전체를 S 배로 그림 */
 function poseHuman(H,p){
+  const s=HU.S, d=a=>Array.isArray(a)?a.map(v=>v/s):a, q=Object.assign({},p,{x:p.x/s,z:p.z/s,y0:(p.y0||0)/s,L:d(p.L),R:d(p.R),look:d(p.look)});
+  H.G.scale.setScalar(s); return poseHumanRaw(H,q);
+}
+function poseHumanRaw(H,p){
   const dt=p.dt==null?1/60:p.dt, y0=p.y0||0, yaw=p.yaw, f=_hv().set(Math.sin(yaw),0,Math.cos(yaw)), lf=_hv().set(Math.cos(yaw),0,-Math.sin(yaw)), up=_Y;
   const root=_hv().set(p.x,y0,p.z), T={L:p.L?_hv().fromArray(p.L):null, R:p.R?_hv().fromArray(p.R):null};
   /* 몸통 틀기 : 손 중점 방향 */
@@ -4114,6 +4124,7 @@ function v3Sync(dt){
   const run=!!(S&&S.session&&S.f&&S.f.run);
   V3.k+=((run?1:0)-V3.k)*Math.min(1,dt*3);             /* 기동 · 정지 시 부드럽게 가 · 감속 */
   if(V3.k>.002) stepAnim(dt*V3.k);
+  if(FM.doors){ const want=S&&S.f&&S.f.door&&S.f.door!=="closed"?1:0; V3.door=(V3.door||0)+Math.max(-dt*1.4,Math.min(dt*1.4,want-(V3.door||0))); const e=V3.door*V3.door*(3-2*V3.door); for(const d of FM.doors) d.G.rotation.y=d.s*1.75*e; }   /* 안전도어 : 약 0.7 초에 열림 · 닫힘 */
   if(PK2.xr) PK2.xr.on=!(S&&S.session&&S.session.active)||!!(S.p&&S.p.xrX);      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
   if(typeof wkDraw==="function") wkDraw(dt);
@@ -4307,12 +4318,12 @@ function wkDraw(dt){
 /* ── v3/fp.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 연결 (새 3D · 단위 m) — 교육 시작 시 1인칭, 상단 버튼으로 3인칭 전환
-   · 눈높이 1.6 m · 이동 속도 3.8 m/s · 계단 · 2층 데크 높이를 따라 눈높이를 부드럽게 맞춤
+   · 눈높이 1.55 m (작업자 키 약 1.70 m · 사용자 지적 11/15) · 이동 속도 3.8 m/s · 계단 · 2층 데크 높이를 따라 눈높이를 부드럽게 맞춤
    · 조작은 기존 타일 · 판넬 · 설비 화면 · 현장 조치 함수를 그대로 호출 (단계 · 인터락 판정 유지)
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
 const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false};
-const EYE=1.6, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const EYE=1.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 
@@ -4602,6 +4613,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:6, d:"2026-11-15", t:"작업자 키 현실화(위생모 포함 약 1.70 m · 1인칭 눈높이 1.55 m, 2층 데크 2.0 m 대비), 충전기 안전도어를 [안전도어] 조작 시 실제로 열리고 닫히도록 변경(가운데 문 2짝 · 경첩 기준)"},
  {v:5, d:"2026-11-15", t:"OEE 연계 교육 : 대시보드 시트의 실제 항목 이름(작업기간 · 포장라인 · 제조번호(LOT) 등)으로 붙여넣기 인식, 주소 연결은 기존 대시보드 주소에 ?format=json 을 붙이는 방식으로 안내 변경"},
  {v:4, d:"2026-11-15", t:"3D 전면 재구축 — 현장 도면 · 사진 · 영상 기준 충전실 · 포장실(스틱공급장치 · 카토너 · 프린터 · X-ray · 중량선별기), 수동 포장(작업자 3명 : 대케이스 포장 · 대박스 테이핑 · 파렛트 적재), X-ray 투과 영상 화면, 그래픽 자동 · 상 · 중 · 하, OEE 연계 교육(부동 원인 분석 → 맞춤 실습 → 교육 효과) 추가"},
  {v:3, d:"2026-11-10", t:"포장실 과정 평가모드 : 이상사례 1건 + 충전기 알람 1건(온도센서 · 상한온도 · 프린터 · 비젼 · 공포감지 중 무작위)으로 변경, 포장실 학습모드 알람 목록 추가, 충전기 화면 탭(연동) 추가"},
