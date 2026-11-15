@@ -18,15 +18,24 @@
 - 한 기록에 코드가 여럿(쉼표 구분)이면 부동시간을 똑같이 나눈다.
 
 ## 3. 대시보드 쪽에서 추가할 것 (사용자 작업 · 확인 필요)
-### 3-1. 읽기 전용 주소 (Apps Script)
+### 3-1. 읽기 전용 주소 (Apps Script · 사용자 제공 code.gs 확인 11/15)
+대시보드에 이미 `doGet` 이 있으므로(대시보드 화면을 돌려줌) 새로 만들지 않고 **맨 앞에 3줄만 추가**한다.
 ```js
 function doGet(e) {
-  return ContentService.createTextOutput(JSON.stringify(getDashboardData()))
-    .setMimeType(ContentService.MimeType.JSON);
+  if (e && e.parameter && e.parameter.format === 'json') {            // IDT 용 읽기 전용 출력
+    return ContentService.createTextOutput(JSON.stringify(getDashboardData())).setMimeType(ContentService.MimeType.JSON);
+  }
+  return HtmlService.createHtmlOutputFromFile('Index')                 // 이하 기존 그대로
+      .setTitle('포장2팀 OEE 대시보드')
+      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
 }
 ```
-- '웹 앱' 으로 배포한 주소(…/exec)를 IDT 의 [OEE 연계 교육 › ① 데이터] 에 입력한다.
-- 확인 필요 : 접근 권한을 조직 내부로 제한하면 브라우저에서 로그인 화면으로 넘어가 불러오기가 실패할 수 있다. IDT 를 claude.ai 아티팩트로 열 때는 외부 주소 연결이 막힐 수 있다. 두 경우 모두 **붙여넣기**(시트에서 복사한 표 또는 JSON)로 대신할 수 있다.
+- 수정 후 [배포 › 배포 관리 › 수정 › 새 버전] 으로 다시 배포해야 반영된다.
+- IDT 의 [OEE 연계 교육 › ① 데이터] 에 `대시보드 주소(…/exec)?format=json` 을 입력한다.
+- 확인 필요 ① 접근 권한 : 웹 앱 액세스가 '모든 사용자' 가 아니면 로그인 화면으로 넘어가 IDT 에서 불러오기가 실패한다. '모든 사용자' 로 열면 주소를 아는 누구나 LOT · 제품명 · 실적을 읽을 수 있으므로 사내 보안 방침 확인이 먼저다.
+- 확인 필요 ② 아티팩트에서 Google 주소 연결이 허용되는지는 시험하지 못했다. 막히면 **붙여넣기**(시트에서 머리글 줄 포함 복사)를 쓴다 — 시트의 실제 항목 이름(작업기간 · 포장라인 · 제품명 · 제조번호(LOT) · 시간가동률(%) · 성능가동률(%) · 수율(%) · OEE(%) · 부동시간 합계(분) · 부동사유 · 대책)을 그대로 인식한다.
+- 값 형식 : 시트에는 비율이 % 값(예 92.5)으로 저장되고 `작업기간` 은 '시작일 ~ 종료일' 글자일 수 있다 → IDT 는 첫 날짜를 기록 날짜로 쓴다.
 
 ### 3-2. 입력 화면에 '부동 유형' 선택란
 ```html
@@ -39,7 +48,8 @@ function doGet(e) {
 // submitData() 의 payload 에 추가
 reasonCode: document.getElementById('inpReasonCode').value,
 ```
-- 서버의 `saveBatchData` 가 이 값을 시트에 저장하고 `getDashboardData` 가 다시 돌려주도록 열 1개를 추가해야 한다 (서버 코드는 이 저장소에 없음 · 확인 필요).
+- code.gs 수정 3곳 (22번째 열 = V열 '부동유형') : ① `saveBatchData` 의 `headers` 끝에 `'부동유형'` 추가, ② 같은 함수 `appendRow([...])` 의 마지막 `""`(대책) 뒤에 `data.reasonCode || ""` 추가, ③ `getDashboardData` 에서 `getRange(2, 1, lastRow - 1, 21)` 을 `22` 로 바꾸고 `allData.push({...})` 에 `reasonCode: row[21] || ""` 추가.
+- 이미 있는 시트는 V1 칸에 '부동유형' 머리글만 직접 적는다. 시트의 열 수가 22개보다 적으면(열을 지운 경우) 열을 먼저 늘려야 한다.
 - 붙여넣기용 표의 항목 이름은 '부동유형' 또는 '사유코드' 로 인식한다.
 
 ## 4. 부동 유형 코드 — 파우치 라인 (IDT 실습과 1:1)

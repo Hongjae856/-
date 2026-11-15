@@ -24,7 +24,7 @@ const OEEEDU=(function(){
     return out.filter(r=>r.date);
   }
   /* 표 붙여넣기(시트에서 복사 · 첫 줄 = 항목 이름) 또는 JSON */
-  const HEAD={dateText:/날짜|일자|작업일|date/i, line:/라인|line/i, prodName:/제품|품목|prod/i, lotNo:/lot|제조번호/i, oee:/^oee|종합/i, avail:/시간\s*가동|avail/i, perf:/성능|perf/i, yieldRate:/수율|양품|yield/i, totalDown:/부동\s*시간|비계획|down/i, reasonCode:/부동\s*유형|사유\s*코드|reasoncode/i, reason:/사유|reason/i, countermeasure:/대책|counter/i};
+  const HEAD={dateText:/날짜|일자|작업일|작업\s*기간|date/i, line:/라인|line/i, prodName:/제품|품목|prod/i, lotNo:/lot|제조번호/i, oee:/^oee|종합/i, avail:/시간\s*가동|avail/i, perf:/성능|perf/i, yieldRate:/수율|양품|yield/i, totalDown:/부동\s*시간|비계획|down/i, reasonCode:/부동\s*유형|사유\s*코드|reasoncode/i, reason:/사유|reason/i, countermeasure:/대책|counter/i};
   function parseText(txt){
     const t=String(txt||"").trim(); if(!t) throw new Error("내용이 비어 있습니다.");
     if(t[0]==="["||t[0]==="{"){ const j=JSON.parse(t); return Array.isArray(j)?j:(j.data||j.rows||[]); }
