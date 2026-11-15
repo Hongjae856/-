@@ -1,0 +1,31 @@
+/* OEE 연계 교육 (공통) */
+#oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
+#oeeWrap.on{display:flex}
+.oeeBox{width:min(1500px,94%);height:90%;background:#f5f7fa;border-radius:16px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.oeeHead{display:flex;align-items:center;gap:18px;padding:14px 22px;background:#1a3555;color:#fff}
+.oeeHead b{font-size:21px}.oeeHead small{font-weight:400;font-size:14px;opacity:.8;margin-left:8px}
+.oeeTabs{display:flex;gap:6px;margin-left:auto}
+.oeeTabs button,.oeeX{border:0;border-radius:9px;padding:9px 16px;font:700 15px inherit;background:rgba(255,255,255,.14);color:#fff;cursor:pointer}
+.oeeTabs button.on{background:#fff;color:#1a3555}
+.oeeDemo{background:#fff3cd;color:#7a5600;padding:8px 22px;font-weight:700;font-size:14px}
+.oeeMsg{background:#e8f1fb;color:#174a84;padding:8px 22px;font-size:14px}
+.oeeBody{flex:1;overflow:auto;padding:18px 22px;font-size:15px;line-height:1.6}
+.oeeBody h3{font-size:17px;margin:14px 0 6px}.oeeBody p{margin:4px 0 8px;color:#4a5866}
+.oeeCols{display:grid;grid-template-columns:1fr 1fr;gap:26px}
+.oeeBody input:not([type=checkbox]),.oeeBody textarea{width:100%;box-sizing:border-box;border:1px solid #c5ced8;border-radius:8px;padding:9px 11px;font:14px inherit;margin-bottom:8px;background:#fff}
+.oeeBody textarea{height:120px;resize:vertical}
+.oeeBody button{border:0;border-radius:8px;padding:9px 16px;font:700 14px inherit;background:#1f5fb8;color:#fff;cursor:pointer}
+.oeeFilter{display:flex;align-items:center;gap:8px;margin-bottom:12px;font-weight:700}.oeeFilter select{padding:6px 8px;border-radius:7px;border:1px solid #c5ced8;font:14px inherit}.oeeFilter span{margin-left:auto;color:#6b7782;font-weight:400}
+.oeeKpi{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}.oeeKpi div{background:#fff;border-radius:11px;padding:11px 14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}.oeeKpi s{display:block;text-decoration:none;font-size:13px;color:#6b7782}.oeeKpi b{font-size:22px}
+.oeeNote{font-size:12.5px;color:#7b8794}.oeeEmpty{color:#8a96a3;padding:14px 0}
+.oeeT{width:100%;border-collapse:collapse;background:#fff;border-radius:10px;overflow:hidden;font-size:14px}.oeeT th{background:#e9eef4;text-align:left;padding:8px 10px}.oeeT td{padding:7px 10px;border-top:1px solid #edf0f3;vertical-align:middle}
+.oeeBar{position:relative;height:20px;background:#eef2f6;border-radius:5px;min-width:150px}.oeeBar span{position:absolute;left:0;top:0;bottom:0;background:#e0714a;border-radius:5px}.oeeBar.n span{background:#4a8fd6}.oeeBar em{position:relative;font-style:normal;font-size:12.5px;font-weight:700;padding-left:7px;line-height:20px}
+.oeeMon{display:flex;align-items:flex-end;gap:10px;height:230px;background:#fff;border-radius:10px;padding:26px 14px 30px}.oeeMon div{flex:1;height:100%;position:relative;display:flex;align-items:flex-end;justify-content:center}.oeeMon span{width:70%;background:#e0714a;border-radius:5px 5px 0 0;min-height:2px}.oeeMon em{position:absolute;top:-20px;font-style:normal;font-size:12px;font-weight:700}.oeeMon s{position:absolute;bottom:-24px;text-decoration:none;font-size:12px;color:#6b7782}
+.oeeCards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.oeeCard{background:#fff;border-radius:13px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.1);position:relative;display:flex;flex-direction:column}
+.oeeCard .rk{position:absolute;right:14px;top:12px;width:30px;height:30px;border-radius:50%;background:#e0714a;color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center}
+.oeeCard h4{font-size:18px;margin:0 40px 6px 0}.oeeCard h4 small{display:block;font-weight:400;font-size:13px;color:#6b7782}
+.oeeCard .why{color:#b4492a;font-weight:700}.oeeCard ol{margin:4px 0 10px 20px;padding:0;font-size:14px}
+.oeeCard .ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between}.oeeCard .ft span{font-size:13px;color:#6b7782}
+.oeeKeep{margin-top:14px;font-size:13.5px}
+#oeeOpen{margin-top:14px;padding:13px 22px;border:0;border-radius:12px;background:#e0714a;color:#fff;font:800 17px inherit;cursor:pointer}

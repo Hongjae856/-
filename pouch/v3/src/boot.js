@@ -40,7 +40,7 @@ function bindGfx(){
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx();
+  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);

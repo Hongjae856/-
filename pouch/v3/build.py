@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -56,7 +56,7 @@ PATCH = {
 
 
 def load(folder: str, name: str) -> str:
-    base = {"old": OLD, "v3": SRC}[folder]
+    base = {"old": OLD, "v3": SRC, "oee": H.parent.parent / "oee"}[folder]
     text = (base / name).read_text(encoding="utf-8")
     if folder == "old" and name in RENAME_CV:
         text = re.sub(r"\bCV\b", "CVL", text)          # 새 3D 의 CV(배출 컨베이어) 와 이름 충돌 방지
@@ -83,7 +83,7 @@ def build() -> str:
     if "</script" in js.lower() or "</script" in three.lower():
         sys.exit("script text must not contain </script")
     parts = {
-        "/*__CSS__*/": (OLD / "style.css").read_text(encoding="utf-8") + "\n" + (SRC / "style3.css").read_text(encoding="utf-8"),
+        "/*__CSS__*/": (OLD / "style.css").read_text(encoding="utf-8") + "\n" + (SRC / "style3.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "oee" / "oee.css").read_text(encoding="utf-8"),
         "<!--__BODY__-->": (OLD / "body.html").read_text(encoding="utf-8"),
     }
     for key, text in parts.items():
