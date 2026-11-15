@@ -12,7 +12,7 @@ H = Path(__file__).resolve().parent
 OLD = H.parent / "src"
 V2 = H.parent / "v2"
 SRC = H / "src"
-OUT = H / "test_idt.html"   # 검증 전까지 시험 출력 (전환 시 파우치라인_IDT.html)
+OUT = H.parent.parent / "파우치라인_IDT.html"   # 11/15 전환 : 새 3D 연결판이 정식 산출물 (옛 판은 pouch/build.py 로 남김)
 
 V2_SCRIPTS = ("kit.js", "layout.js", "room.js", "form.js", "unwind.js", "hopper.js", "filler.js", "conv.js",
               "fillzone.js", "pack_feed.js", "pack_carton.js", "pack_insp.js", "packzone.js", "human.js", "pack_manual.js",
