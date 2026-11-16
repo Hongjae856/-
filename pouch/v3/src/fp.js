@@ -5,7 +5,8 @@
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
 const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false};
-const EYE=1.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const EYE=1.65;      /* 1인칭 눈높이 (11/16 V9 사용자 지정 1.65 m) */
+const FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 

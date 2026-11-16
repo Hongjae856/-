@@ -4369,7 +4369,8 @@ function wkDraw(dt){
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
 const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false};
-const EYE=1.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const EYE=1.65;      /* 1인칭 눈높이 (11/16 V9 사용자 지정 1.65 m) */
+const FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 
@@ -4659,6 +4660,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:9, d:"2026-11-16", t:"1인칭 작업자 눈높이 1.55 m → 1.65 m (2층 데크에서 3.65 m · 천장 4.2 m), 이상사례 대처 교육 중요도 등급(상 · 중 · 하) 확정"},
  {v:8, d:"2026-11-16", t:"메인화면 왼쪽 아래에 OEE 연동 표시등 추가(초록 = Drive 시트 · IDT DB 데이터 연결, 빨강 = 미연동 · 누르면 OEE 관리 대시보드)"},
  {v:7, d:"2026-11-16", t:"메인화면 개편(과정 → 기본 · 심화 · OEE, 순서도 삭제), 기본 · 심화는 라인 가동 절차만 교육(이상상황 제외), OEE 에 [OEE 관리 대시보드](Google Drive 시트 직접 읽기 + IDT 자체 DB) · [이상사례 대처 교육](부동시간 · 빈도 · 중요도 순 학습 · 평가) 신설, 1인칭 설비 화면 실제 크기, 설비 전원에 따른 화면 꺼짐 · 은박 롤 소진 표시, 입력칸 붙여넣기 오류 수정"},
  {v:6, d:"2026-11-15", t:"작업자 키 현실화(위생모 포함 약 1.70 m · 1인칭 눈높이 1.55 m, 2층 데크 2.0 m 대비), 충전기 안전도어를 [안전도어] 조작 시 실제로 열리고 닫히도록 변경(가운데 문 2짝 · 경첩 기준)"},
@@ -4940,7 +4942,7 @@ function oeeInit(){
    · 이상사례 대처 교육 : 정상 운전 중 상황 1건을 발생시켜 정지 → 원인 판단 → 조치 → 해제 → 재가동을 학습 · 평가
      우선순위 = 0.4 × 부동시간(정규화) + 0.3 × 발생 빈도(정규화) + 0.3 × 중요도 등급 (OEE 데이터가 없으면 등급만)
    ═══════════════════════════════════════════════════════════════════ */
-/* 중요도 등급 (잠정 — 사용자 확인 필요) : 상 = 품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전 직접 영향, 중 = 품질 영향 가능 · 점검 필요, 하 = 설비 정지 위주 */
+/* 중요도 등급 (11/16 사용자 확정) : 상 = 품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전 직접 영향, 중 = 품질 영향 가능 · 점검 필요, 하 = 설비 정지 위주 */
 const INC_GRADE={F1:"상",F2:"상",P1:"상",P2:"상",EMP:"상",VIS:"상",EMG:"상",DOOR:"상",
   THI:"중",TSEN:"중",PRT:"중",PSV:"중",F3:"중",CNT:"중",FEED:"중",
   FILM:"하",AIR:"하",MOL:"하",LIM:"하",ALN:"하"};
@@ -4972,7 +4974,7 @@ function renderIncPick(){
       return '<div class="ipRow"><span class="rk">'+(i+1)+'</span><span class="gd g'+({상:"H",중:"M",하:"L"}[o.g])+'" title="'+esc(INC_GRADE_WHY[o.g])+'">'+o.g+'</span>'+
         '<b>'+esc(o.inc.nm)+'<s>'+(CASES[o.k]?"이상사례 (알람 없음)":"충전기 알람")+(R.has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
         '<button class="s" data-inc="'+o.k+'" data-m="incLearn">학습</button><button class="e" data-inc="'+o.k+'" data-m="incExam">평가</button></div>'; }).join("")+'</div>'+
-    '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+' (잠정 기준)</p>'+
+    '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+'</p>'+
     '<button id="incBack">← 기본 · 심화 · OEE 로</button>';
   $$("#incPick [data-inc]").forEach(b=>b.onclick=()=>incStart(b.dataset.inc,b.dataset.m));
   $("#incBack").onclick=()=>eduShow("menu");

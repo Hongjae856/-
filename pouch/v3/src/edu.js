@@ -5,7 +5,7 @@
    · 이상사례 대처 교육 : 정상 운전 중 상황 1건을 발생시켜 정지 → 원인 판단 → 조치 → 해제 → 재가동을 학습 · 평가
      우선순위 = 0.4 × 부동시간(정규화) + 0.3 × 발생 빈도(정규화) + 0.3 × 중요도 등급 (OEE 데이터가 없으면 등급만)
    ═══════════════════════════════════════════════════════════════════ */
-/* 중요도 등급 (잠정 — 사용자 확인 필요) : 상 = 품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전 직접 영향, 중 = 품질 영향 가능 · 점검 필요, 하 = 설비 정지 위주 */
+/* 중요도 등급 (11/16 사용자 확정) : 상 = 품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전 직접 영향, 중 = 품질 영향 가능 · 점검 필요, 하 = 설비 정지 위주 */
 const INC_GRADE={F1:"상",F2:"상",P1:"상",P2:"상",EMP:"상",VIS:"상",EMG:"상",DOOR:"상",
   THI:"중",TSEN:"중",PRT:"중",PSV:"중",F3:"중",CNT:"중",FEED:"중",
   FILM:"하",AIR:"하",MOL:"하",LIM:"하",ALN:"하"};
@@ -37,7 +37,7 @@ function renderIncPick(){
       return '<div class="ipRow"><span class="rk">'+(i+1)+'</span><span class="gd g'+({상:"H",중:"M",하:"L"}[o.g])+'" title="'+esc(INC_GRADE_WHY[o.g])+'">'+o.g+'</span>'+
         '<b>'+esc(o.inc.nm)+'<s>'+(CASES[o.k]?"이상사례 (알람 없음)":"충전기 알람")+(R.has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
         '<button class="s" data-inc="'+o.k+'" data-m="incLearn">학습</button><button class="e" data-inc="'+o.k+'" data-m="incExam">평가</button></div>'; }).join("")+'</div>'+
-    '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+' (잠정 기준)</p>'+
+    '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+'</p>'+
     '<button id="incBack">← 기본 · 심화 · OEE 로</button>';
   $$("#incPick [data-inc]").forEach(b=>b.onclick=()=>incStart(b.dataset.inc,b.dataset.m));
   $("#incBack").onclick=()=>eduShow("menu");
