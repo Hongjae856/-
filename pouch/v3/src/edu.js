@@ -6,16 +6,15 @@
      우선순위 = 0.4 × 부동시간(정규화) + 0.3 × 발생 빈도(정규화) + 0.3 × 중요도 등급 (OEE 데이터가 없으면 등급만)
    ═══════════════════════════════════════════════════════════════════ */
 /* 중요도 등급 (11/16 사용자 확정) : 상 = 품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전 직접 영향, 중 = 품질 영향 가능 · 점검 필요, 하 = 설비 정지 위주 */
-const INC_GRADE={F1:"상",F2:"상",P1:"상",P2:"상",EMP:"상",VIS:"상",EMG:"상",DOOR:"상",
-  THI:"중",TSEN:"중",PRT:"중",PSV:"중",F3:"중",CNT:"중",FEED:"중",
-  FILM:"하",AIR:"하",MOL:"하",LIM:"하",ALN:"하"};
+/* 중요도 등급 (11/16 실제 부동사유 기반 사례로 교체 — 잠정, 사용자 확인 필요) : 상 = 품질(함량 · 표시 · 첨부문서 · 포장 상태)에 직접 영향, 중 = 품질 영향 가능 · 생산 손실, 하 = 설비 정지 위주 */
+const INC_GRADE={RF4:"상",RP2:"상",RP7:"상",RP8:"상",RP6:"상", RF1:"중",RF2:"중",RP4:"중",RP5:"중", RF3:"하",RP1:"하",RP3:"하"};
 const INC_GRADE_W={상:1,중:.6,하:.3};
-const INC_GRADE_WHY={상:"품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전에 직접 영향",중:"품질 영향 가능 · 설비 점검 필요",하:"설비 정지 위주 · 품질 영향 낮음"};
+const INC_GRADE_WHY={상:"품질(함량 · 표시 · 첨부문서 · 포장 상태)에 직접 영향",중:"품질 영향 가능 · 생산 손실",하:"설비 정지 위주 · 품질 영향 낮음"};
 const isInc=()=>!!S&&(S.mode==="incLearn"||S.mode==="incExam");
 const EDU={view:"menu", k:null};
 
 /* 실별 대응 목록 + 우선순위 */
-function incKeys(room){ return room==="F"?Object.keys(INC).concat(["F1","F2","F3"]):P_ALARMS.concat(["P1","P2"]); }
+function incKeys(room){ return RC_KEYS[room]||[]; }   /* 11/16 : 실제 부동사유 기반 사례만 (cases.js) */
 function incRank(room){
   const st=(typeof OEEEDU!=="undefined"&&OEEEDU.codeStats)?OEEEDU.codeStats():null, has=!!(st&&Object.keys(st).length);
   const L=incKeys(room).map(k=>{ const s=has&&st[k]||{down:0,n:0}; return {k, inc:incOf(k), g:INC_GRADE[k]||"중", down:s.down, n:s.n}; });
@@ -35,7 +34,7 @@ function renderIncPick(){
     '<p class="ipNote">'+(R.has?'OEE 데이터의 부동시간(40%) · 발생 빈도(30%) · 중요도 등급(30%)으로 정렬했습니다.':'OEE 데이터가 없어 중요도 등급 순으로 정렬했습니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 발생 빈도가 반영됩니다.')+'</p>'+
     '<div class="ipList">'+R.list.map((o,i)=>{ const d=incDone(o.k), best=d.filter(x=>x.mode==="incExam"&&x.score!=null).reduce((a,x)=>Math.max(a,x.score),-1);
       return '<div class="ipRow"><span class="rk">'+(i+1)+'</span><span class="gd g'+({상:"H",중:"M",하:"L"}[o.g])+'" title="'+esc(INC_GRADE_WHY[o.g])+'">'+o.g+'</span>'+
-        '<b>'+esc(o.inc.nm)+'<s>'+(CASES[o.k]?"이상사례 (알람 없음)":"충전기 알람")+(R.has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
+        '<b>'+esc(o.inc.nm)+'<s>'+esc(o.inc.src||"")+(R.has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
         '<button class="s" data-inc="'+o.k+'" data-m="incLearn">학습</button><button class="e" data-inc="'+o.k+'" data-m="incExam">평가</button></div>'; }).join("")+'</div>'+
     '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+'</p>'+
     '<button id="incBack">← 기본 · 심화 · OEE 로</button>';

@@ -14,7 +14,7 @@ const OEEEDU=(function(){
   const LS={keep:"oeeedu.keep", data:"oeeedu.data", log:"oeeedu.log"};
   const XLSX_URL="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js", XLSX_MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
   const DRIVE="Google Drive", STALE=30*60e3, CHUNK=350;
-  const st={cfg:null, rows:[], src:"", demo:false, tab:"data", from:"", to:"", line:"", msg:"", busy:"", files:null, meta:null, dbState:"none", canWrite:null, dbLog:[], autoTried:false};
+  const st={cfg:null, rows:[], src:"", demo:false, tab:"status", fy:"", fm:"all", fp:"all", from:"", to:"", line:"", msg:"", busy:"", files:null, meta:null, dbState:"none", canWrite:null, dbLog:[], autoTried:false};
   const cap={db:null, user:null, mcp:null, uid:null};
   const $o=s=>document.querySelector(s), esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const lsGet=k=>{ try{ return localStorage.getItem(k); }catch(e){ return null; } }, lsSet=(k,v)=>{ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,v); }catch(e){} };
@@ -23,12 +23,17 @@ const OEEEDU=(function(){
   const today=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
   const kst=ms=>{ if(!ms) return "-"; const d=new Date(ms+9*3600e3).toISOString(); return d.slice(0,10)+" "+d.slice(11,16); };
   /* 자유 기재 사유 → 부동 유형 (코드가 없는 기존 기록용 · 낱말 일치) */
-  function classify(text){ const t=String(text||""); if(!t.trim()) return []; const hit=[]; for(const c of st.cfg.codes){ if(c.kw&&c.kw.some(k=>new RegExp(k,"i").test(t))) hit.push(c.k); } return hit.length?hit:["ETC"]; }
+  function classify(text,one){ const t=String(text||""); if(!t.trim()) return []; const hit=[]; for(const c of st.cfg.codes){ if(c.kw&&c.kw.some(k=>new RegExp(k,"i").test(t))){ hit.push(c.k); if(one) break; } } return hit.length?hit:["ETC"]; }
+  /* 사유 글을 항목별로 나눔 : "충전- 컨베어안착불량(20분), 컷팅점검(15분), 포장- 설명서이송불량(5분)" → 항목 · 실(충전/포장) · 분 (11/16 실제 기록 형식) */
+  function splitReason(text){ const out=[]; let room=""; for(let s of String(text||"").split(/[,，]/)){ s=s.trim(); if(!s) continue; const m=s.match(/^(충전|포장)\s*[-:·]?\s*/); if(m){ room=m[1]; s=s.slice(m[0].length); }
+      const mm=s.match(/\((\d+(?:\.\d+)?)\s*분?\)\s*$/); out.push({text:s.replace(/\((\d+(?:\.\d+)?)\s*분?\)\s*$/,"").trim(), room, min:mm?Number(mm[1]):null}); } return out; }
   function normalize(list){
     const out=[]; for(const r of list||[]){ if(!r) continue; const date=dateOf(r.dateText||r.date), down=Number(r.totalDown)||0;
       let codes=String(r.reasonCode||"").split(/[,;\/\s]+/).map(s=>s.trim().toUpperCase()).filter(Boolean), auto=false;
+      let items=null;
+      if(!codes.length&&String(r.reason||"").trim()){ items=splitReason(r.reason).map(it=>Object.assign(it,{k:classify((it.room||"")+" "+it.text,true)[0]})); if(items.length&&items.some(it=>it.min!=null)){ const rest=items.filter(it=>it.min==null); const left=Math.max(0,down-items.reduce((a,it)=>a+(it.min||0),0)); for(const it of rest) it.min=rest.length?left/rest.length:0; codes=[...new Set(items.map(it=>it.k))]; auto=true; } else items=null; }
       if(!codes.length){ codes=down>0||String(r.reason||"").trim()?classify(r.reason):[]; auto=codes.length>0; }
-      out.push({date, line:String(r.line||""), prod:String(r.prodName||""), lot:String(r.lotNo||""), oee:pct(r.oee), avail:pct(r.avail), perf:pct(r.perf), yld:pct(r.yieldRate), down, reason:String(r.reason||""), codes, auto, cm:String(r.countermeasure||"")}); }
+      out.push({items,date, dateText:String(r.dateText||""), line:String(r.line||""), prod:String(r.prodName||""), lot:String(r.lotNo||""), oee:pct(r.oee), avail:pct(r.avail), perf:pct(r.perf), yld:pct(r.yieldRate), down, reason:String(r.reason||""), codes, auto, cm:String(r.countermeasure||"")}); }
     return out.filter(r=>r.date);
   }
   /* 항목 이름 인식 (시트 머리줄 · 붙여넣기 공용) */
@@ -49,11 +54,13 @@ const OEEEDU=(function(){
     return out;
   }
   function setRows(raw,src,demo){ st.rows=normalize(raw); st.src=src; st.demo=!!demo; const ds=st.rows.map(r=>r.date).sort(); st.from=(ds[0]||"").slice(0,7); st.to=(ds[ds.length-1]||"").slice(0,7);
-    const ls=[...new Set(st.rows.map(r=>r.line))]; st.line=ls.find(l=>l.includes(st.cfg.line))||""; }
+    const ls=[...new Set(st.rows.map(r=>r.line))]; st.line=ls.find(l=>l.includes(st.cfg.line))||""; st.fy=(ds[ds.length-1]||"").slice(0,4); st.fm="all"; st.fp="all"; }
   /* 예시 데이터 : 화면 확인용 (실제 실적 아님 — 규칙으로 만든 값) */
-  function demoData(){ const C=st.cfg.codes.filter(c=>c.k!=="ETC"), out=[]; let seed=11; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
-    for(let m=0;m<6;m++) for(let i=0;i<7;i++){ const d=new Date(Date.UTC(2026,4+m,2+i*4)), w=rnd(), c=C[Math.floor(Math.pow(rnd(),2.2)*C.length)], has=w<.62, down=has?Math.round(10+rnd()*70):0, av=100-down/4.8, pf=90+rnd()*9, yl=97+rnd()*2.5;
-      out.push({dateText:d.toISOString().slice(0,10), line:st.cfg.line, prodName:"예시품목", lotNo:"EX"+String(m*7+i+1).padStart(3,"0"), avail:av, perf:pf, yieldRate:yl, oee:av*pf*yl/1e4, totalDown:down, reason:has?c.nm+" (예시)":"", reasonCode:has?c.k:"", countermeasure:""}); }
+  function demoData(){ const C=st.cfg.codes.filter(c=>c.k!=="ETC"), out=[], LN=["계수기2호","계수기3호","블리스터(흥아)",st.cfg.line]; let seed=11; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
+    for(let m=0;m<6;m++) for(let i=0;i<8;i++){ const d=new Date(Date.UTC(2026,4+m,2+i*3)), line=LN[i%4], has=rnd()<.7, its=[]; let down=0;
+      if(has){ const n=line===st.cfg.line?1+Math.floor(rnd()*3):1; for(let q=0;q<n;q++){ const c=C[Math.floor(Math.pow(rnd(),1.6)*C.length)], mn=5*(1+Math.floor(rnd()*8)); down+=mn; its.push((line===st.cfg.line?(c.room==="F"?"충전- ":"포장- "):"")+(line===st.cfg.line?c.nm:"설비 정지")+"("+mn+"분)"); } }
+      const av=100-down/4.8, pf=60+rnd()*38, yl=90+rnd()*9.5;
+      out.push({dateText:d.toISOString().slice(0,10), line, prodName:line===st.cfg.line?"예시 파우치품목":"예시 정제품목", lotNo:"EX"+String(m*8+i+1).padStart(3,"0"), avail:av, perf:pf, yieldRate:yl, oee:av*pf*yl/1e4, totalDown:down, reason:its.join(", "), countermeasure:has?"(예시) 조치 완료":""}); }
     return out; }
 
   /* ── 아티팩트 기능 (db · user · mcp) ── */
@@ -105,15 +112,13 @@ const OEEEDU=(function(){
   }
   let xlsxP=null;
   function loadXlsx(){ if(window.XLSX) return Promise.resolve(window.XLSX); if(!xlsxP) xlsxP=new Promise((ok,no)=>{ const s=document.createElement("script"); s.src=XLSX_URL; s.onload=()=>window.XLSX?ok(window.XLSX):no(new Error("SheetJS 로드 실패")); s.onerror=()=>{ xlsxP=null; no(new Error("SheetJS(cdnjs) 를 불러오지 못했습니다")); }; document.head.appendChild(s); }); return xlsxP; }
-  /* 이 IDT 라인(cfg.line)만 저장 (11/16 사용자 결정 : 파우치 IDT 는 파우치 시트 · 행만) */
-  const mine=(rows,sheet)=>rows.filter(r=>String(r.line||"").includes(st.cfg.line)||(!String(r.line||"").trim()&&String(sheet||"").includes(st.cfg.line)));
   async function driveRead(file){
     const r=await cap.mcp.callTool(DRIVE,"download_file_content",{fileId:file.id, exportMimeType:XLSX_MIME});
     const b64=b64Of(r); if(!b64) throw new Error("내려받은 내용에서 시트 파일을 찾지 못했습니다.");
     const X=await loadXlsx(), wb=X.read(b64.replace(/\s/g,""),{type:"base64", cellDates:true});
     const raw=[], sheets=[];
-    for(const nm of wb.SheetNames){ const rows=X.utils.sheet_to_json(wb.Sheets[nm],{header:1, raw:true, defval:""}), got=mine(fromTable(rows,nm),nm); if(got.length){ raw.push(...got); sheets.push(nm); } }
-    if(!raw.length) throw new Error("'"+st.cfg.line+"' 시트 · 행을 찾지 못했습니다 (머리줄 '작업기간' · '포장라인' 확인).");
+    for(const nm of wb.SheetNames){ const rows=X.utils.sheet_to_json(wb.Sheets[nm],{header:1, raw:true, defval:""}), got=fromTable(rows,nm); if(got.length){ raw.push(...got); sheets.push(nm); } }
+    if(!raw.length) throw new Error("시트에서 '작업기간' · '포장라인' 머리줄을 찾지 못했습니다.");
     return {raw, sheets};
   }
   async function sync(file,quiet){
@@ -124,7 +129,7 @@ const OEEEDU=(function(){
       setRows(raw,"Google Drive · "+(file.title||"")+" ("+kst(Date.now())+" 읽음)",false);
       let saved="skip"; try{ saved=await dbSave(raw,file,sheets); }catch(e){ saved="fail"; console.warn("db save",e); }
       st.msg=raw.length+" 건 읽음 ("+sheets.join(" · ")+") — "+(saved==="ok"?"IDT DB 에 저장했습니다.":saved==="fail"?"IDT DB 저장은 권한이 없어 건너뜀 (화면에만 표시).":"IDT DB 를 쓸 수 없어 화면에만 표시합니다.");
-      if(!quiet) st.tab="trend";
+      if(!quiet) st.tab="status";
     }catch(e){ st.msg="Drive 읽기 실패 — "+errMsg(e)+(st.rows.length?" (기존 데이터 유지)":""); console.warn("drive",e); }
     st.busy=""; render();
   }
@@ -137,12 +142,12 @@ const OEEEDU=(function(){
       try{ res=await fetch(url,{redirect:"follow",credentials:"omit"}); }catch(e){ st.blocked=true; if(cap.mcp&&!st.files) driveSearch("OEE").then(f=>{ st.files=f; render(); }).catch(()=>{}); throw new Error("연결이 막혔습니다 (claude.ai 아티팩트는 외부 주소 호출을 막음). 위 [1. Google Drive 시트 연결] 목록에서 OEE 시트의 [이 시트 연결] 을 누르세요."); }
       if(!res.ok) throw new Error("응답 "+res.status);
       const txt=await res.text(); if(/^\s*</.test(txt)) throw new Error("JSON 대신 웹 화면이 왔습니다. doGet 에 format=json 출력이 추가 · 재배포되었는지, 웹 앱 액세스 권한이 '모든 사용자' 인지 확인하세요.");
-      const raw=mine(parseText(txt)); if(!raw.length) throw new Error("'"+st.cfg.line+"' 라인 데이터가 0 건입니다.");
+      const raw=parseText(txt); if(!raw.length) throw new Error("받은 데이터가 0 건입니다.");
       setRows(raw,"Apps Script ("+kst(Date.now())+" 읽음)",false);
       let saved="skip"; try{ saved=await dbSave(raw,{url:u,title:"Apps Script 주소"},["Apps Script"]); }catch(e){ saved="fail"; console.warn("db save",e); }
       st.msg=raw.length+" 건 읽음 — "+(saved==="ok"?"IDT DB 에 저장했습니다. 이후 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.":saved==="fail"?"IDT DB 저장은 권한이 없어 건너뜀 (화면에만 표시).":"IDT DB 를 쓸 수 없어 화면에만 표시합니다.");
       try{ localStorage.setItem("oeeedu.url",u); }catch(e){}
-      if(!quiet) st.tab="trend";
+      if(!quiet) st.tab="status";
     }catch(e){ st.msg="Apps Script 읽기 실패 — "+e.message+(st.rows.length?" (기존 데이터 유지)":""); console.warn("url",e); }
     st.busy=""; render();
   }
@@ -152,7 +157,8 @@ const OEEEDU=(function(){
 
   /* ── 분석 ── */
   function view(){ return st.rows.filter(r=>(!st.line||r.line===st.line)&&(!st.from||r.date.slice(0,7)>=st.from)&&(!st.to||r.date.slice(0,7)<=st.to)); }
-  function byCode(rows){ const M={}; for(const r of rows){ if(!r.codes.length) continue; const share=r.down/r.codes.length; for(const k of r.codes){ const o=M[k]||(M[k]={k,down:0,n:0,auto:0,months:{}}); o.down+=share; o.n++; if(r.auto) o.auto++; const mo=r.date.slice(0,7); o.months[mo]=(o.months[mo]||0)+share; } }
+  const downOf=(r,k)=>r.items?r.items.filter(it=>it.k===k).reduce((a,it)=>a+(it.min||0),0):(r.codes.includes(k)?r.down/r.codes.length:0);
+  function byCode(rows){ const M={}; for(const r of rows){ if(!r.codes.length) continue; for(const k of r.codes){ const o=M[k]||(M[k]={k,down:0,n:0,auto:0,months:{}}); const d=downOf(r,k); o.down+=d; o.n+=r.items?r.items.filter(it=>it.k===k).length:1; if(r.auto) o.auto++; const mo=r.date.slice(0,7); o.months[mo]=(o.months[mo]||0)+d; } }
     return Object.values(M).sort((a,b)=>b.down-a.down||b.n-a.n); }
   /* 이 IDT 라인의 부동 유형별 누적 (이상사례 대처 교육 우선순위용) */
   function codeStats(){ const rows=st.rows.filter(r=>r.line.includes(st.cfg.line)), o={}; for(const c of byCode(rows)) o[c.k]={down:c.down, n:c.n}; return o; }
@@ -176,15 +182,15 @@ const OEEEDU=(function(){
   function open(){ let w=$o("#oeeWrap"); if(!w){ w=document.createElement("div"); w.id="oeeWrap"; (st.cfg.mount||document.body).appendChild(w); w.addEventListener("click",onClick); w.addEventListener("change",onChange); } w.classList.add("on"); render(); autoSync(); }
   function close(){ const w=$o("#oeeWrap"); if(w) w.classList.remove("on"); }
   function render(){
-    lamp(); const w=$o("#oeeWrap"); if(!w||!w.classList.contains("on")) return; const tabs=[["data","① 데이터 연결"],["trend","② 부동 트렌드"],["effect","③ 교육 효과"]];
+    lamp(); const w=$o("#oeeWrap"); if(!w||!w.classList.contains("on")) return; const tabs=[["status","① OEE 현황"],["effect","② 교육 효과"],["data","③ 데이터 연결"]];
     const keep=$o("#oeeText")?$o("#oeeText").value:"", kw=$o("#oeeKw")?$o("#oeeKw").value:null; const uv=$o("#oeeUrl")?$o("#oeeUrl").value:null;
     w.innerHTML='<div class="oeeBox"><div class="oeeHead"><b>OEE 관리 대시보드 <small>'+esc(st.cfg.title||"")+'</small></b><div class="oeeTabs">'+tabs.map(([k,t])=>'<button data-tab="'+k+'" class="'+(st.tab===k?"on":"")+'">'+t+'</button>').join("")+'</div><button data-act="close" class="oeeX">닫기</button></div>'+
-      (st.demo?'<div class="oeeDemo">예시 데이터로 표시 중입니다 — 실제 실적이 아닙니다.</div>':'')+(st.busy?'<div class="oeeMsg">⏳ '+esc(st.busy)+'</div>':'')+(st.msg?'<div class="oeeMsg">'+esc(st.msg)+'</div>':'')+'<div class="oeeBody">'+({data:tabData,trend:tabTrend,effect:tabEffect}[st.tab]())+'</div></div>';
+      (st.demo?'<div class="oeeDemo">예시 데이터로 표시 중입니다 — 실제 실적이 아닙니다.</div>':'')+(st.busy?'<div class="oeeMsg">⏳ '+esc(st.busy)+'</div>':'')+(st.msg?'<div class="oeeMsg">'+esc(st.msg)+'</div>':'')+'<div class="oeeBody">'+({data:tabData,status:tabStatus,effect:tabEffect}[st.tab]||tabStatus)()+'</div></div>';
     if($o("#oeeText")) $o("#oeeText").value=keep; if(kw!=null&&$o("#oeeKw")) $o("#oeeKw").value=kw; if(uv!=null&&$o("#oeeUrl")) $o("#oeeUrl").value=uv;
   }
   function filterBar(){ const lines=[...new Set(st.rows.map(r=>r.line))].sort(), months=[...new Set(st.rows.map(r=>r.date.slice(0,7)))].sort(), op=(l,v)=>l.map(x=>'<option'+(x===v?" selected":"")+'>'+esc(x)+'</option>').join("");
     return '<div class="oeeFilter">라인 <select data-f="line"><option value="">전체</option>'+op(lines,st.line)+'</select> 기간 <select data-f="from">'+op(months,st.from)+'</select> ~ <select data-f="to">'+op(months,st.to)+'</select><span>'+view().length+' 건</span></div>'; }
-  function need(){ return '<p class="oeeEmpty">먼저 [① 데이터 연결] 에서 OEE 데이터를 연결하세요.</p>'; }
+  function need(){ return '<p class="oeeEmpty">먼저 [③ 데이터 연결] 에서 OEE 데이터를 연결하세요.</p>'; }
   function tabData(){
     const M=st.meta, dbTxt={none:"이 화면에서는 IDT DB 를 쓸 수 없습니다 (claude.ai 아티팩트로 열면 사용).",loading:"IDT DB 읽는 중…",timeout:"IDT DB 응답이 늦습니다.",error:"IDT DB 를 읽지 못했습니다.",ok:M?"마지막 동기화 "+kst(M.syncedAt)+" · "+esc(M.fileName||"")+" · "+(M.n||0)+" 건 ("+esc((M.sheets||[]).join(" · "))+")":"아직 저장된 데이터가 없습니다."}[st.dbState];
     const files=st.files?(st.files.length?'<table class="oeeT"><tr><th>시트 파일</th><th>수정</th><th></th></tr>'+st.files.map(f=>'<tr><td>'+esc(f.title)+'</td><td>'+esc(String(f.modified).slice(0,10))+'</td><td><button data-act="pick" data-id="'+esc(f.id)+'" data-t="'+esc(f.title)+'">이 시트 연결</button></td></tr>').join("")+'</table>':'<p class="oeeEmpty">찾은 시트가 없습니다.</p>'):"";
@@ -204,13 +210,48 @@ const OEEEDU=(function(){
         '<p>부동 유형 코드 입력 '+st.rows.filter(r=>r.codes.length&&!r.auto).length+' 건 · 자유 기재 사유를 낱말로 분류 '+st.rows.filter(r=>r.auto).length+' 건 (이 중 미분류 '+st.rows.filter(r=>r.auto&&r.codes.includes("ETC")).length+' 건)</p>':'<p class="oeeEmpty">표시 중인 데이터가 없습니다.</p>')+
       '<h3>부동 유형 코드 ('+esc(st.cfg.line)+')</h3><table class="oeeT"><tr><th>코드</th><th>부동 유형</th><th>IDT 실습</th></tr>'+st.cfg.codes.map(c=>'<tr><td>'+c.k+'</td><td>'+esc(c.nm)+'</td><td>'+(c.inc?esc(c.roomNm||""):"-")+'</td></tr>').join("")+'</table></div></div>';
   }
-  function tabTrend(){
-    if(!st.rows.length) return need(); const rows=view(), list=byCode(rows), tot=list.reduce((a,o)=>a+o.down,0), mx=Math.max(1,...list.map(o=>o.down)), mn=Math.max(1,...list.map(o=>o.n)), withDown=rows.filter(r=>r.down>0).length;
-    const months=[...new Set(rows.map(r=>r.date.slice(0,7)))].sort(), mTot=months.map(m=>rows.filter(r=>r.date.slice(0,7)===m).reduce((a,r)=>a+r.down,0)), mM=Math.max(1,...mTot);
-    return filterBar()+'<div class="oeeKpi">'+[["평균 OEE",f1(avg(rows,"oee"))+" %"],["시간가동률",f1(avg(rows,"avail"))+" %"],["성능가동률",f1(avg(rows,"perf"))+" %"],["수율",f1(avg(rows,"yld"))+" %"],["부동시간 합계",Math.round(rows.reduce((a,r)=>a+r.down,0))+" 분"],["부동 발생",withDown+" / "+rows.length+" 건"]].map(([a,b])=>'<div><s>'+a+'</s><b>'+b+'</b></div>').join("")+'</div><p class="oeeNote">※ 비율은 기록별 값의 단순 평균 · 한 기록에 유형이 여럿이면 부동시간을 똑같이 나눔</p>'+
-      '<div class="oeeCols"><div><h3>부동 유형 순위 (부동시간)</h3>'+(list.length?'<table class="oeeT"><tr><th>순위</th><th>부동 유형</th><th>부동시간</th><th>비중</th><th>발생</th></tr>'+list.map((o,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(codeOf(o.k).nm)+(o.auto?' <i title="자유 기재를 낱말로 분류">*</i>':'')+'</td><td><div class="oeeBar"><span style="width:'+(o.down/mx*100).toFixed(0)+'%"></span><em>'+Math.round(o.down)+' 분</em></div></td><td>'+(tot?(o.down/tot*100).toFixed(0):0)+' %</td><td><div class="oeeBar n"><span style="width:'+(o.n/mn*100).toFixed(0)+'%"></span><em>'+o.n+' 회</em></div></td></tr>').join("")+'</table><p class="oeeNote">* 표시 = 자유 기재 사유를 낱말로 분류한 기록 포함 (정확도 확인 필요)</p>':'<p class="oeeEmpty">이 기간에 부동 기록이 없습니다.</p>')+
-      (st.cfg.openInc?'<p><button data-act="inc">이상사례 대처 교육 열기 (이 순위 반영)</button></p>':'')+'</div>'+
-      '<div><h3>월별 부동시간</h3><div class="oeeMon">'+months.map((m,i)=>'<div><span style="height:'+(mTot[i]/mM*100).toFixed(0)+'%"></span><em>'+Math.round(mTot[i])+'</em><s>'+m.slice(2)+'</s></div>').join("")+'</div></div></div>';
+  /* ── ① OEE 현황 : 포장2팀 OEE 대시보드와 같은 구성 (11/16 사용자 제공 화면 기준 · 입력 · 대책 수정은 원래 대시보드에서) ──
+     상단(총 생산 배치 · 목표 95 %) · 년 · 월 · 제품 필터 · 관리 품목 · KPI 4 · 월별 OEE 트렌드(계수기 · 블리스터 · 파우치) · 라인별 OEE · 제품별 부동 원인 · 대책 게시판 · 데이터 목록
+     집계 방식도 같음 : 기록별 값의 단순 평균, 트렌드는 선택 연도 · 제품 기준, 나머지는 연도 · 월 · 제품 기준 */
+  const TARGET=95, LINES=["계수기2호","계수기3호","블리스터(흥아)","파우치"];
+  const MANAGED=[["병(30T)","록소닌정, 메녹틸정40mg, 아토스타10mg, 클로피정, 암로디핀정5mg"],["PTP","모가프텐트로키"],["파우치","판콜에이치건조시럽"]];
+  function svgBars(labels,series,opt){ const W=620,H=250,L=44,R=12,T=26,B=30,iw=W-L-R,ih=H-T-B, y=v=>T+ih*(1-Math.min(120,v)/120), n=labels.length, gw=iw/n, ns=series.length, bw=Math.min(opt&&opt.max||26,gw*.72/ns);
+    let s='<svg viewBox="0 0 '+W+' '+H+'" class="odSvg" role="img">';
+    for(let v=0;v<=120;v+=20) s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(v)+'" y2="'+y(v)+'" stroke="#eef1f4"/><text x="'+(L-6)+'" y="'+(y(v)+4)+'" text-anchor="end" class="odAx">'+v+'%</text>';
+    labels.forEach((lb,i)=>{ const cx=L+gw*(i+.5); s+='<text x="'+cx+'" y="'+(H-10)+'" text-anchor="middle" class="odAx">'+esc(lb)+'</text>';
+      series.forEach((se,j)=>{ const v=se.vals[i]; if(!(v>0)) return; const x=cx-bw*ns/2+j*bw; s+='<rect x="'+(x+1)+'" y="'+y(v)+'" width="'+(bw-2)+'" height="'+(T+ih-y(v))+'" rx="3" fill="'+se.c+'"/><text x="'+(x+bw/2)+'" y="'+(y(v)-5)+'" text-anchor="middle" class="odVal">'+v.toFixed(1)+'%</text>'; }); });
+    s+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y(TARGET)+'" y2="'+y(TARGET)+'" stroke="#ef4444" stroke-dasharray="5 5" stroke-width="1.5"/></svg>';
+    return s+'<div class="odLeg">'+series.map(se=>'<span><i style="background:'+se.c+'"></i>'+esc(se.nm)+'</span>').join("")+'<span><i class="odTg"></i>목표선 ('+TARGET+'%)</span></div>'; }
+  function tabStatus(){
+    if(!st.rows.length) return need();
+    const ym=r=>r.date.slice(0,4), mo=r=>r.date.slice(5,7), years=[...new Set(st.rows.map(ym))].sort(), prods=[...new Set(st.rows.map(r=>r.prod).filter(Boolean))].sort();
+    const fy=st.fy||"all", fm=st.fm||"all", fp=st.fp||"all";
+    const F=st.rows.filter(r=>(fp==="all"||r.prod===fp)&&(fy==="all"||ym(r)===fy)&&(fm==="all"||mo(r)===fm)).sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:a.prod<b.prod?-1:a.prod>b.prod?1:a.lot<b.lot?-1:1);
+    const TR=st.rows.filter(r=>(fp==="all"||r.prod===fp)&&(fy==="all"||ym(r)===fy));
+    const A=(rs,f)=>{ const v=rs.map(r=>r[f]).filter(x=>x!=null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:0; };
+    const op=(list,v,fmt)=>'<option value="all">전체</option>'+list.map(x=>'<option value="'+esc(x)+'"'+(x===v?" selected":"")+'>'+esc(fmt?fmt(x):x)+'</option>').join("");
+    const MK=["01","02","03","04","05","06","07","08","09","10","11","12"], grp=[["계수기(2,3호) 평균 OEE","#3b82f6",r=>/계수기/.test(r.line)],["블리스터(흥아) 평균 OEE","#10b981",r=>/블리스터/.test(r.line)],["파우치 평균 OEE","#f59e0b",r=>/파우치/.test(r.line)]];
+    const trend=svgBars(MK.map(m=>(+m)+"월"),grp.map(([nm,c,f])=>({nm,c,vals:MK.map(m=>A(TR.filter(r=>f(r)&&mo(r)===m),"oee"))})));
+    const lineC=svgBars(LINES,[{nm:"OEE 성과",c:"#3b82f6",vals:LINES.map(l=>A(F.filter(r=>r.line===l),"oee"))}],{max:50});
+    let board;
+    if(fm!=="all"){ const ty=fy!=="all"?fy+"년 ":"", M={}; for(const r of F){ const rs=r.reason.trim(); if(!rs) continue; const L=M[r.prod]||(M[r.prod]=[]); if(!L.some(c=>c.r===rs)&&L.length<2) L.push({r:rs,c:r.cm.trim()||"대책 미등록"}); }
+      const ks=Object.keys(M).sort(); board=ks.length?ks.map(p=>'<div class="odBi"><div class="odBt">'+esc(p)+' <small>('+ty+(+fm)+'월 기준)</small></div>'+M[p].map(c=>'<div class="odBc"><div class="odBx"><b class="w">⚠️ 주요 부동 원인</b>'+esc(c.r)+'</div><div class="odBx"><b class="s">💡 개선 대책 및 피드백</b>'+esc(c.c)+'</div></div>').join("")+'</div>').join(""):'<div class="odNo">해당 월에 등록된 부동 원인이 없습니다.</div>';
+    } else board='<div class="odNo">위 필터에서 <b>특정 월</b>을 선택하면<br>해당 월의 부동 원인 및 대책 종합 게시판이 표시됩니다.</div>';
+    const rowsH=F.length?F.map(r=>{ const fail=r.oee!=null&&r.oee<TARGET&&r.reason.trim(), oc=r.oee>=TARGET?"#2563eb":fail?"#ef4444":"#f59e0b";
+        return '<tr><td class="d">'+esc(r.dateText||r.date)+'</td><td><b>'+esc(r.prod||"-")+'</b></td><td>'+esc(r.lot||"-")+'</td><td><span class="odLn">'+esc(r.line||"-")+'</span></td><td>'+f1(r.avail)+'%</td><td>'+f1(r.perf)+'%</td><td>'+f1(r.yld)+'%</td><td style="color:'+oc+';font-weight:900">'+f1(r.oee)+'%</td><td class="dn">'+(r.down>0?r.down+'분':'-')+'</td><td class="l">'+esc(r.reason)+'</td><td class="l">'+(r.cm?'<span class="odCm">'+esc(r.cm)+'</span>':fail?'<span class="odMu">(미등록)</span>':'<span class="odMu">-</span>')+'</td></tr>'; }).join(""):'<tr><td colspan="11" class="odMu" style="padding:20px">선택한 기간 · 제품에 해당하는 데이터가 없습니다.</td></tr>';
+    const P=st.rows.filter(r=>r.line.includes(st.cfg.line)&&(fy==="all"||ym(r)===fy)&&(fm==="all"||mo(r)===fm)), pl=byCode(P), pt=pl.reduce((a,o)=>a+o.down,0)||1, pm=Math.max(1,...pl.map(o=>o.down));
+    return '<div class="od">'+
+      '<div class="odTop"><div><h2>포장2팀 <span>OEE</span> DASHBOARD</h2><p>고형제 포장 OEE 데이터 통합 분석 및 실적 현황</p><p class="odSt"><i></i>'+esc(st.src)+'</p></div>'+
+        '<div class="odTs"><div><s>총 생산 배치</s><b class="bl">'+F.length+'</b><em>건 (선택 기간)</em></div><div class="tg"><s>🎯 OEE 목표</s><b class="rd">'+TARGET.toFixed(1)+'<small>%</small></b><em>이상</em></div></div>'+
+        '<div class="odFl"><label>년 <select data-f="fy">'+op(years,fy,x=>x+"년")+'</select></label><label>월 <select data-f="fm">'+op(MK,fm,x=>(+x)+"월")+'</select></label><label>제품명 <select data-f="fp">'+op(prods,fp)+'</select></label>'+
+        (st.meta&&(st.meta.fileId||st.meta.url)?'<button data-act="'+(st.meta.url?"reurl":"resync")+'" class="odG">↻ 대시보드 갱신</button>':'')+'</div></div>'+
+      '<div class="odMi"><b>📌 OEE 관리 품목 <small>(수탁 포함)</small></b>'+MANAGED.map(([a,b])=>'<span><i>'+a+'</i>'+b+'</span>').join("")+'</div>'+
+      '<div class="odK">'+[["시간가동률","#10b981","avail"],["성능가동률","#f59e0b","perf"],["수율","#8b5cf6","yld"],["OEE","#2563eb","oee"]].map(([n,c,f])=>'<div style="--c:'+c+'"><s>'+n+'</s><b>'+A(F,f).toFixed(1)+'<small>%</small></b></div>').join("")+'</div>'+
+      '<div class="odC"><div class="odL"><div class="odCard"><h4>월별 OEE 트렌드 추이</h4>'+trend+'</div><div class="odCard"><h4>라인별 OEE 성과 비교</h4>'+lineC+'</div></div>'+
+        '<div class="odCard odB"><h4>제품별 주요 부동 원인 및 대책 종합 게시판'+(fm!=="all"?' ('+(fy!=="all"?fy+"년 ":"")+(+fm)+'월)':'')+'</h4><div class="odBw">'+board+'</div></div></div>'+
+      '<div class="odCard"><h4>파우치 부동 유형 순위 (IDT 이상사례 대처 교육 연계 · 사유 글의 항목별 분 합계)</h4>'+(pl.length?'<table class="oeeT"><tr><th>순위</th><th>부동 유형</th><th>부동시간</th><th>비중</th><th>발생</th></tr>'+pl.map((o,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(codeOf(o.k).nm)+'</td><td><div class="oeeBar"><span style="width:'+(o.down/pm*100).toFixed(0)+'%"></span><em>'+Math.round(o.down)+' 분</em></div></td><td>'+(o.down/pt*100).toFixed(0)+' %</td><td>'+o.n+' 회</td></tr>').join("")+'</table>':'<p class="oeeEmpty">이 기간 파우치 부동 기록이 없습니다.</p>')+
+        (st.cfg.openInc?'<p style="margin-top:8px"><button data-act="inc">이상사례 대처 교육 열기 (이 순위 반영)</button></p>':'')+'</div>'+
+      '<div class="odCard"><h4>OEE 데이터 입력 목록</h4><div class="odTw"><table class="odT"><tr><th>작업기간</th><th>제품명</th><th>제조번호(LOT)</th><th>라인</th><th>시간가동률</th><th>성능가동률</th><th>수율</th><th>OEE</th><th>부동시간</th><th width="17%">부동사유</th><th width="17%">대책</th></tr>'+rowsH+'</table></div><p class="oeeNote">※ 데이터 입력 · 대책 등록은 원래 OEE 대시보드에서 합니다 (IDT 는 읽기 전용).</p></div></div>';
   }
   function tabEffect(){
     const log=getLog(); if(!log.length) return '<p class="oeeEmpty">아직 완료한 이상사례 대처 교육이 없습니다. 메인화면 [OEE › 이상사례 대처 교육] 에서 학습 · 평가를 진행하세요.</p>';
@@ -219,15 +260,15 @@ const OEEEDU=(function(){
       return '<tr><td>'+esc(codeOf(k).nm)+'</td><td>'+L.filter(l=>l.mode!=="incExam").length+' 회</td><td>'+E.length+' 회</td><td>'+(E.length?m(E.map(l=>l.score)).toFixed(0)+' 점':"-")+'</td><td>'+(T.length?Math.round(m(T.map(l=>l.sec)))+' 초':"-")+'</td><td>'+(L.length?m(L.map(l=>l.wrong||0)).toFixed(1):"-")+'</td><td>'+esc(L.map(l=>l.d).sort().pop())+'</td></tr>'; }).join("")+'</table>';
     if(!st.rows.length) return h+need();
     const rows=st.rows.filter(r=>r.line.includes(st.cfg.line)), first={}; for(const l of log) if(!first[l.k]||l.d<first[l.k]) first[l.k]=l.d;
-    const stat=(rs,k)=>{ const hit=rs.filter(r=>r.codes.includes(k)); return {n:rs.length, hit:hit.length, down:hit.reduce((a,r)=>a+r.down/r.codes.length,0), oee:avg(rs,"oee")}; };
+    const stat=(rs,k)=>{ const hit=rs.filter(r=>r.codes.includes(k)); return {n:rs.length, hit:hit.length, down:hit.reduce((a,r)=>a+downOf(r,k),0), oee:avg(rs,"oee")}; };
     return h+'<h3>교육 전 · 후 부동 비교</h3><p>첫 교육일을 기준으로 같은 부동 유형의 교육 전 · 후를 비교합니다 (라인 : '+esc(st.cfg.line)+').</p><table class="oeeT"><tr><th>부동 유형</th><th>첫 교육일</th><th>구분</th><th>기록 수</th><th>발생</th><th>기록당 부동시간</th><th>평균 OEE</th></tr>'+Object.keys(first).map(k=>{ const d=first[k], b=stat(rows.filter(r=>r.date<d),k), a=stat(rows.filter(r=>r.date>=d),k), cell=s=>s.n?'<td>'+s.n+'</td><td>'+s.hit+' 회</td><td>'+(s.down/s.n).toFixed(1)+' 분</td><td>'+f1(s.oee)+' %</td>':'<td colspan="4" class="oeeEmpty">데이터 없음</td>';
       return '<tr><td rowspan="2">'+esc(codeOf(k).nm)+'</td><td rowspan="2">'+d+'</td><td>교육 전</td>'+cell(b)+'</tr><tr><td>교육 후</td>'+cell(a)+'</tr>'; }).join("")+'</table><p class="oeeNote">※ 교육 후 기록이 쌓여야 비교할 수 있습니다. 다른 요인(품목 · 설비 정비 등)의 영향은 구분하지 않습니다.</p>'+(localLog().length?'<button data-act="clearLog">이 브라우저의 교육 기록 지우기</button>':'');
   }
   function onChange(e){ const f=e.target.dataset&&e.target.dataset.f; if(f){ st[f]=e.target.value; render(); } }
   function onClick(e){ const b=e.target.closest("button"); if(!b) return; if(b.dataset.tab){ st.tab=b.dataset.tab; render(); return; } const a=b.dataset.act;
     if(a==="close") close();
-    else if(a==="demo"){ setRows(demoData(),"예시 데이터",true); st.tab="trend"; render(); }
-    else if(a==="paste"){ try{ setRows(parseText($o("#oeeText").value),"붙여넣기",false); st.tab="trend"; }catch(err){ st.msg="붙여넣기 실패 : "+err.message; } render(); }
+    else if(a==="demo"){ setRows(demoData(),"예시 데이터",true); st.tab="status"; render(); }
+    else if(a==="paste"){ try{ setRows(parseText($o("#oeeText").value),"붙여넣기",false); st.tab="status"; }catch(err){ st.msg="붙여넣기 실패 : "+err.message; } render(); }
     else if(a==="search"){ const w=($o("#oeeKw")&&$o("#oeeKw").value.trim())||"OEE"; st.busy="Drive 에서 '"+w+"' 시트 찾는 중…"; render();
       driveSearch(w).then(f=>{ st.files=f; }).catch(err=>{ st.msg="Drive 검색 실패 — "+errMsg(err); }).then(()=>{ st.busy=""; render(); }); }
     else if(a==="pick") sync({id:b.dataset.id, title:b.dataset.t});

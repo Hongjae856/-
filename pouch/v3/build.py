@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "edu.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -54,6 +54,7 @@ PATCH = {
         ("정기 공정검사(IPC)와 알람에 대응합니다.", "정기 공정검사(IPC)를 수행합니다.", 1),
         ("화면 오류를 감시하고 이상사례에 대응합니다.", "화면 오류를 감시합니다.", 1),
         ("  showResult(manual);\n", "  (isInc()?showIncResult:showResult)(manual);\n", 1),
+        ('if(!S.activeTrouble) beginRecovery("F1");', 'if(!S.activeTrouble) beginRecovery(S.flags.incK==="RF4"?"RF4":"F1");', 1),   # 중량 점검 사례 (cases.js RF4)
         ('FX(FIL.xc,1500,FIL.z1+40,"front"', 'FX(...ANC.sealFront,"front"', 1),
         ('FX(PANEL_F.x,1100,PANEL_F.z,"panel"', 'FX(...ANC.panelIn,"panel"', 1),
         ('FX(FIL.xc,700,FIL.z1,"front"', 'FX(...ANC.limit,"front"', 1),

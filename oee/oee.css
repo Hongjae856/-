@@ -34,3 +34,28 @@
 #oeeLamp{position:absolute;left:22px;bottom:16px;display:flex;align-items:center;gap:7px;font:700 13px/1 "Malgun Gothic","Noto Sans KR",sans-serif;color:#5d7086;cursor:pointer;padding:6px 11px;border:1px solid #d5dee8;border-radius:16px;background:#fff}
 #oeeLamp i{width:11px;height:11px;border-radius:50%;background:#d23b2c;box-shadow:0 0 0 3px rgba(210,59,44,.18)}
 #oeeLamp.on i{background:#22a052;box-shadow:0 0 0 3px rgba(34,160,82,.2)}
+/* ① OEE 현황 (포장2팀 OEE 대시보드 구성) */
+.od{display:flex;flex-direction:column;gap:12px}
+.odTop{background:linear-gradient(135deg,#0f172a,#1e3a5f);border-radius:14px;padding:14px 22px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:10px;color:#fff}
+.odTop h2{font-size:21px;font-weight:900}.odTop h2 span{color:#38bdf8}.odTop p{font-size:11.5px;color:#94a3b8;margin:2px 0}.odSt i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#22c55e;margin-right:5px}
+.odTs{display:flex;gap:8px}.odTs>div{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 16px;text-align:center;min-width:120px}.odTs .tg{background:rgba(239,68,68,.12);border-color:rgba(239,68,68,.3)}
+.odTs s{display:block;text-decoration:none;font-size:10.5px;color:#94a3b8;font-weight:700}.odTs b{font-size:22px;font-weight:900}.odTs .bl{color:#60a5fa}.odTs .rd{color:#fca5a5}.odTs small{font-size:13px;margin-left:2px}.odTs em{display:block;font-style:normal;font-size:11px;color:#94a3b8}
+.odFl{width:100%;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-top:1px solid rgba(255,255,255,.1);padding-top:9px}
+.odFl label{display:flex;gap:6px;align-items:center;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:8px;padding:4px 9px;font-size:11px;color:#94a3b8;font-weight:700}
+.odFl select{border:0;border-radius:5px;padding:4px 7px;font:700 12.5px inherit;background:#fff;color:#111}
+.oeeBody .odG{background:#059669;padding:7px 13px;font-size:12.5px}
+.odMi{background:#fff;border-radius:12px;padding:11px 18px;border-left:5px solid #2563eb;display:flex;gap:20px;flex-wrap:wrap;align-items:center;font-size:13px;color:#475569}
+.odMi b{color:#0f172a}.odMi small{color:#64748b;font-weight:600}.odMi i{font-style:normal;background:#e0f2fe;color:#0369a1;border:1px solid #bae6fd;border-radius:6px;padding:3px 9px;font-weight:800;font-size:12px;margin-right:7px}
+.odK{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.odK div{background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 16px;text-align:center;position:relative;overflow:hidden}
+.odK div:before{content:"";position:absolute;left:0;right:0;top:0;height:5px;background:var(--c)}.odK s{display:block;text-decoration:none;font-weight:800;color:#4b5563;font-size:13px}.odK b{font-size:32px;font-weight:900;color:var(--c)}.odK small{font-size:16px;color:#9ca3af;margin-left:3px}
+.odC{display:grid;grid-template-columns:1fr 1fr;gap:12px}.odL{display:flex;flex-direction:column;gap:12px}
+.odCard{background:#fff;border:1.5px solid #e5e7eb;border-radius:12px;padding:12px 16px}.odCard h4{font-size:15px;font-weight:800;margin:0 0 8px;padding-bottom:7px;border-bottom:1px solid #f3f4f6}
+.odSvg{width:100%;height:auto;display:block}.odAx{font-size:11px;fill:#6b7280}.odVal{font-size:10.5px;font-weight:700;fill:#111}
+.odLeg{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;font-size:12px;color:#4b5563}.odLeg i{display:inline-block;width:22px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}.odLeg .odTg{background:none;border-top:2px dashed #ef4444;height:0}
+.odB{display:flex;flex-direction:column}.odBw{flex:1;min-height:420px;max-height:640px;overflow:auto;padding-right:4px}
+.odBi{border:1px solid #e2e8f0;border-radius:8px;margin-bottom:10px}.odBt{padding:7px 13px;font-size:13px;font-weight:800;background:#f8fafc;border-bottom:1px dashed #e2e8f0}.odBt small{font-weight:400;color:#64748b;font-size:11px}
+.odBc{display:flex;gap:10px;padding:10px}.odBc+.odBc{border-top:1px dashed #e2e8f0}.odBx{flex:1;border:1px dashed #cbd5e1;border-radius:6px;padding:9px;font-size:12.5px;color:#475569;line-height:1.45}.odBx b{display:block;font-size:11px;margin-bottom:4px}.odBx .w{color:#d97706}.odBx .s{color:#0ea5e9}
+.odNo{padding:50px 16px;text-align:center;color:#9ca3af;font-size:13px}
+.odTw{overflow-x:auto}.odT{width:100%;border-collapse:collapse;font-size:12.5px}.odT th,.odT td{padding:8px 10px;border:1px solid #e5e7eb;text-align:center;vertical-align:middle}.odT th{background:#f8fafc;font-weight:800;color:#4b5563;white-space:nowrap}
+.odT td.l{text-align:left;color:#4b5563;line-height:1.4}.odT td.d{color:#6b7280;font-size:12px}.odT td.dn{color:#ef4444;font-weight:700}.odLn{background:#eff6ff;color:#1d4ed8;padding:2px 7px;border-radius:4px;font-weight:700;font-size:11px}
+.odCm{font-size:11.5px;color:#059669;background:#ecfdf5;padding:3px 6px;border-radius:4px;display:inline-block}.odMu{color:#9ca3af;font-size:11.5px}
