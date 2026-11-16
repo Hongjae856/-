@@ -6,7 +6,7 @@
    · 'IDT 확인' 칩은 실제 화면에 없는 교육용 확인 버튼
    ═══════════════════════════════════════════════════════════════════ */
 let SPBIG=true;   /* 3인칭 옆 패널에서 화면을 왼쪽으로 넓혀 크게 보기 (⤢) */
-const SNAV=[["run","운전데이터","☰"],["cam","캠 포지션","⌖"],["splice","이음매","▨"],["manual","수동점검","🔍"],["sw1","조작스위치","☝"],["temp","온도설정","🌡"],["xfer","이송기설정","⚡"],["save","품목저장","⬇"],["io","Input/<br>Output","I/O"],["alarm","알람목록","🔔"],["aux","주변기기","⚙"]];
+const SNAV=[["run","운전데이터","☰"],["cam","캠 포지션","⌖"],["splice","이음매","▨"],["manual","수동점검","🔍"],["sw1","조작스위치","☝"],["temp","온도설정","🌡"],["xfer","이송기설정","⚡"],["save","품목저장","⬇","off"],["io","Input/<br>Output","I/O"],["alarm","알람목록","🔔"],["aux","주변기기","⚙"]];
 const SUB={cam2:"cam", sw2:"sw1", vis:"aux"};
 const SPT={run:"운전 데이터",cam:"캠포지션1",cam2:"캠포지션2",splice:"이음매",manual:"수동 점검",sw1:"조작 스위치",sw2:"조작 스위치 2",temp:"온도 설정",xfer:"이송기설정",save:"품목 저장",io:"Input / Output",alarm:"알람 목록",aux:"주변기기",vis:"비전 Setup"};
 const sp2=n=>String(n).padStart(2,"0");
@@ -53,7 +53,7 @@ const SPS={
    '<div class="spChkRow">'+spChk("fl_linkChk",f.linkChk,"후 공정 연동 ON 확인")+'</div>'+spFoot(); },
  temp(){ const f=S.f, pw=f.main?"ON":"OFF", pvs=v=>f.main?fmt(Math.min(v,v*f.heat/f.heatSV),1):"-";
   const V=SPV.vert.map(()=>f.heatSV), H=[1,2,3,4,5,6,7,8,9,10];
-  return spHead("temp")+'<div class="spC"><table class="spTb tmp"><tr><th>세로접착</th>'+H.map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+SPV.vert.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+V.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+H.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER</td>'+V.map(v=>'<td class="v">'+(v+10)+'</td>').join("")+'</tr><tr><td>LOWER</td>'+V.map(v=>'<td class="v">'+(v-10)+'</td>').join("")+'</tr></table>'+
+  return spHead("temp").replace('온도 설정</div>','온도 설정 <small class="spEx">예시값</small></div>')+'<div class="spC"><table class="spTb tmp"><tr><th>세로접착</th>'+H.map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+SPV.vert.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+V.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+H.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER</td>'+V.map(v=>'<td class="v">'+(v+10)+'</td>').join("")+'</tr><tr><td>LOWER</td>'+V.map(v=>'<td class="v">'+(v-10)+'</td>').join("")+'</tr></table>'+
    '<table class="spTb tmp"><tr><th>가로접착</th>'+["1-1","1-2","2-1","2-2"].map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+f.endSV.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+f.endSV.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+f.endSV.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER / LOWER</td>'+f.endSV.map(v=>'<td class="v">'+(v+10)+' / '+(v-10)+'</td>').join("")+'</tr></table></div>'+
    '<div class="spChkRow">'+spChk("fl_temp",f.tempChk,"PV · SV 일치 확인")+'<span class="spNote">UPPER · LOWER 는 SV ± 10 ℃ 로 표시 (사진 없음 · 확인 필요)</span></div>'+spFoot(); },
  xfer(){ const f=S.f, V=[9.0,8.0,9.0];
@@ -74,8 +74,8 @@ const SPS={
 };
 function solpacDraw(body,nav){
   const top=SUB[hScr]||hScr;
-  nav.innerHTML=SNAV.map(([k,t,e])=>'<div class="nv sp'+(top===k?" on":"")+'" data-nav="'+k+'"><i>'+e+'</i>'+t+'</div>').join("");
-  $$("#hNav [data-nav]").forEach(e=>e.onclick=()=>{ hScr=e.dataset.nav; drawHMI(); });
+  nav.innerHTML=SNAV.map(([k,t,e,off])=>'<div class="nv sp'+(top===k?" on":"")+(off?" off":"")+'" data-nav="'+k+'"><i>'+e+'</i>'+t+'</div>').join("");
+  $$("#hNav [data-nav]").forEach(e=>e.onclick=()=>{ if(e.classList.contains("off")){ toast("품목저장 화면은 IDT 에서 구현하지 않습니다 (사용자 결정)."); return; } hScr=e.dataset.nav; drawHMI(); });
   body.innerHTML='<div class="spScr">'+(SPS[hScr]||SPS.run)()+'</div>';
 }
 function solpacLogin(){ return '<div class="spScr">'+spHead("run").replace(SPT.run,"로그인")+'<div class="spC spLogin"><div><b>터치스크린 로그인</b>ID · PASSWORD 를 입력해 로그인합니다 (IDT : 버튼 한 번).<div class="spLgBtn" data-hb="fl_login">Login</div></div></div><div class="spF"><div class="spAl"></div><div class="spB" data-hb="fl_login">Login</div><div class="spB">공포</div><div class="spB">마크</div><div class="spB n">90</div></div></div>'; }

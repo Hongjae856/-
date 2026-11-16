@@ -90,3 +90,4 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #hmi.solpac.big{position:absolute;top:9px;right:9px;width:600px;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.45)}
 #hmi.solpac.big + *{margin-top:0}
 .spB.big{font-size:2.6cqw;padding:.2cqw 1.2cqw}
+#hmi.solpac .nv.sp.off{opacity:.45}.spEx{font-size:1.8cqw;background:#ffd54a;color:#4a3800;padding:.1cqw .8cqw;border-radius:.4cqw;vertical-align:middle}

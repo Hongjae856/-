@@ -32,13 +32,17 @@ PATCH = {
     "hmi.js": [
         ('    nav.innerHTML=FNAV.map(', '    if(0) nav.innerHTML=FNAV.map(', 1),          # 충전기 : SOLPAC 화면 (solpac.js)
         ('    body.innerHTML=(FSCR[hScr]||FSCR.run)();', '    solpacDraw(body,nav);', 1),
-        ('  const m=machOf(hMach);\n  $("#hMach")', '  const m=machOf(hMach); $("#hmi").classList.toggle("solpac",hMach==="fl"); $("#panel").classList.toggle("solpacP",hMach==="fl"); $("#hmi").classList.toggle("oneTab",tabs.length<2); $("#hmi").classList.toggle("big",hMach==="fl"&&SPBIG&&!(typeof fpActive==="function"&&fpActive()));\n  $("#hMach")', 1),
+        ('  const m=machOf(hMach);\n  $("#hMach")', '  const m=machOf(hMach); $("#hmi").classList.toggle("solpac",hMach==="fl"); $("#panel").classList.toggle("solpacP",hMach==="fl"); $("#hmi").classList.toggle("oneTab",tabs.length<2); $("#hmi").classList.toggle("big",hMach==="fl"&&SPBIG&&machPower("fl")&&!(typeof fpActive==="function"&&fpActive()));\n  $("#hMach")', 1),
         ('body.innerHTML=loginScreen(hMach);', 'body.innerHTML=hMach==="fl"?solpacLogin():loginScreen(hMach);', 1),
         ('function hbClick(id){', 'function hbClick(id){ if(id.startsWith("sp_")){ solpacClick(id); return; }', 1),
         ('if(mk==="fl") return HNV(scr);', 'if(mk==="fl") return flRoute(scr);', 1),
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
     "ui.js": [
+        ('mLift:{e:"🛗",b:"주성분 STS 용기",s:()=>S.f.mainLift?"2층 데크 도착":"리프터로 올림"', 'mLift:{e:"🛗",b:"주성분 리프터 운반",s:()=>S.f.mainLift?"2층 데크 도착":"봉투 → 적재칸 → 데크"', 1),   # 11/16 : STS 용기의 봉투를 리프터 적재칸으로 옮겨 올림
+        ('toast("주성분 STS 용기를 먼저 리프터로 올리세요.","bad")', 'toast("주성분을 먼저 리프터로 2층 데크에 올리세요.","bad")', 1),
+        ('const nm=what==="roll"?"적색 인쇄 은박 롤":"주성분 STS 용기";', 'const nm=what==="roll"?"적색 인쇄 은박 롤":"주성분 봉투 · 드럼리프터";', 1),
+        ('else act("lift",()=>{ S.f.mainLift=true; toast("주성분 STS 용기 — 리프터로 2층 데크 도착","good"); });', 'else act("lift",()=>{ S.f.mainLift=true; S.flags.liftAt="use"; toast("주성분 봉투 — STS 용기에서 리프터 적재칸으로 옮겨 2층 데크 도착","good"); });', 1),
         ('if(what==="roll") act("roll",()=>{ S.f.rollCarry="red"; toast("적색 인쇄 은박 롤 2인 1조 운반 완료","good"); });',
          'if(what==="roll") act("roll",()=>{ S.f.rollCarry="red"; S.flags.cartAt="unw"; S.flags.redTaken=true; toast("적색 인쇄 은박 롤 — 대차에 실어 언와인더 옆까지 운반 (2인 1조)","good"); });', 1),
         ('act("rollOut",()=>{ f.roll="red"; f.rollCarry=null; toast("적색 인쇄 은박 롤 장착 · 고정","good"); });',
@@ -58,7 +62,13 @@ PATCH = {
     "fps.js": [
         ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
     ],
+    "data.js": [
+        ('nm:"리프터 · STS 용기", en:"LIFTER · STS CONTAINER"', 'nm:"드럼리프터 · 주성분", en:"DRUM LIFTER"', 1),
+        ('d:"주성분 STS 용기를 2층 데크로 올립니다. 은박 · STS 용기는 반드시 2인 1조로 옮깁니다."', 'd:"STS 용기(맨 동쪽 중앙 파렛트)에 담긴 주성분 봉투를 리프터 적재칸으로 옮겨 원료투입구 아래에서 2층 데크로 올립니다. 리프터는 3인 1조(1명 운전 · 2명 하역)."', 1),
+    ],
     "course.js": [
+        ('A.push(T_("lift","주성분 STS 용기 리프터로 2층 데크에 올림","[주성분 STS 용기] 를 눌러 리프터로 2층 데크에 올립니다."', 'A.push(T_("lift","주성분 봉투를 리프터 적재칸에 옮겨 2층 데크로 올림","[주성분 리프터 운반] 을 눌러 STS 용기의 주성분 봉투를 드럼리프터 적재칸에 옮겨 담고, 원료투입구 아래로 밀고 가서 2층 데크로 올립니다."', 1),
+        ('주성분 STS 용기를 리', '주성분 봉투를 리', 1),
         ('const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");', 'const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");', 1),
         ('examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};', 'examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가"};', 1),
         ('STEPS_CACHE=S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 'STEPS_CACHE=isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 1),

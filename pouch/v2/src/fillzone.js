@@ -1,6 +1,8 @@
 /* ═══ 충전실 주변 : 북쪽 벽 유리창 · 개구부, 경사 컨베이어, 프린터 컨트롤러 거치대, IBC 2기 · 받침 호퍼 · 진공호스,
        저울 작업대 2대(북서), 드럼리프터(북동), 예비 은박(남동), 출입문 2(남) — DRAWING.md 6 · 8절 ═══ */
-let FILLCART=null, FILLLIFT=null, FILLPROP={};   /* 대차 · 리프터 · 예비 은박 롤 · STS 용기 (workers.js 가 상태에 맞춰 움직임) */
+let FILLCART=null, FILLLIFT=null, FILLPROP={};
+/* 주성분 봉투 (흰 PE 봉투 · 묶은 목) */
+function bagMesh(x,y,z){ const G=new T3.Group(), m=new T3.MeshStandardMaterial({color:0xf4f6f7,roughness:.55,transparent:true,opacity:.92}); const b=new T3.Mesh(new T3.SphereGeometry(.14,20,14),m); b.scale.set(1,.9,.8); b.position.set(x,y+.13,z); G.add(b); const n=new T3.Mesh(new T3.CylinderGeometry(.02,.035,.08,12),m); n.position.set(x,y+.27,z); G.add(n); return G; }   /* 대차 · 리프터 · 예비 은박 롤 · STS 용기 (workers.js 가 상태에 맞춰 움직임) */
 function buildFillZone(S){
   const g=new T3.Group(); S.add(g); const F=FL, zc=F.zc, H=RM.fill.h;
   /* ── 북쪽 벽 : 유리창 2 (컨베이어 양옆) · 사각 개구부(스테인리스 테두리) · 인터폰 ── */
@@ -51,7 +53,7 @@ function buildFillZone(S){
     const LP=new T3.Group(); LG.add(LP); FILLPROP.plat=LP;                                       /* 승강 발판 (위아래로 움직임) */
     bx(LP,x-.9,x-.05,.14,.165,z-.36,z+.36,M.ssMir); bx(LP,x-.9,x-.05,.1,.14,z-.36,z+.36,M.ss);
     for(const s of [-1,1]){ rod(LP,[x-.86,.165,z+s*.34],[x-.86,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.12,.165,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.86,.5,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.86,.33,z+s*.34],[x-.12,.33,z+s*.34],.008,M.ssMir); }
-    { const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.set(x-.48,.165+.21,z); add(LP,m); FILLPROP.stsOn=m; m.visible=false; }   /* 발판 위 주성분 STS 용기 */
+    { const B=new T3.Group(); LP.add(B); FILLPROP.bagsOn=B; B.visible=false; for(const [dx,dz] of [[-.62,-.13],[-.33,.12]]){ add(B,bagMesh(x+dx,.165,z+dz)); } }   /* 적재칸 위 주성분 봉투 (STS 용기에서 옮겨 담음 · 11/16 사용자 정정) */
     for(const [dx,dz] of [[-.8,-.3],[-.8,.3],[.3,-.26],[.3,.26]]) { const c=new T3.Mesh(new T3.CylinderGeometry(.055,.055,.04,20),M.red); c.rotation.x=Math.PI/2; c.position.set(x+dx,.055,z+dz); add(LG,c); bx(LG,x+dx-.02,x+dx+.02,.06,.1,z+dz-.03,z+dz+.03,M.ssD); }
     plate(g,.42,.3,labelTex([["리프터 사용 규칙","#111",44],["3인 1조","#c00",52],["(1명 운전 · 2명 하역)","#111",34]],{w:512,h:360,border:"#1f5fb8"}),[RM.fill.x1-.03,1.6,2.9],-Math.PI/2); }
   /* ── 예비 은박 (남동) : 스테인리스 팔레트 + 은박 롤 ── */
@@ -64,8 +66,11 @@ function buildFillZone(S){
     /* 대차 위 은박 롤 : 평소 비어 있음 — 교체하러 갈 때 예비 롤을 올림 (적색 인쇄 · 은색 무지 2종만, 11/16 사용자 지시 : SOLPAC 흰 롤 삭제) */
     for(const [k,m] of [["red",M.foil],["plain",M.foilP]]){ const r=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,40),m); r.rotation.x=Math.PI/2; r.position.set(0,.85,0); add(G,r); r.visible=false; FILLPROP["cart_"+k]=r; } }
     for(const [k,dz,m] of [["red",-.25,M.foil],["plain",.25,M.foilP]]){ const R=new T3.Group(); g.add(R); FILLPROP["pal_"+k]=R; const r=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,40),m); r.rotation.z=Math.PI/2; r.position.set(x,.35,z+dz); add(R,r); rod(R,[x-.46,.35,z+dz],[x+.46,.35,z+dz],.045,M.dark,16); } }
-  /* 주성분 STS 용기 대기 위치 (남쪽 출입문 안쪽 · 추정 — 확인 필요) */
-  { const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.set(2.1,.21,6.45); add(g,m); FILLPROP.stsFloor=m; }
+  /* 주성분 STS 파렛트 대기 장소 (맨 동쪽 중앙 · 11/16 사용자 확인) : 파렛트 + 뚜껑 연 STS 용기 + 봉투에 담긴 주성분 */
+  { const x=11.2, z=3.5; bx(g,x-.5,x+.5,.1,.15,z-.5,z+.5,M.ss); for(const dx of [-.42,0,.42]) bx(g,x+dx-.04,x+dx+.04,0,.1,z-.5,z+.5,M.ss);
+    const d=new T3.Mesh(new T3.CylinderGeometry(.3,.28,.62,36,1,true),M.ssMir); d.material=d.material.clone(); d.material.side=T3.DoubleSide; d.position.set(x,.46,z); add(g,d); bx(g,x-.29,x+.29,.155,.17,z-.29,z+.29,M.ss);
+    rod(g,[x-.3,.77,z],[x+.3,.77,z],.004,M.ssMir,6); const lid=new T3.Mesh(new T3.CylinderGeometry(.31,.31,.02,36),M.ssMir); lid.position.set(x+.36,.6,z-.28); lid.rotation.z=1.2; add(g,lid);
+    const B=new T3.Group(); g.add(B); FILLPROP.bagsIn=B; for(const [dx,dz] of [[-.1,-.08],[.1,.09]]) add(B,bagMesh(x+dx,.5,z+dz)); }
   /* ── 출입문 2 (남쪽 벽) : 양개문 · 유리창 ── */
   for(const x0 of [.7,8.3]){ const z=RM.fill.z1-.03; bx(g,x0-.05,x0+1.05,0,2.15,z-.02,z,M.alu); for(const dx of [0,.5]){ bx(g,x0+dx+.01,x0+dx+.49,.02,2.1,z-.03,z-.02,M.white); bx(g,x0+dx+.1,x0+dx+.4,1.2,1.8,z-.034,z-.03,glass); rod(g,[x0+(dx?.56:.44),1.0,z-.06],[x0+(dx?.56:.44),1.12,z-.06],.01,M.ssMir); } }
   /* ── 소화기 (진공청소기는 구현하지 않음 — 사용자 지시 11/11) ── */

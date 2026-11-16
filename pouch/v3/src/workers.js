@@ -92,6 +92,7 @@ function wkCarryMesh(kind){
   const G=new T3.Group();
   if(kind==="sts"){ const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.y=.21; G.add(m); }
   else if(kind==="roll"||kind==="rollP"){ const m=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,32),kind==="rollP"?M.foilP:M.foil); m.rotation.z=Math.PI/2; G.add(m); }
+  else if(kind==="bag"){ const m=new T3.Mesh(new T3.SphereGeometry(.14,18,12),new T3.MeshStandardMaterial({color:0xf4f6f7,roughness:.55})); m.scale.set(1,.9,.8); G.add(m); }
   else if(kind==="scoop"){ const m=new T3.Mesh(new T3.CylinderGeometry(.06,.05,.12,16),M.ss); G.add(m); }
   else if(kind==="cartons"){ const m=new T3.Mesh(new T3.BoxGeometry(.3,.16,.12),new T3.MeshStandardMaterial({color:0x9a1a14,roughness:.6})); G.add(m); }
   else if(kind==="leaf"){ const m=new T3.Mesh(new T3.BoxGeometry(.2,.06,.14),M.white); G.add(m); }
@@ -122,7 +123,8 @@ function wkDraw(dt){
 
 /* ═══ 대차 · 드럼리프터 · 예비 은박 롤 · STS 용기 — 평소에는 교육 상태(S.f)에 맞춰 놓고, 작업자가 끌 때는 작업자 앞에서 따라옴 (11/16 사용자 지시) ═══
    대차 : 평소 빈 채로 예비 은박 옆 보관 → 교체 때 예비 롤을 올려 언와인더 남쪽까지 밀고 감 (롤은 적색 인쇄 · 은색 무지 2종)
-   드럼리프터 : 북동 보관 → 원료투입구 아래(데크 남쪽 끝)까지 밀고 가서 STS 용기를 올리고 발판을 데크 높이로 올림 */
+   드럼리프터 : 북동 보관 자리에서 STS 용기(맨 동쪽 중앙 파렛트)의 주성분 봉투를 적재칸에 옮겨 담고 → 원료투입구 아래까지 밀고 가서 발판을 데크 높이로 올림 (11/16 사용자 정정)
+   사용 후 [대차 · 리프터 원위치 복귀] 를 누르면 끌지 않고 자동으로 보관 자리로 돌아감 */
 const TOW={ cart:{hd:.3, hy:.9, off:.56, rot:-Math.PI/2}, lift:{hd:.25, hy:.95, off:.75, rot:Math.PI/2} };   /* hd · hy : 손잡이 위치 (대차 손잡이 봉 0.9 m · 리프터 뒤 손잡이 0.95 m) */
 const ROLLJOBS=["roll","rollMount","rollPlain"];
 const PROP={ cartHome:[9.9,5.9,0], cartUnw:[4.62,3.62,Math.PI/2], liftHome:[10.75,1.8,Math.PI], liftUse:[3.53,4.6,0], platUp:1.83 };
@@ -134,10 +136,10 @@ function propsDraw(){
   for(const k of ["cart","lift"]){ const G=propObj(k), w=towers[k];
     if(w){ const T=TOW[k], f=[Math.sin(w.yaw),Math.cos(w.yaw)]; G.position.set(w.x+f[0]*T.off,0,w.z+f[1]*T.off); G.rotation.y=w.yaw+T.rot; continue; }
     if(WK.some(q=>q.job&&q.job.legs&&(k==="cart"?ROLLJOBS.includes(q.job.key):q.job.key==="lift"))) continue;     /* 작업 중 놓아 둔 자리 유지 */
-    const P=k==="cart"?(S.flags.cartAt==="unw"?PROP.cartUnw:PROP.cartHome):(S.f.mainLift?PROP.liftUse:PROP.liftHome); G.position.set(P[0],0,P[1]); G.rotation.y=P[2]; }
+    const P=k==="cart"?(S.flags.cartAt==="unw"?PROP.cartUnw:PROP.cartHome):(S.flags.liftAt==="use"?PROP.liftUse:PROP.liftHome); G.position.set(P[0],0,P[1]); G.rotation.y=P[2]; }
   const busy=k=>WK.some(q=>q.job&&q.job.legs&&q.job.key===k);
   if(!FILLPROP.plat) return;
-  if(!busy("lift")){ FILLPROP.plat.position.y=S.f.mainLift?PROP.platUp:0; FILLPROP.stsOn.visible=!!S.f.mainLift; FILLPROP.stsFloor.visible=!S.f.mainLift; }
+  if(!busy("lift")){ const u=S.flags.liftAt==="use"; FILLPROP.plat.position.y=u?PROP.platUp:0; FILLPROP.bagsOn.visible=u&&!!S.f.mainLift; FILLPROP.bagsIn.visible=!S.f.mainLift; }
   if(!ROLLJOBS.some(busy)){ const c=S.f.rollCarry; FILLPROP.cart_red.visible=c==="red"; FILLPROP.cart_plain.visible=c==="plain";
     FILLPROP.pal_red.visible=!S.flags.redTaken; FILLPROP.pal_plain.visible=!(S.f.roll==="plain"||c==="plain"); }
 }
@@ -158,16 +160,26 @@ function seqMountRoll(kind){
   return [{stand:[4.62,4.18], reach:[4.62,.85,3.62], dur:1.4, on(){ propVis("cart_"+kind,false); }},
           {stand:[5.25,FL.zc+.15], path:[[5.3,4.3],[5.3,3.2]], carry:kind==="red"?"roll":"rollP", reach:ANC.roll, dur:2.4}];     /* 대차와 계단 사이 통로로 언와인더 동쪽까지 */
 }
-/* 드럼리프터를 원료투입구 아래로 밀고 가서 STS 용기를 올리고 발판을 올림 */
+/* STS 용기의 주성분 봉투 2개를 리프터 적재칸(보관 자리)에 옮겨 담음 → 원료투입구 아래로 밀고 감 → 발판을 데크 높이로 올림 */
 function seqLift(){
-  const P=FILLPROP;
-  return [{stand:[10.0,1.8], reach:[10.42,.82,1.8], dur:.8, grab:"lift"},
-          {stand:[4.28,4.6], path:[[8.0,2.0],[7.6,3.3],[7.5,4.85],[6.0,4.75]], dur:.5, release:true},
-          {stand:[2.1,6.0], path:[[4.3,5.5],[2.1,5.6]], reach:[2.1,.42,6.45], dur:1.6, on(){ propVis("stsFloor",false); }},
-          {stand:[3.05,5.35], path:[], carry:"sts", reach:[3.05,.5,4.6], dur:1.6, on(){ propVis("stsOn",true); }},
-          {stand:[4.1,5.25], path:[], carry:null, reach:[3.85,1.0,4.75], dur:3.0, prog(q){ if(FILLPROP.plat) FILLPROP.plat.position.y=PROP.platUp*q*q*(3-2*q); }}];
+  const pick={stand:[11.2,2.58], reach:[11.2,.62,3.45], dur:1.5, on(){ }}, put=(n)=>({stand:[11.2,2.58], path:[], carry:"bag", reach:[11.2,.32,1.9], dur:1.2, on(){ const B=FILLPROP.bagsOn; if(B){ B.visible=true; B.children.forEach((c,i)=>c.visible=i<n); } if(n===2) propVis("bagsIn",false); }});
+  if(S.flags.liftAt==="use") S.flags.liftAt="home"; const home=true;
+  const L=[pick, put(1), Object.assign({},pick,{path:[], carry:null}), put(2)];
+  if(home) L.push({stand:[10.0,1.8], carry:null, reach:[10.42,.95,1.8], dur:.8, grab:"lift"}, {stand:[4.28,4.6], path:[[8.0,2.0],[7.6,3.3],[7.5,4.85],[6.0,4.75]], dur:.5, release:true});
+  L.push({stand:[4.1,5.25], path:[[4.3,5.25]], carry:null, reach:[3.85,1.0,4.75], dur:3.0, prog(q){ if(FILLPROP.plat) FILLPROP.plat.position.y=PROP.platUp*q*q*(3-2*q); }});
+  return L;
+}
+/* 사용 후 원위치 복귀 (끌지 않고 자동) */
+function propsReturn(){
+  if(WK.some(w=>w.job&&["lift","roll","rollMount","rollPlain"].includes(w.job.key))){ toast("작업자가 대차 · 리프터를 사용 중입니다.","bad"); return; }
+  if(S.f.rollCarry){ toast("대차 위 은박 롤을 먼저 장착하세요.","bad"); return; }
+  const was=S.flags.cartAt==="unw"||S.flags.liftAt==="use"; S.flags.cartAt="home"; S.flags.liftAt="home";
+  toast(was?"은박 교체 대차 · 드럼리프터 — 보관 자리로 원위치 (자동 복귀)":"이미 보관 자리에 있습니다.",was?"good":""); renderTiles();
 }
 function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } }
 Object.assign(JOBS,{ rollMount:{stand:[4.62,4.18], dur:1, view:"roll", seqFn:()=>seqMountRoll("red")},
   rollPlain:{stand:[9.34,5.9], dur:1, view:"roll", seqFn:()=>seqFetchRoll("plain").concat(seqMountRoll("plain"))} });
 JOBS.roll.seqFn=()=>seqFetchRoll("red"); JOBS.lift.seqFn=seqLift;
+/* 자재 타일 : 대차 · 리프터 원위치 복귀 (11/16 사용자 지시 — 끌지 않고 자동) */
+TILE.rHome={e:"↩️",b:"대차 · 리프터 원위치",s:()=>(S.flags.cartAt==="unw"||S.flags.liftAt==="use")?"사용 후 복귀 누르기":"보관 위치",on:()=>!(S.flags.cartAt==="unw"||S.flags.liftAt==="use"),click(){ propsReturn(); }};
+if(!TILESET.F.mat.includes("rHome")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mPlain")+1,0,"rHome");
