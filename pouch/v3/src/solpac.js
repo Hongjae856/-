@@ -5,7 +5,7 @@
    · 설정값 = SOP 화면 사진 값 그대로 (사용자 결정 11/16). 품목저장 · Input/Output · 주변기기는 SOP 에 사진이 없어 구성 추정 (확인 필요)
    · 'IDT 확인' 칩은 실제 화면에 없는 교육용 확인 버튼
    ═══════════════════════════════════════════════════════════════════ */
-let SPBIG=true;   /* 3인칭 옆 패널에서 화면을 왼쪽으로 넓혀 크게 보기 (⤢) */
+let SPBIG=false;   /* 11/16 : HMI 를 어떤 방식으로도 띄우지 않음 (사용자 지시) — 크게 보기 삭제 */   /* 3인칭 옆 패널에서 화면을 왼쪽으로 넓혀 크게 보기 (⤢) */
 const SNAV=[["run","운전데이터","☰"],["cam","캠 포지션","⌖"],["splice","이음매","▨"],["manual","수동점검","🔍"],["sw1","조작스위치","☝"],["temp","온도설정","🌡"],["xfer","이송기설정","⚡"],["save","품목저장","⬇","off"],["io","Input/<br>Output","I/O"],["alarm","알람목록","🔔"],["aux","주변기기","⚙"]];
 const SUB={cam2:"cam", sw2:"sw1", vis:"aux"};
 const SPT={run:"운전 데이터",cam:"캠포지션1",cam2:"캠포지션2",splice:"이음매",manual:"수동 점검",sw1:"조작 스위치",sw2:"조작 스위치 2",temp:"온도 설정",xfer:"이송기설정",save:"품목 저장",io:"Input / Output",alarm:"알람 목록",aux:"주변기기",vis:"비전 Setup"};
@@ -15,7 +15,7 @@ function spHead(scr,arrow){ const f=S.f, d=new Date(), dt=d.getFullYear()+"/ "+(
     '<div class="spSc"><s>Speed</s><b>'+(f.run?21:0)+'</b><s>Cam</s><b>'+(f.run?Math.round(f.phase*360)%360:0)+'</b><b class="dt">'+dt+'</b></div></div>'; }
 function spFoot(){ const L=(S.hist||[]).filter(h=>ALARMS[h.key]&&ALARMS[h.key].mk==="fl").slice(0,3), d=new Date(), ds=sp2(d.getMonth()+1)+"/"+sp2(d.getDate())+"/"+d.getFullYear();
   const txt=L.length?L.map(h=>{ const s=Math.max(0,Math.floor(h.at)); return sp2(Math.floor(s/3600)%24)+":"+sp2(Math.floor(s/60)%60)+":"+sp2(s%60)+" "+h.t+" 이상알람 "+ds; }).join("   "):"";
-  return '<div class="spF"><div class="spAl">'+esc(txt)+'</div><div class="spB" data-hb="sp_logout">Logout</div><div class="spB" data-hb="sp_empty">공포</div><div class="spB" data-hb="sp_mark">마크</div><div class="spB n">90</div><div class="spB big" data-hb="sp_big" title="화면 크게 · 작게">'+(SPBIG?"⤡":"⤢")+'</div></div>'; }
+  return '<div class="spF"><div class="spAl">'+esc(txt)+'</div><div class="spB" data-hb="sp_logout">Logout</div><div class="spB" data-hb="sp_empty">공포</div><div class="spB" data-hb="sp_mark">마크</div><div class="spB n">90</div></div>'; }
 const spOn=(t,v,id,cls)=>'<div class="spSw'+(v?" on":"")+(cls?" "+cls:"")+'"'+(id?' data-hb="'+id+'"':' data-hb="sp_view"')+'>'+t+(v===null?"":' '+(v?"On":"Off"))+'</div>';
 const spChk=(id,on,t)=>'<div class="spChk'+(on?" on":"")+'" data-hb="'+id+'">✔ '+t+' <s>IDT 확인</s></div>';
 const spT=(head,rows,cls)=>'<table class="spTb'+(cls?" "+cls:"")+'"><tr>'+head.map(h=>'<th>'+h+'</th>').join("")+'</tr>'+rows.map(r=>'<tr>'+r.map((c,i)=>'<td'+(i?' class="v"':'')+'>'+c+'</td>').join("")+'</tr>').join("")+'</table>';
@@ -81,7 +81,7 @@ function solpacDraw(body,nav){
 function solpacLogin(){ return '<div class="spScr">'+spHead("run").replace(SPT.run,"로그인")+'<div class="spC spLogin"><div><b>터치스크린 로그인</b>ID · PASSWORD 를 입력해 로그인합니다 (IDT : 버튼 한 번).<div class="spLgBtn" data-hb="fl_login">Login</div></div></div><div class="spF"><div class="spAl"></div><div class="spB" data-hb="fl_login">Login</div><div class="spB">공포</div><div class="spB">마크</div><div class="spB n">90</div></div></div>'; }
 function solpacClick(id){
   if(id.startsWith("sp_go_")){ hScr=id.slice(6); drawHMI(); return; }
-  if(id==="sp_big"){ SPBIG=!SPBIG; drawHMI(); return; }
+  if(id==="sp_big") return;
   if(id==="sp_back"){ hScr=SUB[hScr]||"run"; drawHMI(); return; }
   if(id==="sp_logout"){ if(S.f.run){ toast("운전 중에는 로그아웃하지 않습니다.","bad"); return; } S.f.user=null; toast("로그아웃"); drawHMI(); return; }
   if(id==="sp_man"){ if(S.f.run){ toast("운전 중에는 수동 점검을 켜지 않습니다.","bad"); return; } S.flags.spMan=!S.flags.spMan; drawHMI(); return; }

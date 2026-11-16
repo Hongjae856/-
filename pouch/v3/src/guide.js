@@ -17,6 +17,7 @@ function guideTarget(){
     if(id==="mRed"||id==="mPlain"){ if(S.f.rollCarry) return [PROP.cartUnw[0],.9,PROP.cartUnw[1]]; return [PROP.cartHome[0],.9,PROP.cartHome[1]]; }
     if(id==="tDoc") return S.room==="F"?ANC.docF:ANC.docP;
     if(id&&TILEJOB[id]){ const j=JOBS[TILEJOB[id]]; return j&&(j.reach||[j.stand[0],1.0,j.stand[1]]); }
+    if(id&&typeof fpBtnPos==="function"){ const bp=fpBtnPos(id); if(bp) return bp; }   /* 판넬 실제 버튼 */
     let el=null; try{ el=document.querySelector(s); }catch(e){}
     if(el&&el.closest("#hmi,#panel,#hTabs")){ let k=hMach; const tab=s.match(/data-mt="([a-z]+)"/); if(tab) k=tab[1]; const m=monOf(k); if(m) return m.c; }
   }catch(e){}

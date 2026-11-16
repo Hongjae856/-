@@ -41,17 +41,22 @@ function buildHoppers(g){
     for(const s of [-1,1]){ rod(g,[(x0+x1)/2,dy0+.085,zc+s*dl],[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],.03,M.ssD,20); rod(g,[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],[(x0+x1)/2,dy0+.085,zc+s*(dl+.03)],.012,M.ssMir,12); } }
   bx(g,xc-bw-.02,xc+bw+.02,Y+.215,dy0,zc-dl-.02,zc+dl+.02,M.ssD);                                                  /* 도징박스 받침 (함 위) */
   for(const s of [-1,1]) ribbon(g,[[xc+s*(fw-.02),dy1+.02],[xc+s*(bw+.01),dy1]],zc-dl,zc+dl,M.sheet);
-  /* 원료조절부 : 호퍼 끝에 붙은 10열 조절 다이얼 — 도징박스(윗면)보다 높음. 서쪽 = 1 첨가제(위) · 2 주성분(아래), 동쪽 = 3 백당 (11/16) */
+  /* 함량조절다이얼 (현장 사진 · 11/16 사용자 확정) : 호퍼 끝 스테인리스 바에 열마다 주황 카운터(숫자 4자리 창) + 크롬 육각 소켓 — 육각 L 렌치로 돌림
+     서쪽(전면) = 첨가제 10 / 동쪽(후면) = 주성분 10(위) · 백당 10(아래). 도징박스(윗면)보다 높음 */
   FM.dials={add:[],main:[],sug:[]};
-  const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw;
-    bx(g,Math.min(x,x+side*.045),Math.max(x,x+side*.045),y-.03,y+.03,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.047),Math.max(x,x+side*.047),y-.022,y+.022,zc-.44,zc+.44,M.ssD);
+  const orM=new T3.MeshStandardMaterial({color:0xf0701a,roughness:.45}), crM=M.ssMir;
+  const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw, ry=side<0?-Math.PI/2:Math.PI/2;
+    bx(g,Math.min(x,x+side*.03),Math.max(x,x+side*.03),y-.032,y+.032,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.031),Math.max(x,x+side*.031),y-.034,y-.03,zc-.45,zc+.45,M.ssMir);
     rod(g,[xc+side*.27,y,zc-.45],[x,y,zc-.45],.012,M.ssMir,10); rod(g,[xc+side*.27,y,zc+.45],[x,y,zc+.45],.012,M.ssMir,10);          /* 호퍼 끝 브래킷 */
-    plate(g,.13,.035,labelTex([[nm,"#111",64]],{w:512,h:140,border:"#333"}),[x+side*.048,y+.045,zc-.33],side<0?-Math.PI/2:Math.PI/2);
-    for(let i=0;i<n;i++){ const z=pz(i), K=new T3.Group(); K.position.set(x+side*.047,y,z); g.add(K);
-      const kn=new T3.Mesh(new T3.CylinderGeometry(.017,.019,.03,22),M.black); kn.rotation.z=Math.PI/2; kn.position.x=side*.015; add(K,kn);
-      const pt=new T3.Mesh(new T3.BoxGeometry(.004,.022,.005),M.white); pt.position.set(side*.031,.006,0); add(K,pt);
-      FM.dials[key].push(K); } };
-  dialRow(-1,Y+.6,"add","1 첨가제"); dialRow(-1,Y+.53,"main","2 주성분"); dialRow(1,Y+.57,"sug","3 백당");
+    plate(g,.2,.03,labelTex([[nm,"#111",54]],{w:640,h:96,border:"#333"}),[x+side*.032,y+.05,zc-.3],ry);
+    for(let i=0;i<n;i++){ const z=pz(i), xo=x+side*.03;
+      bx(g,Math.min(xo,xo+side*.03),Math.max(xo,xo+side*.03),y-.02,y+.024,z-.03,z+.006,orM);                                   /* 주황 카운터 */
+      const cv=document.createElement("canvas"); cv.width=128; cv.height=48; const ctx=cv.getContext("2d"), tx=new T3.CanvasTexture(cv); tx.encoding=T3.sRGBEncoding;
+      const win=new T3.Mesh(new T3.PlaneGeometry(.03,.011),new T3.MeshBasicMaterial({map:tx})); win.rotation.y=ry; win.position.set(xo+side*.0305,y+.012,z-.012); g.add(win);
+      const sk=new T3.Mesh(new T3.CylinderGeometry(.011,.012,.022,20),crM); sk.rotation.z=Math.PI/2; sk.position.set(xo+side*.011,y-.004,z+.018); add(g,sk);   /* 크롬 육각 소켓 */
+      const HX=new T3.Group(); HX.position.set(xo+side*.0225,y-.004,z+.018); g.add(HX); const hx=new T3.Mesh(new T3.CylinderGeometry(.0055,.0055,.002,6),M.black); hx.rotation.z=Math.PI/2; HX.add(hx);
+      FM.dials[key].push({hex:HX, ctx, tex:tx, cnt:null}); } };
+  dialRow(-1,Y+.57,"add","첨가제 함량조절다이얼"); dialRow(1,Y+.6,"main","주성분 함량조절다이얼"); dialRow(1,Y+.53,"sug","백당 함량조절다이얼");
   /* 남쪽 끝 : 게이트 · 셔터 실린더 · 고정 브래킷 · 덮개 천 */
   const cyl=(x,y0,y1,z)=>{ rod(g,[x,y0,z],[x,y1,z],.019,M.alu,14); rod(g,[x,y1,z],[x,y1+.012,z],.022,M.grey,14); rod(g,[x,y0-.012,z],[x,y0,z],.022,M.grey,14); rod(g,[x,y0-.07,z],[x,y0-.012,z],.006,M.ssMir,8); };
   for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,ft+.01,ft+.19,zc+D+.06);

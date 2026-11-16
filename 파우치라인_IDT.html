@@ -578,6 +578,21 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #dialGame .dgCell.ok s{color:#3ddc84}#dialGame .dgCell.warn s{color:#ffcf33}#dialGame .dgCell.ng s{color:#ff6b5e}
 #dialGame .dgCell.sel{border-color:#ffc400}
 #dialGame .dgFoot{margin-top:10px;color:#cfd6dc}#dialGame .okT{color:#3ddc84;font-weight:800}
+/* 1인칭 설비 화면 : 모니터 유리면에만 (버튼 판 · 테두리 카드 없음 · 11/16) */
+#fpMon{gap:0!important;background:transparent}
+#fpMon #panel{display:none!important}
+#fpMon.withPanel #panel{display:grid!important}
+#fpMon #hmi{flex:1 1 auto!important;min-height:0;height:auto!important;border-radius:0!important;box-shadow:none!important}
+#fpMon.live{box-shadow:none!important}
+/* 함량조절다이얼 미니게임 (아날로그형) */
+#dialGame .dgScene{width:100%;height:auto;display:block;border-radius:10px}
+#dialGame .dgBig{flex:0 0 58%}
+#dialGame .dgPred s{display:block;text-decoration:none;color:#9aa5ae;font-size:13px}
+#dialGame .dgMiniBox{width:86%;height:30px;border-radius:5px;background:linear-gradient(#ff9a3c,#d85f0c);display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.25)}
+#dialGame .dgMiniBox span{background:#111;color:#f2f2ee;font:700 12px monospace;padding:1px 4px;border-radius:2px}
+#dialGame .dgMiniHex{display:block;width:16px;height:16px;margin:4px auto 0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#9aa1a7 55%,#3a3f44);position:relative}
+#dialGame .dgMiniHex:after{content:"";position:absolute;inset:5px;background:#111;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+#dialGame .dgCell{background:#22282e}
 
 /* OEE 연계 교육 (공통) */
 #oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
@@ -1164,17 +1179,22 @@ function buildHoppers(g){
     for(const s of [-1,1]){ rod(g,[(x0+x1)/2,dy0+.085,zc+s*dl],[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],.03,M.ssD,20); rod(g,[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],[(x0+x1)/2,dy0+.085,zc+s*(dl+.03)],.012,M.ssMir,12); } }
   bx(g,xc-bw-.02,xc+bw+.02,Y+.215,dy0,zc-dl-.02,zc+dl+.02,M.ssD);                                                  /* 도징박스 받침 (함 위) */
   for(const s of [-1,1]) ribbon(g,[[xc+s*(fw-.02),dy1+.02],[xc+s*(bw+.01),dy1]],zc-dl,zc+dl,M.sheet);
-  /* 원료조절부 : 호퍼 끝에 붙은 10열 조절 다이얼 — 도징박스(윗면)보다 높음. 서쪽 = 1 첨가제(위) · 2 주성분(아래), 동쪽 = 3 백당 (11/16) */
+  /* 함량조절다이얼 (현장 사진 · 11/16 사용자 확정) : 호퍼 끝 스테인리스 바에 열마다 주황 카운터(숫자 4자리 창) + 크롬 육각 소켓 — 육각 L 렌치로 돌림
+     서쪽(전면) = 첨가제 10 / 동쪽(후면) = 주성분 10(위) · 백당 10(아래). 도징박스(윗면)보다 높음 */
   FM.dials={add:[],main:[],sug:[]};
-  const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw;
-    bx(g,Math.min(x,x+side*.045),Math.max(x,x+side*.045),y-.03,y+.03,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.047),Math.max(x,x+side*.047),y-.022,y+.022,zc-.44,zc+.44,M.ssD);
+  const orM=new T3.MeshStandardMaterial({color:0xf0701a,roughness:.45}), crM=M.ssMir;
+  const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw, ry=side<0?-Math.PI/2:Math.PI/2;
+    bx(g,Math.min(x,x+side*.03),Math.max(x,x+side*.03),y-.032,y+.032,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.031),Math.max(x,x+side*.031),y-.034,y-.03,zc-.45,zc+.45,M.ssMir);
     rod(g,[xc+side*.27,y,zc-.45],[x,y,zc-.45],.012,M.ssMir,10); rod(g,[xc+side*.27,y,zc+.45],[x,y,zc+.45],.012,M.ssMir,10);          /* 호퍼 끝 브래킷 */
-    plate(g,.13,.035,labelTex([[nm,"#111",64]],{w:512,h:140,border:"#333"}),[x+side*.048,y+.045,zc-.33],side<0?-Math.PI/2:Math.PI/2);
-    for(let i=0;i<n;i++){ const z=pz(i), K=new T3.Group(); K.position.set(x+side*.047,y,z); g.add(K);
-      const kn=new T3.Mesh(new T3.CylinderGeometry(.017,.019,.03,22),M.black); kn.rotation.z=Math.PI/2; kn.position.x=side*.015; add(K,kn);
-      const pt=new T3.Mesh(new T3.BoxGeometry(.004,.022,.005),M.white); pt.position.set(side*.031,.006,0); add(K,pt);
-      FM.dials[key].push(K); } };
-  dialRow(-1,Y+.6,"add","1 첨가제"); dialRow(-1,Y+.53,"main","2 주성분"); dialRow(1,Y+.57,"sug","3 백당");
+    plate(g,.2,.03,labelTex([[nm,"#111",54]],{w:640,h:96,border:"#333"}),[x+side*.032,y+.05,zc-.3],ry);
+    for(let i=0;i<n;i++){ const z=pz(i), xo=x+side*.03;
+      bx(g,Math.min(xo,xo+side*.03),Math.max(xo,xo+side*.03),y-.02,y+.024,z-.03,z+.006,orM);                                   /* 주황 카운터 */
+      const cv=document.createElement("canvas"); cv.width=128; cv.height=48; const ctx=cv.getContext("2d"), tx=new T3.CanvasTexture(cv); tx.encoding=T3.sRGBEncoding;
+      const win=new T3.Mesh(new T3.PlaneGeometry(.03,.011),new T3.MeshBasicMaterial({map:tx})); win.rotation.y=ry; win.position.set(xo+side*.0305,y+.012,z-.012); g.add(win);
+      const sk=new T3.Mesh(new T3.CylinderGeometry(.011,.012,.022,20),crM); sk.rotation.z=Math.PI/2; sk.position.set(xo+side*.011,y-.004,z+.018); add(g,sk);   /* 크롬 육각 소켓 */
+      const HX=new T3.Group(); HX.position.set(xo+side*.0225,y-.004,z+.018); g.add(HX); const hx=new T3.Mesh(new T3.CylinderGeometry(.0055,.0055,.002,6),M.black); hx.rotation.z=Math.PI/2; HX.add(hx);
+      FM.dials[key].push({hex:HX, ctx, tex:tx, cnt:null}); } };
+  dialRow(-1,Y+.57,"add","첨가제 함량조절다이얼"); dialRow(1,Y+.6,"main","주성분 함량조절다이얼"); dialRow(1,Y+.53,"sug","백당 함량조절다이얼");
   /* 남쪽 끝 : 게이트 · 셔터 실린더 · 고정 브래킷 · 덮개 천 */
   const cyl=(x,y0,y1,z)=>{ rod(g,[x,y0,z],[x,y1,z],.019,M.alu,14); rod(g,[x,y1,z],[x,y1+.012,z],.022,M.grey,14); rod(g,[x,y0-.012,z],[x,y0,z],.022,M.grey,14); rod(g,[x,y0-.07,z],[x,y0-.012,z],.006,M.ssMir,8); };
   for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,ft+.01,ft+.19,zc+D+.06);
@@ -1438,7 +1458,7 @@ const PB={ beacon(g,x,y,z,mk){ const LM=lampMats(mk||"line"); rod(g,[x,y,z],[x,y
   sign(g,w,h,lines,o,pos,ry){ return plate(g,w,h,labelTex(lines,o),pos,ry); },
   warn(g,x,y,z,ry){ return plate(g,.05,.05,labelTex([["⚠","#111",150]],{w:128,h:128,bg:"#f5d400"}),[x,y,z],ry); },
   frame(g,x0,x1,y0,y1,z0,z1,mat){ const t=.022; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-t,x+t,y0,y1,z-t,z+t,mat); for(const y of [y0,y1]){ for(const z of [z0,z1]) bx(g,x0,x1,y-t,y+t,z-t,z+t,mat); for(const x of [x0,x1]) bx(g,x-t,x+t,y-t,y+t,z0,z1,mat); } },
-  panel(g,x,y,z,ry,brand){ const G=new T3.Group(); G.position.set(x,y,z); G.rotation.y=ry; g.add(G);           /* 흰 판넬 함 · 터치화면 · START/STOP/RESET · 비상정지 (정면 +x) */
+  panels:[], panel(g,x,y,z,ry,brand,mk){ const G=new T3.Group(); if(mk) PB.panels.push({G,mk}); G.position.set(x,y,z); G.rotation.y=ry; g.add(G);           /* 흰 판넬 함 · 터치화면 · START/STOP/RESET · 비상정지 (정면 +x) */
     bx(G,-.05,.05,-.24,.24,-.2,.2,M.white); bx(G,.05,.054,-.02,.21,-.17,.17,M.dark); bx(G,.054,.056,0,.19,-.15,.15,M.scr);
     for(const [k,m] of [[0,M.white],[1,M.dark],[2,M.blue]]) { rod(G,[.05,-.08,-.12+k*.07],[.065,-.08,-.12+k*.07],.016,m,14); rod(G,[.05,-.08,-.12+k*.07],[.054,-.08,-.12+k*.07],.022,M.ssD,14); }
     rod(G,[.05,-.08,.13],[.072,-.08,.13],.026,M.red,16); rod(G,[.05,-.08,.13],[.056,-.08,.13],.036,M.yellow,16);
@@ -1493,7 +1513,7 @@ function buildStickFeeder(g){
   PB.beacon(g,x0+.1,Hf,z1-.1,"sf");
   /* 판넬 : 동남쪽 회전 암 (PanelView · START 흰 · STOP 검 · RESET 파랑 · 비상정지) */
   bx(g,x1+.0,x1+.3,1.62,1.66,z1-.04,z1+.0,M.alu); rod(g,[x1+.28,1.66,z1-.02],[x1+.28,1.5,z1-.02],.02,M.alu,12);
-  PB.panel(g,x1+.33,1.3,z1+.12,0,"Hoonga");
+  PB.panel(g,x1+.33,1.3,z1+.12,0,"Hoonga","sf");
   /* 앞 회색 대차 · 회색 바구니 2 (양품 파우치 임시 보관) · 노란 체인 차단줄 */
   { const cx=x1+.75, cz=zm; for(const y of [.2,.62]) bx(g,cx-.28,cx+.28,y,y+.025,cz-.35,cz+.35,M.grey); for(const dx of [-.26,.26]) for(const dz of [-.33,.33]){ bx(g,cx+dx-.015,cx+dx+.015,.07,.64,cz+dz-.015,cz+dz+.015,M.grey); rod(g,[cx+dx,.035,cz+dz],[cx+dx,.035,cz+dz+.02],.035,M.dark,12); }
     for(const dz of [-.17,.17]){ bx(g,cx-.2,cx+.2,.645,.8,cz+dz-.15,cz+dz+.15,M.grey); bx(g,cx-.18,cx+.18,.66,.8,cz+dz-.13,cz+dz+.13,M.dark); } }
@@ -1575,7 +1595,7 @@ function buildCartoner(g){
     for(const k of [0,1]) tube(g,[[cx+.15,.99,hz-.08+k*.06],[cx+.05,1.25,hz-.1+k*.06],[x0+.1,1.33,hz+.1],[x0+.03,1.3,hz+.4]],.016,M.hoseB);
     bx(g,x0-.48,x0-.06,.05,.95,zn+.05,zn+.55,M.blue); bx(g,x0-.48,x0-.06,.95,1.0,zn+.05,zn+.55,M.dark); for(const dz2 of [.15,.35]) rod(g,[x0-.05,.78,zn+dz2],[x0-.02,.78,zn+dz2],.035,M.white,18);
     tube(g,[[x0-.27,1.0,zn+.3],[x0-.2,1.25,zn+.25],[x0+.01,1.3,zn+.3]],.018,M.hoseB);
-    bx(g,x1+.08,x1+.46,.05,1.1,zn-.05,zn+.35,M.ss); rod(g,[x1+.27,1.1,zn+.15],[x1+.27,1.22,zn+.15],.03,M.ssMir,14); PB.panel(g,x1+.3,1.45,zn+.15,0,"Hoonga");
+    bx(g,x1+.08,x1+.46,.05,1.1,zn-.05,zn+.35,M.ss); rod(g,[x1+.27,1.1,zn+.15],[x1+.27,1.22,zn+.15],.03,M.ssMir,14); PB.panel(g,x1+.3,1.45,zn+.15,0,"Hoonga","ct");
     { const pts=[], hx=x1+.52, hz2=zn+.45; for(let i=0;i<=120;i++){ const t=i/120, a=t*Math.PI*2*14; pts.push([hx+Math.cos(a)*.03,1.1-t*.6,hz2+Math.sin(a)*.03]); } tube(g,pts,.005,M.yellow); }
     { const r=new T3.Mesh(new T3.BoxGeometry(.42,.006,.28),M.ssMir); r.position.set((cx+X)/2,PKZ.y-.004,zl(4.98)-.14); r.rotation.y=.55; add(g,r); } }   /* 체인 끝 → 프린터 벨트 이송판 */
   /* ── 설명서 공급 구간 (스틱공급장치 ↔ 카토너, 흰 버킷 위) ── */
@@ -2721,8 +2741,8 @@ const ANC={
   empty:[CVX-.25,0.5,ZC+.75],           /* 공포 배출 [확인 필요] */
   hop2:[XF,DY+1.0,ZC+.38],              /* 2번 호퍼 (주성분 · 원료투입구 쪽) */
   hops:[XF,DY+1.45,ZC],
-  dialF:[XF-.51,DY+.57,ZC],              /* 충전량 다이얼 (서쪽 · 첨가제 · 주성분) */
-  dialB:[XF+.52,DY+.57,ZC],              /* 백당 (동쪽) */
+  dialF:[XF-.52,DY+.57,ZC],              /* 첨가제 함량조절다이얼 (서쪽 · 전면) */              /* 충전량 다이얼 (서쪽 · 첨가제 · 주성분) */
+  dialB:[XF+.52,DY+.565,ZC],             /* 주성분 · 백당 함량조절다이얼 (동쪽 · 후면) */              /* 백당 (동쪽) */
   dust:[5.0,DY+.55,1.65],               /* 동쪽 데크 진공 생성기 · 집진 */
   roll:[4.71,0.70,ZC],                  /* 은박 롤 (언와인더) */
   prn:[4.35,1.70,ZC-.44],               /* 은박 인쇄부 (북쪽 면 오른쪽 칸 · 11/16 사진) */
@@ -3098,7 +3118,7 @@ function hmiRoute(mk,scr,target){
    · 설정값 = SOP 화면 사진 값 그대로 (사용자 결정 11/16). 품목저장 · Input/Output · 주변기기는 SOP 에 사진이 없어 구성 추정 (확인 필요)
    · 'IDT 확인' 칩은 실제 화면에 없는 교육용 확인 버튼
    ═══════════════════════════════════════════════════════════════════ */
-let SPBIG=true;   /* 3인칭 옆 패널에서 화면을 왼쪽으로 넓혀 크게 보기 (⤢) */
+let SPBIG=false;   /* 11/16 : HMI 를 어떤 방식으로도 띄우지 않음 (사용자 지시) — 크게 보기 삭제 */   /* 3인칭 옆 패널에서 화면을 왼쪽으로 넓혀 크게 보기 (⤢) */
 const SNAV=[["run","운전데이터","☰"],["cam","캠 포지션","⌖"],["splice","이음매","▨"],["manual","수동점검","🔍"],["sw1","조작스위치","☝"],["temp","온도설정","🌡"],["xfer","이송기설정","⚡"],["save","품목저장","⬇","off"],["io","Input/<br>Output","I/O"],["alarm","알람목록","🔔"],["aux","주변기기","⚙"]];
 const SUB={cam2:"cam", sw2:"sw1", vis:"aux"};
 const SPT={run:"운전 데이터",cam:"캠포지션1",cam2:"캠포지션2",splice:"이음매",manual:"수동 점검",sw1:"조작 스위치",sw2:"조작 스위치 2",temp:"온도 설정",xfer:"이송기설정",save:"품목 저장",io:"Input / Output",alarm:"알람 목록",aux:"주변기기",vis:"비전 Setup"};
@@ -3108,7 +3128,7 @@ function spHead(scr,arrow){ const f=S.f, d=new Date(), dt=d.getFullYear()+"/ "+(
     '<div class="spSc"><s>Speed</s><b>'+(f.run?21:0)+'</b><s>Cam</s><b>'+(f.run?Math.round(f.phase*360)%360:0)+'</b><b class="dt">'+dt+'</b></div></div>'; }
 function spFoot(){ const L=(S.hist||[]).filter(h=>ALARMS[h.key]&&ALARMS[h.key].mk==="fl").slice(0,3), d=new Date(), ds=sp2(d.getMonth()+1)+"/"+sp2(d.getDate())+"/"+d.getFullYear();
   const txt=L.length?L.map(h=>{ const s=Math.max(0,Math.floor(h.at)); return sp2(Math.floor(s/3600)%24)+":"+sp2(Math.floor(s/60)%60)+":"+sp2(s%60)+" "+h.t+" 이상알람 "+ds; }).join("   "):"";
-  return '<div class="spF"><div class="spAl">'+esc(txt)+'</div><div class="spB" data-hb="sp_logout">Logout</div><div class="spB" data-hb="sp_empty">공포</div><div class="spB" data-hb="sp_mark">마크</div><div class="spB n">90</div><div class="spB big" data-hb="sp_big" title="화면 크게 · 작게">'+(SPBIG?"⤡":"⤢")+'</div></div>'; }
+  return '<div class="spF"><div class="spAl">'+esc(txt)+'</div><div class="spB" data-hb="sp_logout">Logout</div><div class="spB" data-hb="sp_empty">공포</div><div class="spB" data-hb="sp_mark">마크</div><div class="spB n">90</div></div>'; }
 const spOn=(t,v,id,cls)=>'<div class="spSw'+(v?" on":"")+(cls?" "+cls:"")+'"'+(id?' data-hb="'+id+'"':' data-hb="sp_view"')+'>'+t+(v===null?"":' '+(v?"On":"Off"))+'</div>';
 const spChk=(id,on,t)=>'<div class="spChk'+(on?" on":"")+'" data-hb="'+id+'">✔ '+t+' <s>IDT 확인</s></div>';
 const spT=(head,rows,cls)=>'<table class="spTb'+(cls?" "+cls:"")+'"><tr>'+head.map(h=>'<th>'+h+'</th>').join("")+'</tr>'+rows.map(r=>'<tr>'+r.map((c,i)=>'<td'+(i?' class="v"':'')+'>'+c+'</td>').join("")+'</tr>').join("")+'</table>';
@@ -3174,7 +3194,7 @@ function solpacDraw(body,nav){
 function solpacLogin(){ return '<div class="spScr">'+spHead("run").replace(SPT.run,"로그인")+'<div class="spC spLogin"><div><b>터치스크린 로그인</b>ID · PASSWORD 를 입력해 로그인합니다 (IDT : 버튼 한 번).<div class="spLgBtn" data-hb="fl_login">Login</div></div></div><div class="spF"><div class="spAl"></div><div class="spB" data-hb="fl_login">Login</div><div class="spB">공포</div><div class="spB">마크</div><div class="spB n">90</div></div></div>'; }
 function solpacClick(id){
   if(id.startsWith("sp_go_")){ hScr=id.slice(6); drawHMI(); return; }
-  if(id==="sp_big"){ SPBIG=!SPBIG; drawHMI(); return; }
+  if(id==="sp_big") return;
   if(id==="sp_back"){ hScr=SUB[hScr]||"run"; drawHMI(); return; }
   if(id==="sp_logout"){ if(S.f.run){ toast("운전 중에는 로그아웃하지 않습니다.","bad"); return; } S.f.user=null; toast("로그아웃"); drawHMI(); return; }
   if(id==="sp_man"){ if(S.f.run){ toast("운전 중에는 수동 점검을 켜지 않습니다.","bad"); return; } S.flags.spMan=!S.flags.spMan; drawHMI(); return; }
@@ -3645,7 +3665,7 @@ const CASES={
     q:"IPC 결과 주성분 평균이 기준(2.000 g)보다 4% 넘게 낮습니다. 올바른 조치는?", a:"2층 데크 충전량 조절 다이얼에서 미달된 원료(주성분) · 열의 다이얼을 조정하고 재측정한다",
     w:["판정 기준을 ±10% 로 넓힌다","부적합 포를 정상품과 섞는다","백당 다이얼을 올려 총중량을 맞춘다"],
     fix:[{fix:ANC.dialF,t:"전면 확장 데크의 주성분 충전량 조절 다이얼을 조정합니다 (빨간 ! 누르기).",done:()=>dialOK("main"),
-      act(){ return startWork("dialF",()=>dialOpen("F",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }}]},
+      act(){ return startWork("dialB",()=>dialOpen("B",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }}]},
   F2:{nm:"파우치 인쇄 불량 (사용기한 · 제조번호)", mk:"fl", room:"F", fire(){ S.f.headDirty=true; },
     banner:"비전이 파우치 인쇄 불량을 연속 검출해 배출하고 있습니다.",
     q:"비전이 같은 인쇄 불량을 계속 배출합니다. 원인과 조치로 옳은 것은?", a:"프린터 헤드 오염 · 리본 상태 불량 → 헤드를 세척하고 리본을 점검 · 교체한 뒤 한 스텝 작동해 확인한다",
@@ -4890,11 +4910,13 @@ function fpTargetDefs(){
   const add=(...a)=>T.push(TB(...a));
   if(S.room==="F"){
     add("fMain","메인스위치 (회전 절연 스위치)",A.mainPow,.22,.22,.22,tileRun("fMain"),["#fMain"]);
-    if(S.room==="F"&&typeof dialOpen==="function"){ add("dialF","원료조절부 (서쪽 · 첨가제 · 주성분) · 충전량 조절",A.dialF,.12,.2,.95,()=>startWork("dialF",()=>dialOpen("F")),[]); add("dialB","원료조절부 (동쪽 · 백당) · 충전량 조절",A.dialB,.12,.2,.95,()=>startWork("dialB",()=>dialOpen("B")),[]); }   /* 충전량 조절 미니게임 (11/16) */
+    if(S.room==="F"&&typeof dialOpen==="function"){ add("dialF","첨가제 함량조절다이얼 (서쪽 · 전면)",A.dialF,.12,.2,.95,()=>startWork("dialF",()=>dialOpen("F")),[]); add("dialB","주성분 · 백당 함량조절다이얼 (동쪽 · 후면)",A.dialB,.12,.22,.95,()=>startWork("dialB",()=>dialOpen("B")),[]); }   /* 충전량 조절 미니게임 (11/16) */
     add("fAir1","압축공기 밸브 1",A.air1,.22,.26,.22,tileRun("fAir1"),["#fAir1"]);
     add("fAir2","압축공기 밸브 2",A.air2,.22,.26,.22,tileRun("fAir2"),["#fAir2"]);
     add("fDust","집진 밸브 (2층)",A.dust,.35,.35,.35,tileRun("fDust"),["#fDust"]);
     add("fPanel","컨트롤 판넬 전원 스위치",A.panelSw,.16,.2,.4,tileRun("fPanel"),["#fPanel"]);
+    { const px=FL.x0-.42-.205, pz=FL.bz0-.12, pb=(id,nm,dz,y)=>add("pb_"+id,"판넬 버튼 · "+nm,[px,y,pz+dz],.05,.05,.05,()=>fpPress("fl",id),["#"+id]);   /* 컨트롤 판넬 실제 버튼 (11/16 : 버튼 판 팝업 없음) */
+      pb("swRun","RUN",-.18,1.27); pb("swStop","STOP",-.06,1.27); pb("swJog","JOG",.06,1.27); pb("swReset","RESET",-.18,1.15); pb("swFill","FILLING",-.06,1.15); pb("swBuz","BUZZER",.06,1.15); pb("swEmg","EMERGENCY (비상정지)",.19,1.2); }
     add("fDoor","안전도어",A.door,.12,.8,.7,tileRun("fDoor"),["#fDoor"]);
     add("mLift","리프터 · 주성분 STS 용기",f.mainLift?A.liftUse:A.lift,.8,1.0,.8,tileRun("mLift"),["#mLift"]);
     add("mScoop","2번 호퍼 (주성분 스쿱 공급)",A.hop2,.5,.6,.5,tileRun("mScoop"),["#mScoop"]);
@@ -4922,10 +4944,15 @@ function fpTargetDefs(){
     add("pBin","불량 배출함",A.bin,.6,.5,.6,tileRun("pBin"),["#pBin"]);
     add("tDoc","문서 · 기록 게시판",A.docP,.06,.7,.9,tileRun("tDoc"),["#tDoc",'#listBox [data-doc']);
     add("tAlign","정렬컨베어 가동스위치",A.align,.2,.2,.16,tileRun("tAlign"),["#tAlign"]);
+    for(const P of (PB.panels||[])){ const W=(lx,lz)=>{ const v=P.G.localToWorld(new T3.Vector3(lx,-.08,lz)); return [v.x,v.y,v.z]; }, nm=P.mk==="sf"?"스틱공급장치":"카토너";   /* 판넬 실제 버튼 */
+      add("pb_"+P.mk+"Start",nm+" 버튼 · START",W(.068,.02),.05,.05,.05,()=>fpPress(P.mk,P.mk+"Start"),["#"+P.mk+"Start"]);
+      add("pb_"+P.mk+"Stop",nm+" 버튼 · STOP",W(.068,-.05),.05,.05,.05,()=>fpPress(P.mk,P.mk+"Stop"),["#"+P.mk+"Stop"]);
+      add("pb_"+P.mk+"Reset",nm+" 버튼 · RESET",W(.068,-.12),.05,.05,.05,()=>fpPress(P.mk,P.mk+"Reset"),["#"+P.mk+"Reset"]);
+      add("pb_"+P.mk+"Emg",nm+" 비상정지",W(.072,.13),.06,.06,.06,()=>fpPress(P.mk,"swEmg"),[]); }
   }
   /* 설비 화면 */
   for(const [key,m] of Object.entries(FP_MON)){ if(!m.k.every(k=>HTABS[S.room].some(t=>t[0]===k))) continue;
-    const r=monRect(m), ax=Math.abs(m.n[0])>.5; add("mon_"+key,m.nm+" · 화면",m.c,ax?.08:r.w,r.h,ax?r.w:.08,()=>{},[],{mon:key,hmiPose:monPose(m)}); }
+    const r=monRect(m), ax=Math.abs(m.n[0])>.5; const mg=typeof htxMon==="function"?htxMon(key):m; add("mon_"+key,m.nm+" · 화면",m.c,ax?.08:r.w,r.h,ax?r.w:.08,()=>{},[],{mon:key,hmiPose:monPose(mg)});   /* 누르면 유리면 앞으로 다가감 (확대) */ }
   /* 점검 (라인 클리어런스 · 확인 단계) */
   const st=curStep(), rec=S.activeTrouble?recoveryStep():null;
   if(st&&!rec&&!S.ipc.open){
@@ -4972,7 +4999,8 @@ function fpPlaceMonitor(){
   const w=fpMonEl(); if(!w||w.hidden) return;
   if(!FP.mod||FP.mod.mode!=="hmi"){ w.style.visibility="hidden"; return; }   /* 걸어 다닐 때는 3D 화면 그림(hmitex.js)만 · 누르고 다가간 뒤에만 조작 화면 (11/16) */
   const key=FP.monK||(monOf(hMach)&&Object.keys(FP_MON).find(k=>FP_MON[k]===monOf(hMach)));
-  const m=key&&FP_MON[key]; if(!m){ w.style.visibility="hidden"; return; }
+  const m=key&&(typeof htxMon==="function"?htxMon(key):FP_MON[key]); if(!m){ w.style.visibility="hidden"; return; }   /* 유리면에 꼭 맞춤 (11/16) */
+  w.classList.toggle("withPanel",m.k.includes("cw"));
   const r=monRect(m), e=R3.eye, K=R3.W/Math.max(1,$("#view3d").clientWidth);
   const far=Math.hypot(e[0]-m.c[0],e[2]-m.c[2])>7, back=(e[0]-m.c[0])*m.n[0]+(e[2]-m.c[2])*m.n[2]<.02, other=e[2]*m.c[2]<0;
   if(far||back||other){ placeIDTMonitor(w,null); return; }
@@ -5060,6 +5088,16 @@ function fpOverlay(g,K){
   const w=g.measureText(t).width+18*K; g.fillStyle="rgba(10,20,32,.62)"; rr(g,10*K,10*K,w,24*K,7*K); g.fill(); g.fillStyle="#fff"; g.fillText(t,19*K,27*K);
 }
 
+/* 실제 판넬 버튼 누르기 : 해당 설비의 버튼 동작 그대로 (화면에 버튼 판을 띄우지 않음) */
+function fpPress(mk,id){ if(hMach!==mk){ hMach=mk; hScr=mk==="fl"?"run":"main"; drawHMI(); } const e=$("#"+id); if(e) e.click(); else toast("이 설비에는 해당 버튼이 없습니다."); }
+/* 실제 판넬 버튼 위치 (노란 화살표 안내용) */
+function fpBtnPos(id){
+  const FLB={swRun:[-.18,1.27],swStop:[-.06,1.27],swJog:[.06,1.27],swReset:[-.18,1.15],swFill:[-.06,1.15],swBuz:[.06,1.15],swEmg:[.19,1.2]};
+  if(FLB[id]&&(S.room==="F"||hMach==="fl")) return [FL.x0-.42-.205,FLB[id][1],FL.bz0-.12+FLB[id][0]];
+  const m=id.match(/^(sf|ct)(Start|Stop|Reset)$/)||(id==="swEmg"&&(hMach==="sf"||hMach==="ct")?[0,hMach,"Emg"]:null); if(!m) return null;
+  const P=(PB.panels||[]).find(q=>q.mk===m[1]); if(!P) return null; const lz={Start:.02,Stop:-.05,Reset:-.12,Emg:.13}[m[2]], v=P.G.localToWorld(new T3.Vector3(.07,-.08,lz)); return [v.x,v.y,v.z];
+}
+
 /* ── old/autoplay.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    자동재생 — 힌트와 같은 대상(노란 화살표)을 실제로 눌러 진행
@@ -5112,6 +5150,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:23, d:"2026-11-16", t:"함량조절다이얼을 현장 사진대로(주황 카운터 + 크롬 육각 소켓) 바꾸고 배치 정정(서쪽 = 첨가제 · 동쪽 = 주성분 · 백당), 충전량 조절 미니게임을 아날로그형으로(육각 렌치가 꽂힌 다이얼을 가까이서 A/D 로 돌림 · 카운터 숫자가 굴러감 · 예상 충전량 표시 · 아래 10개 다이얼 참고), HMI 팝업 전면 삭제(3인칭 크게 보기 삭제 · 1인칭 조작 화면은 모니터 유리면에만 맞춤 · 버튼 판 대신 실제 판넬 버튼을 직접 눌러 조작)"},
  {v:22, d:"2026-11-16", t:"교육 시작은 항상 1인칭, 1인칭에서 왼쪽 타일은 ON/OFF 현황만(조작은 현장에서), 메인스위치를 컨트롤 판넬 바로 뒤 본체 서쪽 면의 회전 절연 스위치로 이동, 그래픽 설정 메뉴(상단 · 처음 최고), 자동재생 버튼 삭제, 대케이스 작업자 대기 자세 수정, 2층 호퍼 · 도징박스 · 원료조절부를 한 스테인리스 틀로 재구성(아래 막힘 · 조절부는 호퍼 끝 · 도징박스보다 높음), 2층 난간 1단 추가 · 원료투입구 아래 막힘, 모든 설비 모니터에 실제 HMI 화면 표시 · 화면 조작은 다가간 뒤 직접(회전 잠금 · F 뒤로), 가로실바가 눌러 잡고 내려오며 파우치를 끌어내리는 동작, 충전량 조절 미니게임(10노즐 · A/D 다이얼 · 예상 충전량)"},
  {v:21, d:"2026-11-16", t:"상단 시점 버튼 표기를 현재 시점 + 전환으로 변경(3인칭일 때 \"🎥 3인칭 → 1인칭 전환\", 1인칭일 때 \"🧍 1인칭 → 3인칭 전환\")"},
  {v:20, d:"2026-11-16", t:"포장실 연출을 실제 제품 흐름과 연동(교육 시작 시 카토너 · 검사기 · 수동 포장이 비어 있고 충전기 가동 후 넘어온 제품만 표시), 심화 충전실에 IBC 진공호스 연결 · 클램프 체결 단계 추가(연결 전 이송기 ON 불가), IPC 채취 시 작업자가 배출 컨베이어에서 시료를 꺼내 저울 작업대에서 계량, 설비별 경광등(녹 가동 · 주황 정지 · 적 알람) · 알람 부저, 은박 롤 운반 · 장착 때 보조 작업자 1명이 2인 1조로 함께 움직임"},
@@ -5513,8 +5552,8 @@ const RC={
     banner:"정기 공정검사(IPC)에서 주성분 측정 중량이 기준 범위를 벗어났습니다.",
     q:"중량 점검 결과 주성분 평균이 기준(2.000 g)보다 4% 넘게 낮습니다. 올바른 조치는?", a:"2층 데크 충전량 조절 다이얼에서 미달된 원료(주성분) 다이얼을 조정하고 재측정한다",
     w:["판정 기준을 ±10% 로 넓힌다","부적합 포를 정상품과 섞는다","백당 다이얼을 올려 총중량을 맞춘다"],
-    fix:[{fix:ANC.dialF,t:"전면 데크의 주성분 충전량 조절 다이얼을 조정합니다 (빨간 ! 누르기).",done:()=>dialOK("main"),
-      act(){ return startWork("dialF",()=>dialOpen("F",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }}]},
+    fix:[{fix:ANC.dialB,t:"2층 데크 동쪽(후면) 주성분 함량조절다이얼을 육각 렌치로 조절합니다 (빨간 ! 누르기).",done:()=>dialOK("main"),
+      act(){ return startWork("dialB",()=>dialOpen("B",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }}]},
   /* ── 포장실 ── */
   RP1:{nm:"정렬기 타이밍 · 그룹핑 불량", mk:"sf", room:"P", src:"포장- 정렬기 타이밍오류 (35분) · 그룹핑불량 (10분) · 대책 : 정렬기 작동 속도 조정, 정렬부 서보모터 교체", fire(){ S.flags.rc={}; },
     banner:"스틱공급장치 정렬부에서 파우치 묶음(그룹핑)이 카토너 투입 타이밍과 맞지 않습니다.",
@@ -5684,6 +5723,7 @@ function guideTarget(){
     if(id==="mRed"||id==="mPlain"){ if(S.f.rollCarry) return [PROP.cartUnw[0],.9,PROP.cartUnw[1]]; return [PROP.cartHome[0],.9,PROP.cartHome[1]]; }
     if(id==="tDoc") return S.room==="F"?ANC.docF:ANC.docP;
     if(id&&TILEJOB[id]){ const j=JOBS[TILEJOB[id]]; return j&&(j.reach||[j.stand[0],1.0,j.stand[1]]); }
+    if(id&&typeof fpBtnPos==="function"){ const bp=fpBtnPos(id); if(bp) return bp; }   /* 판넬 실제 버튼 */
     let el=null; try{ el=document.querySelector(s); }catch(e){}
     if(el&&el.closest("#hmi,#panel,#hTabs")){ let k=hMach; const tab=s.match(/data-mt="([a-z]+)"/); if(tab) k=tab[1]; const m=monOf(k); if(m) return m.c; }
   }catch(e){}
@@ -5745,6 +5785,13 @@ function lampTick(dt){
    ═══════════════════════════════════════════════════════════════════ */
 const HTX={css:null, t:0, i:0, last:{}, busy:false, scr:{}, fail:false};
 function htxCss(){ if(HTX.css==null) HTX.css=[...document.querySelectorAll("style")].map(s=>s.textContent).join("\n").replace(/\]\]>/g,""); return HTX.css; }
+/* 화면 유리면 (메시 경계 상자 : 중심 · 폭 · 높이) — 1인칭 조작 화면도 여기에 꼭 맞춤 */
+function htxGlass(k){ const s=V3&&V3.scr&&V3.scr.find(q=>q.k===k); if(!s) return null; if(s.glass) return s.glass;
+  const m=V3.scene.getObjectByProperty("uuid",s.uid); if(!m) return null; const b=new T3.Box3().setFromObject(m), c=b.getCenter(new T3.Vector3()), z=b.getSize(new T3.Vector3()), n=FP_MON[k].n, ax=Math.abs(n[0])>.5;
+  s.glass={c:[c.x+n[0]*(ax?z.x/2:0),c.y,c.z+n[2]*(ax?0:z.z/2)], w:ax?z.z:z.x, h:z.y}; return s.glass; }
+const htxLW=k=>k==="fl"?600:((FP_MON[k].dom||{}).w||560);
+/* 1인칭 조작용 모니터 정의 (유리면 기준) */
+function htxMon(key){ const m=FP_MON[key], g=htxGlass(key); if(!g) return m; const LW=htxLW(key); return {k:m.k, nm:m.nm, n:m.n, c:g.c, w:g.w, h:g.h, dom:{w:LW,h:Math.round(LW*g.h/g.w)}}; }
 /* 화면 크기 (메시 경계 상자 · 화면이 바라보는 축 제외) */
 function htxDims(s){ if(s.dim) return s.dim; const b=new T3.Box3(), m=V3.scene.getObjectByProperty("uuid",s.uid); if(!m) return null; b.setFromObject(m); const z=b.getSize(new T3.Vector3()), n=FP_MON[s.k].n;
   s.dim=Math.abs(n[0])>.5?[z.z,z.y]:[z.x,z.y]; return s.dim; }
@@ -5763,7 +5810,7 @@ async function htxDraw(s){
   if(!machPower(mk)){ if(s.tex){ s.mat.map=null; s.mat.emissiveMap=null; s.mat.needsUpdate=true; s.tex.dispose(); s.tex=null; s.key=null; } return; }
   const d=htxDims(s); if(!d) return;
   const snap=htxSnap(mk); if(!snap||!snap.w) return;
-  const LW=s.k==="fl"?600:((FP_MON[s.k].dom||{}).w||560), W=Math.min(600,LW), H=Math.round(W*d[1]/d[0]), LH=Math.round(LW*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
+  const LW=htxLW(s.k), W=Math.min(600,LW), H=Math.round(W*d[1]/d[0]), LH=Math.round(LW*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
   if(s.key===key) return; s.key=key;
   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(W*2)+'" height="'+(H*2)+'" viewBox="0 0 '+W+' '+H+'"><foreignObject width="'+W+'" height="'+H+'"><div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;height:'+H+'px;overflow:hidden;background:#000"><style><![CDATA['+htxCss()+'\n#hmi{width:'+LW+'px!important;height:'+LH+'px!important;max-width:none!important}#hTabs,#hAlarmTick{display:none!important}*{scrollbar-width:none!important}*::-webkit-scrollbar{display:none!important}]]></style><div style="width:'+LW+'px;height:'+LH+'px;overflow:hidden;transform:scale('+(W/LW)+');transform-origin:0 0">'+snap.html+'</div></div></foreignObject></svg>';
   const img=new Image(); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
@@ -5783,13 +5830,16 @@ function htxTick(dt){
 
 /* ── v3/dial.js ── */
 /* ═══════════════════════════════════════════════════════════════════
-   충전량 조절 미니게임 (11/16 사용자 지시) — 2층 데크 원료조절부를 누르면 10개 노즐 다이얼을 하나씩 돌려 충전량을 맞춤
-   · A / D : 선택한 노즐 다이얼을 왼쪽(감소) · 오른쪽(증가)으로 돌림   · ← / → : 노즐 선택   · 1 / 2 : 원료 선택(서쪽 조절부)   · F · Esc : 닫기
-   · 노즐마다 대략적인 예상 충전량 표시 (예 : 2.150 ~ 2.200 g) — 초록 = 기준 ±2 % 이내 · 노랑 = ±4 % 이내 · 빨강 = 벗어남
-   · 다이얼 값은 공정검사(IPC) 계량값에 노즐별로 반영 (course.js ipcWeigh 패치)
+   충전량 조절 미니게임 (11/16 사용자 지시 · V23 아날로그형) — 2층 데크 함량조절다이얼을 육각 L 렌치로 돌려 노즐별 충전량을 맞춤
+   · 함량조절다이얼 : 주황 카운터(숫자 4자리 창) + 크롬 육각 소켓 (현장 사진). 서쪽(전면) = 첨가제 10 / 동쪽(후면) = 주성분 10 · 백당 10 (사용자 확정)
+   · 화면 : 선택한 다이얼을 크게 가까이서 본 모습(육각 렌치가 꽂힌 채 돌아감 · 카운터 숫자가 굴러감) + 아래에 10개 다이얼을 작게(참고 · 클릭 선택)
+   · A / D : 렌치를 왼쪽(감소) · 오른쪽(증가)으로 돌림 (누르고 있으면 계속)   · ← / → : 노즐 선택   · 1 / 2 : 원료 선택(동쪽)   · F · Esc : 닫기
+   · 예상 충전량은 대략적인 범위로 표시 (예 : 2.150 ~ 2.200 g). 실제 값은 공정검사(IPC) 계량으로 확인 — 다이얼 값은 IPC 계량값에 노즐별로 반영
+   · 카운터 1 눈금 = 충전량 0.1 % (교육용 설정 · 확인 필요), 기준 = 1000
    ═══════════════════════════════════════════════════════════════════ */
-const DIAL={open:false, side:"F", k:"main", i:0, onClose:null, max:.10, step:.0025, ok:.02};
-const DIAL_SIDE={F:["add","main"], B:["sug"]};             /* 서쪽(F) = 1 첨가제 · 2 주성분 / 동쪽(B) = 3 백당 */
+const DIAL={open:false, side:"F", k:"add", i:0, onClose:null, max:.10, step:.001, ok:.02, disp:0, rot:0, raf:0, shake:0};
+const DIAL_SIDE={F:["add"], B:["main","sug"]};                   /* 서쪽(F · 전면) = 첨가제 / 동쪽(B · 후면) = 주성분 · 백당 (11/16 사용자 확정) */
+const dialCount=v=>Math.round(1000*(1+v));                       /* 카운터 표시값 (기준 1000) */
 /* 노즐별 다이얼 값 (기준 대비 비율) — 세션마다 노즐 사이 작은 차이(±1.2 %)로 시작, 이상사례 등으로 원료 전체 값이 바뀌면 노즐 전체를 같이 이동 */
 function dialArr(k){
   if(!S||!S.f) return null;
@@ -5803,70 +5853,120 @@ function dialSet(k,i,v){ const a=dialArr(k); if(!a) return; a[i]=clamp(v,-DIAL.m
 const dialOK=k=>{ const a=dialArr(k); return !!a&&a.every(v=>Math.abs(v)<=DIAL.ok+1e-9); };
 const dialRange=(k,v)=>{ const s=IPC_STD[k].std, c=s*(1+v), h=s*.0125; return [c-h,c+h]; };
 const dialCls=v=>Math.abs(v)<=DIAL.ok+1e-9?"ok":Math.abs(v)<=.04+1e-9?"warn":"ng";
+const dialSideOf=k=>k==="add"?"F":"B";
 
 function dialOpen(side,onClose){
   if(!S||!S.session||!S.session.active) return;
-  DIAL.open=true; DIAL.side=side||"F"; DIAL.k=DIAL_SIDE[DIAL.side].includes(DIAL.k)?DIAL.k:DIAL_SIDE[DIAL.side][DIAL_SIDE[DIAL.side].length-1]; DIAL.onClose=onClose||null;
-  if(DIAL.side==="F"&&S.activeTrouble) DIAL.k="main";
+  DIAL.open=true; DIAL.side=side||"F"; const L=DIAL_SIDE[DIAL.side]; if(!L.includes(DIAL.k)) DIAL.k=L[0]; DIAL.onClose=onClose||null;
+  if(DIAL.side==="B"&&S.activeTrouble) DIAL.k="main";
   let el=$("#dialGame"); if(!el){ $("#main").insertAdjacentHTML("beforeend",'<div id="dialGame" class="modal"></div>'); el=$("#dialGame"); }
   el.classList.add("on"); if(document.pointerLockElement) document.exitPointerLock();
-  dialRender();
+  DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*24;
+  dialRender(); dialLoop();
 }
 function dialClose(){
-  if(!DIAL.open) return; DIAL.open=false; $("#dialGame").classList.remove("on");
+  if(!DIAL.open) return; DIAL.open=false; $("#dialGame").classList.remove("on"); cancelAnimationFrame(DIAL.raf);
   for(const q of DIAL_SIDE[DIAL.side]){ const r=S.ipc&&S.ipc.res&&S.ipc.res[q]; if(r&&!r.pass&&dialOK(q)) r.stale=true; } if(typeof renderIpc==="function") renderIpc();   /* 조절 후 재측정 */
   const cb=DIAL.onClose; DIAL.onClose=null; try{ cb&&cb(); }catch(e){ console.error(e); }
-  renderCoach&&renderCoach(); stepCheck&&stepCheck();
+  if(typeof renderCoach==="function") renderCoach(); if(typeof stepCheck==="function") stepCheck();
 }
-function dialSvg(v,big){
-  const R=big?92:26, a=v/DIAL.max*135, W=R*2+(big?24:8), c=W/2, arc=(a0,a1,col,w)=>{ const p=t=>{ const r=(t-90)*Math.PI/180; return [c+R*Math.cos(r),c+R*Math.sin(r)]; }, [x0,y0]=p(a0), [x1,y1]=p(a1);
-    return '<path d="M'+x0+' '+y0+' A'+R+' '+R+' 0 '+(Math.abs(a1-a0)>180?1:0)+' 1 '+x1+' '+y1+'" stroke="'+col+'" stroke-width="'+w+'" fill="none"/>'; };
-  const z=x=>x/DIAL.max*135, sw=big?9:4;
-  let s='<svg viewBox="0 0 '+W+' '+W+'" width="'+W+'" height="'+W+'">'+'<circle cx="'+c+'" cy="'+c+'" r="'+(R+(big?8:3))+'" fill="#1d2329"/>'+
-    arc(-135,z(-.04),"#c9372c",sw)+arc(z(-.04),z(-DIAL.ok),"#e0a800",sw)+arc(z(-DIAL.ok),z(DIAL.ok),"#22a35a",sw)+arc(z(DIAL.ok),z(.04),"#e0a800",sw)+arc(z(.04),135,"#c9372c",sw);
-  if(big) for(let t=-10;t<=10;t+=2){ const r=(z(t/100)-90)*Math.PI/180; s+='<line x1="'+(c+(R-14)*Math.cos(r))+'" y1="'+(c+(R-14)*Math.sin(r))+'" x2="'+(c+(R-5)*Math.cos(r))+'" y2="'+(c+(R-5)*Math.sin(r))+'" stroke="#9aa5ae" stroke-width="2"/>'+
-    '<text x="'+(c+(R-28)*Math.cos(r))+'" y="'+(c+(R-28)*Math.sin(r)+4)+'" fill="#cfd6dc" font-size="11" text-anchor="middle">'+(t>0?"+":"")+t+'</text>'; }
-  const r=(a-90)*Math.PI/180;
-  s+='<circle cx="'+c+'" cy="'+c+'" r="'+(R*.42)+'" fill="#0d1013" stroke="#59646d" stroke-width="2"/>'+
-    '<line x1="'+c+'" y1="'+c+'" x2="'+(c+R*.9*Math.cos(r))+'" y2="'+(c+R*.9*Math.sin(r))+'" stroke="#f4f6f7" stroke-width="'+(big?5:2.5)+'" stroke-linecap="round"/>'+
-    '<circle cx="'+c+'" cy="'+c+'" r="'+(big?7:3)+'" fill="#f4f6f7"/></svg>';
-  return s;
+/* ── 가까이 본 함량조절다이얼 (아날로그) : 스테인리스 판 · 주황 카운터(굴러가는 숫자 4자리) · 크롬 육각 소켓 · 꽂힌 육각 L 렌치 ── */
+function dialScene(){
+  const v=DIAL.disp, cnt=1000*(1+v), W=560, H=400, sx=380, sy=270;            /* sx · sy : 소켓 중심 */
+  const dig=[]; { let n=cnt; for(let p=0;p<4;p++){ const base=Math.pow(10,p), d=(n/base)%10, f=p===0?d:(Math.floor(d)+Math.max(0,((n%base)-(base-1))));   /* 낮은 자리는 연속, 윗자리는 넘어갈 때만 굴러감 */
+      dig.unshift(f); } }
+  const wheel=(x,d)=>{ let s='<g clip-path="url(#dgWin)"><g transform="translate('+x+','+(-((d%10)*46))+')">'; for(let k=-1;k<=11;k++){ const y=150+k*46; s+='<text x="0" y="'+(y+15)+'" font-size="40" font-family="DejaVu Sans Mono,Consolas,monospace" font-weight="700" fill="#f2f2ee" text-anchor="middle">'+(((k%10)+10)%10)+'</text>'; } return s+'</g></g>'; };
+  const sh=DIAL.shake>0?(Math.random()-.5)*DIAL.shake*6:0, a=DIAL.rot+sh;
+  return '<svg viewBox="0 0 '+W+' '+H+'" class="dgScene"><defs>'+
+    '<linearGradient id="dgSS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9dde0"/><stop offset=".45" stop-color="#9aa1a7"/><stop offset=".55" stop-color="#b8bec3"/><stop offset="1" stop-color="#7d848a"/></linearGradient>'+
+    '<linearGradient id="dgOr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a3c"/><stop offset=".55" stop-color="#ef6c12"/><stop offset="1" stop-color="#c25208"/></linearGradient>'+
+    '<radialGradient id="dgCr" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c8ced3"/><stop offset=".7" stop-color="#6d747a"/><stop offset="1" stop-color="#3a3f44"/></radialGradient>'+
+    '<linearGradient id="dgKey" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a6066"/><stop offset=".5" stop-color="#2b2f33"/><stop offset="1" stop-color="#15181b"/></linearGradient>'+
+    '<linearGradient id="dgWrap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a7a5e"/><stop offset=".5" stop-color="#c4b18c"/><stop offset="1" stop-color="#6e604a"/></linearGradient>'+
+    '<clipPath id="dgWin"><rect x="92" y="128" width="200" height="54" rx="4"/></clipPath>'+
+    '<filter id="dgSh"><feDropShadow dx="3" dy="5" stdDeviation="5" flood-opacity=".45"/></filter></defs>'+
+    '<rect width="'+W+'" height="'+H+'" fill="#1b1f23"/>'+
+    '<rect x="20" y="40" width="'+(W-40)+'" height="'+(H-80)+'" rx="6" fill="url(#dgSS)"/>'+
+    [[40,60],[W-40,60],[40,H-60],[W-40,H-60]].map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="9" fill="url(#dgCr)"/><path d="M'+(x-5)+' '+y+'h10" stroke="#3a3f44" stroke-width="2"/>').join("")+
+    /* 주황 카운터 */
+    '<g filter="url(#dgSh)"><rect x="70" y="80" width="244" height="150" rx="10" fill="url(#dgOr)"/></g>'+
+    '<rect x="78" y="88" width="228" height="10" rx="5" fill="#ffd2a8" opacity=".45"/>'+
+    '<rect x="88" y="124" width="208" height="62" rx="6" fill="#111"/>'+
+    [0,1,2,3].map(p=>'<rect x="'+(95+p*50)+'" y="128" width="44" height="54" rx="3" fill="#1d1d1d"/>').join("")+
+    dig.map((d,p)=>wheel(117+p*50,d)).join("")+
+    '<rect x="92" y="128" width="200" height="16" fill="url(#dgSS)" opacity=".18"/><rect x="92" y="166" width="200" height="16" fill="#000" opacity=".35"/>'+
+    '<text x="192" y="112" font-size="14" fill="#5a2600" text-anchor="middle" font-weight="700">'+esc(IPC_STD[DIAL.k].nm)+' 함량조절 · 노즐 '+(DIAL.i+1)+'</text>'+
+    '<text x="192" y="214" font-size="12" fill="#5a2600" text-anchor="middle">▲ D 증가 · A 감소 ▼</text>'+
+    /* 크롬 육각 소켓 */
+    '<g filter="url(#dgSh)"><circle cx="'+sx+'" cy="'+sy+'" r="52" fill="url(#dgCr)"/></g><circle cx="'+sx+'" cy="'+sy+'" r="40" fill="none" stroke="#5c6369" stroke-width="3"/>'+
+    '<g transform="rotate('+a+' '+sx+' '+sy+')"><polygon points="'+[0,1,2,3,4,5].map(j=>{ const t=j*Math.PI/3; return (sx+17*Math.cos(t))+","+(sy+17*Math.sin(t)); }).join(" ")+'" fill="#0e1012"/>'+
+    /* 꽂힌 육각 L 렌치 : 짧은 쪽은 소켓 안, 긴 손잡이가 화면 오른쪽 아래로 */
+    '<g transform="rotate(35 '+sx+' '+sy+')"><rect x="'+(sx-9)+'" y="'+(sy-9)+'" width="18" height="18" rx="3" fill="url(#dgKey)"/>'+
+    '<rect x="'+(sx)+'" y="'+(sy-8)+'" width="230" height="16" rx="7" fill="url(#dgKey)"/>'+
+    '<rect x="'+(sx+120)+'" y="'+(sy-11)+'" width="120" height="22" rx="9" fill="url(#dgWrap)"/>'+
+    [0,1,2,3,4,5,6,7].map(j=>'<line x1="'+(sx+126+j*14)+'" y1="'+(sy-11)+'" x2="'+(sx+134+j*14)+'" y2="'+(sy+11)+'" stroke="#5b4e3a" stroke-width="2"/>').join("")+'</g></g>'+
+    '</svg>';
+}
+function dialMini(k,x,i){
+  const c=dialCount(x);
+  return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'"><div class="dgMiniBox"><span>'+String(c).padStart(4,"0")+'</span></div><i class="dgMiniHex"></i><b>'+(i+1)+'</b></div>';
 }
 function dialRender(){
   const el=$("#dialGame"); if(!el||!DIAL.open) return;
   const k=DIAL.k, a=dialArr(k), v=a[DIAL.i], rg=dialRange(k,v), std=IPC_STD[k].std, f3=x=>x.toFixed(3);
-  const tabs=DIAL_SIDE[DIAL.side].map((q,j)=>'<button class="dgTab'+(q===k?" on":"")+'" data-k="'+q+'">'+(DIAL.side==="F"?(j+1)+" · ":"3 · ")+IPC_STD[q].nm+(dialOK(q)?" ✓":"")+'</button>').join("");
-  el.innerHTML='<div class="dgBox"><div class="dgHead"><b>🎛️ 원료조절부 · 충전량 조절</b><span>'+(DIAL.side==="F"?"서쪽 조절부":"동쪽 조절부")+'</span><button class="dgX" id="dgX">닫기 (F · Esc)</button></div>'+
+  const tabs=DIAL_SIDE[DIAL.side].map((q,j)=>'<button class="dgTab'+(q===k?" on":"")+'" data-k="'+q+'">'+(DIAL_SIDE[DIAL.side].length>1?(j+1)+" · ":"")+IPC_STD[q].nm+(dialOK(q)?" ✓":"")+'</button>').join("");
+  el.innerHTML='<div class="dgBox"><div class="dgHead"><b>🔧 함량조절다이얼 · 충전량 조절</b><span>'+(DIAL.side==="F"?"서쪽(전면) · 첨가제":"동쪽(후면) · 주성분 · 백당")+'</span><button class="dgX" id="dgX">닫기 (F · Esc)</button></div>'+
     '<div class="dgTabs">'+tabs+'</div>'+
-    '<div class="dgMain"><div class="dgBig">'+dialSvg(v,true)+'</div><div class="dgInfo"><div class="dgNz">노즐 <b>'+(DIAL.i+1)+'</b> / 10</div>'+
-      '<div class="dgPred '+dialCls(v)+'">예상 충전량<b>'+f3(rg[0])+' ~ '+f3(rg[1])+' g</b></div>'+
-      '<div class="dgStd">기준 '+f3(std)+' g · 다이얼 '+(v>=0?"+":"")+(v*100).toFixed(1)+' %</div>'+
-      '<div class="dgKeys"><span>A</span> 감소 <span>D</span> 증가 · <span>←</span><span>→</span> 노즐 선택'+(DIAL_SIDE[DIAL.side].length>1?' · <span>1</span><span>2</span> 원료':'')+'</div>'+
-      '<div class="dgNote">초록 = 기준 ±2 % 이내 · 노랑 = ±4 % 이내 · 빨강 = 벗어남. 예상값은 대략적인 범위이며 실제는 공정검사(IPC) 계량으로 확인합니다.</div></div></div>'+
-    '<div class="dgRow">'+a.map((x,i)=>{ const r=dialRange(k,x); return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'">'+dialSvg(x,false)+'<b>'+(i+1)+'</b><s>'+f3((r[0]+r[1])/2)+'</s></div>'; }).join("")+'</div>'+
-    '<div class="dgFoot">'+(dialOK(k)?'<span class="okT">✓ '+IPC_STD[k].nm+' 10개 노즐 모두 기준 ±2 % 이내</span>':'<span>'+IPC_STD[k].nm+' : 범위를 벗어난 노즐 '+a.filter(x=>Math.abs(x)>DIAL.ok+1e-9).length+' 개</span>')+'</div></div>';
+    '<div class="dgMain"><div class="dgBig" id="dgBig">'+dialScene()+'</div><div class="dgInfo">'+
+      '<div class="dgPred '+dialCls(v)+'" id="dgPred">예상 충전량<b>'+f3(rg[0])+' ~ '+f3(rg[1])+' g</b><s>기준 '+f3(std)+' g</s></div>'+
+      '<div class="dgKeys"><span>A</span> 감소 · <span>D</span> 증가 (누르고 있으면 계속)<br><span>←</span><span>→</span> 노즐 선택'+(DIAL_SIDE[DIAL.side].length>1?' · <span>1</span><span>2</span> 원료':'')+'</div>'+
+      '<div class="dgNote">예상값은 대략적인 범위입니다. 조절 후 공정검사(IPC) 계량으로 확인합니다.</div></div></div>'+
+    '<div class="dgRow">'+a.map((x,i)=>dialMini(k,x,i)).join("")+'</div>'+
+    '<div class="dgFoot" id="dgFoot">'+dialFoot(k,a)+'</div></div>';
   $("#dgX").onclick=dialClose;
-  $$("#dialGame [data-k]").forEach(b=>b.onclick=()=>{ DIAL.k=b.dataset.k; dialRender(); });
-  $$("#dialGame [data-i]").forEach(b=>b.onclick=()=>{ DIAL.i=+b.dataset.i; dialRender(); });
+  $$("#dialGame [data-k]").forEach(b=>b.onclick=()=>{ DIAL.k=b.dataset.k; dialSnap(); dialRender(); });
+  $$("#dialGame [data-i]").forEach(b=>b.onclick=()=>{ DIAL.i=+b.dataset.i; dialSnap(); dialRender(); });
+}
+const dialFoot=(k,a)=>dialOK(k)?'<span class="okT">✓ '+IPC_STD[k].nm+' 10개 노즐 모두 기준 ±2 % 이내</span>':'<span>'+IPC_STD[k].nm+' : 기준 ±2 % 를 벗어난 노즐 '+a.filter(x=>Math.abs(x)>DIAL.ok+1e-9).length+' 개</span>';
+function dialSnap(){ DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*24; }
+/* 애니메이션 : 카운터 숫자가 굴러가고 렌치가 돌아감 */
+function dialLoop(){
+  if(!DIAL.open) return;
+  const a=dialArr(DIAL.k), v=a[DIAL.i], tr=v/DIAL.step*24;
+  const moving=Math.abs(DIAL.disp-v)>1e-6||Math.abs(DIAL.rot-tr)>.05||DIAL.shake>0;
+  if(moving){ DIAL.disp+=(v-DIAL.disp)*.35; DIAL.rot+=(tr-DIAL.rot)*.35; if(Math.abs(DIAL.disp-v)<2e-5) DIAL.disp=v; DIAL.shake=Math.max(0,DIAL.shake-.08);
+    const b=$("#dgBig"); if(b) b.innerHTML=dialScene(); }
+  DIAL.raf=requestAnimationFrame(dialLoop);
 }
 function dialKey(e){
   if(!DIAL.open) return;
   const c=e.code, side=DIAL_SIDE[DIAL.side];
-  if(c==="KeyA"||c==="KeyD"){ const a=dialArr(DIAL.k), v=a[DIAL.i], nv=clamp(v+(c==="KeyD"?1:-1)*DIAL.step,-DIAL.max,DIAL.max); dialSet(DIAL.k,DIAL.i,Math.round(nv/DIAL.step)*DIAL.step); beep(nv===v?180:1200,.03,"square",.02); }
-  else if(c==="ArrowLeft"||c==="ArrowRight") DIAL.i=clamp(DIAL.i+(c==="ArrowRight"?1:-1),0,9);
-  else if((c==="Digit1"||c==="Digit2")&&side.length>1) DIAL.k=side[c==="Digit1"?0:1];
+  if(c==="KeyA"||c==="KeyD"){ const a=dialArr(DIAL.k), v=a[DIAL.i], nv=clamp(v+(c==="KeyD"?1:-1)*DIAL.step,-DIAL.max,DIAL.max);
+    if(nv===v){ DIAL.shake=1; beep(160,.05,"square",.02); } else { dialSet(DIAL.k,DIAL.i,Math.round(nv/DIAL.step)*DIAL.step); beep(1500,.012,"square",.012); }
+    e.preventDefault(); e.stopPropagation();
+    const k=DIAL.k, x=dialArr(k)[DIAL.i], rg=dialRange(k,x), P=$("#dgPred"), cell=$('#dialGame [data-i="'+DIAL.i+'"]');
+    if(P){ P.className="dgPred "+dialCls(x); P.querySelector("b").textContent=rg[0].toFixed(3)+" ~ "+rg[1].toFixed(3)+" g"; }
+    if(cell) cell.outerHTML=dialMini(k,x,DIAL.i); const idx=DIAL.i, nc=$('#dialGame [data-i="'+idx+'"]'); if(nc) nc.onclick=()=>{ DIAL.i=idx; dialSnap(); dialRender(); };
+    const F=$("#dgFoot"); if(F) F.innerHTML=dialFoot(k,dialArr(k));
+    return; }
+  if(c==="ArrowLeft"||c==="ArrowRight"){ DIAL.i=clamp(DIAL.i+(c==="ArrowRight"?1:-1),0,9); dialSnap(); }
+  else if((c==="Digit1"||c==="Digit2")&&side.length>1){ DIAL.k=side[c==="Digit1"?0:1]; dialSnap(); }
   else if(c==="KeyF"||c==="Escape"){ e.preventDefault(); e.stopPropagation(); dialClose(); return; }
   else return;
   e.preventDefault(); e.stopPropagation(); dialRender();
 }
-/* 3D 조절 다이얼 회전 (bridge v3Sync) */
+/* 3D 함량조절다이얼 : 카운터 숫자 · 소켓 회전 (bridge v3Sync) */
 function dialDraw(){
   if(typeof FM==="undefined"||!FM.dials||!S||!S.f) return;
-  for(const k of ["add","main","sug"]){ const a=S.session&&S.session.active?dialArr(k):null; FM.dials[k].forEach((K,i)=>{ K.rotation.x=(a?a[i]:0)/DIAL.max*2.36*(k==="sug"?-1:1); }); }
+  const act=S.session&&S.session.active;
+  for(const k of ["add","main","sug"]){ const a=act?dialArr(k):null; FM.dials[k].forEach((D,i)=>{ const v=a?a[i]:0, c=dialCount(v);
+      if(D.hex) D.hex.rotation.x=v/DIAL.step*.42;
+      if(D.cnt!==c&&D.ctx){ D.cnt=c; const x=D.ctx; x.fillStyle="#111"; x.fillRect(0,0,128,48); x.fillStyle="#f2f2ee"; x.font="bold 36px monospace"; x.textAlign="center"; x.fillText(String(c).padStart(4,"0"),64,38); D.tex.needsUpdate=true; } }); }
 }
 function dialInit(){ addEventListener("keydown",dialKey,true); }
-/* 자재 타일 : 충전량 조절부 (3인칭 — 작업자가 2층 데크 서쪽 조절부로 이동한 뒤 미니게임) */
-TILE.mDial={e:"🎛️",b:"충전량 조절부",s:()=>S&&S.f&&["add","main","sug"].every(dialOK)?"10노즐 기준 이내":"조절 필요",on:()=>!!(S&&S.f&&["add","main","sug"].every(dialOK)),click(){ startWork("dialF",()=>dialOpen("F")); }};
+/* 자재 타일 : 충전량 조절 (3인칭 — 작업자가 2층 데크 조절부로 이동한 뒤 미니게임) */
+TILE.mDial={e:"🔧",b:"충전량 조절 (함량조절다이얼)",s:()=>S&&S.f&&["add","main","sug"].every(dialOK)?"30노즐 기준 이내":"조절 필요",on:()=>!!(S&&S.f&&["add","main","sug"].every(dialOK)),
+  click(){ const bad=["main","sug"].some(q=>!dialOK(q))&&dialOK("add"); bad?startWork("dialB",()=>dialOpen("B")):startWork("dialF",()=>dialOpen("F")); }};
 if(!TILESET.F.mat.includes("mDial")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mScoop")+1,0,"mDial");
 
 /* ── v3/demo.js ── */

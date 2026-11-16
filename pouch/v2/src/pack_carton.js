@@ -72,7 +72,7 @@ function buildCartoner(g){
     for(const k of [0,1]) tube(g,[[cx+.15,.99,hz-.08+k*.06],[cx+.05,1.25,hz-.1+k*.06],[x0+.1,1.33,hz+.1],[x0+.03,1.3,hz+.4]],.016,M.hoseB);
     bx(g,x0-.48,x0-.06,.05,.95,zn+.05,zn+.55,M.blue); bx(g,x0-.48,x0-.06,.95,1.0,zn+.05,zn+.55,M.dark); for(const dz2 of [.15,.35]) rod(g,[x0-.05,.78,zn+dz2],[x0-.02,.78,zn+dz2],.035,M.white,18);
     tube(g,[[x0-.27,1.0,zn+.3],[x0-.2,1.25,zn+.25],[x0+.01,1.3,zn+.3]],.018,M.hoseB);
-    bx(g,x1+.08,x1+.46,.05,1.1,zn-.05,zn+.35,M.ss); rod(g,[x1+.27,1.1,zn+.15],[x1+.27,1.22,zn+.15],.03,M.ssMir,14); PB.panel(g,x1+.3,1.45,zn+.15,0,"Hoonga");
+    bx(g,x1+.08,x1+.46,.05,1.1,zn-.05,zn+.35,M.ss); rod(g,[x1+.27,1.1,zn+.15],[x1+.27,1.22,zn+.15],.03,M.ssMir,14); PB.panel(g,x1+.3,1.45,zn+.15,0,"Hoonga","ct");
     { const pts=[], hx=x1+.52, hz2=zn+.45; for(let i=0;i<=120;i++){ const t=i/120, a=t*Math.PI*2*14; pts.push([hx+Math.cos(a)*.03,1.1-t*.6,hz2+Math.sin(a)*.03]); } tube(g,pts,.005,M.yellow); }
     { const r=new T3.Mesh(new T3.BoxGeometry(.42,.006,.28),M.ssMir); r.position.set((cx+X)/2,PKZ.y-.004,zl(4.98)-.14); r.rotation.y=.55; add(g,r); } }   /* 체인 끝 → 프린터 벨트 이송판 */
   /* ── 설명서 공급 구간 (스틱공급장치 ↔ 카토너, 흰 버킷 위) ── */

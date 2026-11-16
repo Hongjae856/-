@@ -7,6 +7,13 @@
    ═══════════════════════════════════════════════════════════════════ */
 const HTX={css:null, t:0, i:0, last:{}, busy:false, scr:{}, fail:false};
 function htxCss(){ if(HTX.css==null) HTX.css=[...document.querySelectorAll("style")].map(s=>s.textContent).join("\n").replace(/\]\]>/g,""); return HTX.css; }
+/* 화면 유리면 (메시 경계 상자 : 중심 · 폭 · 높이) — 1인칭 조작 화면도 여기에 꼭 맞춤 */
+function htxGlass(k){ const s=V3&&V3.scr&&V3.scr.find(q=>q.k===k); if(!s) return null; if(s.glass) return s.glass;
+  const m=V3.scene.getObjectByProperty("uuid",s.uid); if(!m) return null; const b=new T3.Box3().setFromObject(m), c=b.getCenter(new T3.Vector3()), z=b.getSize(new T3.Vector3()), n=FP_MON[k].n, ax=Math.abs(n[0])>.5;
+  s.glass={c:[c.x+n[0]*(ax?z.x/2:0),c.y,c.z+n[2]*(ax?0:z.z/2)], w:ax?z.z:z.x, h:z.y}; return s.glass; }
+const htxLW=k=>k==="fl"?600:((FP_MON[k].dom||{}).w||560);
+/* 1인칭 조작용 모니터 정의 (유리면 기준) */
+function htxMon(key){ const m=FP_MON[key], g=htxGlass(key); if(!g) return m; const LW=htxLW(key); return {k:m.k, nm:m.nm, n:m.n, c:g.c, w:g.w, h:g.h, dom:{w:LW,h:Math.round(LW*g.h/g.w)}}; }
 /* 화면 크기 (메시 경계 상자 · 화면이 바라보는 축 제외) */
 function htxDims(s){ if(s.dim) return s.dim; const b=new T3.Box3(), m=V3.scene.getObjectByProperty("uuid",s.uid); if(!m) return null; b.setFromObject(m); const z=b.getSize(new T3.Vector3()), n=FP_MON[s.k].n;
   s.dim=Math.abs(n[0])>.5?[z.z,z.y]:[z.x,z.y]; return s.dim; }
@@ -25,7 +32,7 @@ async function htxDraw(s){
   if(!machPower(mk)){ if(s.tex){ s.mat.map=null; s.mat.emissiveMap=null; s.mat.needsUpdate=true; s.tex.dispose(); s.tex=null; s.key=null; } return; }
   const d=htxDims(s); if(!d) return;
   const snap=htxSnap(mk); if(!snap||!snap.w) return;
-  const LW=s.k==="fl"?600:((FP_MON[s.k].dom||{}).w||560), W=Math.min(600,LW), H=Math.round(W*d[1]/d[0]), LH=Math.round(LW*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
+  const LW=htxLW(s.k), W=Math.min(600,LW), H=Math.round(W*d[1]/d[0]), LH=Math.round(LW*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
   if(s.key===key) return; s.key=key;
   const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(W*2)+'" height="'+(H*2)+'" viewBox="0 0 '+W+' '+H+'"><foreignObject width="'+W+'" height="'+H+'"><div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;height:'+H+'px;overflow:hidden;background:#000"><style><![CDATA['+htxCss()+'\n#hmi{width:'+LW+'px!important;height:'+LH+'px!important;max-width:none!important}#hTabs,#hAlarmTick{display:none!important}*{scrollbar-width:none!important}*::-webkit-scrollbar{display:none!important}]]></style><div style="width:'+LW+'px;height:'+LH+'px;overflow:hidden;transform:scale('+(W/LW)+');transform-origin:0 0">'+snap.html+'</div></div></foreignObject></svg>';
   const img=new Image(); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);

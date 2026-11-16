@@ -8,7 +8,7 @@ const PB={ beacon(g,x,y,z,mk){ const LM=lampMats(mk||"line"); rod(g,[x,y,z],[x,y
   sign(g,w,h,lines,o,pos,ry){ return plate(g,w,h,labelTex(lines,o),pos,ry); },
   warn(g,x,y,z,ry){ return plate(g,.05,.05,labelTex([["⚠","#111",150]],{w:128,h:128,bg:"#f5d400"}),[x,y,z],ry); },
   frame(g,x0,x1,y0,y1,z0,z1,mat){ const t=.022; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-t,x+t,y0,y1,z-t,z+t,mat); for(const y of [y0,y1]){ for(const z of [z0,z1]) bx(g,x0,x1,y-t,y+t,z-t,z+t,mat); for(const x of [x0,x1]) bx(g,x-t,x+t,y-t,y+t,z0,z1,mat); } },
-  panel(g,x,y,z,ry,brand){ const G=new T3.Group(); G.position.set(x,y,z); G.rotation.y=ry; g.add(G);           /* 흰 판넬 함 · 터치화면 · START/STOP/RESET · 비상정지 (정면 +x) */
+  panels:[], panel(g,x,y,z,ry,brand,mk){ const G=new T3.Group(); if(mk) PB.panels.push({G,mk}); G.position.set(x,y,z); G.rotation.y=ry; g.add(G);           /* 흰 판넬 함 · 터치화면 · START/STOP/RESET · 비상정지 (정면 +x) */
     bx(G,-.05,.05,-.24,.24,-.2,.2,M.white); bx(G,.05,.054,-.02,.21,-.17,.17,M.dark); bx(G,.054,.056,0,.19,-.15,.15,M.scr);
     for(const [k,m] of [[0,M.white],[1,M.dark],[2,M.blue]]) { rod(G,[.05,-.08,-.12+k*.07],[.065,-.08,-.12+k*.07],.016,m,14); rod(G,[.05,-.08,-.12+k*.07],[.054,-.08,-.12+k*.07],.022,M.ssD,14); }
     rod(G,[.05,-.08,.13],[.072,-.08,.13],.026,M.red,16); rod(G,[.05,-.08,.13],[.056,-.08,.13],.036,M.yellow,16);
@@ -63,7 +63,7 @@ function buildStickFeeder(g){
   PB.beacon(g,x0+.1,Hf,z1-.1,"sf");
   /* 판넬 : 동남쪽 회전 암 (PanelView · START 흰 · STOP 검 · RESET 파랑 · 비상정지) */
   bx(g,x1+.0,x1+.3,1.62,1.66,z1-.04,z1+.0,M.alu); rod(g,[x1+.28,1.66,z1-.02],[x1+.28,1.5,z1-.02],.02,M.alu,12);
-  PB.panel(g,x1+.33,1.3,z1+.12,0,"Hoonga");
+  PB.panel(g,x1+.33,1.3,z1+.12,0,"Hoonga","sf");
   /* 앞 회색 대차 · 회색 바구니 2 (양품 파우치 임시 보관) · 노란 체인 차단줄 */
   { const cx=x1+.75, cz=zm; for(const y of [.2,.62]) bx(g,cx-.28,cx+.28,y,y+.025,cz-.35,cz+.35,M.grey); for(const dx of [-.26,.26]) for(const dz of [-.33,.33]){ bx(g,cx+dx-.015,cx+dx+.015,.07,.64,cz+dz-.015,cz+dz+.015,M.grey); rod(g,[cx+dx,.035,cz+dz],[cx+dx,.035,cz+dz+.02],.035,M.dark,12); }
     for(const dz of [-.17,.17]){ bx(g,cx-.2,cx+.2,.645,.8,cz+dz-.15,cz+dz+.15,M.grey); bx(g,cx-.18,cx+.18,.66,.8,cz+dz-.13,cz+dz+.13,M.dark); } }
