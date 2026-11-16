@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════
    충전량 조절 미니게임 (11/16 사용자 지시 · V23 아날로그형) — 2층 데크 함량조절다이얼을 육각 L 렌치로 돌려 노즐별 충전량을 맞춤
-   · 함량조절다이얼 : 주황 카운터(숫자 4자리 창) + 크롬 육각 소켓 (현장 사진). 서쪽(전면) = 첨가제 10 / 동쪽(후면) = 주성분 10 · 백당 10 (사용자 확정)
+   · 함량조절다이얼 (현장 사진) : 주황 카운터(숫자 4자리 창 + 가운데 큰 크롬 육각 소켓) · 은색 소켓(카운터 없음). 서쪽(전면) = 첨가제(주황) 10 / 동쪽(후면) = 한 줄에 백당(은색) · 주성분(주황) 10쌍 (사용자 확정)
    · 화면 : 선택한 다이얼을 크게 가까이서 본 모습(육각 렌치가 꽂힌 채 돌아감 · 카운터 숫자가 굴러감) + 아래에 10개 다이얼을 작게(참고 · 클릭 선택)
    · A / D : 렌치를 왼쪽(감소) · 오른쪽(증가)으로 돌림 (누르고 있으면 계속)   · ← / → : 노즐 선택   · 1 / 2 : 원료 선택(동쪽)   · F · Esc : 닫기
    · 예상 충전량은 대략적인 범위로 표시 (예 : 2.150 ~ 2.200 g). 실제 값은 공정검사(IPC) 계량으로 확인 — 다이얼 값은 IPC 계량값에 노즐별로 반영
@@ -41,50 +41,45 @@ function dialClose(){
 }
 /* ── 가까이 본 함량조절다이얼 (아날로그) : 스테인리스 판 · 주황 카운터(굴러가는 숫자 4자리) · 크롬 육각 소켓 · 꽂힌 육각 L 렌치 ── */
 function dialScene(){
-  const v=DIAL.disp, cnt=1000*(1+v), W=560, H=400, sx=380, sy=270;            /* sx · sy : 소켓 중심 */
-  const dig=[]; { let n=cnt; for(let p=0;p<4;p++){ const base=Math.pow(10,p), d=(n/base)%10, f=p===0?d:(Math.floor(d)+Math.max(0,((n%base)-(base-1))));   /* 낮은 자리는 연속, 윗자리는 넘어갈 때만 굴러감 */
-      dig.unshift(f); } }
-  const wheel=(x,d)=>{ let s='<g clip-path="url(#dgWin)"><g transform="translate('+x+','+(-((d%10)*46))+')">'; for(let k=-1;k<=11;k++){ const y=150+k*46; s+='<text x="0" y="'+(y+15)+'" font-size="40" font-family="DejaVu Sans Mono,Consolas,monospace" font-weight="700" fill="#f2f2ee" text-anchor="middle">'+(((k%10)+10)%10)+'</text>'; } return s+'</g></g>'; };
-  const sh=DIAL.shake>0?(Math.random()-.5)*DIAL.shake*6:0, a=DIAL.rot+sh;
-  return '<svg viewBox="0 0 '+W+' '+H+'" class="dgScene"><defs>'+
-    '<linearGradient id="dgSS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d9dde0"/><stop offset=".45" stop-color="#9aa1a7"/><stop offset=".55" stop-color="#b8bec3"/><stop offset="1" stop-color="#7d848a"/></linearGradient>'+
+  const v=DIAL.disp, cnt=1000*(1+v), W=560, H=400, ctr=DIAL.k!=="sug", sx=230, sy=ctr?248:205;      /* sx · sy : 육각 소켓 중심 */
+  const dig=[]; { const n=cnt; for(let p=0;p<4;p++){ const base=Math.pow(10,p), d=(n/base)%10, f=p===0?d:(Math.floor(d)+Math.max(0,((n%base)-(base-1)))); dig.unshift(f); } }
+  const wheel=(x,d)=>{ let s='<g clip-path="url(#dgWin)"><g transform="translate('+x+','+(-((d%10)*40))+')">'; for(let k=-1;k<=11;k++){ const y=114+k*40; s+='<text x="0" y="'+(y+13)+'" font-size="34" font-family="DejaVu Sans Mono,Consolas,monospace" font-weight="700" fill="#f2f2ee" text-anchor="middle">'+(((k%10)+10)%10)+'</text>'; } return s+'</g></g>'; };
+  const sh=DIAL.shake>0?(Math.random()-.5)*DIAL.shake*6:0, a=DIAL.rot+sh, hexR=30, ka=15+(((a-45)%60)+60)%60;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" class="dgScene"><defs>'+
+    '<linearGradient id="dgSS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e6e8"/><stop offset=".45" stop-color="#a3a9ae"/><stop offset=".55" stop-color="#c2c7cb"/><stop offset="1" stop-color="#868d93"/></linearGradient>'+
     '<linearGradient id="dgOr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a3c"/><stop offset=".55" stop-color="#ef6c12"/><stop offset="1" stop-color="#c25208"/></linearGradient>'+
     '<radialGradient id="dgCr" cx=".38" cy=".32" r=".75"><stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#c8ced3"/><stop offset=".7" stop-color="#6d747a"/><stop offset="1" stop-color="#3a3f44"/></radialGradient>'+
-    '<linearGradient id="dgKey" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a6066"/><stop offset=".5" stop-color="#2b2f33"/><stop offset="1" stop-color="#15181b"/></linearGradient>'+
-    '<linearGradient id="dgWrap" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#8a7a5e"/><stop offset=".5" stop-color="#c4b18c"/><stop offset="1" stop-color="#6e604a"/></linearGradient>'+
-    '<clipPath id="dgWin"><rect x="92" y="128" width="200" height="54" rx="4"/></clipPath>'+
+    '<linearGradient id="dgKey" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4d8db"/><stop offset=".5" stop-color="#8d949a"/><stop offset="1" stop-color="#4b5157"/></linearGradient>'+
+    '<clipPath id="dgWin"><rect x="'+(sx-96)+'" y="92" width="192" height="46" rx="4"/></clipPath>'+
     '<filter id="dgSh"><feDropShadow dx="3" dy="5" stdDeviation="5" flood-opacity=".45"/></filter></defs>'+
-    '<rect width="'+W+'" height="'+H+'" fill="#1b1f23"/>'+
-    '<rect x="20" y="40" width="'+(W-40)+'" height="'+(H-80)+'" rx="6" fill="url(#dgSS)"/>'+
-    [[40,60],[W-40,60],[40,H-60],[W-40,H-60]].map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="9" fill="url(#dgCr)"/><path d="M'+(x-5)+' '+y+'h10" stroke="#3a3f44" stroke-width="2"/>').join("")+
-    /* 주황 카운터 */
-    '<g filter="url(#dgSh)"><rect x="70" y="80" width="244" height="150" rx="10" fill="url(#dgOr)"/></g>'+
-    '<rect x="78" y="88" width="228" height="10" rx="5" fill="#ffd2a8" opacity=".45"/>'+
-    '<rect x="88" y="124" width="208" height="62" rx="6" fill="#111"/>'+
-    [0,1,2,3].map(p=>'<rect x="'+(95+p*50)+'" y="128" width="44" height="54" rx="3" fill="#1d1d1d"/>').join("")+
-    dig.map((d,p)=>wheel(117+p*50,d)).join("")+
-    '<rect x="92" y="128" width="200" height="16" fill="url(#dgSS)" opacity=".18"/><rect x="92" y="166" width="200" height="16" fill="#000" opacity=".35"/>'+
-    '<text x="192" y="112" font-size="14" fill="#5a2600" text-anchor="middle" font-weight="700">'+esc(IPC_STD[DIAL.k].nm)+' 함량조절 · 노즐 '+(DIAL.i+1)+'</text>'+
-    '<text x="192" y="214" font-size="12" fill="#5a2600" text-anchor="middle">▲ D 증가 · A 감소 ▼</text>'+
-    /* 크롬 육각 소켓 */
-    '<g filter="url(#dgSh)"><circle cx="'+sx+'" cy="'+sy+'" r="52" fill="url(#dgCr)"/></g><circle cx="'+sx+'" cy="'+sy+'" r="40" fill="none" stroke="#5c6369" stroke-width="3"/>'+
-    '<g transform="rotate('+a+' '+sx+' '+sy+')"><polygon points="'+[0,1,2,3,4,5].map(j=>{ const t=j*Math.PI/3; return (sx+17*Math.cos(t))+","+(sy+17*Math.sin(t)); }).join(" ")+'" fill="#0e1012"/>'+
-    /* 꽂힌 육각 L 렌치 : 짧은 쪽은 소켓 안, 긴 손잡이가 화면 오른쪽 아래로 */
-    '<g transform="rotate(35 '+sx+' '+sy+')"><rect x="'+(sx-9)+'" y="'+(sy-9)+'" width="18" height="18" rx="3" fill="url(#dgKey)"/>'+
-    '<rect x="'+(sx)+'" y="'+(sy-8)+'" width="230" height="16" rx="7" fill="url(#dgKey)"/>'+
-    '<rect x="'+(sx+120)+'" y="'+(sy-11)+'" width="120" height="22" rx="9" fill="url(#dgWrap)"/>'+
-    [0,1,2,3,4,5,6,7].map(j=>'<line x1="'+(sx+126+j*14)+'" y1="'+(sy-11)+'" x2="'+(sx+134+j*14)+'" y2="'+(sy+11)+'" stroke="#5b4e3a" stroke-width="2"/>').join("")+'</g></g>'+
-    '</svg>';
+    '<rect width="'+W+'" height="'+H+'" fill="#1b1f23"/><rect x="16" y="30" width="'+(W-32)+'" height="'+(H-60)+'" rx="6" fill="url(#dgSS)"/>'+
+    [[34,48],[W-34,48],[34,H-48],[W-34,H-48]].map(([x,y])=>'<circle cx="'+x+'" cy="'+y+'" r="9" fill="url(#dgCr)"/><path d="M'+(x-5)+' '+y+'h10" stroke="#3a3f44" stroke-width="2"/>').join("");
+  if(ctr){ /* 주황 카운터 다이얼 : 위 숫자 창 · 가운데 큰 크롬 육각 소켓 */
+    s+='<g filter="url(#dgSh)"><rect x="'+(sx-118)+'" y="62" width="236" height="290" rx="12" fill="url(#dgOr)"/></g><rect x="'+(sx-108)+'" y="70" width="216" height="10" rx="5" fill="#ffd2a8" opacity=".45"/>'+
+      '<rect x="'+(sx-102)+'" y="88" width="204" height="54" rx="6" fill="#111"/>'+[0,1,2,3].map(p=>'<rect x="'+(sx-96+p*49)+'" y="92" width="45" height="46" rx="3" fill="#1d1d1d"/>').join("")+
+      dig.map((d,p)=>wheel(sx-73+p*49,d)).join("")+'<rect x="'+(sx-96)+'" y="92" width="192" height="12" fill="#fff" opacity=".08"/><rect x="'+(sx-96)+'" y="126" width="192" height="12" fill="#000" opacity=".35"/>'+
+      '<g filter="url(#dgSh)"><circle cx="'+sx+'" cy="'+sy+'" r="70" fill="url(#dgCr)"/></g><circle cx="'+sx+'" cy="'+sy+'" r="56" fill="none" stroke="#5c6369" stroke-width="3"/>'; }
+  else { /* 백당 : 은색 소켓 (카운터 없음) — 둘레 눈금으로 돌린 양을 봄 */
+    for(let t=0;t<36;t++){ const r=t*10*Math.PI/180, L=t%3?10:18; s+='<line x1="'+(sx+92*Math.cos(r))+'" y1="'+(sy+92*Math.sin(r))+'" x2="'+(sx+(92+L)*Math.cos(r))+'" y2="'+(sy+(92+L)*Math.sin(r))+'" stroke="#3a3f44" stroke-width="'+(t%3?1.5:3)+'"/>'; }
+    s+='<g filter="url(#dgSh)"><circle cx="'+sx+'" cy="'+sy+'" r="82" fill="url(#dgCr)"/></g><circle cx="'+sx+'" cy="'+sy+'" r="66" fill="none" stroke="#5c6369" stroke-width="4"/><circle cx="'+sx+'" cy="'+sy+'" r="50" fill="none" stroke="#7d848a" stroke-width="2"/>'; }
+  s+='<g transform="rotate('+a+' '+sx+' '+sy+')"><polygon points="'+[0,1,2,3,4,5].map(j=>{ const t=j*Math.PI/3; return (sx+hexR*Math.cos(t))+","+(sy+hexR*Math.sin(t)); }).join(" ")+'" fill="#0e1012"/>'+
+    (ctr?'':'<rect x="'+(sx-3)+'" y="'+(sy-80)+'" width="6" height="24" rx="2" fill="#1b1f23"/>')+'</g>'+                               /* 백당 소켓 각도 표시 */
+    /* 꽂힌 육각 L 렌치 (크롬) : 짧은 쪽은 소켓 안, 긴 쪽은 오른쪽 아래 — 좁은 곳에서 돌리듯 60° 마다 다시 끼움(육각은 60° 대칭) → 손잡이가 숫자 창을 가리지 않음 */
+    '<g transform="rotate('+ka+' '+sx+' '+sy+')"><polygon points="'+[0,1,2,3,4,5].map(j=>{ const t=j*Math.PI/3+Math.PI/6; return (sx+hexR*.8*Math.cos(t))+","+(sy+hexR*.8*Math.sin(t)); }).join(" ")+'" fill="url(#dgKey)"/>'+
+    '<rect x="'+sx+'" y="'+(sy-11)+'" width="250" height="22" rx="9" fill="url(#dgKey)"/><rect x="'+(sx+4)+'" y="'+(sy-9)+'" width="242" height="5" rx="2" fill="#fff" opacity=".35"/></g>'+
+    '<text x="'+sx+'" y="'+(ctr?342:330)+'" font-size="15" fill="'+(ctr?"#fff1e2":"#2a2f33")+'" text-anchor="middle" font-weight="700">'+esc(IPC_STD[DIAL.k].nm)+' 함량조절 · 노즐 '+(DIAL.i+1)+(ctr?"":" (은색 소켓 · 카운터 없음)")+'</text></svg>';
+  return s;
 }
 function dialMini(k,x,i){
-  const c=dialCount(x);
-  return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'"><div class="dgMiniBox"><span>'+String(c).padStart(4,"0")+'</span></div><i class="dgMiniHex"></i><b>'+(i+1)+'</b></div>';
+  const c=dialCount(x), r=dialRange(k,x);
+  if(k==="sug") return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'"><i class="dgMiniSil"></i><s>'+((r[0]+r[1])/2).toFixed(3)+'</s><b>'+(i+1)+'</b></div>';   /* 백당 : 은색 소켓 (카운터 없음) */
+  return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'"><div class="dgMiniBox"><span>'+String(c).padStart(4,"0")+'</span><i class="dgMiniHex"></i></div><b>'+(i+1)+'</b></div>';
 }
 function dialRender(){
   const el=$("#dialGame"); if(!el||!DIAL.open) return;
   const k=DIAL.k, a=dialArr(k), v=a[DIAL.i], rg=dialRange(k,v), std=IPC_STD[k].std, f3=x=>x.toFixed(3);
   const tabs=DIAL_SIDE[DIAL.side].map((q,j)=>'<button class="dgTab'+(q===k?" on":"")+'" data-k="'+q+'">'+(DIAL_SIDE[DIAL.side].length>1?(j+1)+" · ":"")+IPC_STD[q].nm+(dialOK(q)?" ✓":"")+'</button>').join("");
-  el.innerHTML='<div class="dgBox"><div class="dgHead"><b>🔧 함량조절다이얼 · 충전량 조절</b><span>'+(DIAL.side==="F"?"서쪽(전면) · 첨가제":"동쪽(후면) · 주성분 · 백당")+'</span><button class="dgX" id="dgX">닫기 (F · Esc)</button></div>'+
+  el.innerHTML='<div class="dgBox"><div class="dgHead"><b>🔧 함량조절다이얼 · 충전량 조절</b><span>'+(DIAL.side==="F"?"서쪽(전면) · 첨가제":"동쪽(후면) · 주성분(주황) · 백당(은색)")+'</span><button class="dgX" id="dgX">닫기 (F · Esc)</button></div>'+
     '<div class="dgTabs">'+tabs+'</div>'+
     '<div class="dgMain"><div class="dgBig" id="dgBig">'+dialScene()+'</div><div class="dgInfo">'+
       '<div class="dgPred '+dialCls(v)+'" id="dgPred">예상 충전량<b>'+f3(rg[0])+' ~ '+f3(rg[1])+' g</b><s>기준 '+f3(std)+' g</s></div>'+

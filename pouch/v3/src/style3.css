@@ -139,3 +139,9 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #dialGame .dgMiniHex{display:block;width:16px;height:16px;margin:4px auto 0;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#9aa1a7 55%,#3a3f44);position:relative}
 #dialGame .dgMiniHex:after{content:"";position:absolute;inset:5px;background:#111;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
 #dialGame .dgCell{background:#22282e}
+/* 미니게임 아래 줄 : 주황 카운터(가운데 육각) · 은색 소켓 (V24) */
+#dialGame .dgMiniBox{height:46px;flex-direction:column;gap:3px}
+#dialGame .dgMiniBox .dgMiniHex{margin:0;width:20px;height:20px}
+#dialGame .dgMiniSil{display:block;width:34px;height:34px;margin:6px auto 4px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#a3a9ae 55%,#3a3f44);position:relative}
+#dialGame .dgMiniSil:after{content:"";position:absolute;inset:10px;background:#111;clip-path:polygon(25% 0,75% 0,100% 50%,75% 100%,25% 100%,0 50%)}
+#dialGame .dgMiniHex:after{inset:5px}
