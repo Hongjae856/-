@@ -117,9 +117,21 @@ function v3Sync(dt){
   V3.k+=((run?1:0)-V3.k)*Math.min(1,dt*3);             /* 기동 · 정지 시 부드럽게 가 · 감속 */
   if(V3.k>.002) stepAnim(dt*V3.k);
   if(FM.doors){ const want=S&&S.f&&S.f.door&&S.f.door!=="closed"?1:0; V3.door=(V3.door||0)+Math.max(-dt*1.4,Math.min(dt*1.4,want-(V3.door||0))); const e=V3.door*V3.door*(3-2*V3.door); for(const d of FM.doors) d.G.rotation.y=d.s*1.75*e; }   /* 안전도어 : 약 0.7 초에 열림 · 닫힘 */
-  if(PK2.xr) PK2.xr.on=!(S&&S.session&&S.session.active)||!!(S.p&&S.p.xrX);      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
+  if(PK2.xr) PK2.xr.on=!(S&&S.session&&S.session.active)||!!(S.p&&S.p.xrX);
+  if(PK2.xr) PK2.xr.pw=!(S&&S.session&&S.session.active)||machPower("xr");   /* 전원 OFF : 화면 꺼짐 */      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
+  if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
+  scrPower();
   if(typeof wkDraw==="function") wkDraw(dt);
+}
+/* 설비 화면 전원 : 전원이 꺼진 설비의 3D 화면은 검게 (FP_MON 위치로 화면 메시를 찾아 재질 분리) */
+function scrPower(){
+  if(!V3.scr){ V3.scr=[]; const b=new T3.Box3(), c=new T3.Vector3(); V3.scene.updateMatrixWorld(true);
+    V3.scene.traverse(o=>{ if(!o.isMesh||o.material!==M.scr) return; b.setFromObject(o); b.getCenter(c); let best=null, bd=.3;
+      for(const [k,m] of Object.entries(FP_MON)){ const d=Math.hypot(c.x-m.c[0],c.y-m.c[1],c.z-m.c[2]); if(d<bd){ bd=d; best=k; } }
+      if(best){ o.material=M.scr.clone(); V3.scr.push({k:best,mat:o.material,on:null}); } }); }
+  for(const s of V3.scr){ const on=!(S&&S.session&&S.session.active)||FP_MON[s.k].k.some(k=>machPower(k)); if(on===s.on) continue; s.on=on;
+    s.mat.emissiveIntensity=on?.7:0; s.mat.color.setHex(on?0x10202c:0x07090b); }
 }
 
 /* ── 카메라 ── */

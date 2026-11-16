@@ -63,7 +63,7 @@ function fpEyeY(pose,moved,dt){
 
 /* ── 설비 화면 (anchors.js FP_MON) ── */
 const FP_DOM={w:460, h:700};
-function monRect(m){ const w=m.w, h=w*FP_DOM.h/FP_DOM.w, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
+function monRect(m){ const h=m.h, w=h*FP_DOM.w/FP_DOM.h, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
   const P=(a,b)=>[m.c[0]+r[0]*a+n[0]*.004, m.c[1]+b, m.c[2]+r[2]*a+n[2]*.004];
   return {w,h,TL:P(-w/2,h/2),TR:P(w/2,h/2),BR:P(w/2,-h/2),BL:P(-w/2,-h/2)}; }
 function monPose(m){ const r=monRect(m), focal=.78, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
@@ -177,7 +177,7 @@ function fpMenu(){
   $("#listBox").innerHTML='<h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
     '<div class="row"><b>교육 계속<s>Esc</s></b><button id="fmGo">계속</button></div>'+
     '<div class="row"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button id="fm3">전환</button></div>'+
-    (isExam()?'':'<div class="row"><b>이상사례 발생<s>학습모드</s></b><button id="fmCase">열기</button></div>'+'<div class="row"><b>알람 발생<s>학습모드</s></b><button id="fmAlm">열기</button></div>')+
+
     '<div class="row"><b>조작 도움말<s>H</s></b><button id="fmHelp">보기</button></div>'+
     '<div class="row"><b>메인화면<s>교육 중단</s></b><button id="fmHome">이동</button></div>';
   $("#mList").classList.add("on");

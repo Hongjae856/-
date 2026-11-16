@@ -26,13 +26,8 @@ const OEE_POUCH_CODES=[
   {k:"ETC",  nm:"기타 · 미분류 (IDT 실습 없음)", inc:null, room:null, kw:[]}
 ].map(c=>Object.assign(c,{roomNm:c.room==="F"?"충전실 실습":c.room==="P"?"포장실 실습":""}));
 function oeeInit(){
-  OEEEDU.init({line:"파우치", title:"파우치 라인 · 부동 원인 기반 맞춤 교육", codes:OEE_POUCH_CODES, mount:$("#app"),
-    /* 실습 : 해당 실을 운전 중 상태로 만든 뒤 그 이상 상황을 발생시킴 (학습 모드 · 대응 절차는 기존 IDT 와 동일) */
-    start(c){ $("#splash").classList.add("hide"); startSession("guide",c.room); presetFillAuto(); presetPackAuto(); S.p.align=true; if(c.room==="F"){ S.f.run=true; S.f.started=true; } S.flags.oeePractice=c.k;
-      renderTiles(); drawHMI(); toast("OEE 연계 실습 : "+c.nm+" — 잠시 뒤 상황이 발생합니다.");
-      setTimeout(()=>{ if(S&&S.session&&S.session.active&&S.flags.oeePractice===c.k){ if(!lineRunning()){ if(c.room==="F") S.f.run=true; else S.p.ctRun=true; } launchIncident(c.inc); } },2500); },
-    active:()=>!!(S&&S.session&&S.session.active&&(S.activeTrouble||S.flags.casePending)),
-    done(c){ toast("실습 완료 : "+c.nm+" — [OEE 연계 교육 › ④ 교육 효과] 에 기록했습니다.","good"); }});
-  const sp=$("#coursePicker"); if(sp&&!$("#oeeOpen")){ sp.insertAdjacentHTML("afterend",'<div style="text-align:center"><button id="oeeOpen">📊 OEE 연계 교육 (부동 원인 분석 → 맞춤 실습)</button></div>'); $("#oeeOpen").onclick=()=>OEEEDU.open(); }
-  const hb=$("#rubricBtn"); if(hb&&!$("#oeeBtn")){ hb.insertAdjacentHTML("beforebegin",'<button class="gbtn" id="oeeBtn">📊 OEE 교육</button>'); $("#oeeBtn").onclick=()=>OEEEDU.open(); }
+  if(!$("#oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');
+  $("#oeeLamp").onclick=()=>OEEEDU.open();
+  OEEEDU.init({line:"파우치", title:"파우치 라인 · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_POUCH_CODES, mount:$("#app"),
+    openInc(){ $("#splash").classList.remove("hide"); $("#coursePicker").style.display="none"; $("#courseBack").style.display=""; eduShow("inc"); }});
 }

@@ -3,3 +3,27 @@
 #xrView{display:none}
 #xrView.on{display:block;margin:6px 0 8px;border-radius:8px;overflow:hidden;border:1px solid #c9d3dc;background:#d8d8d8}
 #xrView canvas{display:block;width:100%;height:auto}
+/* 입력란은 선택 · 붙여넣기 허용 (전역 user-select:none 예외) */
+input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:text}
+/* 메인화면 : 과정 → 기본 · 심화 · OEE */
+#coursePicker{grid-template-columns:1fr 1fr;max-width:900px}
+#splash .go{grid-template-columns:1fr 1fr 1fr;max-width:1180px}
+#splash .go h4{font:800 19px/1 var(--ff);color:#5d7086;letter-spacing:3px;margin:0 0 2px}
+#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
+#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:23px;padding:21px}
+#incPick{max-width:1180px;margin:0 auto;text-align:left}
+#incPick h3{font:800 25px/1.3 var(--ff);color:#142b47;margin:0 0 6px}
+#incPick .ipNote{font:600 14px/1.55 var(--ff);color:#5d7086;margin:4px 0 10px}
+#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
+#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
+#incPick .ipRow:first-child{border-top:0}
+#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff);color:#8ba2bb}
+#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff);color:#fff;flex:none}
+#incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
+#incPick b{flex:1;font:800 19px/1.3 var(--ff);color:#142b47}
+#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff);color:#6a7f96;margin-top:2px}
+#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff);cursor:pointer;border:1px solid #152c4b}
+#incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
+#incBack{margin-top:14px;padding:11px 22px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer}
+/* 기본 · 심화 : 이상사례 · 알람 발생 버튼 없음 */
+#hMenu{display:none!important}

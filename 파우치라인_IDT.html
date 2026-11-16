@@ -457,6 +457,30 @@ table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{p
 #xrView{display:none}
 #xrView.on{display:block;margin:6px 0 8px;border-radius:8px;overflow:hidden;border:1px solid #c9d3dc;background:#d8d8d8}
 #xrView canvas{display:block;width:100%;height:auto}
+/* 입력란은 선택 · 붙여넣기 허용 (전역 user-select:none 예외) */
+input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:text}
+/* 메인화면 : 과정 → 기본 · 심화 · OEE */
+#coursePicker{grid-template-columns:1fr 1fr;max-width:900px}
+#splash .go{grid-template-columns:1fr 1fr 1fr;max-width:1180px}
+#splash .go h4{font:800 19px/1 var(--ff);color:#5d7086;letter-spacing:3px;margin:0 0 2px}
+#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
+#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:23px;padding:21px}
+#incPick{max-width:1180px;margin:0 auto;text-align:left}
+#incPick h3{font:800 25px/1.3 var(--ff);color:#142b47;margin:0 0 6px}
+#incPick .ipNote{font:600 14px/1.55 var(--ff);color:#5d7086;margin:4px 0 10px}
+#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
+#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
+#incPick .ipRow:first-child{border-top:0}
+#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff);color:#8ba2bb}
+#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff);color:#fff;flex:none}
+#incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
+#incPick b{flex:1;font:800 19px/1.3 var(--ff);color:#142b47}
+#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff);color:#6a7f96;margin-top:2px}
+#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff);cursor:pointer;border:1px solid #152c4b}
+#incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
+#incBack{margin-top:14px;padding:11px 22px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer}
+/* 기본 · 심화 : 이상사례 · 알람 발생 버튼 없음 */
+#hMenu{display:none!important}
 
 /* OEE 연계 교육 (공통) */
 #oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
@@ -489,6 +513,11 @@ table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{p
 .oeeCard .ft{margin-top:auto;display:flex;align-items:center;justify-content:space-between}.oeeCard .ft span{font-size:13px;color:#6b7782}
 .oeeKeep{margin-top:14px;font-size:13.5px}
 #oeeOpen{margin-top:14px;padding:13px 22px;border:0;border-radius:12px;background:#e0714a;color:#fff;font:800 17px inherit;cursor:pointer}
+.oeeRow{display:flex;gap:8px;align-items:center;margin-bottom:8px}.oeeRow input{margin:0!important;flex:1}
+/* 메인화면 구석 OEE 연동 표시등 */
+#oeeLamp{position:absolute;left:22px;bottom:16px;display:flex;align-items:center;gap:7px;font:700 13px/1 "Malgun Gothic","Noto Sans KR",sans-serif;color:#5d7086;cursor:pointer;padding:6px 11px;border:1px solid #d5dee8;border-radius:16px;background:#fff}
+#oeeLamp i{width:11px;height:11px;border-radius:50%;background:#d23b2c;box-shadow:0 0 0 3px rgba(210,59,44,.18)}
+#oeeLamp.on i{background:#22a052;box-shadow:0 0 0 3px rgba(34,160,82,.2)}
 
 </style>
 </head>
@@ -595,7 +624,6 @@ table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{p
   <div id="splash">
     <div class="box">
       <h1>파우치 라인 IDT<small>Pouch Line · Interactive Digital Tutor</small></h1>
-      <div id="lineStrip"></div>
       <p class="prodLine">판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤</p>
       <div id="coursePicker">
         <button id="chooseF" class="main"><small>01 · FILLING ROOM</small><strong>충전실 과정</strong><span>파우치 충전기 SP303 · 2층 데크 · IPC · 알람 15종</span></button>
@@ -603,14 +631,19 @@ table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{p
       </div>
       <div class="go" style="display:none">
         <div class="modeColumn">
-          <button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>
-          <button class="e" id="spExamEasy">기본모드 · 평가</button>
+          <h4>기본</h4><button class="s" id="spEasy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button>
+          <button class="e" id="spExamEasy">기본 · 평가</button>
         </div>
         <div class="modeColumn">
-          <button class="s" id="spGuide">심화모드 · 학습<small>전체 절차 단계별 안내</small></button>
-          <button class="e" id="spExam">심화모드 · 평가</button>
+          <h4>심화</h4><button class="s" id="spGuide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button>
+          <button class="e" id="spExam">심화 · 평가</button>
+        </div>
+        <div class="modeColumn oee">
+          <h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button>
+          <button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button>
         </div>
       </div>
+      <div id="incPick" style="display:none"></div>
       <button id="courseBack" style="display:none">← 과정 다시 선택</button>
       <button id="verBadge" class="ver">V</button>
     </div>
@@ -877,7 +910,7 @@ function buildUnwinder(g,cz0,cz1){
     rod(g,[ex+.54,.7,zc+s*hw-.03],[ex+.54,.7,zc+s*hw+.03],.05,M.ssMir,24); rod(g,[ex+.54,.7,zc+s*(hw+.03)],[ex+.54,.7,zc+s*(hw+.09)],.032,M.ssMir,20); }
   bx(g,ex+.44,ex+.62,.56,.84,zc-hw-.14,zc-hw-.03,M.white);                                   /* 롤 축 구동 박스 (북쪽) */
   /* 은박 롤 · 지관 · 축 */
-  const wm=M.web.clone(); wm.map=TX.web.clone(); wm.map.repeat.set(2*Math.PI*.165/.11,rw*2/.08); wm.map.needsUpdate=true; const roll=new T3.Mesh(new T3.CylinderGeometry(.165,.165,rw*2,56,1,true),wm); bx(g,ex+.54-.001,ex+.54+.001,.7-.001,.7+.001,zc-rw,zc+rw,M.white); for(const s of [-1,1]){ const c=new T3.Mesh(new T3.RingGeometry(.048,.165,48),M.white); c.position.set(ex+.54,.7,zc+s*rw); if(s<0) c.rotation.y=Math.PI; g.add(c); } roll.rotation.x=Math.PI/2; roll.position.set(ex+.54,.7,zc); add(g,roll);
+  const wm=M.web.clone(); wm.map=TX.web.clone(); wm.map.repeat.set(2*Math.PI*.165/.11,rw*2/.08); wm.map.needsUpdate=true; const roll=new T3.Mesh(new T3.CylinderGeometry(.165,.165,rw*2,56,1,true),wm); bx(g,ex+.54-.001,ex+.54+.001,.7-.001,.7+.001,zc-rw,zc+rw,M.white); const ends=[]; for(const s of [-1,1]){ const c=new T3.Mesh(new T3.RingGeometry(.048,.165,48),M.white); c.position.set(ex+.54,.7,zc+s*rw); if(s<0) c.rotation.y=Math.PI; g.add(c); ends.push(c); } roll.rotation.x=Math.PI/2; roll.position.set(ex+.54,.7,zc); add(g,roll); FM.roll=[roll,...ends];   /* 은박 롤 (필름 단절 · 교체 시 숨김) */
   rod(g,[ex+.54,.7,zc-rw-.004],[ex+.54,.7,zc+rw+.004],.048,M.black,28); rod(g,[ex+.54,.7,zc-hw],[ex+.54,.7,zc+hw],.02,M.ssMir,16);
   { const a=new T3.Mesh(new T3.TorusGeometry(.2,.007,8,28,Math.PI*.62),M.ss); a.scale.z=4; a.position.set(ex+.54,.7,zc+rw-.03); a.rotation.z=Math.PI*.12; add(g,a); rod(g,[ex+.74,.74,zc+rw-.03],[ex+.78,.74,zc+rw-.03],.014,M.dark,10); }
   /* 가이드 롤러 · 은박 경로 (롤 → 롤러 → 인쇄 유닛) */
@@ -1464,6 +1497,7 @@ function buildInspection(g){
 function xrDraw(){
   const R=PK2.xr; if(!R) return; const now=performance.now(); if(now-R.tDraw<70) return; R.tDraw=now;
   const g=R.cv.getContext("2d"), W=512, H=480, F='"Malgun Gothic","Noto Sans KR",sans-serif';
+  if(R.pw===false){ if(R.drawnOff!=="pw"){ g.fillStyle="#050607"; g.fillRect(0,0,W,H); R.tex.needsUpdate=true; R.drawnOff="pw"; } return; } R.drawnOff=null;
   if(!R.on){ g.fillStyle="#0b0e11"; g.fillRect(0,0,W,H); g.fillStyle="#3a4148"; g.font="bold 30px "+F; g.textAlign="center"; g.fillText("X-RAY OFF",W/2,H/2); g.font="16px "+F; g.fillText("ISHIDA IX-EN",W/2,H/2+34); R.tex.needsUpdate=true; return; }
   g.textAlign="left"; g.fillStyle="#1d2b3a"; g.fillRect(0,0,W,44); g.fillStyle="#fff"; g.font="bold 20px "+F; g.fillText("ISHIDA  IX-EN",14,29); g.font="15px "+F; g.fillStyle="#b9d2ea"; g.fillText("예약 002  판콜에이치건조시럽",190,28);
   g.fillStyle="#e23b2e"; g.beginPath(); g.arc(W-70,22,8,0,7); g.fill(); g.fillStyle="#fff"; g.font="bold 13px "+F; g.fillText("X-RAY",W-56,27);
@@ -2617,13 +2651,14 @@ const JOBS={
 };
 
 /* ── 1인칭 설비 화면 (c : 화면 중심 · n : 화면이 바라보는 방향 · w : 표시 폭 m) ── */
+/* 1인칭 설비 화면 : h = 3D 모델의 실제 화면 높이(m) · 폭은 화면 비율(460:700)로 정함 (11/16 V7 : 실제 크기 — 멀면 작게, 누르면 다가가서 크게) */
 const FP_MON={
-  fl:{k:["fl"], nm:"충전기 컨트롤 판넬", c:[2.292,1.53,1.833], n:[-1,0,0], w:.42},
-  sf:{k:["sf"], nm:"스틱공급장치 판넬", c:[3.587,1.395,-0.13], n:[1,0,0], w:.30},
-  ct:{k:["ct"], nm:"카토너 판넬", c:[3.637,1.545,-5.25], n:[1,0,0], w:.30},
-  pr:{k:["pr","vs"], nm:"케이스 프린터 · 비전 화면", c:[2.527,1.715,-6.025], n:[1,0,0], w:.40},
-  xr:{k:["xr"], nm:"X-ray 조작 화면", c:[3.148,1.525,-7.22], n:[1,0,0], w:.40},
-  cw:{k:["cw"], nm:"중량선별기 조작화면", c:[2.567,1.52,-8.22], n:[1,0,0], w:.36}
+  fl:{k:["fl"], nm:"충전기 컨트롤 판넬", c:[2.292,1.53,1.833], n:[-1,0,0], h:.26},
+  sf:{k:["sf"], nm:"스틱공급장치 판넬", c:[3.587,1.395,-0.13], n:[1,0,0], h:.19},
+  ct:{k:["ct"], nm:"카토너 판넬", c:[3.637,1.545,-5.25], n:[1,0,0], h:.19},
+  pr:{k:["pr","vs"], nm:"케이스 프린터 · 비전 화면", c:[2.527,1.715,-6.025], n:[1,0,0], h:.37},
+  xr:{k:["xr"], nm:"X-ray 조작 화면", c:[3.148,1.525,-7.22], n:[1,0,0], h:.39},
+  cw:{k:["cw"], nm:"중량선별기 조작화면", c:[2.567,1.52,-8.22], n:[1,0,0], h:.16}
 };
 
 /* ── old/hmi.js ── */
@@ -2879,9 +2914,9 @@ function hmiRoute(mk,scr,target){
    · 단계 · 배점 : pouch-idt/SCENARIO.md (2단계 승인 11/10)
    · 학습과 평가는 같은 절차 (평가는 안내 없음)
    ═══════════════════════════════════════════════════════════════════ */
-const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");
+const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");
 const isEasy=()=>!!S&&(S.mode==="easy"||S.mode==="examEasy");
-const MODE_NM={easy:"기본모드 · 학습",guide:"심화모드 · 학습",examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};
+const MODE_NM={easy:"기본모드 · 학습",guide:"심화모드 · 학습",examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가"};
 const ROOM_NM={F:"충전실 과정",P:"포장실 과정"};
 const PASS=80;
 const lineRunning=()=>S.room==="F"?S.f.run:S.p.ctRun;
@@ -2978,7 +3013,7 @@ function stepsFill(easy){
     A.push(T_("leak2","기밀도 시험 결과 적합 확인","[기밀도 시험] 을 다시 눌러 결과를 확인합니다.",leakSel,()=>f().leak.ok,{pts:3}));
     A.push(T_("alignOn","정렬컨베어 가동스위치 ON","정상 제품 배출을 확인한 뒤 [정렬컨베어 스위치] 를 켭니다. 파우치가 포장실로 넘어갑니다.",()=>"#tAlign",()=>S.p.align,{pts:2}));
   }
-  A.push(T_("watch","운전 감시 · 연속 생산 ("+PROD.target+"카톤)","목표 "+PROD.target+"카톤(1,800포)을 생산합니다. 성형 · 접착, 인쇄 선명도, R컷팅, 아이마크, 불량 리젝트, 화면 오류를 감시하고, 정기 공정검사(IPC)와 알람에 대응합니다.",
+  A.push(T_("watch","운전 감시 · 연속 생산 ("+PROD.target+"카톤)","목표 "+PROD.target+"카톤(1,800포)을 생산합니다. 성형 · 접착, 인쇄 선명도, R컷팅, 아이마크, 불량 리젝트, 화면 오류를 감시하고, 정기 공정검사(IPC)를 수행합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target&&!S.ipc.open&&!ipcDue(),{pts:easy?15:14,watch:true}));
   A.push(T_("ipc","정기 공정검사(IPC) 실시","100카톤마다(실제 1시간마다) 도징을 원료별로 켜서 채취 · 계량하고 평균 ±4% · 개개 ±8% 기준으로 판정합니다.",()=>null,()=>S.ipc.done>=3,{pts:6}));
   if(easy){
@@ -3064,7 +3099,7 @@ function stepsPack(easy){
     A.push(T_("sfStart","스틱공급장치 서보 전원 · 제품 공급 → 리셋 → START","자동 화면의 서보 전원 공급 · 제품 공급을 켜고 리셋 → START 합니다.",()=>firstOf(sfStart),()=>p().sfRun,{pts:2,hmi:true}));
     A.push(T_("align","정렬컨베어 가동스위치 ON","충전기 정상 제품 배출을 확인한 뒤 [정렬컨베어 스위치] 를 켭니다.",()=>"#tAlign",()=>p().align,{pts:2}));
   }
-  A.push(T_("watch","운전 감시 · 연속 생산 ("+PROD.target+"카톤)","목표 "+PROD.target+"카톤을 생산합니다. 카톤 성형 · 접착, 인쇄 선명도, 불량 리젝트, 화면 오류를 감시하고 이상사례에 대응합니다.",
+  A.push(T_("watch","운전 감시 · 연속 생산 ("+PROD.target+"카톤)","목표 "+PROD.target+"카톤을 생산합니다. 카톤 성형 · 접착, 인쇄 선명도, 불량 리젝트, 화면 오류를 감시합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target,{pts:easy?18:14,watch:true}));
   if(easy){
     const offAll=[[()=>!p().cwRun,()=>panelSel("cw","cwStop")],...xrOff,...prOff,...sfOff,...ctOff];
@@ -3082,7 +3117,7 @@ function stepsPack(easy){
   return A;
 }
 let STEPS_CACHE=null;
-function STEPS(){ if(!STEPS_CACHE) STEPS_CACHE=S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy()); return STEPS_CACHE; }
+function STEPS(){ if(!STEPS_CACHE) STEPS_CACHE=isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy()); return STEPS_CACHE; }
 const curStep=()=>STEPS()[S.tIdx];
 
 /* ═══ 세션 ═══ */
@@ -3094,7 +3129,6 @@ function startSession(mode,room){
   if(room==="F") presetPackAuto(); else presetFillAuto();
   if(isEasy()) presetEasy();
   hMach=room==="F"?"fl":"sf"; hScr=hMach==="fl"?"run":"main";
-  if(isExam()) scheduleExamTrouble();
   if(typeof buildTiles==="function") buildTiles();
   buildStatic(); cam.fp=null; camSet(room==="F"?"fill":"pack"); drawHMI(); renderCoach(); renderTiles();
   S.stepAt=tSim;
@@ -3165,7 +3199,7 @@ function finishSession(manual){
   S.session.sec=(performance.now()-S.session.start)/1000;
   for(const id of ["#mInc","#mList","#mCarry"]) $(id).classList.remove("on");
   if(typeof apStop==="function") apStop();
-  showResult(manual);
+  (isInc()?showIncResult:showResult)(manual);
 }
 
 /* ═══ 정기 공정검사 (IPC) — 100카톤마다 1회차 (실제 1시간마다) ═══ */
@@ -3649,7 +3683,7 @@ function renderCoach(){
   }else if(st){
     $("#cStep").textContent=ROOM_NM[S.room]+" · "+MODE_NM[S.mode]+" · STEP "+(S.tIdx+1)+" / "+A.length+(st.watch?" · 생산 "+S.cnt.good+" / "+S.cnt.target+" 카톤":"");
     $("#cTitle").textContent=st.t;
-    $("#cDesc").textContent=ex&&!hintOn?(st.watch?"라인을 감시하고 이상에 대응하세요.":"평가 진행 중 — 절차에 따라 수행하세요."):st.d;
+    $("#cDesc").textContent=ex&&!hintOn?(isInc()?"라인을 감시하고 이상이 생기면 대응하세요.":st.watch?"라인을 감시하며 생산을 진행하세요.":"평가 진행 중 — 절차에 따라 수행하세요."):st.d;
   }else{ $("#cStep").textContent="완료"; $("#cTitle").textContent="모든 단계를 마쳤습니다"; $("#cDesc").textContent="상단 [학습 종료] 로 결과를 확인하세요."; }
   const chk=!rec&&!ip&&st&&(st.lc!==undefined&&!S.clear.includes(st.lc)||st.chk&&st.chk());
   $("#lcCheck").style.display=chk?"":"none";
@@ -3758,14 +3792,14 @@ function openList(kind){
 
 /* ── 시작 화면 ── */
 function initSplash(){
-  $("#lineStrip").innerHTML=FLOW.map(([k,a,b],i)=>'<div class="ls'+(["fl","cv"].includes(k)?" fr":"")+'"><b>'+a+'</b><s>'+b+'</s></div>'+(i<FLOW.length-1?'<div class="ar">›</div>':'')).join("");
+  if(0) $("#lineStrip").innerHTML=FLOW.map(([k,a,b],i)=>'<div class="ls'+(["fl","cv"].includes(k)?" fr":"")+'"><b>'+a+'</b><s>'+b+'</s></div>'+(i<FLOW.length-1?'<div class="ar">›</div>':'')).join("");
   const pick=r=>{ PICK_ROOM=r; $("#coursePicker").style.display="none"; $("#splash .go").style.display="grid"; $("#courseBack").style.display=""; $("#courseBack").textContent="← 과정 다시 선택 ("+ROOM_NM[r]+")"; };
   $("#chooseF").onclick=()=>pick("F"); $("#chooseP").onclick=()=>pick("P");
-  $("#courseBack").onclick=()=>{ $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; };
+  $("#courseBack").onclick=()=>{ $("#incPick").style.display="none"; $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; };
   for(const [id,mode] of [["#spEasy","easy"],["#spExamEasy","examEasy"],["#spGuide","guide"],["#spExam","exam"]]) $(id).onclick=()=>{
     $("#splash").classList.add("hide"); startSession(mode,PICK_ROOM); toast(ROOM_NM[PICK_ROOM]+" · "+MODE_NM[mode]+" 시작"); };
 }
-function goHome(){ if(typeof apStop==="function") apStop(); if(FP.on){ FP.mod.stop(); cam.fp=null; FP.on=false; fpMoveHMI(false); } if(S&&S.session) S.session.active=false; $("#splash").classList.remove("hide"); $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; }
+function goHome(){ $("#incPick").style.display="none"; $("#oeeWrap")&&$("#oeeWrap").classList.remove("on"); if(typeof apStop==="function") apStop(); if(FP.on){ FP.mod.stop(); cam.fp=null; FP.on=false; fpMoveHMI(false); } if(S&&S.session) S.session.active=false; $("#splash").classList.remove("hide"); $("#coursePicker").style.display=""; $("#splash .go").style.display="none"; $("#courseBack").style.display="none"; }
 
 /* ── 결과 · 채점 관리 ── */
 function showResult(manual){
@@ -3782,7 +3816,7 @@ function showResult(manual){
     (ex?'<div class="finalScore">'+sc.score+'<small>점 · '+(pass?"합격":"불합격")+' (기준 '+PASS+'점)</small></div><p>단계 점수 '+sc.base+'점 − 감점 '+sc.minus+'점</p>':'')+
     '<div class="kpis" style="grid-template-columns:repeat(4,1fr);margin:10px 0">'+kp+'</div>'+
     '<h3>단계별 수행</h3><table class="ht"><tr><th>No</th><th>단계</th><th>배점</th><th>결과</th></tr>'+rows+'</table>'+
-    '<h3>알람 · 이상사례 대응</h3><table class="ht"><tr><th>구분</th><th>명칭</th><th>발생</th></tr>'+inc+'</table>'+
+    
     (ipc?'<h3>정기 공정검사 (IPC)</h3><table class="ht"><tr><th>회차</th><th>대상</th><th>평균</th><th>판정</th></tr>'+ipc+'</table>':'')+
     '<h3>감점 내역</h3><table class="ht"><tr><th>항목</th><th>감점</th><th>시각</th></tr>'+ded+'</table>'+
     '<div class="mbtn"><button class="pri" id="endAgain">다시 하기</button><button id="endHome">메인화면</button><button id="endClose">닫기</button></div>';
@@ -3793,7 +3827,7 @@ function showResult(manual){
 }
 function openRubric(){
   const A=STEPS(), tot=A.reduce((s,x)=>s+(x.pts||0),0);
-  $("#rubBox").innerHTML='<h2>채점 기준 — '+esc(ROOM_NM[S.room]+" · "+(isEasy()?"기본모드":"심화모드"))+'</h2><p>단계 배점 합계를 100점으로 환산한 뒤 감점을 뺍니다. 합격 기준 '+PASS+'점. 학습 · 평가는 같은 절차이며 평가에서는 안내가 표시되지 않습니다.</p>'+
+  $("#rubBox").innerHTML='<h2>채점 기준 — '+esc(ROOM_NM[S.room]+" · "+(isInc()?"이상사례 대처":isEasy()?"기본모드":"심화모드"))+'</h2><p>단계 배점 합계를 100점으로 환산한 뒤 감점을 뺍니다. 합격 기준 '+PASS+'점. 학습 · 평가는 같은 절차이며 평가에서는 안내가 표시되지 않습니다.</p>'+
     '<table class="ht"><tr><th>단계</th><th>배점</th><th>환산</th></tr>'+A.map(st=>'<tr><td class="l">'+esc(st.t)+'</td><td>'+(st.pts||0)+'</td><td>'+fmt((st.pts||0)/tot*100,1)+'</td></tr>').join("")+'</table>'+
     '<h3>감점</h3><table class="ht">'+Object.values(PENALTY).map(p=>'<tr><td class="l">'+esc(p[0])+'</td><td>−'+p[1]+'</td></tr>').join("")+'</table>'+
     '<div class="mbtn"><button class="pri" id="rubX">닫기</button></div>';
@@ -4125,9 +4159,21 @@ function v3Sync(dt){
   V3.k+=((run?1:0)-V3.k)*Math.min(1,dt*3);             /* 기동 · 정지 시 부드럽게 가 · 감속 */
   if(V3.k>.002) stepAnim(dt*V3.k);
   if(FM.doors){ const want=S&&S.f&&S.f.door&&S.f.door!=="closed"?1:0; V3.door=(V3.door||0)+Math.max(-dt*1.4,Math.min(dt*1.4,want-(V3.door||0))); const e=V3.door*V3.door*(3-2*V3.door); for(const d of FM.doors) d.G.rotation.y=d.s*1.75*e; }   /* 안전도어 : 약 0.7 초에 열림 · 닫힘 */
-  if(PK2.xr) PK2.xr.on=!(S&&S.session&&S.session.active)||!!(S.p&&S.p.xrX);      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
+  if(PK2.xr) PK2.xr.on=!(S&&S.session&&S.session.active)||!!(S.p&&S.p.xrX);
+  if(PK2.xr) PK2.xr.pw=!(S&&S.session&&S.session.active)||machPower("xr");   /* 전원 OFF : 화면 꺼짐 */      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
+  if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
+  scrPower();
   if(typeof wkDraw==="function") wkDraw(dt);
+}
+/* 설비 화면 전원 : 전원이 꺼진 설비의 3D 화면은 검게 (FP_MON 위치로 화면 메시를 찾아 재질 분리) */
+function scrPower(){
+  if(!V3.scr){ V3.scr=[]; const b=new T3.Box3(), c=new T3.Vector3(); V3.scene.updateMatrixWorld(true);
+    V3.scene.traverse(o=>{ if(!o.isMesh||o.material!==M.scr) return; b.setFromObject(o); b.getCenter(c); let best=null, bd=.3;
+      for(const [k,m] of Object.entries(FP_MON)){ const d=Math.hypot(c.x-m.c[0],c.y-m.c[1],c.z-m.c[2]); if(d<bd){ bd=d; best=k; } }
+      if(best){ o.material=M.scr.clone(); V3.scr.push({k:best,mat:o.material,on:null}); } }); }
+  for(const s of V3.scr){ const on=!(S&&S.session&&S.session.active)||FP_MON[s.k].k.some(k=>machPower(k)); if(on===s.on) continue; s.on=on;
+    s.mat.emissiveIntensity=on?.7:0; s.mat.color.setHex(on?0x10202c:0x07090b); }
 }
 
 /* ── 카메라 ── */
@@ -4381,7 +4427,7 @@ function fpEyeY(pose,moved,dt){
 
 /* ── 설비 화면 (anchors.js FP_MON) ── */
 const FP_DOM={w:460, h:700};
-function monRect(m){ const w=m.w, h=w*FP_DOM.h/FP_DOM.w, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
+function monRect(m){ const h=m.h, w=h*FP_DOM.w/FP_DOM.h, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
   const P=(a,b)=>[m.c[0]+r[0]*a+n[0]*.004, m.c[1]+b, m.c[2]+r[2]*a+n[2]*.004];
   return {w,h,TL:P(-w/2,h/2),TR:P(w/2,h/2),BR:P(w/2,-h/2),BL:P(-w/2,-h/2)}; }
 function monPose(m){ const r=monRect(m), focal=.78, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
@@ -4495,7 +4541,7 @@ function fpMenu(){
   $("#listBox").innerHTML='<h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
     '<div class="row"><b>교육 계속<s>Esc</s></b><button id="fmGo">계속</button></div>'+
     '<div class="row"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button id="fm3">전환</button></div>'+
-    (isExam()?'':'<div class="row"><b>이상사례 발생<s>학습모드</s></b><button id="fmCase">열기</button></div>'+'<div class="row"><b>알람 발생<s>학습모드</s></b><button id="fmAlm">열기</button></div>')+
+
     '<div class="row"><b>조작 도움말<s>H</s></b><button id="fmHelp">보기</button></div>'+
     '<div class="row"><b>메인화면<s>교육 중단</s></b><button id="fmHome">이동</button></div>';
   $("#mList").classList.add("on");
@@ -4613,6 +4659,8 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:8, d:"2026-11-16", t:"메인화면 왼쪽 아래에 OEE 연동 표시등 추가(초록 = Drive 시트 · IDT DB 데이터 연결, 빨강 = 미연동 · 누르면 OEE 관리 대시보드)"},
+ {v:7, d:"2026-11-16", t:"메인화면 개편(과정 → 기본 · 심화 · OEE, 순서도 삭제), 기본 · 심화는 라인 가동 절차만 교육(이상상황 제외), OEE 에 [OEE 관리 대시보드](Google Drive 시트 직접 읽기 + IDT 자체 DB) · [이상사례 대처 교육](부동시간 · 빈도 · 중요도 순 학습 · 평가) 신설, 1인칭 설비 화면 실제 크기, 설비 전원에 따른 화면 꺼짐 · 은박 롤 소진 표시, 입력칸 붙여넣기 오류 수정"},
  {v:6, d:"2026-11-15", t:"작업자 키 현실화(위생모 포함 약 1.70 m · 1인칭 눈높이 1.55 m, 2층 데크 2.0 m 대비), 충전기 안전도어를 [안전도어] 조작 시 실제로 열리고 닫히도록 변경(가운데 문 2짝 · 경첩 기준)"},
  {v:5, d:"2026-11-15", t:"OEE 연계 교육 : 대시보드 시트의 실제 항목 이름(작업기간 · 포장라인 · 제조번호(LOT) 등)으로 붙여넣기 인식, 주소 연결은 기존 대시보드 주소에 ?format=json 을 붙이는 방식으로 안내 변경"},
  {v:4, d:"2026-11-15", t:"3D 전면 재구축 — 현장 도면 · 사진 · 영상 기준 충전실 · 포장실(스틱공급장치 · 카토너 · 프린터 · X-ray · 중량선별기), 수동 포장(작업자 3명 : 대케이스 포장 · 대박스 테이핑 · 파렛트 적재), X-ray 투과 영상 화면, 그래픽 자동 · 상 · 중 · 하, OEE 연계 교육(부동 원인 분석 → 맞춤 실습 → 교육 효과) 추가"},
@@ -4635,21 +4683,29 @@ function bindVersion(){
 
 /* ── oee/oee.js ── */
 /* ═══════════════════════════════════════════════════════════════════
-   OEE 연계 교육 — 공통 모듈 (파우치 IDT 먼저 적용 → 병 · PTP IDT 로 확대 예정, SCENARIO.md 11절)
-   흐름 : ① OEE 데이터 불러오기 → ② 부동 트렌드 분석(부동시간 · 발생 빈도 순위) → ③ 원인별 맞춤 교육 추천 → 3D 실습 → ④ 교육 후 효과
+   OEE 관리 대시보드 — 공통 모듈 (파우치 IDT 먼저 적용 → 병 · PTP IDT 로 확대 예정, SCENARIO.md 11절)
+   흐름 : ① 데이터 연결(Google Drive 시트 → IDT DB) → ② 부동 트렌드(부동시간 · 발생 빈도 순위) → ③ 교육 효과(이상사례 대처 교육 기록)
    데이터 : 포장2팀 OEE 대시보드의 Google Sheets DB (getDashboardData 와 같은 항목)
      { dateText, line, prodName, lotNo, oee, avail, perf, yieldRate, totalDown(분), reason(자유 기재), reasonCode(부동 유형 · 신규), countermeasure }
-   · 실제 실적 값은 이 파일 · 저장소에 넣지 않는다. 불러온 값은 브라우저 메모리에만 두고, 사용자가 켠 경우에만 이 브라우저에 저장한다.
-   · IDT 별 설정(라인 이름 · 부동 유형 목록 · 실습 시작 방법)은 OEEEDU.init(cfg) 로 넘긴다.
+   연결 방식 (11/16 V7)
+     · Google Drive 커넥터(아티팩트 mcp 기능)로 보는 사람의 Drive 권한으로 시트를 xlsx 로 내려받아 읽음 (SheetJS · cdnjs)
+     · 읽은 값은 IDT DB(아티팩트 db 기능 : oee/meta + oee_rows/c0…)에 저장 → Drive 연결이 없는 사람도 마지막 동기화 값을 봄
+     · 대시보드를 열 때 마지막 동기화가 30 분보다 오래됐으면 Drive 에서 다시 읽음 (쓰기 권한이 있는 사람만 DB 갱신)
+     · 아티팩트 밖(파일로 연 경우)에서는 붙여넣기 · 예시 데이터만 사용
+   · 실제 실적 값은 이 파일 · 저장소 · 게시 페이지 본문에 넣지 않는다 (DB 에만 저장).
    ═══════════════════════════════════════════════════════════════════ */
 const OEEEDU=(function(){
-  const LS={url:"oeeedu.url", keep:"oeeedu.keep", data:"oeeedu.data", log:"oeeedu.log"};
-  const st={cfg:null, rows:[], src:"", demo:false, tab:"data", from:"", to:"", line:"", practice:null, msg:""};
+  const LS={keep:"oeeedu.keep", data:"oeeedu.data", log:"oeeedu.log"};
+  const XLSX_URL="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js", XLSX_MIME="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+  const DRIVE="Google Drive", STALE=30*60e3, CHUNK=350;
+  const st={cfg:null, rows:[], src:"", demo:false, tab:"data", from:"", to:"", line:"", msg:"", busy:"", files:null, meta:null, dbState:"none", canWrite:null, dbLog:[], autoTried:false};
+  const cap={db:null, user:null, mcp:null, uid:null};
   const $o=s=>document.querySelector(s), esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const lsGet=k=>{ try{ return localStorage.getItem(k); }catch(e){ return null; } }, lsSet=(k,v)=>{ try{ v==null?localStorage.removeItem(k):localStorage.setItem(k,v); }catch(e){} };
-  const pct=v=>{ v=Number(v); if(!isFinite(v)) return null; return v<=1.5?v*100:v; };
+  const pct=v=>{ if(v===""||v==null) return null; v=Number(String(v).replace("%","").trim()); if(!isFinite(v)) return null; return v<=1.5?v*100:v; };
   const dateOf=t=>{ const m=String(t||"").match(/(\d{4})[-.\/년\s]+(\d{1,2})[-.\/월\s]+(\d{1,2})/); return m?m[1]+"-"+m[2].padStart(2,"0")+"-"+m[3].padStart(2,"0"):""; };
-  const today=()=>{ const d=new Date(Date.now()+9*3600e3); return d.toISOString().slice(0,10); };
+  const today=()=>new Date(Date.now()+9*3600e3).toISOString().slice(0,10);
+  const kst=ms=>{ if(!ms) return "-"; const d=new Date(ms+9*3600e3).toISOString(); return d.slice(0,10)+" "+d.slice(11,16); };
   /* 자유 기재 사유 → 부동 유형 (코드가 없는 기존 기록용 · 낱말 일치) */
   function classify(text){ const t=String(text||""); if(!t.trim()) return []; const hit=[]; for(const c of st.cfg.codes){ if(c.kw&&c.kw.some(k=>new RegExp(k,"i").test(t))) hit.push(c.k); } return hit.length?hit:["ETC"]; }
   function normalize(list){
@@ -4659,84 +4715,186 @@ const OEEEDU=(function(){
       out.push({date, line:String(r.line||""), prod:String(r.prodName||""), lot:String(r.lotNo||""), oee:pct(r.oee), avail:pct(r.avail), perf:pct(r.perf), yld:pct(r.yieldRate), down, reason:String(r.reason||""), codes, auto, cm:String(r.countermeasure||"")}); }
     return out.filter(r=>r.date);
   }
-  /* 표 붙여넣기(시트에서 복사 · 첫 줄 = 항목 이름) 또는 JSON */
+  /* 항목 이름 인식 (시트 머리줄 · 붙여넣기 공용) */
   const HEAD={dateText:/날짜|일자|작업일|작업\s*기간|date/i, line:/라인|line/i, prodName:/제품|품목|prod/i, lotNo:/lot|제조번호/i, oee:/^oee|종합/i, avail:/시간\s*가동|avail/i, perf:/성능|perf/i, yieldRate:/수율|양품|yield/i, totalDown:/부동\s*시간|비계획|down/i, reasonCode:/부동\s*유형|사유\s*코드|reasoncode/i, reason:/사유|reason/i, countermeasure:/대책|counter/i};
+  function headMap(head){ const map=[]; head.forEach((h,i)=>{ h=String(h==null?"":h).trim(); for(const k in HEAD){ if(HEAD[k].test(h)&&!map.includes(k)){ map[i]=k; break; } } }); return map; }
+  const cellTxt=v=>v instanceof Date?new Date(v.getTime()-v.getTimezoneOffset()*6e4).toISOString().slice(0,10):v;
+  function fromTable(rows,fallbackLine){
+    let hi=rows.findIndex(r=>{ const m=headMap(r); return m.includes("dateText")&&(m.includes("line")||m.includes("oee")); }); if(hi<0) return [];
+    const map=headMap(rows[hi]);
+    return rows.slice(hi+1).filter(r=>r.some(c=>String(c).trim())).map(c=>{ const o={}; map.forEach((k,i)=>{ if(k) o[k]=cellTxt(c[i]); }); if(!o.line) o.line=fallbackLine||""; return o; });
+  }
   function parseText(txt){
     const t=String(txt||"").trim(); if(!t) throw new Error("내용이 비어 있습니다.");
     if(t[0]==="["||t[0]==="{"){ const j=JSON.parse(t); return Array.isArray(j)?j:(j.data||j.rows||[]); }
-    const lines=t.split(/\r?\n/).filter(l=>l.trim()), sep=lines[0].includes("\t")?"\t":",", head=lines[0].split(sep).map(s=>s.trim()), map=[];
-    head.forEach((h,i)=>{ for(const k in HEAD){ if(HEAD[k].test(h)&&!map.includes(k)){ map[i]=k; break; } } });
-    if(!map.includes("dateText")||!map.includes("line")) throw new Error("첫 줄에서 '날짜' · '라인' 항목을 찾지 못했습니다.");
-    return lines.slice(1).map(l=>{ const c=l.split(sep), o={}; map.forEach((k,i)=>{ if(k) o[k]=(c[i]||"").trim(); }); return o; });
+    const lines=t.split(/\r?\n/).filter(l=>l.trim()), sep=lines[0].includes("\t")?"\t":",";
+    const out=fromTable(lines.map(l=>l.split(sep).map(s=>s.trim())));
+    if(!out.length) throw new Error("머리줄에서 '작업기간(날짜)' · '포장라인' 항목을 찾지 못했습니다.");
+    return out;
   }
-  function setRows(raw,src,demo){ st.rows=normalize(raw); st.src=src; st.demo=!!demo; const ds=st.rows.map(r=>r.date).sort(); st.from=(ds[0]||"").slice(0,7); st.to=(ds[ds.length-1]||"").slice(0,7); st.line=st.cfg.line;
-    if(!demo&&lsGet(LS.keep)==="1") lsSet(LS.data,JSON.stringify(raw)); }
+  function setRows(raw,src,demo){ st.rows=normalize(raw); st.src=src; st.demo=!!demo; const ds=st.rows.map(r=>r.date).sort(); st.from=(ds[0]||"").slice(0,7); st.to=(ds[ds.length-1]||"").slice(0,7);
+    const ls=[...new Set(st.rows.map(r=>r.line))]; st.line=ls.find(l=>l.includes(st.cfg.line))||""; }
   /* 예시 데이터 : 화면 확인용 (실제 실적 아님 — 규칙으로 만든 값) */
   function demoData(){ const C=st.cfg.codes.filter(c=>c.k!=="ETC"), out=[]; let seed=11; const rnd=()=>{ seed=(seed*16807)%2147483647; return seed/2147483647; };
     for(let m=0;m<6;m++) for(let i=0;i<7;i++){ const d=new Date(Date.UTC(2026,4+m,2+i*4)), w=rnd(), c=C[Math.floor(Math.pow(rnd(),2.2)*C.length)], has=w<.62, down=has?Math.round(10+rnd()*70):0, av=100-down/4.8, pf=90+rnd()*9, yl=97+rnd()*2.5;
       out.push({dateText:d.toISOString().slice(0,10), line:st.cfg.line, prodName:"예시품목", lotNo:"EX"+String(m*7+i+1).padStart(3,"0"), avail:av, perf:pf, yieldRate:yl, oee:av*pf*yl/1e4, totalDown:down, reason:has?c.nm+" (예시)":"", reasonCode:has?c.k:"", countermeasure:""}); }
     return out; }
+
+  /* ── 아티팩트 기능 (db · user · mcp) ── */
+  async function capsInit(){
+    const C=window.claude; if(!C||typeof C.use!=="function") return;
+    const use=n=>C.use(n).catch(()=>null);
+    [cap.db,cap.user,cap.mcp]=await Promise.all([use("db"),use("user"),use("mcp")]);
+    if(cap.user){ try{ st.canWrite=await cap.user.can("data.write"); }catch(e){} try{ cap.uid=await cap.user.id(); }catch(e){} }
+    if(cap.db) dbLoad(); render();
+  }
+  async function dbLoad(){
+    st.dbState="loading"; render(); const timer=setTimeout(()=>{ if(st.dbState==="loading"){ st.dbState="timeout"; render(); } },10000);
+    try{
+      const m=await cap.db.doc("oee/meta").get(); st.meta=m.exists?m.data():null;
+      if(st.meta&&!st.demo&&(!st.rows.length||st.src.startsWith("IDT DB"))){
+        const parts=[]; for(let i=0;i<(st.meta.chunks||0);i++){ const d=await cap.db.doc("oee_rows/c"+i).get(); if(d.exists) parts.push(...(d.data().rows||[])); }
+        setRows(parts,"IDT DB ("+(st.meta.fileName||"시트")+" · "+kst(st.meta.syncedAt)+" 동기화)",false);
+      }
+      st.dbState="ok";
+      cap.db.collection("edu_log").onSnapshot(q=>{ st.dbLog=[]; q.docs.forEach(d=>{ const v=d.data(); if(v&&Array.isArray(v.list)) st.dbLog.push(...v.list); }); render(); }, ()=>{});
+    }catch(e){ st.dbState="error"; console.warn("db",e); }
+    clearTimeout(timer); render(); autoSync();
+  }
+  async function dbSave(raw,file,sheets){
+    if(!cap.db||st.canWrite===false) return "skip";
+    const n=Math.ceil(raw.length/CHUNK), old=(st.meta&&st.meta.chunks)||0;
+    for(let i=0;i<n;i++) await cap.db.doc("oee_rows/c"+i).set({rows:raw.slice(i*CHUNK,(i+1)*CHUNK)});
+    const meta={fileId:file.id, fileName:file.title||"", syncedAt:Date.now(), sheets, n:raw.length, chunks:n};
+    await cap.db.doc("oee/meta").set(meta); st.meta=meta;
+    for(let i=n;i<old;i++){ try{ await cap.db.doc("oee_rows/c"+i).delete(); }catch(e){} }
+    return "ok";
+  }
+  /* ── Google Drive ── */
+  const ERR={needs_reauth:"Google Drive 연결 인증이 만료되었습니다. claude.ai 설정 › 커넥터에서 Google Drive 를 다시 연결하세요.",
+    server_not_connected:"Google Drive 커넥터가 연결되어 있지 않습니다. claude.ai 설정 › 커넥터에서 연결하세요.", server_not_found:"Google Drive 커넥터를 찾지 못했습니다.",
+    not_granted:"이 페이지의 Google Drive 사용을 허용하지 않았습니다 (아티팩트 권한 메뉴에서 바꿀 수 있음).", consent_required:"Google Drive 사용 동의가 필요합니다.", approval_required:"Google Drive 호출 승인이 필요합니다.",
+    blocked_by_policy:"조직 정책으로 Google Drive 호출이 막혀 있습니다.", tool_error:"Drive 에서 파일을 읽지 못했습니다 (파일 권한 · 파일 ID 확인).",
+    rate_limited:"요청이 많습니다. 잠시 뒤 다시 시도하세요.", server_unavailable:"Drive 서버가 응답하지 않습니다. 잠시 뒤 다시 시도하세요.", upstream_error:"Drive 응답 오류입니다. 잠시 뒤 다시 시도하세요."};
+  const errMsg=e=>(e&&ERR[e.code])||("오류 : "+((e&&(e.message||e.code))||e));
+  function textOf(r){ return (r&&r.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("\n"); }
+  function jsonOf(r){ if(r&&r.payload&&typeof r.payload==="object") return r.payload; try{ return JSON.parse(textOf(r)); }catch(e){ return null; } }
+  function b64Of(r){ const B64=/^[A-Za-z0-9+/=\r\n]{200,}$/; let hit=null;
+    const walk=o=>{ if(hit||o==null) return; if(typeof o==="string"){ if(B64.test(o)) hit=o; return; } if(typeof o!=="object") return; for(const k of ["blob","data","content","base64","fileContent"]) if(typeof o[k]==="string"&&B64.test(o[k])){ hit=o[k]; return; } for(const k in o) walk(o[k]); };
+    walk(r&&r.content); if(!hit) walk(r&&r.payload); return hit; }
+  async function driveSearch(word){
+    const q="mimeType = 'application/vnd.google-apps.spreadsheet' and title contains '"+String(word||"OEE").replace(/['\\]/g,"\\$&")+"'";
+    const r=await cap.mcp.callTool(DRIVE,"search_files",{query:q, excludeContentSnippets:true, pageSize:20, orderBy:"modifiedTime desc"});
+    const j=jsonOf(r); return (j&&j.files||[]).map(f=>({id:f.id, title:f.title||f.name||f.id, modified:f.modifiedTime||""}));
+  }
+  let xlsxP=null;
+  function loadXlsx(){ if(window.XLSX) return Promise.resolve(window.XLSX); if(!xlsxP) xlsxP=new Promise((ok,no)=>{ const s=document.createElement("script"); s.src=XLSX_URL; s.onload=()=>window.XLSX?ok(window.XLSX):no(new Error("SheetJS 로드 실패")); s.onerror=()=>{ xlsxP=null; no(new Error("SheetJS(cdnjs) 를 불러오지 못했습니다")); }; document.head.appendChild(s); }); return xlsxP; }
+  async function driveRead(file){
+    const r=await cap.mcp.callTool(DRIVE,"download_file_content",{fileId:file.id, exportMimeType:XLSX_MIME});
+    const b64=b64Of(r); if(!b64) throw new Error("내려받은 내용에서 시트 파일을 찾지 못했습니다.");
+    const X=await loadXlsx(), wb=X.read(b64.replace(/\s/g,""),{type:"base64", cellDates:true});
+    const raw=[], sheets=[];
+    for(const nm of wb.SheetNames){ const rows=X.utils.sheet_to_json(wb.Sheets[nm],{header:1, raw:true, defval:""}), got=fromTable(rows,nm); if(got.length){ raw.push(...got); sheets.push(nm); } }
+    if(!raw.length) throw new Error("시트에서 '작업기간' · '포장라인' 머리줄을 찾지 못했습니다.");
+    return {raw, sheets};
+  }
+  async function sync(file,quiet){
+    if(!cap.mcp){ st.msg="이 화면에서는 Google Drive 연결을 쓸 수 없습니다 (claude.ai 아티팩트로 열어야 함)."; render(); return; }
+    st.busy="Drive 에서 '"+(file.title||"시트")+"' 읽는 중…"; render();
+    try{
+      const {raw,sheets}=await driveRead(file);
+      setRows(raw,"Google Drive · "+(file.title||"")+" ("+kst(Date.now())+" 읽음)",false);
+      let saved="skip"; try{ saved=await dbSave(raw,file,sheets); }catch(e){ saved="fail"; console.warn("db save",e); }
+      st.msg=raw.length+" 건 읽음 ("+sheets.join(" · ")+") — "+(saved==="ok"?"IDT DB 에 저장했습니다.":saved==="fail"?"IDT DB 저장은 권한이 없어 건너뜀 (화면에만 표시).":"IDT DB 를 쓸 수 없어 화면에만 표시합니다.");
+      if(!quiet) st.tab="trend";
+    }catch(e){ st.msg="Drive 읽기 실패 — "+errMsg(e)+(st.rows.length?" (기존 데이터 유지)":""); console.warn("drive",e); }
+    st.busy=""; render();
+  }
+  function autoSync(){ if(st.autoTried||!cap.mcp||!st.meta||!st.meta.fileId||st.demo) return; if(!$o("#oeeWrap.on")) return; if(Date.now()-(st.meta.syncedAt||0)<STALE) return;
+    st.autoTried=true; sync({id:st.meta.fileId, title:st.meta.fileName},true); }
+
   /* ── 분석 ── */
   function view(){ return st.rows.filter(r=>(!st.line||r.line===st.line)&&(!st.from||r.date.slice(0,7)>=st.from)&&(!st.to||r.date.slice(0,7)<=st.to)); }
   function byCode(rows){ const M={}; for(const r of rows){ if(!r.codes.length) continue; const share=r.down/r.codes.length; for(const k of r.codes){ const o=M[k]||(M[k]={k,down:0,n:0,auto:0,months:{}}); o.down+=share; o.n++; if(r.auto) o.auto++; const mo=r.date.slice(0,7); o.months[mo]=(o.months[mo]||0)+share; } }
     return Object.values(M).sort((a,b)=>b.down-a.down||b.n-a.n); }
+  /* 이 IDT 라인의 부동 유형별 누적 (이상사례 대처 교육 우선순위용) */
+  function codeStats(){ const rows=st.rows.filter(r=>r.line.includes(st.cfg.line)), o={}; for(const c of byCode(rows)) o[c.k]={down:c.down, n:c.n}; return o; }
   const avg=(rows,f)=>{ const v=rows.map(r=>r[f]).filter(x=>x!=null); return v.length?v.reduce((a,b)=>a+b,0)/v.length:null; };
   const codeOf=k=>st.cfg.codes.find(c=>c.k===k)||{k,nm:k==="ETC"?"기타 · 미분류":k};
   const f1=v=>v==null?"-":v.toFixed(1);
+  /* ── 실습 기록 (이상사례 대처 교육) : IDT DB edu_log/<사용자> + 이 브라우저 ── */
+  const localLog=()=>{ try{ return JSON.parse(lsGet(LS.log)||"[]"); }catch(e){ return []; } };
+  const getLog=()=>st.dbLog.concat(localLog());
+  async function logPractice(e){
+    const ent=Object.assign({d:today(), t:Date.now()},e);
+    if(cap.db&&cap.uid){ try{ const ref=cap.db.doc("edu_log/"+cap.uid), s=await ref.get(), list=(s.exists&&s.data().list)||[]; list.push(ent); await ref.set({list:list.slice(-1500)}); return; }catch(err){ console.warn("log db",err); } }
+    const l=localLog(); l.push(ent); lsSet(LS.log,JSON.stringify(l.slice(-1500)));
+  }
+  /* ── 연동 표시등 (메인화면 구석) : 초록 = Drive 시트 또는 IDT DB 의 실제 데이터 연결, 빨강 = 미연결 ── */
+  function lamp(){ const el=$o("#oeeLamp"); if(!el) return; const M=st.meta, live=!st.demo&&(st.src.startsWith("Google Drive")||st.src.startsWith("IDT DB"));
+    el.className=live?"on":"off";
+    el.title=live?"OEE 연동됨 — "+(M?"마지막 동기화 "+kst(M.syncedAt)+" · "+(M.fileName||"")+" · "+(M.n||st.rows.length)+" 건":st.src):"OEE 미연동 — "+({none:"아티팩트 밖에서는 IDT DB · Drive 를 쓸 수 없음",loading:"IDT DB 확인 중",timeout:"IDT DB 응답 지연",error:"IDT DB 읽기 실패",ok:"저장된 OEE 데이터 없음 ([OEE › OEE 관리 대시보드 › ① 데이터 연결])"}[st.dbState]||"");
+    el.querySelector("span").textContent=live?"OEE 연동":"OEE 미연동"; }
   /* ── 화면 ── */
-  function open(){ let w=$o("#oeeWrap"); if(!w){ w=document.createElement("div"); w.id="oeeWrap"; (st.cfg.mount||document.body).appendChild(w); w.addEventListener("click",onClick); w.addEventListener("change",onChange); } w.classList.add("on"); render(); }
+  function open(){ let w=$o("#oeeWrap"); if(!w){ w=document.createElement("div"); w.id="oeeWrap"; (st.cfg.mount||document.body).appendChild(w); w.addEventListener("click",onClick); w.addEventListener("change",onChange); } w.classList.add("on"); render(); autoSync(); }
   function close(){ const w=$o("#oeeWrap"); if(w) w.classList.remove("on"); }
   function render(){
-    const w=$o("#oeeWrap"); if(!w||!w.classList.contains("on")) return; const tabs=[["data","① 데이터"],["trend","② 부동 트렌드"],["edu","③ 맞춤 교육"],["effect","④ 교육 효과"]];
-    w.innerHTML='<div class="oeeBox"><div class="oeeHead"><b>OEE 연계 교육 <small>'+esc(st.cfg.title||"")+'</small></b><div class="oeeTabs">'+tabs.map(([k,t])=>'<button data-tab="'+k+'" class="'+(st.tab===k?"on":"")+'">'+t+'</button>').join("")+'</div><button data-act="close" class="oeeX">닫기</button></div>'+
-      (st.demo?'<div class="oeeDemo">예시 데이터로 표시 중입니다 — 실제 실적이 아닙니다.</div>':'')+(st.msg?'<div class="oeeMsg">'+esc(st.msg)+'</div>':'')+'<div class="oeeBody">'+({data:tabData,trend:tabTrend,edu:tabEdu,effect:tabEffect}[st.tab]())+'</div></div>'; st.msg="";
+    lamp(); const w=$o("#oeeWrap"); if(!w||!w.classList.contains("on")) return; const tabs=[["data","① 데이터 연결"],["trend","② 부동 트렌드"],["effect","③ 교육 효과"]];
+    const keep=$o("#oeeText")?$o("#oeeText").value:"", kw=$o("#oeeKw")?$o("#oeeKw").value:null;
+    w.innerHTML='<div class="oeeBox"><div class="oeeHead"><b>OEE 관리 대시보드 <small>'+esc(st.cfg.title||"")+'</small></b><div class="oeeTabs">'+tabs.map(([k,t])=>'<button data-tab="'+k+'" class="'+(st.tab===k?"on":"")+'">'+t+'</button>').join("")+'</div><button data-act="close" class="oeeX">닫기</button></div>'+
+      (st.demo?'<div class="oeeDemo">예시 데이터로 표시 중입니다 — 실제 실적이 아닙니다.</div>':'')+(st.busy?'<div class="oeeMsg">⏳ '+esc(st.busy)+'</div>':'')+(st.msg?'<div class="oeeMsg">'+esc(st.msg)+'</div>':'')+'<div class="oeeBody">'+({data:tabData,trend:tabTrend,effect:tabEffect}[st.tab]())+'</div></div>';
+    if($o("#oeeText")) $o("#oeeText").value=keep; if(kw!=null&&$o("#oeeKw")) $o("#oeeKw").value=kw;
   }
   function filterBar(){ const lines=[...new Set(st.rows.map(r=>r.line))].sort(), months=[...new Set(st.rows.map(r=>r.date.slice(0,7)))].sort(), op=(l,v)=>l.map(x=>'<option'+(x===v?" selected":"")+'>'+esc(x)+'</option>').join("");
     return '<div class="oeeFilter">라인 <select data-f="line"><option value="">전체</option>'+op(lines,st.line)+'</select> 기간 <select data-f="from">'+op(months,st.from)+'</select> ~ <select data-f="to">'+op(months,st.to)+'</select><span>'+view().length+' 건</span></div>'; }
-  function need(){ return '<p class="oeeEmpty">먼저 [① 데이터] 에서 OEE 데이터를 불러오세요.</p>'; }
+  function need(){ return '<p class="oeeEmpty">먼저 [① 데이터 연결] 에서 OEE 데이터를 연결하세요.</p>'; }
   function tabData(){
-    return '<div class="oeeCols"><div><h3>1. 주소로 불러오기</h3><p>Apps Script 에 추가한 읽기 전용 주소(JSON)를 입력합니다. 사내 네트워크 · 권한에 따라 막힐 수 있습니다.</p><input id="oeeUrl" placeholder="https://script.google.com/macros/s/…/exec" value="'+esc(lsGet(LS.url)||"")+'"><button data-act="fetch">불러오기</button>'+
-      '<h3>2. 붙여넣기</h3><p>시트에서 복사한 표(첫 줄 = 항목 이름) 또는 JSON 을 붙여 넣습니다.</p><textarea id="oeeText" placeholder="날짜	라인	제품명	LOT	OEE	시간가동률	성능가동률	수율	부동시간	부동유형	부동사유	대책"></textarea><button data-act="paste">적용</button>'+
-      '<h3>3. 예시 데이터</h3><p>화면 확인용으로 규칙에 따라 만든 값입니다 (실제 실적 아님).</p><button data-act="demo">예시 데이터로 보기</button>'+
-      '<p class="oeeKeep"><label><input type="checkbox" id="oeeKeep"'+(lsGet(LS.keep)==="1"?" checked":"")+'> 불러온 데이터를 이 브라우저에 저장 (끄면 닫을 때 사라짐)</label></p></div>'+
-      '<div><h3>현재 데이터</h3>'+(st.rows.length?'<p>'+esc(st.src)+' · '+st.rows.length+' 건 · '+esc(st.rows.map(r=>r.date).sort()[0])+' ~ '+esc(st.rows.map(r=>r.date).sort().pop())+'</p>'+
-        '<p>부동 유형 코드 입력 '+st.rows.filter(r=>r.codes.length&&!r.auto).length+' 건 · 자유 기재를 낱말로 분류 '+st.rows.filter(r=>r.auto).length+' 건 (이 중 미분류 '+st.rows.filter(r=>r.auto&&r.codes.includes("ETC")).length+' 건)</p>':'<p class="oeeEmpty">불러온 데이터가 없습니다.</p>')+
+    const M=st.meta, dbTxt={none:"이 화면에서는 IDT DB 를 쓸 수 없습니다 (claude.ai 아티팩트로 열면 사용).",loading:"IDT DB 읽는 중…",timeout:"IDT DB 응답이 늦습니다.",error:"IDT DB 를 읽지 못했습니다.",ok:M?"마지막 동기화 "+kst(M.syncedAt)+" · "+esc(M.fileName||"")+" · "+(M.n||0)+" 건 ("+esc((M.sheets||[]).join(" · "))+")":"아직 저장된 데이터가 없습니다."}[st.dbState];
+    const files=st.files?(st.files.length?'<table class="oeeT"><tr><th>시트 파일</th><th>수정</th><th></th></tr>'+st.files.map(f=>'<tr><td>'+esc(f.title)+'</td><td>'+esc(String(f.modified).slice(0,10))+'</td><td><button data-act="pick" data-id="'+esc(f.id)+'" data-t="'+esc(f.title)+'">이 시트 연결</button></td></tr>').join("")+'</table>':'<p class="oeeEmpty">찾은 시트가 없습니다.</p>'):"";
+    return '<div class="oeeCols"><div>'+
+      '<h3>1. Google Drive 시트 연결 (권장)</h3><p>보는 사람의 Google Drive 권한으로 OEE 시트를 직접 읽어 IDT DB 에 저장합니다. 연결 후에는 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.</p>'+
+      (cap.mcp?'<div class="oeeRow"><input id="oeeKw" placeholder="시트 이름 낱말 (예: OEE)" value="OEE"><button data-act="search">Drive 에서 찾기</button></div>'+files+
+        (M&&M.fileId?'<p><button data-act="resync">지금 다시 읽기</button> <span class="oeeNote">연결된 시트 : '+esc(M.fileName||M.fileId)+'</span></p>':''):
+        '<p class="oeeEmpty">이 화면에서는 Drive 연결을 쓸 수 없습니다. claude.ai 에서 아티팩트로 열고, 설정 › 커넥터에서 Google Drive 를 연결하세요.</p>')+
+      '<h3>2. 붙여넣기 (보조)</h3><p>시트에서 머리줄을 포함해 범위를 복사(Ctrl+C)한 뒤 아래 칸에 붙여 넣습니다 (Ctrl+V). 이 화면에만 표시하며 IDT DB 에는 저장하지 않습니다.</p><textarea id="oeeText" placeholder="작업기간	제조번호(LOT)	포장라인	제품명	…	시간가동률(%)	성능가동률(%)	수율(%)	OEE(%)	부동사유	대책"></textarea><button data-act="paste">적용</button>'+
+      '<h3>3. 예시 데이터</h3><p>화면 확인용으로 규칙에 따라 만든 값입니다 (실제 실적 아님).</p><button data-act="demo">예시 데이터로 보기</button></div>'+
+      '<div><h3>IDT DB</h3><p>'+dbTxt+'</p>'+(st.canWrite===false?'<p class="oeeNote">※ 이 계정은 IDT DB 를 읽기만 할 수 있습니다. Drive 에서 읽은 값은 화면에만 표시됩니다.</p>':'')+
+      '<h3>현재 표시 중</h3>'+(st.rows.length?'<p>'+esc(st.src)+' · '+st.rows.length+' 건 · '+esc(st.rows.map(r=>r.date).sort()[0])+' ~ '+esc(st.rows.map(r=>r.date).sort().pop())+'</p>'+
+        '<p>부동 유형 코드 입력 '+st.rows.filter(r=>r.codes.length&&!r.auto).length+' 건 · 자유 기재 사유를 낱말로 분류 '+st.rows.filter(r=>r.auto).length+' 건 (이 중 미분류 '+st.rows.filter(r=>r.auto&&r.codes.includes("ETC")).length+' 건)</p>':'<p class="oeeEmpty">표시 중인 데이터가 없습니다.</p>')+
       '<h3>부동 유형 코드 ('+esc(st.cfg.line)+')</h3><table class="oeeT"><tr><th>코드</th><th>부동 유형</th><th>IDT 실습</th></tr>'+st.cfg.codes.map(c=>'<tr><td>'+c.k+'</td><td>'+esc(c.nm)+'</td><td>'+(c.inc?esc(c.roomNm||""):"-")+'</td></tr>').join("")+'</table></div></div>';
   }
   function tabTrend(){
     if(!st.rows.length) return need(); const rows=view(), list=byCode(rows), tot=list.reduce((a,o)=>a+o.down,0), mx=Math.max(1,...list.map(o=>o.down)), mn=Math.max(1,...list.map(o=>o.n)), withDown=rows.filter(r=>r.down>0).length;
     const months=[...new Set(rows.map(r=>r.date.slice(0,7)))].sort(), mTot=months.map(m=>rows.filter(r=>r.date.slice(0,7)===m).reduce((a,r)=>a+r.down,0)), mM=Math.max(1,...mTot);
     return filterBar()+'<div class="oeeKpi">'+[["평균 OEE",f1(avg(rows,"oee"))+" %"],["시간가동률",f1(avg(rows,"avail"))+" %"],["성능가동률",f1(avg(rows,"perf"))+" %"],["수율",f1(avg(rows,"yld"))+" %"],["부동시간 합계",Math.round(rows.reduce((a,r)=>a+r.down,0))+" 분"],["부동 발생",withDown+" / "+rows.length+" 건"]].map(([a,b])=>'<div><s>'+a+'</s><b>'+b+'</b></div>').join("")+'</div><p class="oeeNote">※ 비율은 기록별 값의 단순 평균 · 한 기록에 유형이 여럿이면 부동시간을 똑같이 나눔</p>'+
-      '<div class="oeeCols"><div><h3>부동 유형 순위 (부동시간)</h3>'+(list.length?'<table class="oeeT"><tr><th>순위</th><th>부동 유형</th><th>부동시간</th><th>비중</th><th>발생</th></tr>'+list.map((o,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(codeOf(o.k).nm)+(o.auto?' <i title="자유 기재를 낱말로 분류">*</i>':'')+'</td><td><div class="oeeBar"><span style="width:'+(o.down/mx*100).toFixed(0)+'%"></span><em>'+Math.round(o.down)+' 분</em></div></td><td>'+(tot?(o.down/tot*100).toFixed(0):0)+' %</td><td><div class="oeeBar n"><span style="width:'+(o.n/mn*100).toFixed(0)+'%"></span><em>'+o.n+' 회</em></div></td></tr>').join("")+'</table><p class="oeeNote">* 표시 = 자유 기재 사유를 낱말로 분류한 기록 포함 (정확도 확인 필요)</p>':'<p class="oeeEmpty">이 기간에 부동 기록이 없습니다.</p>')+'</div>'+
+      '<div class="oeeCols"><div><h3>부동 유형 순위 (부동시간)</h3>'+(list.length?'<table class="oeeT"><tr><th>순위</th><th>부동 유형</th><th>부동시간</th><th>비중</th><th>발생</th></tr>'+list.map((o,i)=>'<tr><td>'+(i+1)+'</td><td>'+esc(codeOf(o.k).nm)+(o.auto?' <i title="자유 기재를 낱말로 분류">*</i>':'')+'</td><td><div class="oeeBar"><span style="width:'+(o.down/mx*100).toFixed(0)+'%"></span><em>'+Math.round(o.down)+' 분</em></div></td><td>'+(tot?(o.down/tot*100).toFixed(0):0)+' %</td><td><div class="oeeBar n"><span style="width:'+(o.n/mn*100).toFixed(0)+'%"></span><em>'+o.n+' 회</em></div></td></tr>').join("")+'</table><p class="oeeNote">* 표시 = 자유 기재 사유를 낱말로 분류한 기록 포함 (정확도 확인 필요)</p>':'<p class="oeeEmpty">이 기간에 부동 기록이 없습니다.</p>')+
+      (st.cfg.openInc?'<p><button data-act="inc">이상사례 대처 교육 열기 (이 순위 반영)</button></p>':'')+'</div>'+
       '<div><h3>월별 부동시간</h3><div class="oeeMon">'+months.map((m,i)=>'<div><span style="height:'+(mTot[i]/mM*100).toFixed(0)+'%"></span><em>'+Math.round(mTot[i])+'</em><s>'+m.slice(2)+'</s></div>').join("")+'</div></div></div>';
   }
-  function tabEdu(){
-    if(!st.rows.length) return need(); const rows=view(), list=byCode(rows).filter(o=>codeOf(o.k).inc), tot=byCode(rows).reduce((a,o)=>a+o.down,0), log=getLog();
-    if(!list.length) return filterBar()+'<p class="oeeEmpty">IDT 실습과 연결된 부동 유형이 이 기간에 없습니다.</p>';
-    return filterBar()+'<p>부동시간이 큰 순서로 IDT 실습을 추천합니다. 실습을 끝내면 [④ 교육 효과] 에 기록됩니다.</p><div class="oeeCards">'+list.slice(0,6).map((o,i)=>{ const c=codeOf(o.k), done=log.filter(l=>l.k===o.k).length;
-      return '<div class="oeeCard"><div class="rk">'+(i+1)+'</div><h4>'+esc(c.nm)+'<small>'+esc(c.roomNm||"")+'</small></h4><p class="why">선정 근거 : 부동시간 '+Math.round(o.down)+' 분 ('+(tot?(o.down/tot*100).toFixed(0):0)+' %) · '+o.n+' 회 발생</p><p>학습 목표 : '+esc(c.goal||"발생 원인을 판단하고 정해진 순서로 조치한 뒤 재가동을 확인한다.")+'</p><ol>'+(c.steps||["설비 정지 · 알람 확인","원인 판단","현장 조치","재가동 · 정상 확인"]).map(s=>'<li>'+esc(s)+'</li>').join("")+'</ol><div class="ft"><span>'+(done?"실습 "+done+" 회 완료":"실습 기록 없음")+'</span><button data-act="start" data-k="'+o.k+'">3D 실습 시작</button></div></div>'; }).join("")+'</div>';
-  }
   function tabEffect(){
-    if(!st.rows.length) return need(); const log=getLog(); if(!log.length) return '<p class="oeeEmpty">아직 완료한 실습이 없습니다. [③ 맞춤 교육] 에서 실습을 시작하세요.</p>';
-    const rows=st.rows.filter(r=>!st.cfg.line||r.line===st.cfg.line), first={}; for(const l of log) if(!first[l.k]||l.d<first[l.k]) first[l.k]=l.d;
+    const log=getLog(); if(!log.length) return '<p class="oeeEmpty">아직 완료한 이상사례 대처 교육이 없습니다. 메인화면 [OEE › 이상사례 대처 교육] 에서 학습 · 평가를 진행하세요.</p>';
+    const ks=[...new Set(log.map(l=>l.k))], m=a=>a.length?a.reduce((x,y)=>x+y,0)/a.length:null;
+    let h='<h3>교육 실적</h3><table class="oeeT"><tr><th>상황</th><th>학습</th><th>평가</th><th>평가 평균</th><th>평균 대응 시간</th><th>평균 오답</th><th>최근</th></tr>'+ks.map(k=>{ const L=log.filter(l=>l.k===k), E=L.filter(l=>l.mode==="incExam"&&l.score!=null), T=L.filter(l=>l.ok&&l.sec!=null);
+      return '<tr><td>'+esc(codeOf(k).nm)+'</td><td>'+L.filter(l=>l.mode!=="incExam").length+' 회</td><td>'+E.length+' 회</td><td>'+(E.length?m(E.map(l=>l.score)).toFixed(0)+' 점':"-")+'</td><td>'+(T.length?Math.round(m(T.map(l=>l.sec)))+' 초':"-")+'</td><td>'+(L.length?m(L.map(l=>l.wrong||0)).toFixed(1):"-")+'</td><td>'+esc(L.map(l=>l.d).sort().pop())+'</td></tr>'; }).join("")+'</table>';
+    if(!st.rows.length) return h+need();
+    const rows=st.rows.filter(r=>r.line.includes(st.cfg.line)), first={}; for(const l of log) if(!first[l.k]||l.d<first[l.k]) first[l.k]=l.d;
     const stat=(rs,k)=>{ const hit=rs.filter(r=>r.codes.includes(k)); return {n:rs.length, hit:hit.length, down:hit.reduce((a,r)=>a+r.down/r.codes.length,0), oee:avg(rs,"oee")}; };
-    return '<p>첫 실습일을 기준으로 같은 부동 유형의 교육 전 · 후를 비교합니다 (라인 : '+esc(st.cfg.line)+').</p><table class="oeeT"><tr><th>부동 유형</th><th>첫 실습일</th><th>실습</th><th>구분</th><th>기록 수</th><th>발생</th><th>기록당 부동시간</th><th>평균 OEE</th></tr>'+Object.keys(first).map(k=>{ const d=first[k], b=stat(rows.filter(r=>r.date<d),k), a=stat(rows.filter(r=>r.date>=d),k), cell=s=>s.n?'<td>'+s.n+'</td><td>'+s.hit+' 회</td><td>'+(s.down/s.n).toFixed(1)+' 분</td><td>'+f1(s.oee)+' %</td>':'<td colspan="4" class="oeeEmpty">데이터 없음</td>';
-      return '<tr><td rowspan="2">'+esc(codeOf(k).nm)+'</td><td rowspan="2">'+d+'</td><td rowspan="2">'+log.filter(l=>l.k===k).length+' 회</td><td>교육 전</td>'+cell(b)+'</tr><tr><td>교육 후</td>'+cell(a)+'</tr>'; }).join("")+'</table><p class="oeeNote">※ 교육 후 기록이 쌓여야 비교할 수 있습니다. 다른 요인(품목 · 설비 정비 등)의 영향은 구분하지 않습니다.</p><button data-act="clearLog">실습 기록 지우기</button>';
+    return h+'<h3>교육 전 · 후 부동 비교</h3><p>첫 교육일을 기준으로 같은 부동 유형의 교육 전 · 후를 비교합니다 (라인 : '+esc(st.cfg.line)+').</p><table class="oeeT"><tr><th>부동 유형</th><th>첫 교육일</th><th>구분</th><th>기록 수</th><th>발생</th><th>기록당 부동시간</th><th>평균 OEE</th></tr>'+Object.keys(first).map(k=>{ const d=first[k], b=stat(rows.filter(r=>r.date<d),k), a=stat(rows.filter(r=>r.date>=d),k), cell=s=>s.n?'<td>'+s.n+'</td><td>'+s.hit+' 회</td><td>'+(s.down/s.n).toFixed(1)+' 분</td><td>'+f1(s.oee)+' %</td>':'<td colspan="4" class="oeeEmpty">데이터 없음</td>';
+      return '<tr><td rowspan="2">'+esc(codeOf(k).nm)+'</td><td rowspan="2">'+d+'</td><td>교육 전</td>'+cell(b)+'</tr><tr><td>교육 후</td>'+cell(a)+'</tr>'; }).join("")+'</table><p class="oeeNote">※ 교육 후 기록이 쌓여야 비교할 수 있습니다. 다른 요인(품목 · 설비 정비 등)의 영향은 구분하지 않습니다.</p>'+(localLog().length?'<button data-act="clearLog">이 브라우저의 교육 기록 지우기</button>':'');
   }
-  const getLog=()=>{ try{ return JSON.parse(lsGet(LS.log)||"[]"); }catch(e){ return []; } };
-  function onChange(e){ const f=e.target.dataset&&e.target.dataset.f; if(f){ st[f]=e.target.value; render(); } if(e.target.id==="oeeKeep"){ lsSet(LS.keep,e.target.checked?"1":null); if(!e.target.checked) lsSet(LS.data,null); } }
+  function onChange(e){ const f=e.target.dataset&&e.target.dataset.f; if(f){ st[f]=e.target.value; render(); } }
   function onClick(e){ const b=e.target.closest("button"); if(!b) return; if(b.dataset.tab){ st.tab=b.dataset.tab; render(); return; } const a=b.dataset.act;
     if(a==="close") close();
     else if(a==="demo"){ setRows(demoData(),"예시 데이터",true); st.tab="trend"; render(); }
     else if(a==="paste"){ try{ setRows(parseText($o("#oeeText").value),"붙여넣기",false); st.tab="trend"; }catch(err){ st.msg="붙여넣기 실패 : "+err.message; } render(); }
-    else if(a==="fetch"){ const u=$o("#oeeUrl").value.trim(); if(!u){ st.msg="주소를 입력하세요."; render(); return; } lsSet(LS.url,u); st.msg="불러오는 중…"; render();
-      fetch(u,{redirect:"follow"}).then(r=>{ if(!r.ok) throw new Error("응답 "+r.status); return r.text(); }).then(t=>{ setRows(parseText(t),"주소에서 불러옴",false); st.tab="trend"; render(); }).catch(err=>{ st.msg="불러오기 실패 : "+err.message+" — 네트워크 · 권한을 확인하거나 붙여넣기를 사용하세요."; render(); }); }
-    else if(a==="start"){ const c=codeOf(b.dataset.k); st.practice={k:c.k, seen:false, at:Date.now()}; close(); try{ st.cfg.start(c); }catch(err){ console.error(err); } }
+    else if(a==="search"){ const w=($o("#oeeKw")&&$o("#oeeKw").value.trim())||"OEE"; st.busy="Drive 에서 '"+w+"' 시트 찾는 중…"; render();
+      driveSearch(w).then(f=>{ st.files=f; }).catch(err=>{ st.msg="Drive 검색 실패 — "+errMsg(err); }).then(()=>{ st.busy=""; render(); }); }
+    else if(a==="pick") sync({id:b.dataset.id, title:b.dataset.t});
+    else if(a==="resync"&&st.meta) sync({id:st.meta.fileId, title:st.meta.fileName});
+    else if(a==="inc"){ close(); st.cfg.openInc(); }
     else if(a==="clearLog"){ lsSet(LS.log,null); render(); } }
-  /* 실습 완료 감지 : cfg.active() 가 참이 되었다가 거짓으로 돌아오면 기록 */
-  function tick(){ const p=st.practice; if(!p||!st.cfg.active) return; const on=!!st.cfg.active(p.k); if(on) p.seen=true; else if(p.seen){ const log=getLog(); log.push({k:p.k,d:today()}); lsSet(LS.log,JSON.stringify(log)); st.practice=null; if(st.cfg.done) st.cfg.done(codeOf(p.k)); } else if(Date.now()-p.at>120000) st.practice=null; }
-  function init(cfg){ st.cfg=cfg; st.line=cfg.line; if(lsGet(LS.keep)==="1"){ try{ const d=JSON.parse(lsGet(LS.data)||"null"); if(d) setRows(d,"이 브라우저에 저장된 데이터",false); }catch(e){} } setInterval(tick,500); }
-  return {init,open,close,state:st,_parse:parseText,_norm:normalize,_byCode:byCode};
+  function init(cfg){ st.cfg=cfg; st.line=cfg.line; lamp(); capsInit(); }
+  return {init,open,close,state:st,codeStats,getLog,logPractice,_parse:parseText,_norm:normalize,_byCode:byCode,_fromTable:fromTable};
 })();
 
 /* ── v3/oee_pouch.js ── */
@@ -4768,15 +4926,114 @@ const OEE_POUCH_CODES=[
   {k:"ETC",  nm:"기타 · 미분류 (IDT 실습 없음)", inc:null, room:null, kw:[]}
 ].map(c=>Object.assign(c,{roomNm:c.room==="F"?"충전실 실습":c.room==="P"?"포장실 실습":""}));
 function oeeInit(){
-  OEEEDU.init({line:"파우치", title:"파우치 라인 · 부동 원인 기반 맞춤 교육", codes:OEE_POUCH_CODES, mount:$("#app"),
-    /* 실습 : 해당 실을 운전 중 상태로 만든 뒤 그 이상 상황을 발생시킴 (학습 모드 · 대응 절차는 기존 IDT 와 동일) */
-    start(c){ $("#splash").classList.add("hide"); startSession("guide",c.room); presetFillAuto(); presetPackAuto(); S.p.align=true; if(c.room==="F"){ S.f.run=true; S.f.started=true; } S.flags.oeePractice=c.k;
-      renderTiles(); drawHMI(); toast("OEE 연계 실습 : "+c.nm+" — 잠시 뒤 상황이 발생합니다.");
-      setTimeout(()=>{ if(S&&S.session&&S.session.active&&S.flags.oeePractice===c.k){ if(!lineRunning()){ if(c.room==="F") S.f.run=true; else S.p.ctRun=true; } launchIncident(c.inc); } },2500); },
-    active:()=>!!(S&&S.session&&S.session.active&&(S.activeTrouble||S.flags.casePending)),
-    done(c){ toast("실습 완료 : "+c.nm+" — [OEE 연계 교육 › ④ 교육 효과] 에 기록했습니다.","good"); }});
-  const sp=$("#coursePicker"); if(sp&&!$("#oeeOpen")){ sp.insertAdjacentHTML("afterend",'<div style="text-align:center"><button id="oeeOpen">📊 OEE 연계 교육 (부동 원인 분석 → 맞춤 실습)</button></div>'); $("#oeeOpen").onclick=()=>OEEEDU.open(); }
-  const hb=$("#rubricBtn"); if(hb&&!$("#oeeBtn")){ hb.insertAdjacentHTML("beforebegin",'<button class="gbtn" id="oeeBtn">📊 OEE 교육</button>'); $("#oeeBtn").onclick=()=>OEEEDU.open(); }
+  if(!$("#oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');
+  $("#oeeLamp").onclick=()=>OEEEDU.open();
+  OEEEDU.init({line:"파우치", title:"파우치 라인 · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_POUCH_CODES, mount:$("#app"),
+    openInc(){ $("#splash").classList.remove("hide"); $("#coursePicker").style.display="none"; $("#courseBack").style.display=""; eduShow("inc"); }});
+}
+
+/* ── v3/edu.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   메인 메뉴 (과정 → 기본 · 심화 · OEE) + 이상사례 대처 교육
+   · 기본 · 심화 = 라인 가동 절차만 (예약 이상상황 · 이상사례/알람 발생 버튼 없음)
+   · OEE = [OEE 관리 대시보드] + [이상사례 대처 교육]
+   · 이상사례 대처 교육 : 정상 운전 중 상황 1건을 발생시켜 정지 → 원인 판단 → 조치 → 해제 → 재가동을 학습 · 평가
+     우선순위 = 0.4 × 부동시간(정규화) + 0.3 × 발생 빈도(정규화) + 0.3 × 중요도 등급 (OEE 데이터가 없으면 등급만)
+   ═══════════════════════════════════════════════════════════════════ */
+/* 중요도 등급 (잠정 — 사용자 확인 필요) : 상 = 품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전 직접 영향, 중 = 품질 영향 가능 · 점검 필요, 하 = 설비 정지 위주 */
+const INC_GRADE={F1:"상",F2:"상",P1:"상",P2:"상",EMP:"상",VIS:"상",EMG:"상",DOOR:"상",
+  THI:"중",TSEN:"중",PRT:"중",PSV:"중",F3:"중",CNT:"중",FEED:"중",
+  FILM:"하",AIR:"하",MOL:"하",LIM:"하",ALN:"하"};
+const INC_GRADE_W={상:1,중:.6,하:.3};
+const INC_GRADE_WHY={상:"품질(함량 · 표시 · 첨부문서 · 검사) 또는 안전에 직접 영향",중:"품질 영향 가능 · 설비 점검 필요",하:"설비 정지 위주 · 품질 영향 낮음"};
+const isInc=()=>!!S&&(S.mode==="incLearn"||S.mode==="incExam");
+const EDU={view:"menu", k:null};
+
+/* 실별 대응 목록 + 우선순위 */
+function incKeys(room){ return room==="F"?Object.keys(INC).concat(["F1","F2","F3"]):P_ALARMS.concat(["P1","P2"]); }
+function incRank(room){
+  const st=(typeof OEEEDU!=="undefined"&&OEEEDU.codeStats)?OEEEDU.codeStats():null, has=!!(st&&Object.keys(st).length);
+  const L=incKeys(room).map(k=>{ const s=has&&st[k]||{down:0,n:0}; return {k, inc:incOf(k), g:INC_GRADE[k]||"중", down:s.down, n:s.n}; });
+  const mD=Math.max(1e-9,...L.map(o=>o.down)), mN=Math.max(1e-9,...L.map(o=>o.n));
+  for(const o of L) o.score=has?.4*(o.down/mD)+.3*(o.n/mN)+.3*INC_GRADE_W[o.g]:INC_GRADE_W[o.g];
+  L.sort((a,b)=>b.score-a.score||b.down-a.down||(CASES[b.k]?1:0)-(CASES[a.k]?1:0));
+  return {list:L, has};
+}
+function incDone(k){ const log=(typeof OEEEDU!=="undefined"&&OEEEDU.getLog)?OEEEDU.getLog():[]; return log.filter(l=>l.k===k); }
+
+/* ── 메인 화면 ── */
+function eduShow(v){ EDU.view=v; const go=$("#splash .go"), ip=$("#incPick");
+  go.style.display=v==="menu"?"grid":"none"; ip.style.display=v==="inc"?"block":"none"; if(v==="inc") renderIncPick(); }
+function renderIncPick(){
+  const r=PICK_ROOM, R=incRank(r);
+  $("#incPick").innerHTML='<h3>이상사례 대처 교육 — '+esc(ROOM_NM[r])+'</h3>'+
+    '<p class="ipNote">'+(R.has?'OEE 데이터의 부동시간(40%) · 발생 빈도(30%) · 중요도 등급(30%)으로 정렬했습니다.':'OEE 데이터가 없어 중요도 등급 순으로 정렬했습니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 발생 빈도가 반영됩니다.')+'</p>'+
+    '<div class="ipList">'+R.list.map((o,i)=>{ const d=incDone(o.k), best=d.filter(x=>x.mode==="incExam"&&x.score!=null).reduce((a,x)=>Math.max(a,x.score),-1);
+      return '<div class="ipRow"><span class="rk">'+(i+1)+'</span><span class="gd g'+({상:"H",중:"M",하:"L"}[o.g])+'" title="'+esc(INC_GRADE_WHY[o.g])+'">'+o.g+'</span>'+
+        '<b>'+esc(o.inc.nm)+'<s>'+(CASES[o.k]?"이상사례 (알람 없음)":"충전기 알람")+(R.has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
+        '<button class="s" data-inc="'+o.k+'" data-m="incLearn">학습</button><button class="e" data-inc="'+o.k+'" data-m="incExam">평가</button></div>'; }).join("")+'</div>'+
+    '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+' (잠정 기준)</p>'+
+    '<button id="incBack">← 기본 · 심화 · OEE 로</button>';
+  $$("#incPick [data-inc]").forEach(b=>b.onclick=()=>incStart(b.dataset.inc,b.dataset.m));
+  $("#incBack").onclick=()=>eduShow("menu");
+}
+
+/* ── 세션 ── */
+function stepsInc(){
+  const k=S.flags.incK||EDU.k, inc=incOf(k);
+  return [T_("inc","이상 상황 대응 — "+inc.nm,"라인이 정상 운전 중입니다. 곧 이상 상황이 발생합니다. 정지 → 원인 판단 → 조치 → 알람 해제 → 재가동 순서로 대응합니다.",
+    ()=>null, ()=>!!S.flags.incAt&&S.flags.resolvedAt!=null&&!S.activeTrouble&&!S.flags.casePending&&!S.ipc.open, {pts:100})];
+}
+function incStart(k,mode){
+  const inc=incOf(k), room=inc.room||PICK_ROOM;
+  $("#splash").classList.add("hide"); EDU.k=k;
+  startSession(mode,room);
+  S.flags.incK=k; S.flags.incAt=null; S.flags.incT0=performance.now(); STEPS_CACHE=null;
+  presetPackAuto(); presetFillAuto(); S.p.align=true;     /* 순서 주의 : presetPackAuto 가 호퍼(주성분)를 0 으로 둠 → presetFillAuto 로 다시 채움 */
+  S.f.run=true; S.f.started=true; if(room==="P"){ S.p.ctRun=true; S.p.sfRun=true; }
+  buildStatic(); renderTiles(); drawHMI(); renderCoach();
+  toast(ROOM_NM[room]+" · "+MODE_NM[mode]+" — "+inc.nm+" (잠시 뒤 발생)");
+}
+/* 시작 3 초 뒤 상황 발생 · 대응 시간 기록 */
+function eduTick(){
+  if(!isInc()||!S.session||!S.session.active) return;
+  const F=S.flags;
+  if(!F.incAt&&performance.now()-F.incT0>3000){
+    if(!lineRunning()){ if(S.room==="F") S.f.run=true; else S.p.ctRun=true; }
+    if(lineRunning()){ launchIncident(F.incK); F.incAt=performance.now(); F.incSim=tSim; }
+  }
+  if(F.incAt&&S.activeTrouble&&!F.incSeen) F.incSeen=performance.now();
+}
+function showIncResult(manual){
+  const F=S.flags, inc=incOf(F.incK), ex=S.mode==="incExam", sc=scoreNow(), pass=sc.score>=PASS, ok=F.resolvedAt!=null&&!manual;
+  const sec=F.incAt?(performance.now()-F.incAt)/1000:null;
+  const ded=S.deducts.map(d=>'<tr><td class="l">'+esc(d.why)+'</td><td>−'+d.pts+'</td></tr>').join("")||'<tr><td colspan="2">감점 없음</td></tr>';
+  if(F.incAt&&typeof OEEEDU!=="undefined"&&OEEEDU.logPractice) OEEEDU.logPractice({k:F.incK, mode:S.mode, ok, score:ex?sc.score:null, sec:sec==null?null:Math.round(sec), wrong:S.deducts.filter(d=>d.k==="wrong").length, hint:S.hintUsed||0});
+  $("#endBox").innerHTML='<h2>'+(ex?"📝 이상사례 대처 평가":"📘 이상사례 대처 학습")+' — '+esc(ROOM_NM[S.room]+" · "+inc.nm)+'</h2>'+
+    '<p>중요도 '+(INC_GRADE[F.incK]||"-")+' · '+(ok?"대응 완료":"중도 종료")+(sec!=null?' · 발생 → 재가동 '+mmss(sec):'')+' · 원인 판단 오답 '+S.deducts.filter(d=>d.k==="wrong").length+'회 · 힌트 '+(S.hintUsed||0)+'회</p>'+
+    (ex?'<div class="finalScore">'+(ok?sc.score:0)+'<small>점 · '+(ok&&pass?"합격":"불합격")+' (기준 '+PASS+'점)</small></div>':'')+
+    '<h3>올바른 판단</h3><p>'+esc(inc.a)+'</p>'+
+    '<h3>감점 내역</h3><table class="ht"><tr><th>항목</th><th>감점</th></tr>'+ded+'</table>'+
+    '<p class="oeeNote">결과는 [OEE › OEE 관리 대시보드 › ③ 교육 효과] 에 기록됩니다.</p>'+
+    '<div class="mbtn"><button class="pri" id="endAgain">다시 하기</button><button id="endList">이상사례 목록</button><button id="endHome">메인화면</button></div>';
+  $("#mEnd").classList.add("on");
+  $("#endAgain").onclick=()=>{ $("#mEnd").classList.remove("on"); incStart(F.incK,S.mode); };
+  $("#endList").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); $("#choose"+S.room).click(); eduShow("inc"); };
+  $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
+}
+/* 현장 조치 단계 : 조치 위치(빨간 !)가 화면 밖이면 3인칭 카메라를 그 위치로 옮김 (포장실에서 충전기 알람 · 2층 데크 다이얼 등) */
+function fixFocus(){
+  if(!S||!S.session||!S.session.active||!S.activeTrouble||cam.fp||!R3.gl){ EDU.fk=null; return; }
+  const h=recoveryStep(); if(!h||h.k!=="fix"||!h.f.fix){ EDU.fk=null; return; }
+  const key=S.activeTrouble.k+"|"+S.recovery.fixI; if(EDU.fk===key) return; EDU.fk=key;
+  const p=prj(...h.f.fix), W=R3.W, H=R3.H; if(p&&p.x>W*.12&&p.x<W*.88&&p.y>H*.12&&p.y<H*.88) return;
+  cam.view="work"; cam.txT=h.f.fix[0]; cam.tyT=h.f.fix[1]; cam.tzT=h.f.fix[2]; cam.distT=Math.min(Math.max(cam.dist,3),4.5);
+}
+function eduInit(){
+  $("#spOee").onclick=()=>{ if(typeof OEEEDU!=="undefined") OEEEDU.open(); };
+  $("#spInc").onclick=()=>eduShow("inc");
+  $("#courseBack").addEventListener("click",()=>{ $("#incPick").style.display="none"; });
+  setInterval(()=>{ eduTick(); fixFocus(); },200);
 }
 
 /* ── v3/boot.js ── */
@@ -4822,7 +5079,7 @@ function bindGfx(){
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit();
+  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);

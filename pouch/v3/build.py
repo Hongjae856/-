@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "edu.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -33,11 +33,24 @@ PATCH = {
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
     "ui.js": [
+        ('  $("#lineStrip").innerHTML=', '  if(0) $("#lineStrip").innerHTML=', 1),   # 메인화면 순서도 삭제
+        ('$("#courseBack").onclick=()=>{ ', '$("#courseBack").onclick=()=>{ $("#incPick").style.display="none"; ', 1),
+        ('function goHome(){ ', 'function goHome(){ $("#incPick").style.display="none"; $("#oeeWrap")&&$("#oeeWrap").classList.remove("on"); ', 1),
+        ('(st.watch?"라인을 감시하고 이상에 대응하세요.":"평가 진행 중 — 절차에 따라 수행하세요.")', '(isInc()?"라인을 감시하고 이상이 생기면 대응하세요.":st.watch?"라인을 감시하며 생산을 진행하세요.":"평가 진행 중 — 절차에 따라 수행하세요.")', 1),
+        ("""'<h3>알람 · 이상사례 대응</h3><table class="ht"><tr><th>구분</th><th>명칭</th><th>발생</th></tr>'+inc+'</table>'+""", "", 1),
+        ('(isEasy()?"기본모드":"심화모드")', '(isInc()?"이상사례 대처":isEasy()?"기본모드":"심화모드")', 1),
         ("const pan=d=>{ cam.txT=clamp(cam.txT+d*Math.max(700,cam.dist*0.25),-9500,12500); };", "const pan=d=>camPanLine(d);", 1),
         ("cam.dist>6000", "cam.dist>6", 1),
         ('const info="드래그 회전 · 휠 확대 · Shift/우클릭 드래그 이동";', 'const info="드래그 회전 · 휠 확대 · Shift/우클릭 드래그 이동 · 그래픽 "+GQ.label();', 1),
     ],
     "course.js": [
+        ('const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");', 'const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");', 1),
+        ('examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};', 'examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가"};', 1),
+        ('STEPS_CACHE=S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 'STEPS_CACHE=isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 1),
+        ("  if(isExam()) scheduleExamTrouble();\n", "", 1),   # 기본 · 심화 : 예약 이상상황 없음 (이상사례 대처 교육으로 분리)
+        ("정기 공정검사(IPC)와 알람에 대응합니다.", "정기 공정검사(IPC)를 수행합니다.", 1),
+        ("화면 오류를 감시하고 이상사례에 대응합니다.", "화면 오류를 감시합니다.", 1),
+        ("  showResult(manual);\n", "  (isInc()?showIncResult:showResult)(manual);\n", 1),
         ('FX(FIL.xc,1500,FIL.z1+40,"front"', 'FX(...ANC.sealFront,"front"', 1),
         ('FX(PANEL_F.x,1100,PANEL_F.z,"panel"', 'FX(...ANC.panelIn,"panel"', 1),
         ('FX(FIL.xc,700,FIL.z1,"front"', 'FX(...ANC.limit,"front"', 1),
@@ -75,6 +88,31 @@ def load(folder: str, name: str) -> str:
     return text
 
 
+BODY_PATCH = [   # 메인화면 : 순서도 삭제 · 과정 → 기본 · 심화 · OEE
+    ('      <div id="lineStrip"></div>\n', '', 1),
+    ('<button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>',
+     '<h4>기본</h4><button class="s" id="spEasy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button>', 1),
+    ('<button class="e" id="spExamEasy">기본모드 · 평가</button>', '<button class="e" id="spExamEasy">기본 · 평가</button>', 1),
+    ('<button class="s" id="spGuide">심화모드 · 학습<small>전체 절차 단계별 안내</small></button>',
+     '<h4>심화</h4><button class="s" id="spGuide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button>', 1),
+    ('<button class="e" id="spExam">심화모드 · 평가</button>\n        </div>\n      </div>',
+     '<button class="e" id="spExam">심화 · 평가</button>\n        </div>\n'
+     '        <div class="modeColumn oee">\n          <h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button>\n'
+     '          <button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button>\n        </div>\n      </div>\n'
+     '      <div id="incPick" style="display:none"></div>', 1),
+]
+
+
+def body() -> str:
+    text = (OLD / "body.html").read_text(encoding="utf-8")
+    for old, new, n in BODY_PATCH:
+        c = text.count(old)
+        if c != n:
+            sys.exit(f"body.html: '{old[:50]}' 가 {c} 번 (기대 {n})")
+        text = text.replace(old, new)
+    return text
+
+
 def build() -> str:
     shell = (OLD / "shell.html").read_text(encoding="utf-8")
     three = (V2 / "vendor" / "three.min.js").read_text(encoding="utf-8")
@@ -84,7 +122,7 @@ def build() -> str:
         sys.exit("script text must not contain </script")
     parts = {
         "/*__CSS__*/": (OLD / "style.css").read_text(encoding="utf-8") + "\n" + (SRC / "style3.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "oee" / "oee.css").read_text(encoding="utf-8"),
-        "<!--__BODY__-->": (OLD / "body.html").read_text(encoding="utf-8"),
+        "<!--__BODY__-->": body(),
     }
     for key, text in parts.items():
         if shell.count(key) != 1:

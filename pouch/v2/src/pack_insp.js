@@ -73,6 +73,7 @@ function buildInspection(g){
 function xrDraw(){
   const R=PK2.xr; if(!R) return; const now=performance.now(); if(now-R.tDraw<70) return; R.tDraw=now;
   const g=R.cv.getContext("2d"), W=512, H=480, F='"Malgun Gothic","Noto Sans KR",sans-serif';
+  if(R.pw===false){ if(R.drawnOff!=="pw"){ g.fillStyle="#050607"; g.fillRect(0,0,W,H); R.tex.needsUpdate=true; R.drawnOff="pw"; } return; } R.drawnOff=null;
   if(!R.on){ g.fillStyle="#0b0e11"; g.fillRect(0,0,W,H); g.fillStyle="#3a4148"; g.font="bold 30px "+F; g.textAlign="center"; g.fillText("X-RAY OFF",W/2,H/2); g.font="16px "+F; g.fillText("ISHIDA IX-EN",W/2,H/2+34); R.tex.needsUpdate=true; return; }
   g.textAlign="left"; g.fillStyle="#1d2b3a"; g.fillRect(0,0,W,44); g.fillStyle="#fff"; g.font="bold 20px "+F; g.fillText("ISHIDA  IX-EN",14,29); g.font="15px "+F; g.fillStyle="#b9d2ea"; g.fillText("예약 002  판콜에이치건조시럽",190,28);
   g.fillStyle="#e23b2e"; g.beginPath(); g.arc(W-70,22,8,0,7); g.fill(); g.fillStyle="#fff"; g.font="bold 13px "+F; g.fillText("X-RAY",W-56,27);
