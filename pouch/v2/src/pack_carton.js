@@ -65,7 +65,7 @@ function buildCartoner(g){
   /* 하부 투명 배출함 2 · 핀셋 표지 */
   for(const [z,t] of [[zs-.75,"설명서 삽입 불량"],[zm+.25,"케이스 성형 불량"]]){ bx(g,X-.05,X+.25,.17,.45,z-.14,z+.14,M.acryl); bx(g,X-.05,X+.25,.16,.17,z-.14,z+.14,M.ss); PB.sign(g,.18,.06,[["포장실","#111",40],[t,"#111",40]],{w:384,h:130,border:"#333"},[X+.252,.36,z],Math.PI/2); }
   PB.sign(g,.17,.07,[["불량 조치 시","#c00",50],["핀셋 사용","#c00",50]],{w:384,h:150,border:"#c00"},[X+.302,.6,zs-.95],Math.PI/2);
-  PB.beacon(g,x0+.1,my,zs-.25);
+  PB.beacon(g,x0+.1,my,zs-.25,"ct");
   /* 북쪽 끝 : 곡면 핫멜트 건 하우징 · 파란 꼬인 호스 · LS 판넬 · 파란 핫멜트 유닛(뒤) · 노란 코일 에어호스 · 출구 슈트 */
   { const hz=zl(4.43); bx(g,cx+.1,cx+.36,.55,.86,hz-.16,hz+.16,M.ssMir); const c=new T3.Mesh(new T3.CylinderGeometry(.13,.13,.32,32,1,false,0,Math.PI),M.ssMir); c.rotation.set(Math.PI/2,0,Math.PI/2); c.position.set(cx+.23,.86,hz); c.rotation.set(0,0,0); c.rotation.x=Math.PI/2; c.rotation.z=Math.PI/2; add(g,c);
     bx(g,cx+.36,cx+.362,.6,.82,hz-.12,hz+.06,M.ss); bx(g,cx+.362,cx+.364,.64,.7,hz+.02,hz+.05,M.dark); PB.warn(g,cx+.364,.78,hz-.06,Math.PI/2);

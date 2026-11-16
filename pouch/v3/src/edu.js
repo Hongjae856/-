@@ -53,7 +53,7 @@ function incStart(k,mode){
   $("#splash").classList.add("hide"); EDU.k=k;
   startSession(mode,room);
   S.flags.incK=k; S.flags.incAt=null; S.flags.incT0=performance.now(); STEPS_CACHE=null;
-  presetPackAuto(); presetFillAuto(); S.p.align=true;     /* 순서 주의 : presetPackAuto 가 호퍼(주성분)를 0 으로 둠 → presetFillAuto 로 다시 채움 */
+  presetPackAuto(); presetFillAuto(); S.p.align=true; if(typeof CV!=="undefined"&&CV.full) CV.full.fill(1); if(typeof PA!=="undefined") PA.live=false;   /* 이상사례 : 정상 운전 중인 라인(제품 흐름 있음)에서 시작 */     /* 순서 주의 : presetPackAuto 가 호퍼(주성분)를 0 으로 둠 → presetFillAuto 로 다시 채움 */
   S.f.run=true; S.f.started=true; if(room==="P"){ S.p.ctRun=true; S.p.sfRun=true; }
   buildStatic(); renderTiles(); drawHMI(); renderCoach();
   toast(ROOM_NM[room]+" · "+MODE_NM[mode]+" — "+inc.nm+" (잠시 뒤 발생)");

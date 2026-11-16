@@ -162,22 +162,23 @@ function manualPrep(t,Ltot){ MP.t=t; MP.t0=(Ltot-.282)/.3+2.25; }
 function stepManual(){
   if(!MP.cases) return; const X=CVX, Y=PKZ.y, Yt=Y-.1, t=MP.t, t0=MP.t0, PI=Math.PI, d=MP.box;
   const dt=MP.tp==null?0:Math.max(0,Math.min(.1,t-MP.tp)); MP.tp=t;
+  const B0=PA.B0==null?-Infinity:PA.B0, M0=B0===-Infinity?-Infinity:B0===Infinity?Infinity:Math.ceil((B0-7)/8), N0=M0===-Infinity?-Infinity:M0===Infinity?Infinity:Math.ceil((M0-3)/4);   /* 실제 제품이 든 첫 대케이스 · 대박스 (11/16) */
   const Tm=m=>t0+6*m, Arr=m=>Tm(m)+8.3+(MP.zB-MP.zK)/MP.vB+.6+(MP.zG0-MP.zE)/MP.vG, Bn=n=>Arr(4*n)+8.5, pkT=m=>{ const n=Math.floor(m/4); return Bn(n)+MP.pk[m-4*n]; };
   /* 작업자 1 · 2 */
-  for(const w of [0,1]){ const m=w+2*Math.floor((t-t0-6*w+3.5)/12), ta=t-Tm(m), sc=packScene(w?-1:1,ta); poseHuman(MP.w[w],Object.assign(sc.pose,{dt})); }
+  for(const w of [0,1]){ const m=w+2*Math.floor((t-t0-6*w+3.5)/12), ta=m<M0?-9:t-Tm(m), sc=packScene(w?-1:1,ta);   /* 제품이 오기 전 : 준비 자세로 대기 */ poseHuman(MP.w[w],Object.assign(sc.pose,{dt})); }
   /* 작업자 3 */
-  const n3=Math.floor((t-Bn(0))/24), c3=t-Bn(n3), bs=boxScene(c3,n3); poseHuman(MP.w[2],Object.assign(bs.pose,{dt}));
+  const n3=Math.floor((t-Bn(0))/24), c3=n3<N0?0:t-Bn(n3), bs=boxScene(c3,n3); poseHuman(MP.w[2],Object.assign(bs.pose,{dt}));
   if(bs.bxA) MP.boxes[mod(n3,2)].set({p:bs.bxA.p,yaw:bs.bxA.yaw,b1:bs.b1,b2:bs.b2,tape:bs.tape}); else MP.boxes[mod(n3,2)].G.visible=false;
   MP.boxes[mod(n3+1,2)].set({p:bs.bxB.p,yaw:bs.bxB.yaw,b1:MP.open,b2:MP.open,tape:0});
   for(let k=0;k<3;k++){ const on=k<3-bs.sIdx; if(on) MP.supB[k].set({p:[MP.sup[0],MP.sup[1]+k*d.y,MP.sup[2]],yaw:PI/2,b1:MP.open,b2:MP.open,tape:0}); else MP.supB[k].G.visible=false; }
   { const g=MP.gun; g.position.fromArray(bs.gun); g.rotation.set(bs.gunUse?-.5:0,0,bs.gunUse?0:PI/2); if(!bs.gunUse) g.position.y=Yt+.03; }
   /* 파렛트 위 박스 */
-  { const cnt=mod(n3,24)+(bs.placed?1:0), M4=new T3.Matrix4(), q=new T3.Quaternion(), e=new T3.Euler(), v=new T3.Vector3(), one=new T3.Vector3(1,1,1);
+  { const cnt=N0===-Infinity?mod(n3,24)+(bs.placed?1:0):n3<N0?0:mod(n3-N0,24)+(bs.placed?1:0), M4=new T3.Matrix4(), q=new T3.Quaternion(), e=new T3.Euler(), v=new T3.Vector3(), one=new T3.Vector3(1,1,1);
     for(let i=0;i<cnt;i++){ const s=slotOf(i); q.setFromEuler(e.set(0,0,0)); M4.compose(v.set(s.p[0],s.p[1]+d.y/2,s.p[2]),q,one); MP.palB.setMatrixAt(i,M4); M4.compose(v.set(s.p[0],s.p[1]+d.y-.022,s.p[2]),q,one); MP.palT.setMatrixAt(i,M4); }
     for(const m of [MP.palB,MP.palT]){ m.count=cnt; m.instanceMatrix.needsUpdate=true; } }
   /* 대케이스 */
   let ci=0; const mTop=Math.floor((t-t0+2.9)/6);
-  for(let m=mTop;m>mTop-14&&ci<MP.cases.length;m--){ const ta=t-Tm(m), sd=mod(m,2)?-1:1, yaw=sd>0?PI:0, n=Math.floor(m/4), j=m-4*n; let o=null;
+  for(let m=mTop;m>mTop-14&&ci<MP.cases.length;m--){ if(m<M0) break; const ta=t-Tm(m), sd=mod(m,2)?-1:1, yaw=sd>0?PI:0, n=Math.floor(m/4), j=m-4*n; let o=null;
     if(ta<8.3){ const sc=packScene(sd,ta); if(sc.cs.vis) o=sc.cs; }
     else { const tb=ta-8.3, z=MP.zB-MP.vB*tb, pk=pkT(m);
       if(z>MP.zK) o={p:[X,Y,z],yaw,stk:1,lab:z<-11.4};

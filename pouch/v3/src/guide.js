@@ -12,7 +12,7 @@ function guideTarget(){
     if(s==="#fixBtn"){ const h=recoveryStep(); return h&&h.f&&h.f.fix; }
     if(s==="#demoAct"){ const st=curStep(); return st&&st.pos; }
     if(s==="#lcCheck"){ const st=curStep(); if(!st) return null; let job=null; if(st.lc!==undefined) job=CLEAR[S.room][st.lc].job; else if(st.chk){ const c=st.chk(); job=c&&c.job; } return job&&JOBS[job]&&JOBS[job].reach; }
-    if(s==="#ipcTake"||s==="#ipcNext"||s==="#ipcDone") return ANC.ipc;
+    if(s==="#ipcTake") return ANC.ipcTake; if(s==="#ipcNext"||s==="#ipcDone") return ANC.ipc;
     const id=(s.match(/^#([A-Za-z0-9]+)$/)||[])[1];
     if(id==="mRed"||id==="mPlain"){ if(S.f.rollCarry) return [PROP.cartUnw[0],.9,PROP.cartUnw[1]]; return [PROP.cartHome[0],.9,PROP.cartHome[1]]; }
     if(id==="tDoc") return S.room==="F"?ANC.docF:ANC.docP;

@@ -4,7 +4,8 @@
    → ④ 칸 바닥 게이트가 열려 흰 버킷 칸으로 낙하 → ⑤ 설명서가 묶음 위에 놓임 → ⑥ 카톤 매거진에서 흡착 암이 한 장씩 끌어내려 펼쳐 같은 칸 옆 체인에 세움
    → ⑦ 밀대가 묶음 · 설명서를 카톤 속으로 밀어 넣음 → ⑧ 작은 날개 접기 → 아래 큰 날개 올림 → 핫멜트 → 위 큰 날개 내림 → 압착
    → ⑨ 프린터 · X-ray · 중량선별기 벨트 → ⑩ 끝에 8개 모이면 작업자가 가져감 ═══ */
-const PA={};
+const PA={live:false};   /* live : 교육 세션 — 실제로 넘어온 제품(CV.j0 이후)만 표시 (11/16) */
+function packJ0(){ if(!PA.live) return -Infinity; return CV.j0==null?Infinity:CV.j0; }
 function initPackAnim(S){
   const P=PK2.P, C=PK2.carton, Pf=FM.P, T=PK2.tc, o=new T3.Object3D(); PA.o=o;
   PA.Lt=T.z0-T.z1; PA.La=Math.PI*T.r; PA.Lf=.08; PA.loopT=2*PA.Lt+2*PA.La;
@@ -38,6 +39,7 @@ const PZ={ lfL:2.06, pk0:2.5, pk1:2.8, ps0:3.05, ps1:3.75, rt1:4.02, m0:3.95, m1
 function stepPackAnim(){
   if(!PA.stk) return;
   const P=PK2.P, Pf=FM.P, C=PK2.carton, X=CVX, xb=PK2.xb, cx=PK2.cx, yC=PK2.yC, o=PA.o, ez=x=>x<=0?0:x>=1?1:x*x*(3-2*x), cl=x=>x<0?0:x>1?1:x, lerp=(a,b,t)=>a+(b-a)*t;
+  const J0=packJ0(), B0=J0===-Infinity?-Infinity:J0===Infinity?Infinity:Math.ceil((J0-5)/6); PA.B0=B0;
   const ss=(AN.u()-CV.L)/Pf, sb=ss/6+PA.c0, zl=l=>PK2.bz0-l, T=PK2.tc, bl0=b=>(sb-b)*P;
   const put=(m,i,x,y,z,rx,sc)=>{ o.position.set(x,y,z); o.rotation.set(rx||0,0,0); o.scale.setScalar(sc===undefined?1:sc); o.updateMatrix(); m.setMatrixAt(i,o.matrix); };
   /* ── 버킷 칸막이 (위 · 아래 · 양 끝 원호) ── */
@@ -57,7 +59,7 @@ function stepPackAnim(){
   /* ── 스틱 : 상단 체인 위 줄 → 스프로킷 → 아래 줄(뒤집힘) → 투입구에서 정렬기 위단으로 낙하 → 6포 모이면 가운데단 → 아래단 → 버킷 ── */
   const comp=b=>6*b+5+PA.D(b&1), tY=PK2.tiers, hs=FM.stickW/2+.001;
   let k=0; const jMax=Math.floor(ss), bMin=Math.floor(sb-PZ.t1/P)-1, jMin=6*bMin;
-  for(let j=jMax;j>=jMin&&k<360;j--){ const b=Math.floor(j/6), i=j-6*b, d=(ss-j)*Pf, c=b&1, zc=PK2.ch[c], sl=(i-2.5)*.0125, ds=drop(b), cp=comp(b);
+  for(let j=jMax;j>=jMin&&k<360;j--){ if(j<J0) break; const b=Math.floor(j/6), i=j-6*b, d=(ss-j)*Pf, c=b&1, zc=PK2.ch[c], sl=(i-2.5)*.0125, ds=drop(b), cp=comp(b);
     let x=xb,y,z,rx;
     if(ss<ds){ const sD=CV.sDrop(zc)-CV.L, hh=CV.hb+.0052;
       if(d<sD){ const q=CV.path(CV.L+d); y=q.y+Math.cos(q.a)*hh; z=q.z+Math.sin(q.a)*hh; rx=q.a; }
@@ -75,8 +77,8 @@ function stepPackAnim(){
       for(let ti=0;ti<3;ti++){ const t=ss-ev[ti]; if(t>-.3&&t<1.8) op[ti]=Math.max(op[ti],ez((t+.3)/.4)*(1-ez((t-1.1)/.7))); } }
     for(let ti=0;ti<3;ti++) for(const gt of PK2.gates[c][ti]) gt.G.rotation.x=gt.s*op[ti]*1.3; }
   /* ── 설명서 · 밀대 ── */
-  { let n=0, pn=0; for(let b=Math.floor(sb-PZ.t1/P);b<=Math.floor(sb-PZ.lfL/P)+1;b++){ const l=bl(b); if(l<PZ.lfL||l>=PZ.t1) continue; const q=cl((l-PZ.lfL)/.1), p=pushX(l), zt=zl(l), yt=.95+FM.stickW+.004;
-      put(PA.lfl,n++,xb+p*(cx-xb),lerp(1.09,yt-p*.0055,ez(q)),lerp(zl(PZ.lfL),zt,ez(q)),0);
+  { let n=0, pn=0; for(let b=Math.floor(sb-PZ.t1/P);b<=Math.floor(sb-PZ.lfL/P)+1;b++){ const l=bl(b); if(l<PZ.lfL||l>=PZ.t1) continue; const real=b>=B0; const q=cl((l-PZ.lfL)/.1), p=pushX(l), zt=zl(l), yt=.95+FM.stickW+.004;
+      if(real) put(PA.lfl,n++,xb+p*(cx-xb),lerp(1.09,yt-p*.0055,ez(q)),lerp(zl(PZ.lfL),zt,ez(q)),0);
       if(l>2.9&&l<PZ.rt1+.05&&pn<16){ const app=ez((l-2.92)/.13), rt=ez((l-(PZ.ps1+.03))/(PZ.rt1-PZ.ps1-.03)), xh=lerp(lerp(xb-.125,xb-.062,app)+p*(cx-xb),xb-.125,rt);
         put(PA.push,pn,xh,.97,zt); o.position.set(X-.2,.965,zt); o.rotation.set(0,0,0); o.scale.set(Math.max(.01,xh-(X-.2)),1,1); o.updateMatrix(); PA.rod.setMatrixAt(pn,o.matrix); pn++; } }
     PA.lfl.count=n; PA.push.count=pn; PA.rod.count=pn; PA.lfl.instanceMatrix.needsUpdate=true; PA.push.instanceMatrix.needsUpdate=true; PA.rod.instanceMatrix.needsUpdate=true; }
@@ -98,9 +100,10 @@ function stepPackAnim(){
     else { const e=Math.min(eOf(b),stopOf(b));
       fm=fb=ft=Math.PI/2; prt=true;
       if(e<L1){ const t=e/L1, u=1-t; px=u*u*cx+2*u*t*cx+t*t*X; pz=u*u*zl(PZ.cEnd)+2*u*t*(zl(PZ.cEnd)-.22)+t*t*zT; py=lerp(yC,PKZ.y,ez(t))+C.H/2; }
-      else { px=X; pz=zT-(e-L1); py=PKZ.y+C.H/2; } prt=pz<-6.05;
+      else { px=X; pz=zT-(e-L1); py=PKZ.y+C.H/2; } prt=pz<-6.05; if(b<B0) continue;
       if(pz<-6.9&&pz>-7.5){ xl.push([b,pz]); if(pz<-7.2&&(PK2.xr.last==null||b>PK2.xr.last)){ PK2.xr.last=b; PK2.xr.n++; } }
       const mp=manualCarton(b,[px,py,pz]); if(mp==='hide') continue; [px,py,pz]=mp; rz=mp[3]||0; }
+    if(b<B0) continue;
     Sh.set(1,0,0,0, 0,Math.sin(th),0,0, 0,Math.cos(th),1,0, 0,0,0,1);
     PA.e.set(rx,0,rz); PA.q.setFromEuler(PA.e); M4.compose(PA.v.set(px,py,pz),PA.q,PA.one); Mc.multiplyMatrices(M4,Sh);
     PA.cb.setMatrixAt(nc,Mc);
@@ -114,6 +117,6 @@ function stepPackAnim(){
   if(PK2.pickArm&&arm!==null) PK2.pickArm.rotation.x=arm;
   stepManual(); PK2.xr.list=xl; xrDraw();
   /* ── X-ray 커튼 ── */
-  if(PA.curt.length){ const zs=[]; for(let b=Math.floor(sb-7.4/P);b<=Math.floor(sb-PZ.cEnd/P);b++){ const e=Math.min(eOf(b),stopOf(b)); if(e>L1) zs.push(zT-(e-L1)); }
+  if(PA.curt.length){ const zs=[]; for(let b=Math.max(Math.floor(sb-7.4/P),B0);b<=Math.floor(sb-PZ.cEnd/P);b++){ const e=Math.min(eOf(b),stopOf(b)); if(e>L1) zs.push(zT-(e-L1)); }
     for(const c of PA.curt){ let a=0; for(const z of zs){ const dz=z-c.z; if(dz>-.06&&dz<.12) a=Math.max(a,(1-Math.abs(dz-.03)/.09)*(Math.abs(c.x-X)<.07?1.1:.35)); } c.G.rotation.x=Math.max(0,a); } }
 }

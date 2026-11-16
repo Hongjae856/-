@@ -1,6 +1,9 @@
 /* ═══ 포장실 공통 도구 · 스틱공급장치 (Hoonga) — 현장 사진 · 영상 판독 (DRAWING.md 7-7 · 7-8 · 9-4)
    라인 중심 x=CVX, 흐름 남 → 북(−z), 설비 정면 = 동쪽(+x, 작업자 통로). 판넬은 장비 동남쪽 회전 암 ═══ */
-const PB={ beacon(g,x,y,z){ rod(g,[x,y,z],[x,y+.32,z],.011,M.ssMir,10); for(const [k,m] of [[0,M.green],[1,M.orange],[2,M.red]]) rod(g,[x,y+.32+k*.055,z],[x,y+.372+k*.055,z],.028,m,18); rod(g,[x,y+.485,z],[x,y+.5,z],.03,M.ssD,18); },
+/* 경광등 : 설비별 램프 재질 (녹 = 가동 · 주황 = 전원 ON 정지 · 적 = 알람) — 상태 반영은 v3 lamp.js (11/16) */
+const LAMPS=[], LAMP_C=[0x1fd060,0xff8c1a,0xff2a1a];
+function lampMats(k){ const ms=LAMP_C.map(c=>{ const d=new T3.Color(c).multiplyScalar(.32); return new T3.MeshStandardMaterial({color:d,roughness:.35,emissive:c,emissiveIntensity:0}); }); LAMPS.push({k,m:ms,s:null}); return ms; }
+const PB={ beacon(g,x,y,z,mk){ const LM=lampMats(mk||"line"); rod(g,[x,y,z],[x,y+.32,z],.011,M.ssMir,10); for(const [k,m] of [[0,LM[0]],[1,LM[1]],[2,LM[2]]]) rod(g,[x,y+.32+k*.055,z],[x,y+.372+k*.055,z],.028,m,18); rod(g,[x,y+.485,z],[x,y+.5,z],.03,M.ssD,18); },
   legs(g,x0,x1,z0,z1,h,mat){ for(const x of [x0,x1]) for(const z of [z0,z1]){ bx(g,x-.022,x+.022,.05,h,z-.022,z+.022,mat||M.ss); rod(g,[x,.012,z],[x,.05,z],.008,M.ssMir,8); rod(g,[x,0,z],[x,.012,z],.03,M.ssD,16); } },
   sign(g,w,h,lines,o,pos,ry){ return plate(g,w,h,labelTex(lines,o),pos,ry); },
   warn(g,x,y,z,ry){ return plate(g,.05,.05,labelTex([["⚠","#111",150]],{w:128,h:128,bg:"#f5d400"}),[x,y,z],ry); },
@@ -57,7 +60,7 @@ function buildStickFeeder(g){
   PB.sign(g,.12,.16,[["DANGER","#fff",50],["재해발생","#111",44],["위험장소","#111",44]],{w:256,h:340,bg:"#fff",border:"#c00"},[x1+.006,1.66,zm+.42],Math.PI/2);
   for(const [y,z] of [[1.66,zm+.6],[1.12,z0+.6],[.6,zm-.3],[.6,zm+.3]]) PB.warn(g,x1+.006,y,z,Math.PI/2);
   decal(g,.36,.07,textTex("Hoonga","#2a2d30",512,100,80),[x1+.006,1.74,zm-.35],Math.PI/2);
-  PB.beacon(g,x0+.1,Hf,z1-.1);
+  PB.beacon(g,x0+.1,Hf,z1-.1,"sf");
   /* 판넬 : 동남쪽 회전 암 (PanelView · START 흰 · STOP 검 · RESET 파랑 · 비상정지) */
   bx(g,x1+.0,x1+.3,1.62,1.66,z1-.04,z1+.0,M.alu); rod(g,[x1+.28,1.66,z1-.02],[x1+.28,1.5,z1-.02],.02,M.alu,12);
   PB.panel(g,x1+.33,1.3,z1+.12,0,"Hoonga");

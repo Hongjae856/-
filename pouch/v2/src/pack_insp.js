@@ -18,7 +18,7 @@ function buildInspection(g){
     bx(g,X+.26,X+.5,.12,.9,z0-.1,z0+.2,M.acryl); bx(g,X+.26,X+.5,.11,.12,z0-.1,z0+.2,M.ss); PB.sign(g,.18,.07,[["포장실","#111",40],["인쇄 불량","#111",44]],{w:384,h:130,border:"#333"},[X+.502,.62,z0+.05],Math.PI/2);
     rod(g,[X+.5,.85,z0+.05],[X+.52,.85,z0+.05],.012,M.brass,10);
     { const pts=[], hx=X-.2, hz=z1+.1; for(let i=0;i<=100;i++){ const t=i/100, a=t*Math.PI*2*12; pts.push([hx+Math.cos(a)*.028,1.2-t*.6,hz+Math.sin(a)*.028]); } tube(g,pts,.005,M.yellow); }
-    PB.beacon(g,X-.55,1.6,zc+.2); }
+    PB.beacon(g,X-.55,1.6,zc+.2,"pr"); }
   /* ── X-ray (Ishida IX) : 큰 스테인리스 함(벨트가 터널로 통과) · 위 검은 오각 패널 + 터치화면 · IX · X-RAY ON · 아래 띠(키 스위치 · 비상정지) ·
        아래 함 방사선 표지 · 파란 차폐 커튼 · U자 원형관 다리 · 경광등 ── */
   { const [z0,z1]=PKZ.xr, zc=(z0+z1)/2, xf=X+.36; belt(z0-.18,z1+.18,.2,M.dark);
@@ -33,7 +33,7 @@ function buildInspection(g){
     PB.sign(g,.2,.15,[["방사선기기","#111",44],["안전관리 수칙","#111",44],["☢","#c00",110]],{w:384,h:300,bg:"#f6d51c"},[xf+.002,.76,zc+.12],Math.PI/2);
     for(const [y,z] of [[.78,zc-.25],[Y+.12,z0+.08],[1.65,z1-.06]]) PB.warn(g,xf+.002,y,z,Math.PI/2);
     for(const z of [z0+.08,z1-.08]){ const u=new T3.Mesh(new T3.TorusGeometry(.38,.025,10,24,Math.PI),M.ssMir); u.rotation.z=Math.PI; u.position.set(X-.03,.6,z); add(g,u); for(const dx of [-.38,.38]){ rod(g,[X-.03+dx,.04,z],[X-.03+dx,.6,z],.025,M.ssMir,14); rod(g,[X-.03+dx,0,z],[X-.03+dx,.04,z],.035,M.ssD,16); } }
-    PB.beacon(g,X-.3,1.9,zc); }
+    PB.beacon(g,X-.3,1.9,zc,"xr"); }
   /* ── 중량선별기 (Anritsu SSV) : 기둥형 표시부(서쪽 뒤) · 흰 계량 벨트 · 아크릴 커버 · 이어서 배출함 2 ── */
   { const [z0,z1]=PKZ.cw, zc=(z0+z1)/2; belt(z0,z1,.16,M.white); bx(g,X-.12,X+.12,Y+.006,Y+.24,z0+.08,z1-.02,M.acryl); bx(g,X-.12,X+.12,Y+.24,Y+.246,z0+.08,z1-.02,M.acryl);
     PB.legs(g,X-.12,X+.12,z0+.06,z1-.06,Y-.07);
@@ -56,7 +56,7 @@ function buildInspection(g){
     for(const z of [z1-.75,z1-1.3,z1-1.85]){ rod(g,[X-w/2-.04,Y+.13,z],[X-.16,Y+.13,z],.006,M.ssMir,8); rod(g,[X-.16,Y+.03,z],[X-.16,Y+.13,z],.014,M.orange,10);   /* 케이스 측면 가이드 · 감지 (케이스 통과 폭 밖) */ }
     bx(g,X-w/2-.25,X-w/2-.05,Y-.02,Y+.16,z1-1.15,z1-.8,M.dark); bx(g,X-w/2-.25,X-w/2-.05,Y+.16,Y+.18,z1-1.15,z1-.8,M.ss); PB.sign(g,.14,.03,[["DOMINO","#fff",60]],{w:320,h:70,bg:"#9aa0a6"},[X-w/2-.049,Y+.1,z1-.97],Math.PI/2);
     { const zp=z1-1.5; bx(g,X-w/2-.14,X-w/2-.1,.07,1.55,zp-.02,zp+.02,M.alu); rod(g,[X-w/2-.12,1.4,zp],[X+.0,1.4,zp],.015,M.alu,10); bx(g,X-.02,X+.02,1.2,1.42,zp-.12,zp+.12,M.dark); bx(g,X+.02,X+.022,1.23,1.4,zp-.09,zp+.09,M.scr);
-      PB.beacon(g,X-w/2-.12,1.55,zp); } }
+      PB.beacon(g,X-w/2-.12,1.55,zp,"line"); } }
   /* ── 라인 끝 작업대 : 긴 스테인리스 상판 · 가운데 녹색 벨트 · 2단 다리 ── */
   { const [z0,z1]=PKZ.tb; bx(g,X-.5,X+.5,Y-.14,Y-.1,z0,z1,M.ssMir); bx(g,X-.12,X+.12,Y-.1,Y-.094,MP.zGE,z1,M.green); bx(g,X-.13,X+.13,Y-.1,Y-.06,MP.zGE-.012,MP.zGE,M.ss);   /* 녹색 벨트 끝 멈춤턱 · 그 뒤 상판 = 대박스 자리 */ bx(g,X-.15,X+.15,Y-.2,Y-.14,z0,z1,M.ss);
     PB.legs(g,X-.46,X+.46,z0+.08,z1-.08,Y-.14); for(const z of [z0+.08,z1-.08]) bx(g,X-.46,X+.46,.22,.26,z-.02,z+.02,M.ss); for(const x of [X-.46,X+.46]) bx(g,x-.02,x+.02,.22,.26,z0+.08,z1-.08,M.ss); }

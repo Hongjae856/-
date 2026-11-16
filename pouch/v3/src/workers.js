@@ -52,6 +52,7 @@ function legRoute(w,L){ if(L.path) return L.path.map(q=>[q[0],q[1],0]).concat([[
 const curLeg=J=>J.legs?J.legs[J.li]:J.j;
 const WK_SPD=1.6;                               /* 보행 속도 m/s */
 function wkTick(dt){
+  if(typeof helpTick==="function") helpTick(dt);
   if(CAMRET){ CAMRET.t-=dt; if(CAMRET.t<=0){ if(cam.view==="work"&&!WK.some(w=>w.job&&w.job.hasView)) camSet(CAMRET.view); CAMRET=null; } }
   for(const w of WK){
     w.walking=false;
@@ -88,7 +89,7 @@ function wkTick(dt){
 }
 function reachAmt(J){ const D=curLeg(J).dur, t=J.t-.15, e=D-.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(D-J.t)/.45):1); }
 /* ── 3D 표현 : 방진복 작업자 (human.js makeHuman · poseHuman) · 들고 가는 물건 ── */
-function wkCarryMesh(kind){
+let wkCarryMesh=function(kind){
   const G=new T3.Group();
   if(kind==="sts"){ const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.y=.21; G.add(m); }
   else if(kind==="roll"||kind==="rollP"){ const m=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,32),kind==="rollP"?M.foilP:M.foil); m.rotation.z=Math.PI/2; G.add(m); }
@@ -98,7 +99,7 @@ function wkCarryMesh(kind){
   else if(kind==="leaf"){ const m=new T3.Mesh(new T3.BoxGeometry(.2,.06,.14),M.white); G.add(m); }
   else { const m=new T3.Mesh(new T3.BoxGeometry(.1,.14,.06),M.dark); G.add(m); }
   return G;
-}
+};
 function wkDraw(dt){
   if(!V3) return;
   for(const w of WK){
@@ -118,7 +119,7 @@ function wkDraw(dt){
     else if(work&&J.t>.12&&J.t<LJ.dur-.35){ P.R=LJ.reach.slice(); P.gR=.3; P.nR="down"; if(LJ.dur>2.2){ P.L=[LJ.reach[0]+lf[0]*.22,LJ.reach[1],LJ.reach[2]+lf[1]*.22]; P.gL=.3; P.nL="down"; } }
     poseHuman(H,P);
   }
-  propsDraw();
+  propsDraw(); if(typeof helpDraw==="function") helpDraw(dt);
 }
 
 /* ═══ 대차 · 드럼리프터 · 예비 은박 롤 · STS 용기 — 평소에는 교육 상태(S.f)에 맞춰 놓고, 작업자가 끌 때는 작업자 앞에서 따라옴 (11/16 사용자 지시) ═══
@@ -176,10 +177,88 @@ function propsReturn(){
   const was=S.flags.cartAt==="unw"||S.flags.liftAt==="use"; S.flags.cartAt="home"; S.flags.liftAt="home";
   toast(was?"은박 교체 대차 · 드럼리프터 — 보관 자리로 원위치 (자동 복귀)":"이미 보관 자리에 있습니다.",was?"good":""); renderTiles();
 }
-function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } if(typeof CV!=="undefined"&&CV.full) CV.full.fill(0); if(typeof AN!=="undefined"&&AN.ld) AN.ld.fill(1); }   /* 새 세션 : 배출 컨베이어 비움 (11/16) */
+function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } if(typeof helpReset==="function") helpReset(); if(typeof CV!=="undefined"&&CV.full){ CV.full.fill(0); CV.j0=null; } if(typeof PA!=="undefined") PA.live=true; if(typeof AN!=="undefined"&&AN.ld) AN.ld.fill(1); }   /* 새 세션 : 배출 컨베이어 비움 (11/16) */
 Object.assign(JOBS,{ rollMount:{stand:[4.62,4.18], dur:1, view:"roll", seqFn:()=>seqMountRoll("red")},
   rollPlain:{stand:[9.34,5.9], dur:1, view:"roll", seqFn:()=>seqFetchRoll("plain").concat(seqMountRoll("plain"))} });
 JOBS.roll.seqFn=()=>seqFetchRoll("red"); JOBS.lift.seqFn=seqLift;
 /* 자재 타일 : 대차 · 리프터 원위치 복귀 (11/16 사용자 지시 — 끌지 않고 자동) */
 TILE.rHome={e:"↩️",b:"대차 · 리프터 원위치",s:()=>(S.flags.cartAt==="unw"||S.flags.liftAt==="use")?"사용 후 복귀 누르기":"보관 위치",on:()=>!(S.flags.cartAt==="unw"||S.flags.liftAt==="use"),click(){ propsReturn(); }};
 if(!TILESET.F.mat.includes("rHome")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mPlain")+1,0,"rHome");
+
+/* ═══ V20 (11/16 사용자 선택) : IBC 진공호스 연결 · IPC 시료 채취 동작 · 2인 1조 보조 작업자 ═══ */
+Object.assign(ANC,{ hoseS:[6.38,.1,2.22], hoseA:[6.38,.1,.8], ipcTake:[2.72,.45,2.3] });   /* 받침 호퍼 배출구(백당 · 첨가제) · 시료 채취 위치(슈트 아래 배출 컨베이어) */
+Object.assign(WORKVIEW,{ hose:VW([4.5,1.7,1.5],[6.3,.25,1.5]), ipc:VW([3.4,2.3,3.9],[1.7,.7,1.6]) });
+/* IBC 진공호스 : 백당(남) → 첨가제(북) 배출구에 호스를 끼우고 클램프 체결 (IBC 서쪽 통로에서 몸을 숙여 작업) */
+function seqHose(){
+  return [{stand:[5.85,2.22], reach:ANC.hoseS, dur:2.2, on(){ if(S.f.hoseC) S.f.hoseC[1]=true; }},
+          {stand:[5.85,.8], path:[], reach:ANC.hoseA, dur:2.2, on(){ if(S.f.hoseC) S.f.hoseC[0]=true; }}];
+}
+/* IPC : 슈트 아래 배출 컨베이어에서 시료 파우치를 꺼냄 → 저울 작업대 1 로 가서 계량 */
+function seqIpc(){
+  return [{stand:[2.3,2.42], reach:ANC.ipcTake, dur:1.8},
+          {stand:[1.05,.75], carry:"tray", reach:ANC.ipc, dur:2.6}];
+}
+Object.assign(JOBS,{ hose:{stand:[5.85,2.22], reach:ANC.hoseS, dur:2.2, view:"hose", seqFn:seqHose},
+  ipc:{stand:[2.3,2.42], reach:ANC.ipcTake, dur:1.8, view:"ipc", seqFn:seqIpc} });
+{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="tray") return base(kind);       /* 시료 트레이 (파우치 몇 포) */
+    const G=new T3.Group(), t=new T3.Mesh(new T3.BoxGeometry(.26,.025,.16),new T3.MeshStandardMaterial({color:0xe8edf0,roughness:.5})); G.add(t);
+    for(let i=0;i<3;i++){ const s=new T3.Mesh(new T3.BoxGeometry(.2,.008,.03),M.foil); s.position.set(0,.017,-.045+i*.045); G.add(s); } return G; }; }
+
+/* ── 2인 1조 보조 작업자 (충전실) : 은박 롤 운반 · 장착 · 교체 때 함께 움직임 ──
+   · 주 작업자가 걸어간 길을 약 1 m 뒤에서 그대로 따라감 → 설비 · 벽을 통과하지 않음
+   · 주 작업자가 작업 위치에 서면 옆자리(비어 있고 곧게 갈 수 있을 때)로 와서 롤 반대쪽 끝을 함께 잡음
+   · 작업이 끝나면 대기 자리(저울 작업대 남쪽)로 돌아감 */
+const PAIRJOBS=ROLLJOBS.concat(["rollOut"]);
+const HELP={id:"F", x:.8, z:3.4, y:0, lvl:0, face:Math.PI/2, yaw:Math.PI/2, home:[.8,3.4], q:[], route:[], on:false, side:null, back:null, walking:false, m:null};
+function floorFree(x,z){
+  if(typeof fpObstacles!=="function") return true;
+  if(!FP_OBS) FP_OBS=fpObstacles();
+  if(!(x>RM.fill.x0+.25&&x<RM.fill.x1-.25&&z>RM.fill.z0+.25&&z<RM.fill.z1-.25)) return false;
+  return !FP_OBS.some(r=>inR(x,z,r,.2))&&!propBlock(x,z);
+}
+const segFree=(a,b)=>{ for(let i=1;i<=8;i++){ const t=i/8; if(!floorFree(a[0]+(b[0]-a[0])*t,a[1]+(b[1]-a[1])*t)) return false; } return true; };
+/* 작업 위치 옆자리 : 좌 · 우 · 뒤 순으로, 주 작업자 0.45 m 뒤 지점에서 곧게 갈 수 있는 곳 */
+function helpSide(w){
+  const f=[Math.sin(w.face),Math.cos(w.face)], l=[Math.cos(w.face),-Math.sin(w.face)], H=HELP;
+  let p=[w.x,w.z], acc=0; for(let i=H.q.length-1;i>=0;i--){ const q=H.q[i]; acc+=Math.hypot(q[0]-p[0],q[1]-p[1]); p=q; if(acc>=.45) break; }
+  if(Math.hypot(p[0]-w.x,p[1]-w.z)<.3) p=[w.x-f[0]*.5,w.z-f[1]*.5];
+  for(const c of [[w.x+l[0]*.68,w.z+l[1]*.68],[w.x-l[0]*.68,w.z-l[1]*.68],[w.x-f[0]*.75+l[0]*.3,w.z-f[1]*.75+l[1]*.3]])
+    if(floorFree(c[0],c[1])&&floorFree(p[0],p[1])&&segFree(p,c)) return {c,p};
+  return null;
+}
+function helpStep(H,pts,st){ while(st>1e-4&&pts.length){ const p=pts[0], dx=p[0]-H.x, dz=p[1]-H.z, d=Math.hypot(dx,dz);
+    if(d>1e-3) H.face=Math.atan2(dx,dz); H.walking=true;
+    if(d<=st){ H.x=p[0]; H.z=p[1]; st-=d; pts.shift(); } else { H.x+=dx/d*st; H.z+=dz/d*st; st=0; } } }
+function helpTick(dt){
+  const w=WK[0], H=HELP, pair=!!(w.job&&PAIRJOBS.includes(w.job.key))&&!cam.fp;
+  H.walking=false;
+  if(pair&&!H.on){ H.on=true; H.route=[]; H.side=null; H.q=navPath(H,[w.x,w.z],w.lvl).map(p=>[p[0],p[1]]); }
+  if(!pair&&H.on){ H.on=false; H.side=null; H.q=[]; H.route=navPath(H,H.home,0).map(p=>[p[0],p[1]]); }
+  if(H.on){
+    const last=H.q[H.q.length-1]; if(!last||Math.hypot(last[0]-w.x,last[1]-w.z)>.05) H.q.push([w.x,w.z]);
+    const LJ=curLeg(w.job), work=w.job.phase==="work"&&!w.route.length&&!!LJ.reach;
+    if(work&&!H.side&&!H.noSide){ const s=helpSide(w); if(s){ H.side=s; const i=H.q.findIndex(q=>q[0]===s.p[0]&&q[1]===s.p[1]); H.sq=(i>=0?H.q.slice(0,i+1):[s.p]).concat([s.c]); } else H.noSide=true; }
+    if(!work){ H.noSide=false; if(H.side){ H.q=[H.side.p,[w.x,w.z]]; H.side=null; } }
+    if(H.side) helpStep(H,H.sq,dt*WK_SPD*1.2);
+    else { let rem=0, px=H.x, pz=H.z; for(const p of H.q){ rem+=Math.hypot(p[0]-px,p[1]-pz); px=p[0]; pz=p[1]; }
+      helpStep(H,H.q,Math.min(Math.max(0,rem-1.0),dt*WK_SPD*1.25));
+      if(!H.walking&&Math.hypot(w.x-H.x,w.z-H.z)>.3) H.face=Math.atan2(w.x-H.x,w.z-H.z); }
+    if(H.side&&!H.sq.length&&work){ const r=LJ.reach; H.face=Math.atan2(r[0]-H.x,r[2]-H.z); }
+  } else if(H.route.length){ helpStep(H,H.route,dt*WK_SPD); if(!H.route.length) H.face=Math.PI/2; }
+}
+function helpDraw(dt){
+  const H=HELP; if(!V3||!V3.scene) return;
+  if(!H.m) H.m=makeHuman(V3.scene,"suit");
+  H.m.G.visible=!cam.fp&&!!(S&&S.session&&S.session.active&&S.room==="F");
+  let da=H.face-H.yaw; da=Math.atan2(Math.sin(da),Math.cos(da)); H.yaw+=da*Math.min(1,dt*9);
+  const w=WK[0], J=w.job, LJ=J&&curLeg(J), P={x:H.x,z:H.z,y0:0,yaw:H.yaw,dt,L:null,R:null};
+  if(H.on&&H.side&&!H.sq.length&&J&&J.phase==="work"&&LJ.reach){
+    const roll=w.carry&&w.cm&&w.cm[w.carry]&&w.cm[w.carry].visible?w.cm[w.carry]:null, lf=[Math.cos(w.yaw),-Math.sin(w.yaw)];
+    if(roll){ const c=roll.position, sg=((H.x-c.x)*lf[0]+(H.z-c.z)*lf[1])>0?1:-1;               /* 롤 반대쪽 끝을 두 손으로 받침 */
+      P.L=[c.x+lf[0]*sg*.3,c.y,c.z+lf[1]*sg*.3]; P.R=[c.x+lf[0]*sg*.4,c.y,c.z+lf[1]*sg*.4]; P.gL=P.gR=.5; }
+    else if(J.t>.15&&J.t<LJ.dur-.35){ const r=LJ.reach, d=Math.hypot(r[0]-H.x,r[2]-H.z); if(d<1.2){ const k=Math.min(.25,d*.3), u=[(H.x-r[0])/(d||1),(H.z-r[2])/(d||1)];
+      P.R=[r[0]+u[0]*k,r[1],r[2]+u[1]*k]; P.gR=.3; P.nR="down"; } }
+  }
+  poseHuman(H.m,P);
+}
+function helpReset(){ const H=HELP; H.x=H.home[0]; H.z=H.home[1]; H.face=H.yaw=Math.PI/2; H.q=[]; H.route=[]; H.on=false; H.side=null; H.noSide=false; }

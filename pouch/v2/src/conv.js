@@ -50,7 +50,7 @@ function buildConveyor(S){
   const stk=new T3.InstancedMesh(stickGeo(FM.stickL,FM.stickW,.009),M.stick,N); stk.castShadow=true; stk.frustumCulled=false; g.add(stk);
   CV.N=N; CV.full=new Uint8Array(N+4); CV.out=0; CV.prev=null;
   CV.sOf=(k,u)=>{ const span=N*P; return ((k*P+u)%span+span)%span; };                                     /* 칸 k 중심의 경로 위치 */
-  CV.set=u=>{ for(let k=0;k<N;k++){ const s=CV.sOf(k,u); if(CV.prev){ if(CV.prev[k]>=0&&CV.prev[k]<=CV.L&&(s>CV.L||s<CV.prev[k])){ CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; }
+  CV.set=u=>{ for(let k=0;k<N;k++){ const s=CV.sOf(k,u); if(CV.prev){ if(CV.prev[k]>=0&&CV.prev[k]<=CV.L&&(s>CV.L||s<CV.prev[k])){ if(CV.full[k]&&CV.j0==null) CV.j0=Math.floor((u-CV.L)/P+1e-6); CV.out+=CV.full[k]; CV.full[k]=0; } CV.prev[k]=s; }
       const vis=s<=CV.L, q=CV.path(s), c=Math.cos(q.a), sn=Math.sin(q.a);
       o.position.set(X,q.y,q.z); o.rotation.set(q.a,0,0); o.scale.setScalar(1); o.updateMatrix(); cle.setMatrixAt(k,o.matrix);
       const h=CV.hb+.0052; o.position.set(X,q.y+c*h,q.z+sn*h); o.scale.setScalar(vis&&CV.full[k]?1:0); o.updateMatrix(); stk.setMatrixAt(k,o.matrix); }
@@ -66,7 +66,7 @@ function buildConveyor(S){
   /* 바닥 조작 박스(비상정지) · 그 위 경광등(적 · 황 · 녹) — 트레이 북서 */
   { const bx0=X-hw-.5, bz=zT-.2; bx(g,bx0,bx0+.4,.08,.42,bz-.19,bz+.19,M.ssMir); for(const dx of [.04,.36]) for(const dz of [-.15,.15]) rod(g,[bx0+dx,0,bz+dz],[bx0+dx,.08,bz+dz],.014,M.ssD,8);
     bx(g,bx0+.05,bx0+.17,.42,.48,bz-.06,bz+.06,M.yellow); rod(g,[bx0+.11,.48,bz],[bx0+.11,.51,bz],.03,M.red,18); rod(g,[bx0+.25,.42,bz+.08],[bx0+.25,.44,bz+.08],.012,M.dark,10);
-    rod(g,[bx0+.34,.42,bz-.13],[bx0+.34,.86,bz-.13],.013,M.ssMir,12); for(const [k,m] of [[0,M.green],[1,M.orange],[2,M.red]]) rod(g,[bx0+.34,.86+k*.055,bz-.13],[bx0+.34,.912+k*.055,bz-.13],.028,m,18); rod(g,[bx0+.34,1.025,bz-.13],[bx0+.34,1.04,bz-.13],.03,M.ssD,18);
+    rod(g,[bx0+.34,.42,bz-.13],[bx0+.34,.86,bz-.13],.013,M.ssMir,12); const LM=lampMats("fl"); for(const [k,m] of [[0,LM[0]],[1,LM[1]],[2,LM[2]]]) rod(g,[bx0+.34,.86+k*.055,bz-.13],[bx0+.34,.912+k*.055,bz-.13],.028,m,18); rod(g,[bx0+.34,1.025,bz-.13],[bx0+.34,1.04,bz-.13],.03,M.ssD,18);
     plate(g,.1,.07,labelTex([["⚡","#111",90]],{w:128,h:100,bg:"#f5d400"}),[bx0-.001,.25,bz],-Math.PI/2); }
   /* 경사부 받침대 (회색 도장 강재 · 세로 기둥 + 비스듬한 보강 · 캐스터) · 아래쪽 원형 받침 · 표지 */
   { const q=CV.at(L1+L2*.55), zs=q.z, ys=q.y-.07, q0=CV.at(L1+L2*.3);
