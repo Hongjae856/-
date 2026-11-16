@@ -19,7 +19,7 @@ V2_SCRIPTS = ("kit.js", "layout.js", "room.js", "form.js", "unwind.js", "hopper.
               "pack_anim.js", "anim.js")
 ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
-    ("v3", "anchors.js"), ("old", "hmi.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
+    ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
     ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "boot.js"),
 )
@@ -30,6 +30,12 @@ PATCH = {
         (r"R3.lo=[-9900,-10,-3300]; R3.hi=[12900,4300,2700];", "", 1),
     ],
     "hmi.js": [
+        ('    nav.innerHTML=FNAV.map(', '    if(0) nav.innerHTML=FNAV.map(', 1),          # 충전기 : SOLPAC 화면 (solpac.js)
+        ('    body.innerHTML=(FSCR[hScr]||FSCR.run)();', '    solpacDraw(body,nav);', 1),
+        ('  const m=machOf(hMach);\n  $("#hMach")', '  const m=machOf(hMach); $("#hmi").classList.toggle("solpac",hMach==="fl"); $("#panel").classList.toggle("solpacP",hMach==="fl"); $("#hmi").classList.toggle("oneTab",tabs.length<2); $("#hmi").classList.toggle("big",hMach==="fl"&&SPBIG&&!(typeof fpActive==="function"&&fpActive()));\n  $("#hMach")', 1),
+        ('body.innerHTML=loginScreen(hMach);', 'body.innerHTML=hMach==="fl"?solpacLogin():loginScreen(hMach);', 1),
+        ('function hbClick(id){', 'function hbClick(id){ if(id.startsWith("sp_")){ solpacClick(id); return; }', 1),
+        ('if(mk==="fl") return HNV(scr);', 'if(mk==="fl") return flRoute(scr);', 1),
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
     "ui.js": [
@@ -130,6 +136,10 @@ def build() -> str:
     three = (V2 / "vendor" / "three.min.js").read_text(encoding="utf-8")
     js = "\n".join(f"/* ── v2/{n} ── */\n" + (V2 / "src" / n).read_text(encoding="utf-8") for n in V2_SCRIPTS)
     js += "\n" + "\n".join(f"/* ── {f}/{n} ── */\n" + load(f, n) for f, n in ORDER)
+    names = re.findall(r"^(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)", js, re.M)   # 같은 이름 최상위 선언 2번 → 페이지 전체가 멈춤 (11/16 pv 충돌)
+    dup = sorted({n for n in names if names.count(n) > 1})
+    if dup:
+        sys.exit("최상위 이름 중복 선언 : " + ", ".join(dup))
     if "</script" in js.lower() or "</script" in three.lower():
         sys.exit("script text must not contain </script")
     parts = {

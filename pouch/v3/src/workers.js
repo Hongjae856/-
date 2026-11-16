@@ -126,7 +126,7 @@ function wkDraw(dt){
 const TOW={ cart:{hd:.3, hy:.9, off:.56, rot:-Math.PI/2}, lift:{hd:.25, hy:.95, off:.75, rot:Math.PI/2} };   /* hd · hy : 손잡이 위치 (대차 손잡이 봉 0.9 m · 리프터 뒤 손잡이 0.95 m) */
 const ROLLJOBS=["roll","rollMount","rollPlain"];
 const PROP={ cartHome:[9.9,5.9,0], cartUnw:[4.62,3.62,Math.PI/2], liftHome:[10.75,1.8,Math.PI], liftUse:[3.53,4.6,0], platUp:1.83 };
-const PST={plat:null, cartRoll:null, sts:null, carting:false};
+const propVis=(k,v)=>{ if(typeof FILLPROP!=="undefined"&&FILLPROP[k]) FILLPROP[k].visible=v; };   /* 3D 가 없을 때(WebGL 미지원)도 절차가 멈추지 않게 */
 function propObj(k){ return k==="cart"?FILLCART:FILLLIFT; }
 function propsDraw(){
   if(typeof FILLCART==="undefined"||!FILLCART||!FILLLIFT||!S||!S.f) return;
@@ -136,6 +136,7 @@ function propsDraw(){
     if(WK.some(q=>q.job&&q.job.legs&&(k==="cart"?ROLLJOBS.includes(q.job.key):q.job.key==="lift"))) continue;     /* 작업 중 놓아 둔 자리 유지 */
     const P=k==="cart"?(S.flags.cartAt==="unw"?PROP.cartUnw:PROP.cartHome):(S.f.mainLift?PROP.liftUse:PROP.liftHome); G.position.set(P[0],0,P[1]); G.rotation.y=P[2]; }
   const busy=k=>WK.some(q=>q.job&&q.job.legs&&q.job.key===k);
+  if(!FILLPROP.plat) return;
   if(!busy("lift")){ FILLPROP.plat.position.y=S.f.mainLift?PROP.platUp:0; FILLPROP.stsOn.visible=!!S.f.mainLift; FILLPROP.stsFloor.visible=!S.f.mainLift; }
   if(!ROLLJOBS.some(busy)){ const c=S.f.rollCarry; FILLPROP.cart_red.visible=c==="red"; FILLPROP.cart_plain.visible=c==="plain";
     FILLPROP.pal_red.visible=!S.flags.redTaken; FILLPROP.pal_plain.visible=!(S.f.roll==="plain"||c==="plain"); }
@@ -145,8 +146,8 @@ function seqFetchRoll(kind){
   const P=FILLPROP, atUnw=S.flags.cartAt==="unw", L=[], pz=kind==="red"?5.95:6.45;
   if(atUnw){ L.push({stand:[4.62,4.18], reach:[4.62,.9,3.92], dur:.8, grab:"cart"}); L.push({stand:[9.54,6.05], path:[[4.62,4.9],[7.5,4.9],[8.6,6.05]], dur:.4, release:true}); }
   else { L.push({stand:[9.34,5.9], reach:[9.64,.9,5.9], dur:.8, grab:"cart"}); L.push({stand:[9.54,6.05], path:[], dur:.4, release:true}); }
-  L.push({stand:[10.75,5.4], reach:[10.95,.45,pz], dur:1.8, on(){ P["pal_"+kind].visible=false; if(kind==="red") S.flags.redTaken=true; }});
-  L.push({stand:[9.54,6.05], carry:kind==="red"?"roll":"rollP", reach:[10.1,.85,6.05], dur:1.4, on(){ P["cart_"+kind].visible=true; }});
+  L.push({stand:[10.75,5.4], reach:[10.95,.45,pz], dur:1.8, on(){ propVis("pal_"+kind,false); if(kind==="red") S.flags.redTaken=true; }});
+  L.push({stand:[9.54,6.05], carry:kind==="red"?"roll":"rollP", reach:[10.1,.85,6.05], dur:1.4, on(){ propVis("cart_"+kind,true); }});
   L.push({stand:[9.54,6.05], carry:null, path:[], reach:[9.84,.9,6.05], dur:.6, grab:"cart"});
   L.push({stand:[4.62,4.18], path:[[9.5,5.3],[7.5,4.9],[4.62,4.9]], dur:.5, release:true});
   return L;
@@ -154,7 +155,7 @@ function seqFetchRoll(kind){
 /* 대차 위 롤을 언와인더에 장착 */
 function seqMountRoll(kind){
   const P=FILLPROP;
-  return [{stand:[4.62,4.18], reach:[4.62,.85,3.62], dur:1.4, on(){ P["cart_"+kind].visible=false; }},
+  return [{stand:[4.62,4.18], reach:[4.62,.85,3.62], dur:1.4, on(){ propVis("cart_"+kind,false); }},
           {stand:[5.25,FL.zc+.15], path:[[5.3,4.3],[5.3,3.2]], carry:kind==="red"?"roll":"rollP", reach:ANC.roll, dur:2.4}];     /* 대차와 계단 사이 통로로 언와인더 동쪽까지 */
 }
 /* 드럼리프터를 원료투입구 아래로 밀고 가서 STS 용기를 올리고 발판을 올림 */
@@ -162,9 +163,9 @@ function seqLift(){
   const P=FILLPROP;
   return [{stand:[10.0,1.8], reach:[10.42,.82,1.8], dur:.8, grab:"lift"},
           {stand:[4.28,4.6], path:[[8.0,2.0],[7.6,3.3],[7.5,4.85],[6.0,4.75]], dur:.5, release:true},
-          {stand:[2.1,6.0], path:[[4.3,5.5],[2.1,5.6]], reach:[2.1,.42,6.45], dur:1.6, on(){ P.stsFloor.visible=false; }},
-          {stand:[3.05,5.35], path:[], carry:"sts", reach:[3.05,.5,4.6], dur:1.6, on(){ P.stsOn.visible=true; }},
-          {stand:[4.1,5.25], path:[], carry:null, reach:[3.85,1.0,4.75], dur:3.0, prog(q){ P.plat.position.y=PROP.platUp*q*q*(3-2*q); }}];
+          {stand:[2.1,6.0], path:[[4.3,5.5],[2.1,5.6]], reach:[2.1,.42,6.45], dur:1.6, on(){ propVis("stsFloor",false); }},
+          {stand:[3.05,5.35], path:[], carry:"sts", reach:[3.05,.5,4.6], dur:1.6, on(){ propVis("stsOn",true); }},
+          {stand:[4.1,5.25], path:[], carry:null, reach:[3.85,1.0,4.75], dur:3.0, prog(q){ if(FILLPROP.plat) FILLPROP.plat.position.y=PROP.platUp*q*q*(3-2*q); }}];
 }
 function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } }
 Object.assign(JOBS,{ rollMount:{stand:[4.62,4.18], dur:1, view:"roll", seqFn:()=>seqMountRoll("red")},

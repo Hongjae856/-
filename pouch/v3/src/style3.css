@@ -27,3 +27,66 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #incBack{margin-top:14px;padding:11px 22px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer}
 /* 기본 · 심화 : 이상사례 · 알람 발생 버튼 없음 */
 #hMenu{display:none!important}
+/* ═══ SOLPAC 충전기 터치스크린 (가로형 · SOP 화면 사진 기준) ═══ */
+#hmi.solpac{flex:0 0 auto;aspect-ratio:1.46;width:100%;border:6px solid #15181c;border-radius:6px;background:#0d0f12;container-type:inline-size}
+#hmi.solpac #hTop{display:none}
+#hmi.solpac.oneTab #hTabs{display:none}
+#hmi.solpac #hBody{padding:0;background:#4a525c;overflow:hidden;flex:1;display:flex}
+#hmi.solpac .offScr{background:#050607;color:#3d4650;height:100%}
+.spScr{flex:1;display:flex;flex-direction:column;min-width:0;font:600 2.15cqw/1.25 "Malgun Gothic","Noto Sans KR",sans-serif;color:#1d232b;background:#e9edf2}
+.spH{display:flex;align-items:center;gap:1cqw;background:linear-gradient(180deg,#eef3f8,#cfd9e4);padding:.5cqw 1cqw;border-bottom:.3cqw solid #8396ab}
+.spLogo{background:linear-gradient(90deg,#2d55a8 75%,#e9edf2 75%);color:#fff;font:900 2.9cqw/1 Arial,sans-serif;padding:.6cqw 4cqw .6cqw 1.4cqw;clip-path:polygon(0 0,100% 0,92% 100%,0 100%)}
+.spTt{flex:1;text-align:center;font:800 3.4cqw/1 "Malgun Gothic",sans-serif;color:#1d2a3b;letter-spacing:.2cqw}
+.spArr{font-size:3.6cqw;line-height:1;color:#1c3d6b;cursor:pointer;padding:0 1cqw}
+.spSc{display:flex;align-items:center;gap:.6cqw;font-size:1.7cqw}.spSc s{text-decoration:none;color:#33445a}.spSc b{background:#dff3ff;border:.2cqw solid #6c8fb3;padding:.1cqw .9cqw;font:700 2cqw/1.2 Arial;color:#0b4a8a}.spSc b.dt{background:#eaf7ff;font-size:1.8cqw}
+.spMan{background:#bfc7d0;border:.2cqw solid #687685;padding:.4cqw 2cqw;font-weight:800;cursor:pointer}.spMan.on{background:repeating-linear-gradient(135deg,#2db34a 0 1cqw,#47d064 1cqw 2cqw);color:#073}
+.spC{flex:1;min-height:0;display:grid;gap:1cqw;padding:1cqw;overflow:hidden;background:#2f353d}
+.spC.two{grid-template-columns:1fr 1fr}.spC.three{grid-template-columns:repeat(3,1fr)}.spC.four{grid-template-columns:repeat(4,1fr)}.spC.five{grid-template-columns:repeat(5,1fr)}.spC.sw2{grid-template-columns:1fr 3fr}.spC.vis{grid-template-columns:2.2fr 1fr;grid-auto-rows:auto}
+.spC>div{min-width:0;display:flex;flex-direction:column;gap:.7cqw}
+.spTb{width:100%;border-collapse:collapse;background:#f6f8fa;font-size:1.9cqw}.spTb th{background:#d9e0e8;font-weight:700;padding:.4cqw;border:.15cqw solid #9aa8b6}.spTb td{border:.15cqw solid #9aa8b6;padding:.35cqw .5cqw;background:#dfe5ec}.spTb td.v{background:#f9fbfd;text-align:center;font:700 2.3cqw/1.2 Arial;color:#1c2633}
+.spTb td s{display:block;text-decoration:none;font-size:1.4cqw;color:#59687a}.spTb td.v s{display:inline;font-size:1.5cqw}.spTb .bl{font-style:normal;color:#1d5fd0}.rd{color:#d6262d!important;font-style:normal}
+.spTb.cam td.v{color:#1e63c8;font-size:2.8cqw}.spTb.tmp td,.spTb.tmp th{text-align:center;font-size:1.7cqw;padding:.3cqw .2cqw}
+.spR{display:inline-block;background:#fff;border:.15cqw solid #9aa8b6;color:#d6262d;padding:.1cqw 1.2cqw;cursor:pointer;font-weight:700}
+.spUp,.spDn{display:inline-block;font-size:2.6cqw;color:#178a3a;cursor:pointer;margin:0 1.2cqw}
+.spTg{display:grid;grid-template-columns:repeat(6,1fr);gap:.2cqw;background:#9aa8b6;padding:.2cqw}.spTg div{background:#f9fbfd;text-align:center;padding:.2cqw 0}.spTg s{display:block;text-decoration:none;font-size:1.4cqw;background:#dfe5ec;color:#344}.spTg b{font:700 2.1cqw/1.3 Arial}
+.spFn{display:grid;grid-template-columns:repeat(4,1fr);gap:.4cqw}.spFn.two{grid-template-columns:1fr 1fr}
+.spSw{background:linear-gradient(180deg,#f3f5f7,#c9d0d8);border:.2cqw solid #7e8a97;border-radius:.4cqw;text-align:center;padding:.6cqw .3cqw;font-weight:700;cursor:pointer;color:#26303b;font-size:1.85cqw}
+.spSw.on,.spSw.red{background:linear-gradient(180deg,#f06573,#c92f43);color:#fff;border-color:#8e1d2c}.spSw.dk{background:#5d6977;color:#fff}
+.spRow{display:flex;gap:.6cqw;align-items:center}.spRow .spSw{flex:2}.spLb{color:#e8edf3;font-size:1.8cqw;text-align:center}.spLb.l{text-align:left;color:#dfe7ef;font-weight:700}.spVal{background:#fff;padding:.4cqw 1.6cqw;font:700 2.4cqw Arial}
+.spCol,.spCol3{display:flex;flex-direction:column;gap:.5cqw}.spCol3{display:grid;grid-template-columns:repeat(3,1fr)}
+.spM{background:linear-gradient(180deg,#fafbfc,#d8dee5);border:.15cqw solid #8794a2;text-align:center;padding:.45cqw .2cqw;font-size:1.75cqw;cursor:pointer}
+.spCnt{background:#3a414a;padding:.4cqw}.spSvPv{display:grid;grid-template-columns:1fr 1fr 1.3fr;align-items:center;color:#fff;text-align:center;font:700 2.2cqw Arial}.spSvPv s{text-decoration:none;font-size:1.6cqw}.spSvPv .spR{grid-row:span 2}
+.spSt{display:grid;grid-template-columns:repeat(5,1fr);gap:.3cqw}.spSt div{background:#f6f8fa;text-align:center;font:700 2.2cqw Arial}.spSt s{display:block;text-decoration:none;font-size:1.4cqw;background:#c7d2dd}
+.spGrid{display:grid;grid-template-columns:repeat(10,1fr);gap:.2cqw}.spGrid div{background:#6f7a86;color:#e9eef3;text-align:center;font-size:1.5cqw}
+.spX{background:#3a414a;padding:.6cqw;gap:.5cqw}.spXh{display:flex;align-items:center;gap:.6cqw;color:#fff;font-weight:700}.spXh .spSw{flex:1}.spXr{display:grid;grid-template-columns:1.2fr 1fr 1.3fr;gap:.4cqw;align-items:center;background:#f2f5f8;padding:.3cqw}.spXr b{background:#1c232b;color:#fff;text-align:center;font:700 2.6cqw Arial}.spXr i{font-style:normal;background:#5d6977;color:#fff;text-align:center;font-size:1.5cqw;padding:.4cqw .2cqw;cursor:pointer}.spXr i.no{background:none}
+.spIoG{display:grid;grid-template-columns:1fr 1fr;gap:.4cqw}.spIo{background:#f2f5f8;padding:.4cqw .6cqw;display:flex;align-items:center;gap:.8cqw;font-size:1.8cqw}.spIo i{width:1.8cqw;height:1.8cqw;border-radius:50%;background:#7b8590}.spIo.on i{background:#26d04a;box-shadow:0 0 .8cqw #26d04a}
+.spAux{background:linear-gradient(180deg,#f3f5f7,#c9d0d8);border:.2cqw solid #7e8a97;border-radius:.6cqw;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:5cqw;cursor:pointer}.spAux b{font-size:2.2cqw}
+.spVb{position:relative;background:#3a414a;display:flex!important;flex-direction:row!important;justify-content:space-between;align-items:center;padding:1cqw 2cqw;font:700 2.4cqw Arial}.spVb b{background:#fff;padding:.2cqw 3cqw;color:#111}.spBar{position:absolute;left:12%;right:12%;bottom:.6cqw;height:1.2cqw;background:#222;border:.15cqw solid #666}
+.spTb.v2{grid-column:1/2}.spTb.v2 td{font-size:1.8cqw}.spPos{grid-column:1/-1;display:grid!important;grid-template-columns:repeat(10,1fr);gap:.2cqw;flex-direction:initial!important}.spPos div{background:#f9fbfd;text-align:center;font:700 2.1cqw Arial;color:#d6262d}.spPos s{display:block;text-decoration:none;background:#6c7a8a;color:#fff;font-size:1.5cqw}
+.spNote{font-size:1.6cqw;color:#dbe3ec;padding:0 1cqw .3cqw;background:#2f353d}
+.spChkRow{display:flex;gap:1cqw;align-items:center;background:#2f353d;padding:0 1cqw .5cqw}.spChk{background:#ffd54a;color:#4a3800;border-radius:.6cqw;padding:.5cqw 1.4cqw;font-weight:800;cursor:pointer;font-size:1.8cqw}.spChk.on{background:#3cc06b;color:#fff}.spChk s{text-decoration:none;font-size:1.3cqw;opacity:.8}
+.spF{display:flex;align-items:stretch;gap:.4cqw;background:#cfd8e2;padding:.4cqw;border-top:.2cqw solid #8396ab}.spAl{flex:1;background:#fff;color:#d6262d;font-weight:700;font-size:2.1cqw;white-space:nowrap;overflow:hidden;padding:.4cqw 1cqw;border:.15cqw solid #9aa8b6}
+.spB{background:linear-gradient(180deg,#fff,#dde3ea);border:.15cqw solid #8a97a5;padding:.4cqw 1.4cqw;font-weight:700;cursor:pointer;display:flex;align-items:center}.spB.n{background:#fff;cursor:default}
+.spLogin{display:flex!important;align-items:center;justify-content:center;color:#fff;text-align:center}.spLogin b{display:block;font-size:3cqw;margin-bottom:1cqw}.spLgBtn{margin:2cqw auto 0;width:30%;background:linear-gradient(180deg,#3b77d8,#1c4e9f);border-radius:.8cqw;padding:1.2cqw;font-weight:800;cursor:pointer}
+#hmi.solpac #hNav{display:grid;grid-template-columns:repeat(11,1fr);gap:0;background:#c8d2dd;padding:0;border-top:.2cqw solid #8396ab}
+#hmi.solpac .nv.sp{min-height:0;border-radius:0;padding:.6cqw .1cqw;background:linear-gradient(180deg,#f9fbfc,#d6dee7);border-right:.15cqw solid #9aa8b6;font:700 1.45cqw/1.15 "Malgun Gothic",sans-serif;color:#26364b;gap:.3cqw}
+#hmi.solpac .nv.sp i{font-style:normal;font-size:3cqw;line-height:1;color:#1e4f97}#hmi.solpac .nv.sp.on{background:linear-gradient(180deg,#cfe3ff,#9ec3f2)}
+#hmi.solpac + #hNav{display:none}
+/* 조작반 (RUN 파랑 · STOP 빨강 · JOG 검정 · RESET 노랑 · FILLING 선택 · BUZZER · 비상정지) */
+#panel.solpacP{grid-template-columns:repeat(4,1fr);grid-template-areas:"a b c g" "d e f g";background:#cfd4da;border:2px solid #9aa3ad;border-radius:10px;padding:10px;gap:8px}
+#panel.solpacP .psw{border-radius:10px;background:#eef1f4;border:2px solid #69737e;color:#1d2530;text-align:center;font:800 12px/1.2 var(--ff);padding:8px 4px}
+#panel.solpacP .psw .e{display:block;width:34px;height:34px;margin:4px auto;border-radius:50%;font-size:0;border:3px solid #9aa3ad}
+#panel.solpacP #swRun{grid-area:a}#panel.solpacP #swRun .e{background:radial-gradient(circle at 40% 35%,#9fdcff,#1f86d6)}
+#panel.solpacP #swStop{grid-area:b}#panel.solpacP #swStop .e{background:radial-gradient(circle at 40% 35%,#ff9a8c,#d4271c)}
+#panel.solpacP #swJog{grid-area:c}#panel.solpacP #swJog .e{background:radial-gradient(circle at 40% 35%,#777,#141414)}
+#panel.solpacP #swReset{grid-area:d}#panel.solpacP #swReset .e{background:radial-gradient(circle at 40% 35%,#fff3a1,#e2b300)}
+#panel.solpacP #swFill{grid-area:e}#panel.solpacP #swFill .e{background:#1b1b1b;border-radius:30%}
+#panel.solpacP #swBuz{grid-area:f}#panel.solpacP #swBuz .e{background:radial-gradient(circle,#2f3b31 40%,#8fa194 42%,#2f3b31 60%)}
+#panel.solpacP #swEmg{grid-area:g;background:#e9edf1}#panel.solpacP #swEmg .e{width:58px;height:58px;background:radial-gradient(circle at 40% 35%,#ff7b6e,#c8161a);box-shadow:0 0 0 6px #f4c400}
+#panel.solpacP .psw.on{box-shadow:inset 0 0 0 3px #2fbf63}
+#fpMon #hmi.solpac{flex:0 0 auto}
+#fpMon #panel.solpacP{flex:1;margin-top:0}
+#hmiWrap{position:relative}
+#hmi.solpac.big{position:absolute;top:9px;right:9px;width:600px;z-index:30;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+#hmi.solpac.big + *{margin-top:0}
+.spB.big{font-size:2.6cqw;padding:.2cqw 1.2cqw}

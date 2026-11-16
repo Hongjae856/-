@@ -70,7 +70,7 @@ function fpEyeY(pose,moved,dt){
 
 /* ── 설비 화면 (anchors.js FP_MON) ── */
 const FP_DOM={w:460, h:700};
-function monRect(m){ const h=m.h, w=h*FP_DOM.w/FP_DOM.h, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
+function monRect(m){ const D=m.dom||FP_DOM, h=m.h, w=m.w||h*D.w/D.h, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
   const P=(a,b)=>[m.c[0]+r[0]*a+n[0]*.004, m.c[1]+b, m.c[2]+r[2]*a+n[2]*.004];
   return {w,h,TL:P(-w/2,h/2),TR:P(w/2,h/2),BR:P(w/2,-h/2),BL:P(-w/2,-h/2)}; }
 function monPose(m){ const r=monRect(m), focal=.78, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
@@ -170,7 +170,8 @@ function fpPlaceMonitor(){
   if(far||back||other){ placeIDTMonitor(w,null); return; }
   const P=[r.TL,r.TR,r.BR,r.BL].map(q=>prj(q[0],q[1],q[2]));
   if(P.some(q=>!q||q.w<.03)){ placeIDTMonitor(w,null); return; }
-  placeIDTMonitor(w,P.map(q=>({x:q.x/K,y:q.y/K})),FP_DOM.w,FP_DOM.h);
+  const D=m.dom||FP_DOM; if(w.style.width!==D.w+"px"){ w.style.width=D.w+"px"; w.style.height=D.h+"px"; }
+  placeIDTMonitor(w,P.map(q=>({x:q.x/K,y:q.y/K})),D.w,D.h);
 }
 function fpHmiInteractive(on,t){
   const w=fpMonEl(); w.style.pointerEvents=on?"auto":"none"; w.classList.toggle("live",!!on);
