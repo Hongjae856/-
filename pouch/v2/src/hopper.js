@@ -48,7 +48,7 @@ function buildHoppers(g){
   const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw, ry=side<0?-Math.PI/2:Math.PI/2;
     bx(g,Math.min(x,x+side*.03),Math.max(x,x+side*.03),y-.032,y+.032,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.031),Math.max(x,x+side*.031),y-.034,y-.03,zc-.45,zc+.45,M.ssMir);
     rod(g,[xc+side*.27,y,zc-.45],[x,y,zc-.45],.012,M.ssMir,10); rod(g,[xc+side*.27,y,zc+.45],[x,y,zc+.45],.012,M.ssMir,10);          /* 호퍼 끝 브래킷 */
-    plate(g,.2,.03,labelTex([[nm,"#111",54]],{w:640,h:96,border:"#333"}),[x+side*.032,y+.05,zc-.3],ry);
+    if(nm) plate(g,.26,.026,labelTex([[nm,"#111",50]],{w:800,h:80,border:"#333"}),[x+side*.032,y+.048,zc-.25],ry);   /* 이름표 : 위 줄 위에만 (아래 줄을 가리지 않게) */
     for(let i=0;i<n;i++){ const z=pz(i), xo=x+side*.03;
       bx(g,Math.min(xo,xo+side*.03),Math.max(xo,xo+side*.03),y-.02,y+.024,z-.03,z+.006,orM);                                   /* 주황 카운터 */
       const cv=document.createElement("canvas"); cv.width=128; cv.height=48; const ctx=cv.getContext("2d"), tx=new T3.CanvasTexture(cv); tx.encoding=T3.sRGBEncoding;
@@ -56,7 +56,7 @@ function buildHoppers(g){
       const sk=new T3.Mesh(new T3.CylinderGeometry(.011,.012,.022,20),crM); sk.rotation.z=Math.PI/2; sk.position.set(xo+side*.011,y-.004,z+.018); add(g,sk);   /* 크롬 육각 소켓 */
       const HX=new T3.Group(); HX.position.set(xo+side*.0225,y-.004,z+.018); g.add(HX); const hx=new T3.Mesh(new T3.CylinderGeometry(.0055,.0055,.002,6),M.black); hx.rotation.z=Math.PI/2; HX.add(hx);
       FM.dials[key].push({hex:HX, ctx, tex:tx, cnt:null}); } };
-  dialRow(-1,Y+.57,"add","첨가제 함량조절다이얼"); dialRow(1,Y+.6,"main","주성분 함량조절다이얼"); dialRow(1,Y+.53,"sug","백당 함량조절다이얼");
+  dialRow(-1,Y+.57,"add","첨가제 함량조절다이얼"); dialRow(1,Y+.6,"main","주성분(위) · 백당(아래) 함량조절다이얼"); dialRow(1,Y+.53,"sug",null);
   /* 남쪽 끝 : 게이트 · 셔터 실린더 · 고정 브래킷 · 덮개 천 */
   const cyl=(x,y0,y1,z)=>{ rod(g,[x,y0,z],[x,y1,z],.019,M.alu,14); rod(g,[x,y1,z],[x,y1+.012,z],.022,M.grey,14); rod(g,[x,y0-.012,z],[x,y0,z],.022,M.grey,14); rod(g,[x,y0-.07,z],[x,y0-.012,z],.006,M.ssMir,8); };
   for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,ft+.01,ft+.19,zc+D+.06);
