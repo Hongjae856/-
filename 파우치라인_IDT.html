@@ -572,7 +572,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
           <button id="fixBtn" hidden aria-label="현장 조치">!</button>
           <div id="ipcPanel" hidden></div>
           <div id="fpMon" hidden></div>
-          <div id="fpHelp" hidden><b>1인칭 조작</b><span>W A S D</span>이동 (계단으로 2층 데크 오르내림)<span>마우스</span>시선 (화면 클릭 시 포인터 고정)<span>좌클릭 · E</span>조준한 대상 조작 · 설비 화면 열기<span>Esc</span>설비 화면 닫기 · 포인터 해제<span>F1</span>힌트 (평가모드 −5점)<span>R · 우클릭</span>운반 중인 자재 반납<span>Tab</span>메뉴 (3인칭 전환 · 이상사례 · 알람)<span>H</span>도움말 닫기</div>
+          <div id="fpHelp" hidden><b>1인칭 조작</b><span>W A S D</span>이동 (계단으로 2층 데크 오르내림)<span>마우스</span>시선 (화면 클릭 시 포인터 고정)<span>좌클릭 · E</span>조준한 대상 조작 · 설비 화면 열기<span>Esc</span>설비 화면 닫기 · 포인터 해제<span>F1</span>힌트 (평가모드 −5점)<span>C</span>앉기 · 일어서기 (눈높이 약 1.1 m)<span>R · 우클릭</span>운반 중인 자재 반납<span>Tab</span>메뉴 (3인칭 전환 · 이상사례 · 알람)<span>H</span>도움말 닫기</div>
         </div>
         <div id="legend">
           <span><i style="background:#c9cdd2"></i>파우치 (은박)</span>
@@ -771,7 +771,7 @@ M.steel=new T3.MeshStandardMaterial({color:0x6c7177,metalness:.3,roughness:.55})
    원점 : 충전실 북서 모서리 바닥 · X 동쪽 · Z 남쪽 */
 const RM={ fill:{x0:0,x1:11.8,z0:0,z1:7.0,h:4.2}, pack:{x0:0,x1:8.0,z0:-16.0,z1:0,h:3.2}, pier:5.925 };
 /* 충전기 도면값 : 프레임 2,640(동서) × 2,855(남북) · 본체 1,550 · 측면 통로 653.5 · 데크 2,000 · 난간 935.6 · 최고 3,664.75 */
-const FL={ x0:2.9, x1:5.54, z0:1.3, z1:4.155, ext:1.0, deckY:2.0, rail:.9356, top:3.66475 };
+const FL={ x0:2.9, x1:5.54, z0:1.3, z1:4.155, ext:1.45, deckY:2.0, rail:.9356, top:3.66475 };
 FL.bz0=FL.z0+.6535; FL.bz1=FL.bz0+1.55; FL.bx0=FL.x0+.5; FL.bx1=FL.x0+1.25; FL.zc=(FL.bz0+FL.bz1)/2;   /* bx0 · bx1 : 제어함 서 · 동쪽 면 (도면 재판독 11/11) */
 const STR={ x0:FL.x1, x1:FL.x1+1.58647, z0:FL.z1-.63, z1:FL.z1, n:11 };      /* 계단 : 동쪽으로 내려감 */
 const COL={ x0:6.4, x1:7.1, z0:STR.z0-.62, z1:STR.z0-.02 };                 /* 건물 기둥 (계단 바로 북쪽) */
@@ -915,26 +915,54 @@ function buildUnwinder(g,cz0,cz1){
   { const a=new T3.Mesh(new T3.TorusGeometry(.2,.007,8,28,Math.PI*.62),M.ss); a.scale.z=4; a.position.set(ex+.54,.7,zc+rw-.03); a.rotation.z=Math.PI*.12; add(g,a); rod(g,[ex+.74,.74,zc+rw-.03],[ex+.78,.74,zc+rw-.03],.014,M.dark,10); }
   /* 가이드 롤러 · 은박 경로 (롤 → 롤러 → 인쇄 유닛) */
   const R=[[.16,1.0],[.4,1.1],[.2,1.24],[.46,1.36],[.14,1.46]]; for(const [x,y] of R){ rod(g,[ex+x,y,zc-hw],[ex+x,y,zc+hw],.024,M.ssMir,18); }
-  ribbon(g,[[ex+.44,.83],[ex+.16,.976],[ex+.136,1.0],[ex+.4,1.124],[ex+.424,1.1],[ex+.2,1.216],[ex+.176,1.24],[ex+.46,1.384],[ex+.484,1.36],[ex+.14,1.484],[ex+.116,1.46],[ex+.1,1.9]],zc-rw,zc+rw,M.web);
+  ribbon(g,[[ex+.44,.83],[ex+.16,.976],[ex+.136,1.0],[ex+.4,1.124],[ex+.424,1.1],[ex+.2,1.216],[ex+.176,1.24],[ex+.46,1.384],[ex+.484,1.36],[ex+.14,1.484],[ex+.116,1.46],[ex+.1,1.6],[ex+.12,1.626],[ex+.58,1.626],[ex+.6,1.65],[ex+.6,1.92]],zc-rw,zc+rw,M.web);   /* 롤러 → 인쇄부(수평 · 헤드 아래) → 비전부(수직 · 카메라 앞) → 천장 틈으로 본체 (경로는 사진 기준 추정 · 확인 필요) */
   /* 접합대 : 낮게 뻗은 판 · 누름 봉 · 테이프 */
   bx(g,ex+.36,ex+1.0,.33,.35,zc-.44,zc+.44,M.ss); ribbon(g,[[ex+.5,.54],[ex+.62,.356],[ex+.97,.356]],zc-rw,zc+rw,M.web);
   for(const x of [.7,.92]){ rod(g,[ex+x,.375,zc-.46],[ex+x,.375,zc+.46],.01,M.ssMir,10); for(const s of [-1,1]) bx(g,ex+x-.03,ex+x+.03,.35,.39,zc+s*.46-.012,zc+s*.46+.012,M.ssD); }
   { const t=new T3.Mesh(new T3.CylinderGeometry(.035,.035,.024,20),new T3.MeshStandardMaterial({color:0xb99a3a,roughness:.5})); t.position.set(ex+.84,.4,zc+.3); add(g,t); }
   for(const s of [-1,1]) bx(g,ex+.36,ex+1.0,.3,.36,zc+s*.44-.012,zc+s*.44+.012,M.ssD);
   /* 사다리꼴 아크릴 커버 (롤러 구간) · 손잡이 */
-  ribbon(g,[[ex+.02,1.53],[ex+.5,1.53],[ex+.66,1.3],[ex+.66,1.0]],zc-hw+.01,zc+hw-.01,M.acryl);
+  ribbon(g,[[ex+.16,1.53],[ex+.5,1.53],[ex+.66,1.3],[ex+.66,1.0]],zc-hw+.01,zc+hw-.01,M.acryl);
   rod(g,[ex+.61,1.44,zc-.07],[ex+.61,1.44,zc+.07],.006,M.ssMir,8); for(const d of [-.07,.07]) rod(g,[ex+.585,1.41,zc+d],[ex+.61,1.44,zc+d],.005,M.ssMir,6);
-  /* 인쇄 유닛 : 알루미늄 틀 · 아크릴 함 · 열전사 헤드(흰 상자 · 파란 원) · 리본 카세트 */
-  const py0=1.56, py1=Y-.1;
-  for(const z of [zc-hw,zc+hw]){ bx(g,ex+.62,ex+.66,py0,py1,z-.02,z+.02,M.alu); } bx(g,ex,ex+.66,py0-.03,py0,zc-hw-.02,zc+hw+.02,M.alu);
-  bx(g,ex+.655,ex+.66,py0,py1,zc-hw+.02,zc+hw-.02,M.acryl); for(const s of [-1,1]) bx(g,ex,ex+.62,py0,py1,zc+s*hw-.003,zc+s*hw+.003,M.acryl);
-  bx(g,ex+.2,ex+.5,py0+.06,py0+.1,zc-hw+.03,zc+hw-.03,M.alu); bx(g,ex+.24,ex+.44,py0+.1,py0+.26,zc-.36,zc-.1,M.dark);
-  bx(g,ex+.3,ex+.42,py0+.1,py0+.21,zc-.09,zc+.05,M.white); rod(g,[ex+.42,py0+.155,zc-.02],[ex+.424,py0+.155,zc-.02],.035,M.blue,24);
-  rod(g,[ex+.1,py0+.05,zc-hw+.03],[ex+.1,py0+.05,zc+hw-.03],.02,M.ssMir,14);
-  for(const s of [-1,1]) rod(g,[ex+.66,py0+.05,zc+s*(hw-.06)],[ex+.69,py0+.05,zc+s*(hw-.06)],.014,M.orange,12);
-  tube(g,[[ex+.36,py0+.2,zc+.06],[ex+.5,py0+.1,zc+.3],[ex+.4,py0-.1,zc+hw+.06],[ex+.1,py0-.3,zc+hw+.1]],.012,M.dark);
-  /* 소형 제어 박스 (북쪽 · 흰 함체 · 화면 · 적색 버튼) · 공압 레귤레이터 · 전선관 */
-  { const z0=cz0+.04, z1=zc-hw-.05; bx(g,ex-.02,ex+.14,1.12,1.5,z0,z1,M.white); bx(g,ex+.14,ex+.146,1.33,1.45,z0+.04,z1-.04,M.scr); rod(g,[ex+.14,1.24,z0+.06],[ex+.155,1.24,z0+.06],.012,M.red,12); rod(g,[ex+.14,1.24,z1-.06],[ex+.155,1.24,z1-.06],.012,M.dark,12);
+  /* ── 인쇄 · 비전 유닛 (데크 아래 · 북쪽에서 보면 오른쪽(서) = 인쇄부, 왼쪽(동) = 비전부 — 현장 사진 · 영상 11/16) ──
+     회색 틀(북 · 남 면 2칸 개구 · 가운데 칸막이 + 볼트 클램프판) · 위 폭 조절 나사봉 · 동쪽 아크릴 문(손잡이)
+     인쇄부 : 알루미늄 받침(플래튼) 위 수평 은박 · 열전사 헤드(검정) + 리본 카세트(투명) · 매달림 브래킷 · 리니어 모듈(남북 · 위) · 서보(북쪽 끝)
+     비전부 : 수직 은박 · 카메라(검정 · 적색 LED) · 매달림 브래킷 · 케이블 체인 · 리니어 모듈(위) · 서보 · 적색 조명
+     리니어 모듈은 은박 경로와 겹치지 않도록 틀 위쪽에 둠 (사진상 서보는 아래쪽으로 보임 — 확인 필요) */
+  const py0=1.58, py1=Y-.1, zN=zc-hw, zS=zc+hw, PU=FM.pu={};
+  for(const z of [zN,zS]){ const t=z<zc?-1:1, f=(x0,x1,y0,y1)=>bx(g,ex+x0,ex+x1,y0,y1,z-.006,z+.006,M.grey);
+    f(.02,.64,py1-.05,py1); f(.02,.64,py0,py0+.045); f(.02,.06,py0,py1); f(.6,.64,py0,py1); f(.29,.36,py0,py1);
+    bx(g,ex+.3,ex+.35,py0+.07,py1-.07,z+t*.006,z+t*.012,M.alu); for(const y of [py0+.1,py0+.14,py1-.11,py1-.15]) for(const x of [.31,.34]) rod(g,[ex+x,y,z+t*.012],[ex+x,y,z+t*.02],.007,M.ssMir,10); }
+  bx(g,ex+.3,ex+.35,py0+.08,py1-.04,zN+.006,zS-.006,M.grey);                                   /* 칸막이 (은박이 아래 · 위로 지나감) */
+  bx(g,ex+.02,ex+.56,py1-.012,py1,zN,zS,M.grey); bx(g,ex+.625,ex+.64,py1-.012,py1,zN,zS,M.grey);   /* 천장판 (은박이 나가는 틈) */
+  rod(g,[ex+.05,py1-.03,zN-.035],[ex+.59,py1-.03,zN-.035],.009,M.ssD,10); for(const x of [.05,.27,.38,.59]) bx(g,ex+x-.02,ex+x+.02,py1-.05,py1-.01,zN-.05,zN-.02,M.alu); for(const x of [.03,.61]) rod(g,[ex+x-.02,py1-.03,zN-.035],[ex+x+.02,py1-.03,zN-.035],.022,M.ssMir,18);
+  bx(g,ex+.655,ex+.66,py0,py1,zN+.01,zS-.01,M.acryl);                                         /* 동쪽 아크릴 문 */
+  for(const zz of [zc-.31,zc-.23]){ rod(g,[ex+.66,py0+.1,zz],[ex+.69,py0+.1,zz],.007,M.ssMir,8); rod(g,[ex+.66,py0+.24,zz],[ex+.69,py0+.24,zz],.007,M.ssMir,8); rod(g,[ex+.69,py0+.1,zz],[ex+.69,py0+.24,zz],.007,M.ssMir,8); }
+  for(const s of [-1,1]) rod(g,[ex+.66,py0+.03,zc+s*(hw-.06)],[ex+.69,py0+.03,zc+s*(hw-.06)],.014,M.black,12);
+  /* 서보 (쿨머슬형 : 알루미늄 몸체 · 방열핀 · 파란 덮개) · 리니어 모듈 */
+  const sy=py1-.17, servo=(x0,x1)=>{ bx(g,ex+x0,ex+x1,sy,sy+.1,zN-.2,zN-.04,M.alu); for(let k=0;k<5;k++) bx(g,ex+x0+.01+k*(x1-x0-.02)/4-.003,ex+x0+.01+k*(x1-x0-.02)/4+.003,sy+.01,sy+.095,zN-.2,zN-.04,M.alu);
+    bx(g,ex+x0,ex+x1,sy+.1,sy+.112,zN-.2,zN-.12,M.blue); bx(g,ex+x0+.02,ex+x1-.02,sy+.06,sy+.1,zN-.04,zN,M.black); };
+  const lin=(x0,x1)=>{ bx(g,ex+x0,ex+x1,py1-.06,py1-.012,zN,zS-.02,M.alu); bx(g,ex+x0+.01,ex+x1-.01,py1-.064,py1-.06,zN+.02,zS-.04,M.ssD); };
+  /* 인쇄부 (서쪽 칸) */
+  bx(g,ex+.13,ex+.28,py0+.03,py0+.042,zN+.02,zS-.02,M.alu);                                     /* 플래튼 (은박 받침) */
+  lin(.12,.24); servo(.12,.24);
+  { const G=new T3.Group(); g.add(G); PU.prn=G;                                                /* 헤드 · 카세트 (남북 이동) */
+    bx(G,ex+.13,ex+.23,py1-.08,py1-.064,-.06,.06,M.grey); bx(G,ex+.17,ex+.19,py0+.215,py1-.08,-.04,.04,M.grey);
+    bx(G,ex+.13,ex+.27,py0+.06,py0+.14,-.09,.09,M.black); bx(G,ex+.125,ex+.275,py0+.14,py0+.215,-.105,.105,M.acryl);
+    for(const d of [-.05,.05]) rod(G,[ex+.125,py0+.178,d],[ex+.265,py0+.178,d],.03,M.dark,20);
+    tube(G,[[ex+.21,py0+.215,.03],[ex+.24,py1-.1,.07],[ex+.26,py1-.07,.14]],.009,M.black); G.position.z=zc-.12; }
+  /* 비전부 (동쪽 칸) */
+  lin(.38,.5); servo(.38,.5);
+  bx(g,ex+.505,ex+.55,py1-.05,py1-.02,zN+.02,zc,M.black);                                     /* 케이블 체인 */
+  { const G=new T3.Group(); g.add(G); PU.vis=G;                                                /* 카메라 (남북 이동) */
+    bx(G,ex+.39,ex+.49,py1-.08,py1-.064,-.05,.05,M.grey); bx(G,ex+.41,ex+.43,py0+.13,py1-.08,-.035,.035,M.alu); bx(G,ex+.41,ex+.47,py0+.13,py0+.15,-.035,.035,M.alu);
+    bx(G,ex+.45,ex+.535,py0+.1,py0+.2,-.045,.045,M.black); rod(G,[ex+.535,py0+.15,0],[ex+.545,py0+.15,0],.006,FM.ledR||(FM.ledR=new T3.MeshStandardMaterial({color:0xff2020,emissive:0xff2020,emissiveIntensity:2})),10);
+    tube(G,[[ex+.49,py0+.2,.03],[ex+.5,py1-.1,.06],[ex+.52,py1-.05,.1]],.008,M.black); G.position.z=zc+.1; }
+  bx(g,ex+.56,ex+.595,py1-.06,py1-.035,zN+.03,zS-.03,new T3.MeshStandardMaterial({color:0xff3030,emissive:0xff1a1a,emissiveIntensity:1.4}));   /* 적색 조명 */
+  /* 인쇄 · 비전 제어 박스 (북쪽 면 · 흰 함체 · 터치 화면 · OFF/ON 로터리 · 적색 버튼 — 사진) · 공압 레귤레이터 · 전선관 */
+  { const z0=cz0+.04, b0=zN-.2, b1=zN-.04; bx(g,ex+.02,ex+.3,1.06,1.44,b0,b1,M.white); bx(g,ex+.06,ex+.26,1.3,1.4,b0-.004,b0,M.scr); bx(g,ex+.04,ex+.28,1.285,1.415,b0-.003,b0-.001,M.black);
+    rod(g,[ex+.09,1.19,b0],[ex+.09,1.19,b0-.02],.016,M.red,14); rod(g,[ex+.22,1.15,b0],[ex+.22,1.15,b0-.014],.013,M.red,14); for(const y of [1.1,1.4]) bx(g,ex+.295,ex+.31,y-.03,y+.03,b0+.02,b0+.06,M.white);
+  
     for(const dz of [.05,.13]){ rod(g,[ex+.06,.52,z0+dz],[ex+.06,.72,z0+dz],.026,M.white,14); rod(g,[ex+.06,.72,z0+dz],[ex+.06,.8,z0+dz],.02,M.blue,12); rod(g,[ex+.06,.44,z0+dz],[ex+.06,.52,z0+dz],.02,M.dark,12); }
     tube(g,[[ex+.07,1.12,z0+.1],[ex+.12,.95,z0+.12],[ex+.1,.85,z0+.1],[ex+.06,.8,z0+.09]],.012,M.dark);
     tube(g,[[ex+.05,.44,z0+.09],[ex+.2,.2,z0+.2],[ex+.3,.1,zc-.2],[ex+.1,.06,zc+.3]],.016,M.dark); }
@@ -2543,8 +2571,8 @@ const ANC={
   dialB:[XF+.66,DY+.3,ZC],              /* 백당 (동쪽) */
   dust:[5.0,DY+.55,1.65],               /* 동쪽 데크 진공 생성기 · 집진 */
   roll:[4.71,0.70,ZC],                  /* 은박 롤 (언와인더) */
-  prn:[4.55,1.40,ZC-.25],               /* 은박 인쇄 유닛 */
-  vis:[4.55,1.40,ZC+.25],
+  prn:[4.35,1.70,ZC-.44],               /* 은박 인쇄부 (북쪽 면 오른쪽 칸 · 11/16 사진) */
+  vis:[4.65,1.70,ZC-.44],               /* 비전부 (왼쪽 칸) */
   ibc:[6.75,1.55,1.5],
   lift:[10.75,1.20,1.8],                /* 드럼리프터 (보관 위치) */
   liftUse:[XF,0.70,FL.z1+.55],          /* 원료투입구 아래 사용 위치 */
@@ -2591,7 +2619,7 @@ const WORKVIEW={
   ibc:   VW([8.9,1.8,1.5],[6.75,1.0,1.5]),
   lift:  VW([6.2,2.6,6.5],[3.2,1.2,4.6]),
   roll:  VW([6.7,1.5,1.0],[4.7,0.8,2.6]),
-  printer:VW([6.5,1.9,1.1],[4.6,1.35,2.5]),
+  printer:VW([4.75,1.85,1.05],[4.45,1.62,2.45]),        /* 북쪽에서 인쇄 · 비전 유닛을 봄 (현장 사진 시점) */
   chute: VW([1.3,1.25,3.7],[2.85,0.6,2.73]),
   door:  VW([1.15,1.6,2.73],[2.95,1.4,2.73]),
   sw:    VW([5.2,1.5,-1.0],[3.6,1.2,-0.4]),
@@ -2626,7 +2654,7 @@ const JOBS={
   scoop:  {stand:[XF,3.95], deck:true, reach:ANC.hop2, carry:"scoop", dur:3.0, view:"hopper", pour:true},
   roll:   {stand:[5.25,ZC+.15], reach:ANC.roll, carry:"roll", dur:3.0, view:"roll"},
   rollOut:{stand:[5.25,ZC+.15], reach:ANC.roll, carry:null, dur:2.4, view:"roll"},
-  prn:    {stand:[5.25,ZC-.45], reach:ANC.prn, dur:1.6, view:"printer"},
+  prn:    {stand:[4.5,ZC-.95], reach:ANC.prn, dur:1.6, view:"printer"},
   door:   {stand:[2.35,ZC-.3], reach:ANC.door, dur:1.4, view:"door"},
   front:  {stand:[2.35,ZC+.15], reach:ANC.sealFront, dur:2.4, view:"door"},
   chute:  {stand:[2.35,ZC+.45], reach:ANC.chute, dur:2.6, view:"chute"},
@@ -3990,7 +4018,7 @@ listen(canvas,'pointerdown',e=>{
     }
     if(e.target?.closest?.('input,textarea,select,[contenteditable=true]'))return;
     if(mode!=='walk')return;
-    const actions={KeyE:use,F1:host.hint,KeyR:host.returnPart,KeyH:host.help,Tab:host.menu};
+    const actions={KeyE:use,F1:host.hint,KeyR:host.returnPart,KeyH:host.help,KeyC:host.crouch||(()=>{}),Tab:host.menu};
     if(!['KeyW','KeyA','KeyS','KeyD'].includes(e.code) && !actions[e.code])return;
     e.preventDefault();
     if(actions[e.code]){if(!e.repeat)actions[e.code]();}else keys.add(e.code);
@@ -4368,9 +4396,9 @@ function wkDraw(dt){
    · 조작은 기존 타일 · 판넬 · 설비 화면 · 현장 조치 함수를 그대로 호출 (단계 · 인터락 판정 유지)
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
-const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false};
+const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false, crouch:false, ck:0};
 const EYE=1.65;      /* 1인칭 눈높이 (11/16 V9 사용자 지정 1.65 m) */
-const FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const CROUCH=.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 
@@ -4382,6 +4410,7 @@ function fpObstacles(){
   b(F.x0-.05,F.bx0,F.bz0+.1,F.bz1-.1);                           /* 성형 · 슈트 (서쪽 정면) */
   b(CVX-.16,CVX+.16,0,F.zc+.55);                                 /* 배출 컨베이어 */
   b(F.bx1,F.bx1+.78,F.zc-.62,F.zc+.62);                          /* 언와인더 */
+  b(F.bx1,F.bx1+.33,F.zc-.7,F.zc-.6);                            /* 인쇄 · 비전 제어 박스 (북쪽 면) */
   b(F.x0-.62,F.x0-.37,F.bz0-.42,F.bz0+.18);                      /* 컨트롤 판넬 */
   for(const [x,z] of [[xw+.05,F.z0+.05],[xw+.05,F.z1-.05],[F.x0+.045,F.z0+.05],[F.x0+.045,F.z1-.05],[F.x1-.05,F.z0+.05],[F.x1-.05,F.z1-.05],[F.x0+.045,F.bz0-.07],[F.x0+.045,F.bz1+.07]]) b(x-.06,x+.06,z-.06,z+.06);
   b(CVX+.38,CVX+1.07,.38,1.25);                                  /* 프린터 컨트롤러 거치대 */
@@ -4423,7 +4452,8 @@ function fpCanStand(x,z){ return fpPick(x,z)!=null; }
 function fpEyeY(pose,moved,dt){
   const y=fpPick(pose.x,pose.z); if(y!=null) FP.feet=y;
   if(moved>0){ FP.bob+=moved/.62*Math.PI; FP.bobA=Math.min(1,FP.bobA+dt*6); } else FP.bobA=Math.max(0,FP.bobA-dt*4);
-  return FP.feet+EYE+Math.sin(FP.bob*2)*.011*FP.bobA;
+  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.65 → 1.10 m */
+  return FP.feet+EYE-CROUCH*FP.ck+Math.sin(FP.bob*2)*.011*FP.bobA*(1-FP.ck*.6);
 }
 
 /* ── 설비 화면 (anchors.js FP_MON) ── */
@@ -4564,6 +4594,7 @@ function fpInit(){
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
+    crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.1 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },
     returnPart:fpReturnPart, menu:fpMenu, help:fpHelp});
   $("#fpBtn").onclick=()=>fpSet(!FP.on);
@@ -4604,7 +4635,7 @@ function fpOverlay(g,K){
   const f=S.f, carry=f.rollCarry==="red"?"적색 인쇄 은박 롤 운반 중 (2인 1조) · R 반납":"";
   const lv=FP.feet>=FL.deckY-.05?"2층 데크":FP.feet>.05?"계단":"1층";
   g.textAlign="left"; g.textBaseline="alphabetic"; g.font="800 "+(12*K).toFixed(0)+"px sans-serif";
-  const t="🧍 1인칭 · "+lv+(carry?" · "+carry:"")+"   WASD 이동 · 마우스 시선 · 좌클릭/E 조작 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
+  const t="🧍 1인칭 · "+lv+(FP.crouch?" · 앉음":"")+(carry?" · "+carry:"")+"   WASD 이동 · 마우스 시선 · 좌클릭/E 조작 · C 앉기 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
   const w=g.measureText(t).width+18*K; g.fillStyle="rgba(10,20,32,.62)"; rr(g,10*K,10*K,w,24*K,7*K); g.fill(); g.fillStyle="#fff"; g.fillText(t,19*K,27*K);
 }
 
@@ -4660,6 +4691,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:13, d:"2026-11-16", t:"2층 데크 앞(서쪽) 확장 1.0 → 1.45 m(통로 약 0.9 m), 1인칭 앉기(C 키 · 눈높이 약 1.1 m), 은박 인쇄 · 비전 유닛을 현장 사진 · 영상 기준으로 재구성(북쪽에서 보아 오른쪽 = 인쇄부 : 열전사 헤드 · 리본 카세트 · 플래튼, 왼쪽 = 비전부 : 카메라 · 적색 조명 · 케이블 체인, 리니어 모듈 · 서보, 폭 조절 나사봉, 북쪽 면 제어 박스)"},
  {v:12, d:"2026-11-16", t:"OEE 시트 읽기 범위를 파우치 라인만으로 제한(계수기 · 블리스터 시트는 IDT DB 에 저장하지 않음)"},
  {v:11, d:"2026-11-16", t:"OEE 연결 : claude.ai 아티팩트가 Apps Script 주소 호출을 막는 것을 확인 → Google Drive 시트 연결을 1번(권장)으로 올리고, Apps Script 연결이 막히면 Drive 의 OEE 시트 목록을 자동으로 띄움"},
  {v:10, d:"2026-11-16", t:"OEE 관리 대시보드에 Apps Script 주소 연결 추가(배포 관리의 웹 앱 주소 붙여넣기 → ?format=json 으로 읽어 IDT DB 저장 · 열 때 30 분 경과 시 자동 갱신), 실패 원인 안내"},

@@ -43,6 +43,9 @@ PATCH = {
         ("cam.dist>6000", "cam.dist>6", 1),
         ('const info="드래그 회전 · 휠 확대 · Shift/우클릭 드래그 이동";', 'const info="드래그 회전 · 휠 확대 · Shift/우클릭 드래그 이동 · 그래픽 "+GQ.label();', 1),
     ],
+    "fps.js": [
+        ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
+    ],
     "course.js": [
         ('const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");', 'const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");', 1),
         ('examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};', 'examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가"};', 1),
@@ -89,6 +92,7 @@ def load(folder: str, name: str) -> str:
 
 
 BODY_PATCH = [   # 메인화면 : 순서도 삭제 · 과정 → 기본 · 심화 · OEE
+    ('<span>R · 우클릭</span>', '<span>C</span>앉기 · 일어서기 (눈높이 약 1.1 m)<span>R · 우클릭</span>', 1),
     ('      <div id="lineStrip"></div>\n', '', 1),
     ('<button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>',
      '<h4>기본</h4><button class="s" id="spEasy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button>', 1),

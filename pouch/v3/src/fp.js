@@ -4,9 +4,9 @@
    · 조작은 기존 타일 · 판넬 · 설비 화면 · 현장 조치 함수를 그대로 호출 (단계 · 인터락 판정 유지)
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
-const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false};
+const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false, crouch:false, ck:0};
 const EYE=1.65;      /* 1인칭 눈높이 (11/16 V9 사용자 지정 1.65 m) */
-const FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const CROUCH=.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 
@@ -18,6 +18,7 @@ function fpObstacles(){
   b(F.x0-.05,F.bx0,F.bz0+.1,F.bz1-.1);                           /* 성형 · 슈트 (서쪽 정면) */
   b(CVX-.16,CVX+.16,0,F.zc+.55);                                 /* 배출 컨베이어 */
   b(F.bx1,F.bx1+.78,F.zc-.62,F.zc+.62);                          /* 언와인더 */
+  b(F.bx1,F.bx1+.33,F.zc-.7,F.zc-.6);                            /* 인쇄 · 비전 제어 박스 (북쪽 면) */
   b(F.x0-.62,F.x0-.37,F.bz0-.42,F.bz0+.18);                      /* 컨트롤 판넬 */
   for(const [x,z] of [[xw+.05,F.z0+.05],[xw+.05,F.z1-.05],[F.x0+.045,F.z0+.05],[F.x0+.045,F.z1-.05],[F.x1-.05,F.z0+.05],[F.x1-.05,F.z1-.05],[F.x0+.045,F.bz0-.07],[F.x0+.045,F.bz1+.07]]) b(x-.06,x+.06,z-.06,z+.06);
   b(CVX+.38,CVX+1.07,.38,1.25);                                  /* 프린터 컨트롤러 거치대 */
@@ -59,7 +60,8 @@ function fpCanStand(x,z){ return fpPick(x,z)!=null; }
 function fpEyeY(pose,moved,dt){
   const y=fpPick(pose.x,pose.z); if(y!=null) FP.feet=y;
   if(moved>0){ FP.bob+=moved/.62*Math.PI; FP.bobA=Math.min(1,FP.bobA+dt*6); } else FP.bobA=Math.max(0,FP.bobA-dt*4);
-  return FP.feet+EYE+Math.sin(FP.bob*2)*.011*FP.bobA;
+  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.65 → 1.10 m */
+  return FP.feet+EYE-CROUCH*FP.ck+Math.sin(FP.bob*2)*.011*FP.bobA*(1-FP.ck*.6);
 }
 
 /* ── 설비 화면 (anchors.js FP_MON) ── */
@@ -200,6 +202,7 @@ function fpInit(){
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
+    crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.1 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },
     returnPart:fpReturnPart, menu:fpMenu, help:fpHelp});
   $("#fpBtn").onclick=()=>fpSet(!FP.on);
@@ -240,6 +243,6 @@ function fpOverlay(g,K){
   const f=S.f, carry=f.rollCarry==="red"?"적색 인쇄 은박 롤 운반 중 (2인 1조) · R 반납":"";
   const lv=FP.feet>=FL.deckY-.05?"2층 데크":FP.feet>.05?"계단":"1층";
   g.textAlign="left"; g.textBaseline="alphabetic"; g.font="800 "+(12*K).toFixed(0)+"px sans-serif";
-  const t="🧍 1인칭 · "+lv+(carry?" · "+carry:"")+"   WASD 이동 · 마우스 시선 · 좌클릭/E 조작 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
+  const t="🧍 1인칭 · "+lv+(FP.crouch?" · 앉음":"")+(carry?" · "+carry:"")+"   WASD 이동 · 마우스 시선 · 좌클릭/E 조작 · C 앉기 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
   const w=g.measureText(t).width+18*K; g.fillStyle="rgba(10,20,32,.62)"; rr(g,10*K,10*K,w,24*K,7*K); g.fill(); g.fillStyle="#fff"; g.fillText(t,19*K,27*K);
 }

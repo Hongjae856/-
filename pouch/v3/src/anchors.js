@@ -29,8 +29,8 @@ const ANC={
   dialB:[XF+.66,DY+.3,ZC],              /* 백당 (동쪽) */
   dust:[5.0,DY+.55,1.65],               /* 동쪽 데크 진공 생성기 · 집진 */
   roll:[4.71,0.70,ZC],                  /* 은박 롤 (언와인더) */
-  prn:[4.55,1.40,ZC-.25],               /* 은박 인쇄 유닛 */
-  vis:[4.55,1.40,ZC+.25],
+  prn:[4.35,1.70,ZC-.44],               /* 은박 인쇄부 (북쪽 면 오른쪽 칸 · 11/16 사진) */
+  vis:[4.65,1.70,ZC-.44],               /* 비전부 (왼쪽 칸) */
   ibc:[6.75,1.55,1.5],
   lift:[10.75,1.20,1.8],                /* 드럼리프터 (보관 위치) */
   liftUse:[XF,0.70,FL.z1+.55],          /* 원료투입구 아래 사용 위치 */
@@ -77,7 +77,7 @@ const WORKVIEW={
   ibc:   VW([8.9,1.8,1.5],[6.75,1.0,1.5]),
   lift:  VW([6.2,2.6,6.5],[3.2,1.2,4.6]),
   roll:  VW([6.7,1.5,1.0],[4.7,0.8,2.6]),
-  printer:VW([6.5,1.9,1.1],[4.6,1.35,2.5]),
+  printer:VW([4.75,1.85,1.05],[4.45,1.62,2.45]),        /* 북쪽에서 인쇄 · 비전 유닛을 봄 (현장 사진 시점) */
   chute: VW([1.3,1.25,3.7],[2.85,0.6,2.73]),
   door:  VW([1.15,1.6,2.73],[2.95,1.4,2.73]),
   sw:    VW([5.2,1.5,-1.0],[3.6,1.2,-0.4]),
@@ -112,7 +112,7 @@ const JOBS={
   scoop:  {stand:[XF,3.95], deck:true, reach:ANC.hop2, carry:"scoop", dur:3.0, view:"hopper", pour:true},
   roll:   {stand:[5.25,ZC+.15], reach:ANC.roll, carry:"roll", dur:3.0, view:"roll"},
   rollOut:{stand:[5.25,ZC+.15], reach:ANC.roll, carry:null, dur:2.4, view:"roll"},
-  prn:    {stand:[5.25,ZC-.45], reach:ANC.prn, dur:1.6, view:"printer"},
+  prn:    {stand:[4.5,ZC-.95], reach:ANC.prn, dur:1.6, view:"printer"},
   door:   {stand:[2.35,ZC-.3], reach:ANC.door, dur:1.4, view:"door"},
   front:  {stand:[2.35,ZC+.15], reach:ANC.sealFront, dur:2.4, view:"door"},
   chute:  {stand:[2.35,ZC+.45], reach:ANC.chute, dur:2.6, view:"chute"},
