@@ -5720,9 +5720,9 @@ function stepsDemo(){
     D("dRun","충전기 가동 (RESET → RUN → FILLING ON)","후 공정 연동 상태에서 충전기를 가동하고 FILLING 을 켜서 충전을 시작합니다.","충전기 가동",ANC.panel,"front",
       ()=>{ Object.assign(S.f,{link:true, linkChk:true, door:"closed", run:true, started:true, filling:true}); S.alarms=[]; hMach="fl"; hScr="run"; drawHMI(); toast("충전기 RESET → RUN → FILLING ON — 충전 시작","good"); },
       ()=>f().run&&f().filling),
-    D("dWatch","생산 → 수동 포장 (대케이스 · 대박스 · 파렛트)","파우치가 정렬컨베어로 포장실에 넘어가 카톤 → 대케이스 → 대박스 → 파렛트까지 포장됩니다. "+DEMO_GOAL+"카톤이 되면 시연을 마칩니다.","수동 포장 보기",ANC.boxing,"hand",
+    D("dWatch","생산 → 수동 포장 (대케이스 · 대박스 · 파렛트)","파우치가 정렬컨베어로 포장실에 넘어가 카톤 → 대케이스 → 대박스 → 파렛트까지 포장됩니다. "+DEMO_GOAL+"카톤이 되고 첫 대박스가 파렛트에 올라가면 시연을 마칩니다.","수동 포장 보기",ANC.boxing,"hand",
       ()=>{ camSet("hand"); toast("수동 포장 구역 — 대케이스 포장 → 대박스 테이핑 → 파렛트 적재","good"); S.flags.demoWatch=true; },
-      ()=>S.flags.demoWatch&&S.cnt.good>=DEMO_GOAL)
+      ()=>S.flags.demoWatch&&S.cnt.good>=DEMO_GOAL&&(typeof MP=="undefined"||!MP.palB||!R3.gl||MP.palB.count>=1))   /* 3D : 첫 대박스가 파렛트에 올라갈 때까지 (V20 포장실 상태 연동) */
   ];
 }
 /* 코치 패널의 [시연 실행] 버튼 */
