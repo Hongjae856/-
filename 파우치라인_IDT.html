@@ -4660,6 +4660,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:11, d:"2026-11-16", t:"OEE 연결 : claude.ai 아티팩트가 Apps Script 주소 호출을 막는 것을 확인 → Google Drive 시트 연결을 1번(권장)으로 올리고, Apps Script 연결이 막히면 Drive 의 OEE 시트 목록을 자동으로 띄움"},
  {v:10, d:"2026-11-16", t:"OEE 관리 대시보드에 Apps Script 주소 연결 추가(배포 관리의 웹 앱 주소 붙여넣기 → ?format=json 으로 읽어 IDT DB 저장 · 열 때 30 분 경과 시 자동 갱신), 실패 원인 안내"},
  {v:9, d:"2026-11-16", t:"1인칭 작업자 눈높이 1.55 m → 1.65 m (2층 데크에서 3.65 m · 천장 4.2 m), 이상사례 대처 교육 중요도 등급(상 · 중 · 하) 확정"},
  {v:8, d:"2026-11-16", t:"메인화면 왼쪽 아래에 OEE 연동 표시등 추가(초록 = Drive 시트 · IDT DB 데이터 연결, 빨강 = 미연동 · 누르면 OEE 관리 대시보드)"},
@@ -4819,7 +4820,7 @@ const OEEEDU=(function(){
     st.busy="Apps Script 주소에서 읽는 중…"; render();
     try{
       const url=jsonUrl(u); let res;
-      try{ res=await fetch(url,{redirect:"follow",credentials:"omit"}); }catch(e){ throw new Error("연결이 막혔습니다 (아티팩트 보안 정책 · 사내망 차단 가능성). [Google Drive 시트 연결] 을 쓰세요."); }
+      try{ res=await fetch(url,{redirect:"follow",credentials:"omit"}); }catch(e){ st.blocked=true; if(cap.mcp&&!st.files) driveSearch("OEE").then(f=>{ st.files=f; render(); }).catch(()=>{}); throw new Error("연결이 막혔습니다 (claude.ai 아티팩트는 외부 주소 호출을 막음). 위 [1. Google Drive 시트 연결] 목록에서 OEE 시트의 [이 시트 연결] 을 누르세요."); }
       if(!res.ok) throw new Error("응답 "+res.status);
       const txt=await res.text(); if(/^\s*</.test(txt)) throw new Error("JSON 대신 웹 화면이 왔습니다. doGet 에 format=json 출력이 추가 · 재배포되었는지, 웹 앱 액세스 권한이 '모든 사용자' 인지 확인하세요.");
       const raw=parseText(txt); if(!raw.length) throw new Error("받은 데이터가 0 건입니다.");
@@ -4875,13 +4876,13 @@ const OEEEDU=(function(){
     const files=st.files?(st.files.length?'<table class="oeeT"><tr><th>시트 파일</th><th>수정</th><th></th></tr>'+st.files.map(f=>'<tr><td>'+esc(f.title)+'</td><td>'+esc(String(f.modified).slice(0,10))+'</td><td><button data-act="pick" data-id="'+esc(f.id)+'" data-t="'+esc(f.title)+'">이 시트 연결</button></td></tr>').join("")+'</table>':'<p class="oeeEmpty">찾은 시트가 없습니다.</p>'):"";
     const savedUrl=(M&&M.url)||lsGet("oeeedu.url")||"";
     return '<div class="oeeCols"><div>'+
-      '<h3>1. Apps Script 주소 연결</h3><p>대시보드 [배포 › 배포 관리] 의 웹 앱 주소(…/exec)를 붙여 넣고 [연결] 을 누릅니다. IDT 가 끝에 ?format=json 을 붙여 읽고 IDT DB 에 저장합니다.</p>'+
-      '<div class="oeeRow"><input id="oeeUrl" placeholder="https://script.google.com/macros/s/…/exec" value="'+esc(savedUrl)+'"><button data-act="url">연결</button></div>'+
-      (M&&M.url?'<p><button data-act="reurl">지금 다시 읽기</button> <span class="oeeNote">연결된 주소로 마지막 동기화 '+kst(M.syncedAt)+'</span></p>':'')+
-      '<h3>2. Google Drive 시트 연결</h3><p>보는 사람의 Google Drive 권한으로 OEE 시트를 직접 읽어 IDT DB 에 저장합니다. 연결 후에는 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.</p>'+
+      '<h3>1. Google Drive 시트 연결 (권장)</h3><p>보는 사람의 Google Drive 권한으로 OEE 시트를 직접 읽어 IDT DB 에 저장합니다. 연결 후에는 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.</p>'+
       (cap.mcp?'<div class="oeeRow"><input id="oeeKw" placeholder="시트 이름 낱말 (예: OEE)" value="OEE"><button data-act="search">Drive 에서 찾기</button></div>'+files+
         (M&&M.fileId?'<p><button data-act="resync">지금 다시 읽기</button> <span class="oeeNote">연결된 시트 : '+esc(M.fileName||M.fileId)+'</span></p>':''):
         '<p class="oeeEmpty">이 화면에서는 Drive 연결을 쓸 수 없습니다. claude.ai 에서 아티팩트로 열고, 설정 › 커넥터에서 Google Drive 를 연결하세요.</p>')+
+      '<h3>2. Apps Script 주소 연결</h3><p>대시보드 웹 앱 주소(…/exec)로 읽습니다. <b>claude.ai 아티팩트에서는 외부 주소 호출이 막혀 동작하지 않습니다(11/16 확인)</b> — 파일로 내려받아 연 경우 등에만 사용하세요.</p>'+
+      '<div class="oeeRow"><input id="oeeUrl" placeholder="https://script.google.com/macros/s/…/exec" value="'+esc(savedUrl)+'"><button data-act="url">연결</button></div>'+
+      (M&&M.url?'<p><button data-act="reurl">지금 다시 읽기</button> <span class="oeeNote">연결된 주소로 마지막 동기화 '+kst(M.syncedAt)+'</span></p>':'')+
       '<h3>3. 붙여넣기 (보조)</h3><p>시트에서 머리줄을 포함해 범위를 복사(Ctrl+C)한 뒤 아래 칸에 붙여 넣습니다 (Ctrl+V). 이 화면에만 표시하며 IDT DB 에는 저장하지 않습니다.</p><textarea id="oeeText" placeholder="작업기간	제조번호(LOT)	포장라인	제품명	…	시간가동률(%)	성능가동률(%)	수율(%)	OEE(%)	부동사유	대책"></textarea><button data-act="paste">적용</button>'+
       '<h3>4. 예시 데이터</h3><p>화면 확인용으로 규칙에 따라 만든 값입니다 (실제 실적 아님).</p><button data-act="demo">예시 데이터로 보기</button></div>'+
       '<div><h3>IDT DB</h3><p>'+dbTxt+'</p>'+(st.canWrite===false?'<p class="oeeNote">※ 이 계정은 IDT DB 를 읽기만 할 수 있습니다. Drive 에서 읽은 값은 화면에만 표시됩니다.</p>':'')+
