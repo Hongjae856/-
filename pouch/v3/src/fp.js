@@ -223,7 +223,7 @@ function fpSet(on){
   FP_OBS=FP_OBS||fpObstacles();
   if(on){ if(typeof apStop==="function"&&AP.on) apStop(); fpMoveHMI(true); FP.mod.start(fpSpawnFrom()); }
   else { FP.mod.stop(); cam.fp=null; FPMON=null; fpMoveHMI(false); camSet(S&&S.room==="P"?"pack":"fill"); drawHMI(); }
-  $("#fpBtn").textContent=on?"🎥 3인칭 보기":"🧍 1인칭";
+  $("#fpBtn").textContent=on?"🧍 1인칭 → 3인칭 전환":"🎥 3인칭 → 1인칭 전환";   /* 현재 시점 + 전환 표기 (11/16 사용자 선택) */
   $("#fpBtn").classList.toggle("on",on);
   renderTiles();
 }

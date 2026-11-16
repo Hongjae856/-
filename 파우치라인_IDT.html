@@ -622,7 +622,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <div class="ttl">파우치 라인 IDT</div>
     <div id="roomTag" class="pill"><b id="roomNm">-</b></div>
     <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button><button data-s="10">×10</button></div>
-    <button class="gbtn" id="fpBtn">🧍 1인칭</button>
+    <button class="gbtn" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>
     <button class="gbtn" id="apBtn">▶ 자동재생</button>
     <div class="sp"></div>
     <button class="gbtn" id="soundBtn">사운드 OFF</button>
@@ -699,7 +699,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
         </div>
       </div>
       <div id="panel"></div>
-      <div id="fpNote"><b>🧍 1인칭 진행 중</b>설비 화면과 조작반은 현장 모니터 앞에서 좌클릭(E)으로 엽니다. Esc 로 닫습니다.<br>상단 [🎥 3인칭 보기] 로 이 자리에 다시 표시할 수 있습니다.</div>
+      <div id="fpNote"><b>🧍 1인칭 진행 중</b>설비 화면과 조작반은 현장 모니터 앞에서 좌클릭(E)으로 엽니다. Esc 로 닫습니다.<br>상단 [🧍 1인칭 → 3인칭 전환] 으로 이 자리에 다시 표시할 수 있습니다.</div>
     </div>
   </div>
   <!-- 모달 -->
@@ -4989,7 +4989,7 @@ function fpSet(on){
   FP_OBS=FP_OBS||fpObstacles();
   if(on){ if(typeof apStop==="function"&&AP.on) apStop(); fpMoveHMI(true); FP.mod.start(fpSpawnFrom()); }
   else { FP.mod.stop(); cam.fp=null; FPMON=null; fpMoveHMI(false); camSet(S&&S.room==="P"?"pack":"fill"); drawHMI(); }
-  $("#fpBtn").textContent=on?"🎥 3인칭 보기":"🧍 1인칭";
+  $("#fpBtn").textContent=on?"🧍 1인칭 → 3인칭 전환":"🎥 3인칭 → 1인칭 전환";   /* 현재 시점 + 전환 표기 (11/16 사용자 선택) */
   $("#fpBtn").classList.toggle("on",on);
   renderTiles();
 }
@@ -5070,6 +5070,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:21, d:"2026-11-16", t:"상단 시점 버튼 표기를 현재 시점 + 전환으로 변경(3인칭일 때 \"🎥 3인칭 → 1인칭 전환\", 1인칭일 때 \"🧍 1인칭 → 3인칭 전환\")"},
  {v:20, d:"2026-11-16", t:"포장실 연출을 실제 제품 흐름과 연동(교육 시작 시 카토너 · 검사기 · 수동 포장이 비어 있고 충전기 가동 후 넘어온 제품만 표시), 심화 충전실에 IBC 진공호스 연결 · 클램프 체결 단계 추가(연결 전 이송기 ON 불가), IPC 채취 시 작업자가 배출 컨베이어에서 시료를 꺼내 저울 작업대에서 계량, 설비별 경광등(녹 가동 · 주황 정지 · 적 알람) · 알람 부저, 은박 롤 운반 · 장착 때 보조 작업자 1명이 2인 1조로 함께 움직임"},
  {v:19, d:"2026-11-16", t:"다음 작업 안내를 모든 모드에서 노란 테두리 + 3D 노란 화살표(위아래로 움직임) · 노란 고리로 표시, 메인화면에 시연모드 추가(충전기 전원 일괄 → 카토너 · 포장실 전원 일괄 → 진공 이송기 → 포장 라인 · 충전기 가동 → 수동 포장까지, 라인 클리어런스 등 생략), 교육 시작 시 배출 컨베이어를 비운 상태로 시작"},
  {v:18, d:"2026-11-16", t:"이상사례 대처 교육 중요도 등급 확정(상 : 중량 점검 · 핫멜트 · 파우치 터짐 / 중 : 안착 · 컷팅 · 정렬기 · 설명서 · 제품 투입 · 클로징 · 소케이스 인쇄 / 하 : 은박 끊어짐 · 푸셔 오버로드)"},

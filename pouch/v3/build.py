@@ -121,6 +121,8 @@ def load(folder: str, name: str) -> str:
 
 
 BODY_PATCH = [   # 메인화면 : 순서도 삭제 · 과정 → 기본 · 심화 · OEE
+    ('<button class="gbtn" id="fpBtn">🧍 1인칭</button>', '<button class="gbtn" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>', 1),   # 버튼 = 현재 시점 + 전환 (11/16)
+    ('상단 [🎥 3인칭 보기] 로', '상단 [🧍 1인칭 → 3인칭 전환] 으로', 1),
     ('<span>R · 우클릭</span>', '<span>C</span>앉기 · 일어서기 (눈높이 약 1.1 m)<span>R · 우클릭</span>', 1),
     ('      <div id="lineStrip"></div>\n', '', 1),
     ('<button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>',
