@@ -5,7 +5,7 @@
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
 const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false, crouch:false, ck:0};
-const EYE=1.65;      /* 1인칭 눈높이 (11/16 V9 사용자 지정 1.65 m) */
+const EYE=1.55;      /* 1인칭 눈높이 (11/16 V15 사용자 지시로 1.55 m 로 되돌림) */
 const CROUCH=.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
@@ -19,14 +19,14 @@ function fpObstacles(){
   b(CVX-.16,CVX+.16,0,F.zc+.55);                                 /* 배출 컨베이어 */
   b(F.bx1,F.bx1+.78,F.zc-.62,F.zc+.62);                          /* 언와인더 */
   b(F.bx1,F.bx1+.33,F.zc-.7,F.zc-.6);                            /* 인쇄 · 비전 제어 박스 (북쪽 면) */
+  b(1.88,2.32,6.23,6.67);                                        /* 주성분 STS 용기 대기 (추정) */
   b(F.x0-.62,F.x0-.37,F.bz0-.42,F.bz0+.18);                      /* 컨트롤 판넬 */
   for(const [x,z] of [[xw+.05,F.z0+.05],[xw+.05,F.z1-.05],[F.x0+.045,F.z0+.05],[F.x0+.045,F.z1-.05],[F.x1-.05,F.z0+.05],[F.x1-.05,F.z1-.05],[F.x0+.045,F.bz0-.07],[F.x0+.045,F.bz1+.07]]) b(x-.06,x+.06,z-.06,z+.06);
   b(CVX+.38,CVX+1.07,.38,1.25);                                  /* 프린터 컨트롤러 거치대 */
   b(6.17,7.33,.22,1.38); b(6.17,7.33,1.64,2.8);                  /* IBC 2 */
-  b(10.2,11.2,1.35,2.25);                                        /* 드럼리프터 */
   b(COL.x0,COL.x1,COL.z0,COL.z1);                                /* 건물 기둥 */
   b(.1,.74,.23,1.27); b(.1,.74,1.38,2.42);                       /* 저울 작업대 2 */
-  b(9.65,10.15,5.45,6.35); b(10.38,11.52,5.68,6.72);             /* 은박 대차 · 예비 은박 */
+  b(10.38,11.52,5.68,6.72);                                      /* 예비 은박 팔레트 (대차 · 드럼리프터는 propBlock) */
   b(RM.pier-.14,RM.pier+.14,0,.62); b(RM.pier-.14,RM.pier+.14,6.33,7);   /* 벽기둥 */
   b(7.42,7.82,.18,.52);                                          /* 수지 마개 */
   /* 포장실 : 라인 · 받침대 · 작업자 · 자재대 · 작업대 · 파렛트 · 성형 박스 대차 · 자재 */
@@ -41,12 +41,16 @@ function fpObstacles(){
   return L;
 }
 let FP_OBS=null;
+/* 움직이는 대차 · 드럼리프터 (현재 놓인 자리 · 방향 기준) */
+function propBlock(x,z){ if(typeof FILLCART==="undefined"||!FILLCART) return false;
+  for(const [G,hx0,hx1,hz] of [[FILLCART,-.3,.24,.46],[FILLLIFT,-.92,.42,.38]]){ const c=Math.cos(G.rotation.y), s=Math.sin(G.rotation.y), dx=x-G.position.x, dz=z-G.position.z, lx=dx*c-dz*s, lz=dx*s+dz*c;
+    if(lx>hx0-FP_R&&lx<hx1+FP_R&&lz>-hz-FP_R&&lz<hz+FP_R) return true; } return false; }
 /* 서 있을 수 있는 발 높이 후보 */
 function fpSupports(x,z){
   const out=[], F=FL;
   const inFill=x>RM.fill.x0+FP_R&&x<RM.fill.x1-FP_R&&z>RM.fill.z0+FP_R&&z<RM.fill.z1-FP_R;
   const inPack=x>RM.pack.x0+FP_R&&x<RM.pack.x1-FP_R&&z>RM.pack.z0+FP_R&&z<RM.pack.z1-FP_R;
-  let floor=(inFill||inPack)&&!FP_OBS.some(r=>inR(x,z,r,FP_R));
+  let floor=(inFill||inPack)&&!FP_OBS.some(r=>inR(x,z,r,FP_R))&&!propBlock(x,z);
   if(floor&&inFill&&x>STR.x0-FP_R&&x<STR.x1&&z>STR.z0-FP_R&&z<STR.z1+FP_R&&STAIRY(x)>.26) floor=false;   /* 계단 밑 */
   if(floor) out.push(0);
   if(x>=STR.x0-.04&&x<=STR.x1+.06&&z>STR.z0+.15&&z<STR.z1-.15) out.push(STAIRY(x));                   /* 계단 발판 */
@@ -202,7 +206,7 @@ function fpInit(){
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
-    crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.1 m (C 로 일어서기)":"일어섬"); },
+    crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.0 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },
     returnPart:fpReturnPart, menu:fpMenu, help:fpHelp});
   $("#fpBtn").onclick=()=>fpSet(!FP.on);

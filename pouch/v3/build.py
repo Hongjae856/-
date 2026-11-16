@@ -33,6 +33,12 @@ PATCH = {
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
     "ui.js": [
+        ('if(what==="roll") act("roll",()=>{ S.f.rollCarry="red"; toast("적색 인쇄 은박 롤 2인 1조 운반 완료","good"); });',
+         'if(what==="roll") act("roll",()=>{ S.f.rollCarry="red"; S.flags.cartAt="unw"; S.flags.redTaken=true; toast("적색 인쇄 은박 롤 — 대차에 실어 언와인더 옆까지 운반 (2인 1조)","good"); });', 1),
+        ('act("rollOut",()=>{ f.roll="red"; f.rollCarry=null; toast("적색 인쇄 은박 롤 장착 · 고정","good"); });',
+         'act("rollMount",()=>{ f.roll="red"; f.rollCarry=null; toast("적색 인쇄 은박 롤 장착 · 고정","good"); });', 1),
+        ('act("roll",()=>{ f.roll="plain"; toast("무지 은박 롤 장착","good"); });',
+         'act("rollPlain",()=>{ f.roll="plain"; f.rollCarry=null; S.flags.cartAt="unw"; toast("은색 무지 은박 롤 — 대차로 운반 · 장착","good"); });', 1),
         ('  $("#lineStrip").innerHTML=', '  if(0) $("#lineStrip").innerHTML=', 1),   # 메인화면 순서도 삭제
         ('$("#courseBack").onclick=()=>{ ', '$("#courseBack").onclick=()=>{ $("#incPick").style.display="none"; ', 1),
         ('function goHome(){ ', 'function goHome(){ $("#incPick").style.display="none"; $("#oeeWrap")&&$("#oeeWrap").classList.remove("on"); ', 1),
@@ -54,6 +60,7 @@ PATCH = {
         ("정기 공정검사(IPC)와 알람에 대응합니다.", "정기 공정검사(IPC)를 수행합니다.", 1),
         ("화면 오류를 감시하고 이상사례에 대응합니다.", "화면 오류를 감시합니다.", 1),
         ("  showResult(manual);\n", "  (isInc()?showIncResult:showResult)(manual);\n", 1),
+        ("  S.stepAt=tSim;\n  if(typeof fpSet", "  S.stepAt=tSim; if(typeof propsReset===\"function\") propsReset();\n  if(typeof fpSet", 1),   # 새 세션 : 작업자 작업 · 끌던 대차 초기화
         ('if(!S.activeTrouble) beginRecovery("F1");', 'if(!S.activeTrouble) beginRecovery(S.flags.incK==="RF4"?"RF4":"F1");', 1),   # 중량 점검 사례 (cases.js RF4)
         ('FX(FIL.xc,1500,FIL.z1+40,"front"', 'FX(...ANC.sealFront,"front"', 1),
         ('FX(PANEL_F.x,1100,PANEL_F.z,"panel"', 'FX(...ANC.panelIn,"panel"', 1),

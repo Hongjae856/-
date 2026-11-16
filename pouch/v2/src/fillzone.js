@@ -1,6 +1,6 @@
 /* ═══ 충전실 주변 : 북쪽 벽 유리창 · 개구부, 경사 컨베이어, 프린터 컨트롤러 거치대, IBC 2기 · 받침 호퍼 · 진공호스,
        저울 작업대 2대(북서), 드럼리프터(북동), 예비 은박(남동), 출입문 2(남) — DRAWING.md 6 · 8절 ═══ */
-let FILLCART=null, FILLLIFT=null;
+let FILLCART=null, FILLLIFT=null, FILLPROP={};   /* 대차 · 리프터 · 예비 은박 롤 · STS 용기 (workers.js 가 상태에 맞춰 움직임) */
 function buildFillZone(S){
   const g=new T3.Group(); S.add(g); const F=FL, zc=F.zc, H=RM.fill.h;
   /* ── 북쪽 벽 : 유리창 2 (컨베이어 양옆) · 사각 개구부(스테인리스 테두리) · 인터폰 ── */
@@ -48,8 +48,10 @@ function buildFillZone(S){
     for(const s of [-1,1]) bx(LG,x-.05,x+.05,.1,mh,z+s*.27-.04,z+s*.27+.04,M.ss); bx(LG,x-.01,x+.01,.5,mh,z-.23,z+.23,M.ss); bx(LG,x-.06,x+.06,mh-.06,mh,z-.31,z+.31,M.ss); bx(LG,x-.07,x+.4,.06,.12,z-.33,z+.33,M.ssD);
     rrect(LG,x+.3,z,.2,.26,.05,.12,.78,M.ss); rod(LG,[x+.3,.78,z-.1],[x+.3,.82,z-.1],.014,M.red,10); tube(LG,[[x+.12,.7,z+.1],[x+.1,1.1,z+.14],[x+.08,1.5,z+.1],[x+.06,1.9,z+.12]],.012,M.dark);
     rod(LG,[x+.52,.95,z-.2],[x+.52,.95,z+.2],.012,M.ssMir,10); for(const s of [-1,1]) rod(LG,[x+.48,.78,z+s*.2],[x+.52,.95,z+s*.2],.012,M.ssMir,10);
-    bx(LG,x-.9,x-.05,.14,.165,z-.36,z+.36,M.ssMir); bx(LG,x-.9,x-.05,.1,.14,z-.36,z+.36,M.ss);
-    for(const s of [-1,1]){ rod(LG,[x-.86,.165,z+s*.34],[x-.86,.5,z+s*.34],.012,M.ssMir); rod(LG,[x-.12,.165,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LG,[x-.86,.5,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LG,[x-.86,.33,z+s*.34],[x-.12,.33,z+s*.34],.008,M.ssMir); }
+    const LP=new T3.Group(); LG.add(LP); FILLPROP.plat=LP;                                       /* 승강 발판 (위아래로 움직임) */
+    bx(LP,x-.9,x-.05,.14,.165,z-.36,z+.36,M.ssMir); bx(LP,x-.9,x-.05,.1,.14,z-.36,z+.36,M.ss);
+    for(const s of [-1,1]){ rod(LP,[x-.86,.165,z+s*.34],[x-.86,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.12,.165,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.86,.5,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.86,.33,z+s*.34],[x-.12,.33,z+s*.34],.008,M.ssMir); }
+    { const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.set(x-.48,.165+.21,z); add(LP,m); FILLPROP.stsOn=m; m.visible=false; }   /* 발판 위 주성분 STS 용기 */
     for(const [dx,dz] of [[-.8,-.3],[-.8,.3],[.3,-.26],[.3,.26]]) { const c=new T3.Mesh(new T3.CylinderGeometry(.055,.055,.04,20),M.red); c.rotation.x=Math.PI/2; c.position.set(x+dx,.055,z+dz); add(LG,c); bx(LG,x+dx-.02,x+dx+.02,.06,.1,z+dz-.03,z+dz+.03,M.ssD); }
     plate(g,.42,.3,labelTex([["리프터 사용 규칙","#111",44],["3인 1조","#c00",52],["(1명 운전 · 2명 하역)","#111",34]],{w:512,h:360,border:"#1f5fb8"}),[RM.fill.x1-.03,1.6,2.9],-Math.PI/2); }
   /* ── 예비 은박 (남동) : 스테인리스 팔레트 + 은박 롤 ── */
@@ -59,10 +61,11 @@ function buildFillZone(S){
     for(const x of [-.2,.2]) for(const z of [-.42,.42]){ bx(G,x-.02,x+.02,.09,.62,z-.02,z+.02,M.ss); rod(G,[x,.045,z],[x,.045,z+.03],.045,M.dark,16); bx(G,x-.015,x+.015,.07,.1,z-.015,z+.015,M.ssD); }
     for(const y of [.2,.6]){ for(const z of [-.42,.42]) bx(G,-.2,.2,y,y+.03,z-.015,z+.015,M.ss); for(const x of [-.2,.2]) bx(G,x-.015,x+.015,y,y+.03,-.42,.42,M.ss); }
     for(const x of [-.09,.09]) rod(G,[x,.65,-.44],[x,.65,.44],.03,M.dark,16); rod(G,[-.26,.9,-.42],[-.26,.9,.42],.012,M.ssMir,10); for(const z of [-.42,.42]) rod(G,[-.2,.62,z],[-.26,.9,z],.012,M.ssMir,10);
-    const wt=tex(cvs(512,256,(c)=>{ c.fillStyle="#f4f5f5"; c.fillRect(0,0,512,256); c.fillStyle="#2d55a8"; c.font="bold 40px Arial"; for(let j=0;j<3;j++) for(let i=0;i<3;i++) c.fillText("SOLPAC",20+i*170+(j%2)*60,60+j*80); }),2,1,true);
-    const r=new T3.Mesh(new T3.CylinderGeometry(.16,.16,.86,48,1,true),new T3.MeshStandardMaterial({map:wt,roughness:.45})); r.rotation.x=Math.PI/2; r.position.set(0,.81,0); add(G,r);
-    for(const s of [-1,1]){ const c=new T3.Mesh(new T3.RingGeometry(.045,.16,40),M.foilP.clone()); c.material.side=T3.DoubleSide; c.position.set(0,.81,s*.43); G.add(c); rod(G,[0,.81,s*.4],[0,.81,s*.44],.045,new T3.MeshStandardMaterial({color:0xb08a52,roughness:.8}),20); } }
-    for(const [dz,m] of [[-.25,M.foil],[.25,M.foilP]]){ const r=new T3.Mesh(new T3.CylinderGeometry(.22,.22,.95,40),m); r.rotation.z=Math.PI/2; r.position.set(x,.38,z+dz); add(g,r); rod(g,[x-.5,.38,z+dz],[x+.5,.38,z+dz],.04,M.dark,16); } }
+    /* 대차 위 은박 롤 : 평소 비어 있음 — 교체하러 갈 때 예비 롤을 올림 (적색 인쇄 · 은색 무지 2종만, 11/16 사용자 지시 : SOLPAC 흰 롤 삭제) */
+    for(const [k,m] of [["red",M.foil],["plain",M.foilP]]){ const r=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,40),m); r.rotation.x=Math.PI/2; r.position.set(0,.85,0); add(G,r); r.visible=false; FILLPROP["cart_"+k]=r; } }
+    for(const [k,dz,m] of [["red",-.25,M.foil],["plain",.25,M.foilP]]){ const R=new T3.Group(); g.add(R); FILLPROP["pal_"+k]=R; const r=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,40),m); r.rotation.z=Math.PI/2; r.position.set(x,.35,z+dz); add(R,r); rod(R,[x-.46,.35,z+dz],[x+.46,.35,z+dz],.045,M.dark,16); } }
+  /* 주성분 STS 용기 대기 위치 (남쪽 출입문 안쪽 · 추정 — 확인 필요) */
+  { const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.set(2.1,.21,6.45); add(g,m); FILLPROP.stsFloor=m; }
   /* ── 출입문 2 (남쪽 벽) : 양개문 · 유리창 ── */
   for(const x0 of [.7,8.3]){ const z=RM.fill.z1-.03; bx(g,x0-.05,x0+1.05,0,2.15,z-.02,z,M.alu); for(const dx of [0,.5]){ bx(g,x0+dx+.01,x0+dx+.49,.02,2.1,z-.03,z-.02,M.white); bx(g,x0+dx+.1,x0+dx+.4,1.2,1.8,z-.034,z-.03,glass); rod(g,[x0+(dx?.56:.44),1.0,z-.06],[x0+(dx?.56:.44),1.12,z-.06],.01,M.ssMir); } }
   /* ── 소화기 (진공청소기는 구현하지 않음 — 사용자 지시 11/11) ── */
