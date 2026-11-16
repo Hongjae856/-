@@ -91,3 +91,9 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #hmi.solpac.big + *{margin-top:0}
 .spB.big{font-size:2.6cqw;padding:.2cqw 1.2cqw}
 #hmi.solpac .nv.sp.off{opacity:.45}.spEx{font-size:1.8cqw;background:#ffd54a;color:#4a3800;padding:.1cqw .8cqw;border-radius:.4cqw;vertical-align:middle}
+/* 다음 작업 안내 : 노란 테두리 (11/16) */
+.hint{outline-color:#ffc400!important;box-shadow:0 0 0 3px rgba(255,196,0,.35)}
+/* 시연모드 */
+#splash .go{grid-template-columns:repeat(4,1fr);max-width:1300px}
+#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
+#demoAct{margin-top:8px;width:100%;padding:12px 10px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd84d,#f0b400);color:#3a2a00;font:800 17px/1.2 var(--ff);cursor:pointer;box-shadow:0 2px 0 #b98a00}

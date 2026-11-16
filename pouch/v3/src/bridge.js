@@ -121,7 +121,7 @@ function v3Sync(dt){
   if(PK2.xr) PK2.xr.pw=!(S&&S.session&&S.session.active)||machPower("xr");   /* 전원 OFF : 화면 꺼짐 */      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
-  scrPower();
+  scrPower(); if(typeof guide3D==="function") guide3D(dt);
   if(typeof wkDraw==="function") wkDraw(dt);
 }
 /* 설비 화면 전원 : 전원이 꺼진 설비의 3D 화면은 검게 (FP_MON 위치로 화면 메시를 찾아 재질 분리) */

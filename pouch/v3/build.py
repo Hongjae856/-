@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "demo.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -52,6 +52,7 @@ PATCH = {
         ('  $("#lineStrip").innerHTML=', '  if(0) $("#lineStrip").innerHTML=', 1),   # 메인화면 순서도 삭제
         ('$("#courseBack").onclick=()=>{ ', '$("#courseBack").onclick=()=>{ $("#incPick").style.display="none"; ', 1),
         ('function goHome(){ ', 'function goHome(){ $("#incPick").style.display="none"; $("#oeeWrap")&&$("#oeeWrap").classList.remove("on"); ', 1),
+        ('  $("#lcCheck").style.display=chk?"":"none";', '  $("#lcCheck").style.display=chk?"":"none"; if(typeof demoCoach==="function") demoCoach(st);', 1),
         ('(st.watch?"라인을 감시하고 이상에 대응하세요.":"평가 진행 중 — 절차에 따라 수행하세요.")', '(isInc()?"라인을 감시하고 이상이 생기면 대응하세요.":st.watch?"라인을 감시하며 생산을 진행하세요.":"평가 진행 중 — 절차에 따라 수행하세요.")', 1),
         ("""'<h3>알람 · 이상사례 대응</h3><table class="ht"><tr><th>구분</th><th>명칭</th><th>발생</th></tr>'+inc+'</table>'+""", "", 1),
         ('(isEasy()?"기본모드":"심화모드")', '(isInc()?"이상사례 대처":isEasy()?"기본모드":"심화모드")', 1),
@@ -70,13 +71,14 @@ PATCH = {
         ('A.push(T_("lift","주성분 STS 용기 리프터로 2층 데크에 올림","[주성분 STS 용기] 를 눌러 리프터로 2층 데크에 올립니다."', 'A.push(T_("lift","주성분 봉투를 리프터 적재칸에 옮겨 2층 데크로 올림","[주성분 리프터 운반] 을 눌러 STS 용기의 주성분 봉투를 드럼리프터 적재칸에 옮겨 담고, 원료투입구 아래로 밀고 가서 2층 데크로 올립니다."', 1),
         ('주성분 STS 용기를 리', '주성분 봉투를 리', 1),
         ('const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");', 'const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");', 1),
-        ('examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};', 'examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가"};', 1),
-        ('STEPS_CACHE=S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 'STEPS_CACHE=isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 1),
+        ('examEasy:"기본모드 · 평가",exam:"심화모드 · 평가"};', 'examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가",demo:"시연모드"};', 1),
+        ('STEPS_CACHE=S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 'STEPS_CACHE=isDemo()?stepsDemo():isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy());', 1),
         ("  if(isExam()) scheduleExamTrouble();\n", "", 1),   # 기본 · 심화 : 예약 이상상황 없음 (이상사례 대처 교육으로 분리)
         ("정기 공정검사(IPC)와 알람에 대응합니다.", "정기 공정검사(IPC)를 수행합니다.", 1),
         ("화면 오류를 감시하고 이상사례에 대응합니다.", "화면 오류를 감시합니다.", 1),
-        ("  showResult(manual);\n", "  (isInc()?showIncResult:showResult)(manual);\n", 1),
+        ("  showResult(manual);\n", "  (isDemo()?showDemoResult:isInc()?showIncResult:showResult)(manual);\n", 1),
         ("  S.stepAt=tSim;\n  if(typeof fpSet", "  S.stepAt=tSim; if(typeof propsReset===\"function\") propsReset();\n  if(typeof fpSet", 1),   # 새 세션 : 작업자 작업 · 끌던 대차 초기화
+        ('  if(room==="F") presetPackAuto(); else presetFillAuto();', '  if(S.mode!=="demo"){ if(room==="F") presetPackAuto(); else presetFillAuto(); }   /* 시연모드 : 모든 설비 꺼진 상태에서 시작 */', 1),
         ('if(!S.activeTrouble) beginRecovery("F1");', 'if(!S.activeTrouble) beginRecovery(S.flags.incK==="RF4"?"RF4":"F1");', 1),   # 중량 점검 사례 (cases.js RF4)
         ('FX(FIL.xc,1500,FIL.z1+40,"front"', 'FX(...ANC.sealFront,"front"', 1),
         ('FX(PANEL_F.x,1100,PANEL_F.z,"panel"', 'FX(...ANC.panelIn,"panel"', 1),
@@ -126,7 +128,8 @@ BODY_PATCH = [   # 메인화면 : 순서도 삭제 · 과정 → 기본 · 심�
     ('<button class="e" id="spExam">심화모드 · 평가</button>\n        </div>\n      </div>',
      '<button class="e" id="spExam">심화 · 평가</button>\n        </div>\n'
      '        <div class="modeColumn oee">\n          <h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button>\n'
-     '          <button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button>\n        </div>\n      </div>\n'
+     '          <button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button>\n        </div>\n'
+     '        <div class="modeColumn demo">\n          <h4>시연</h4><button class="d" id="spDemo">시연모드<small>장비 ON → 이송기 → 가동 → 수동 포장까지 간단히</small></button>\n        </div>\n      </div>\n'
      '      <div id="incPick" style="display:none"></div>', 1),
 ]
 

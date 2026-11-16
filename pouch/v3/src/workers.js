@@ -176,7 +176,7 @@ function propsReturn(){
   const was=S.flags.cartAt==="unw"||S.flags.liftAt==="use"; S.flags.cartAt="home"; S.flags.liftAt="home";
   toast(was?"은박 교체 대차 · 드럼리프터 — 보관 자리로 원위치 (자동 복귀)":"이미 보관 자리에 있습니다.",was?"good":""); renderTiles();
 }
-function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } }
+function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } if(typeof CV!=="undefined"&&CV.full) CV.full.fill(0); if(typeof AN!=="undefined"&&AN.ld) AN.ld.fill(1); }   /* 새 세션 : 배출 컨베이어 비움 (11/16) */
 Object.assign(JOBS,{ rollMount:{stand:[4.62,4.18], dur:1, view:"roll", seqFn:()=>seqMountRoll("red")},
   rollPlain:{stand:[9.34,5.9], dur:1, view:"roll", seqFn:()=>seqFetchRoll("plain").concat(seqMountRoll("plain"))} });
 JOBS.roll.seqFn=()=>seqFetchRoll("red"); JOBS.lift.seqFn=seqLift;

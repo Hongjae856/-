@@ -545,6 +545,12 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #hmi.solpac.big + *{margin-top:0}
 .spB.big{font-size:2.6cqw;padding:.2cqw 1.2cqw}
 #hmi.solpac .nv.sp.off{opacity:.45}.spEx{font-size:1.8cqw;background:#ffd54a;color:#4a3800;padding:.1cqw .8cqw;border-radius:.4cqw;vertical-align:middle}
+/* 다음 작업 안내 : 노란 테두리 (11/16) */
+.hint{outline-color:#ffc400!important;box-shadow:0 0 0 3px rgba(255,196,0,.35)}
+/* 시연모드 */
+#splash .go{grid-template-columns:repeat(4,1fr);max-width:1300px}
+#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
+#demoAct{margin-top:8px;width:100%;padding:12px 10px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd84d,#f0b400);color:#3a2a00;font:800 17px/1.2 var(--ff);cursor:pointer;box-shadow:0 2px 0 #b98a00}
 
 /* OEE 연계 교육 (공통) */
 #oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
@@ -730,6 +736,9 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
         <div class="modeColumn oee">
           <h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button>
           <button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button>
+        </div>
+        <div class="modeColumn demo">
+          <h4>시연</h4><button class="d" id="spDemo">시연모드<small>장비 ON → 이송기 → 가동 → 수동 포장까지 간단히</small></button>
         </div>
       </div>
       <div id="incPick" style="display:none"></div>
@@ -2175,7 +2184,7 @@ function initAnim(S){
   AN.o=new T3.Object3D(); AN.ld=new Uint8Array(n).fill(1);
   AN.u0=((CV.zS-FM.pz(0))%P+P)%P;                                         /* 안착 순간 칸 중심 = 열 위치 */
   AN.u=()=>AN.u0+n*P*(AN.cyc+AN.ph-AN.TG);
-  { const u=AN.u(), fr=((AN.ph-AN.TG)%1+1)%1, sF=CV.zS-FM.pz(n-1)+n*P*fr-P*.5; for(let k=0;k<CV.N;k++){ const sk=CV.sOf(k,u); CV.full[k]=sk>sF&&sk<=CV.L?1:0; } }
+  CV.full.fill(0);                                                        /* 시작 시 배출 컨베이어는 비어 있음 (11/16 사용자 지시 · 미리 채우지 않음) */
   CV.prev=new Float32Array(CV.N).fill(-1); stepAnim(0);
 }
 function stepAnim(dt){
@@ -3136,7 +3145,7 @@ function flRoute(scr){ const top=SUB[scr]; if(!top) return HNV(scr); return hScr
    ═══════════════════════════════════════════════════════════════════ */
 const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");
 const isEasy=()=>!!S&&(S.mode==="easy"||S.mode==="examEasy");
-const MODE_NM={easy:"기본모드 · 학습",guide:"심화모드 · 학습",examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가"};
+const MODE_NM={easy:"기본모드 · 학습",guide:"심화모드 · 학습",examEasy:"기본모드 · 평가",exam:"심화모드 · 평가",incLearn:"이상사례 대처 · 학습",incExam:"이상사례 대처 · 평가",demo:"시연모드"};
 const ROOM_NM={F:"충전실 과정",P:"포장실 과정"};
 const PASS=80;
 const lineRunning=()=>S.room==="F"?S.f.run:S.p.ctRun;
@@ -3337,7 +3346,7 @@ function stepsPack(easy){
   return A;
 }
 let STEPS_CACHE=null;
-function STEPS(){ if(!STEPS_CACHE) STEPS_CACHE=isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy()); return STEPS_CACHE; }
+function STEPS(){ if(!STEPS_CACHE) STEPS_CACHE=isDemo()?stepsDemo():isInc()?stepsInc():S.room==="F"?stepsFill(isEasy()):stepsPack(isEasy()); return STEPS_CACHE; }
 const curStep=()=>STEPS()[S.tIdx];
 
 /* ═══ 세션 ═══ */
@@ -3346,7 +3355,7 @@ function startSession(mode,room){
   initState(); lineInit(); STEPS_CACHE=null; hintOn=false;
   S.room=room; S.mode=mode; S.session={active:true, ended:false, start:performance.now(), sec:0};
   S.flags.fault={};
-  if(room==="F") presetPackAuto(); else presetFillAuto();
+  if(S.mode!=="demo"){ if(room==="F") presetPackAuto(); else presetFillAuto(); }   /* 시연모드 : 모든 설비 꺼진 상태에서 시작 */
   if(isEasy()) presetEasy();
   hMach=room==="F"?"fl":"sf"; hScr=hMach==="fl"?"run":"main";
   if(typeof buildTiles==="function") buildTiles();
@@ -3419,7 +3428,7 @@ function finishSession(manual){
   S.session.sec=(performance.now()-S.session.start)/1000;
   for(const id of ["#mInc","#mList","#mCarry"]) $(id).classList.remove("on");
   if(typeof apStop==="function") apStop();
-  (isInc()?showIncResult:showResult)(manual);
+  (isDemo()?showDemoResult:isInc()?showIncResult:showResult)(manual);
 }
 
 /* ═══ 정기 공정검사 (IPC) — 100카톤마다 1회차 (실제 1시간마다) ═══ */
@@ -3906,7 +3915,7 @@ function renderCoach(){
     $("#cDesc").textContent=ex&&!hintOn?(isInc()?"라인을 감시하고 이상이 생기면 대응하세요.":st.watch?"라인을 감시하며 생산을 진행하세요.":"평가 진행 중 — 절차에 따라 수행하세요."):st.d;
   }else{ $("#cStep").textContent="완료"; $("#cTitle").textContent="모든 단계를 마쳤습니다"; $("#cDesc").textContent="상단 [학습 종료] 로 결과를 확인하세요."; }
   const chk=!rec&&!ip&&st&&(st.lc!==undefined&&!S.clear.includes(st.lc)||st.chk&&st.chk());
-  $("#lcCheck").style.display=chk?"":"none";
+  $("#lcCheck").style.display=chk?"":"none"; if(typeof demoCoach==="function") demoCoach(st);
   $("#incAsk").style.display=(rec&&rec.k==="ask")?"":"none";
   $("#examHint").style.display=ex?"":"none"; $("#examHint").disabled=hintOn;
   $("#examHint").textContent=hintOn?"💡 힌트 표시 중":"💡 힌트 보기 · −5점";
@@ -4383,7 +4392,7 @@ function v3Sync(dt){
   if(PK2.xr) PK2.xr.pw=!(S&&S.session&&S.session.active)||machPower("xr");   /* 전원 OFF : 화면 꺼짐 */      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
-  scrPower();
+  scrPower(); if(typeof guide3D==="function") guide3D(dt);
   if(typeof wkDraw==="function") wkDraw(dt);
 }
 /* 설비 화면 전원 : 전원이 꺼진 설비의 3D 화면은 검게 (FP_MON 위치로 화면 메시를 찾아 재질 분리) */
@@ -4651,7 +4660,7 @@ function propsReturn(){
   const was=S.flags.cartAt==="unw"||S.flags.liftAt==="use"; S.flags.cartAt="home"; S.flags.liftAt="home";
   toast(was?"은박 교체 대차 · 드럼리프터 — 보관 자리로 원위치 (자동 복귀)":"이미 보관 자리에 있습니다.",was?"good":""); renderTiles();
 }
-function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } }
+function propsReset(){ for(const w of WK){ w.tow=null; w.job=null; w.route=[]; w.carry=null; } if(typeof CV!=="undefined"&&CV.full) CV.full.fill(0); if(typeof AN!=="undefined"&&AN.ld) AN.ld.fill(1); }   /* 새 세션 : 배출 컨베이어 비움 (11/16) */
 Object.assign(JOBS,{ rollMount:{stand:[4.62,4.18], dur:1, view:"roll", seqFn:()=>seqMountRoll("red")},
   rollPlain:{stand:[9.34,5.9], dur:1, view:"roll", seqFn:()=>seqFetchRoll("plain").concat(seqMountRoll("plain"))} });
 JOBS.roll.seqFn=()=>seqFetchRoll("red"); JOBS.lift.seqFn=seqLift;
@@ -4966,6 +4975,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:19, d:"2026-11-16", t:"다음 작업 안내를 모든 모드에서 노란 테두리 + 3D 노란 화살표(위아래로 움직임) · 노란 고리로 표시, 메인화면에 시연모드 추가(충전기 전원 일괄 → 카토너 · 포장실 전원 일괄 → 진공 이송기 → 포장 라인 · 충전기 가동 → 수동 포장까지, 라인 클리어런스 등 생략), 교육 시작 시 배출 컨베이어를 비운 상태로 시작"},
  {v:18, d:"2026-11-16", t:"이상사례 대처 교육 중요도 등급 확정(상 : 중량 점검 · 핫멜트 · 파우치 터짐 / 중 : 안착 · 컷팅 · 정렬기 · 설명서 · 제품 투입 · 클로징 · 소케이스 인쇄 / 하 : 은박 끊어짐 · 푸셔 오버로드)"},
  {v:17, d:"2026-11-16", t:"주성분 운반을 실제대로 정정(맨 동쪽 중앙 STS 파렛트의 용기에서 주성분 봉투를 드럼리프터 적재칸에 옮겨 담고 원료투입구 아래로 밀고 가서 2층 데크로 올림), [대차 · 리프터 원위치] 타일(누르면 자동 복귀), 충전기 화면 품목저장 제외 · 온도 설정 화면 예시값 표기"},
  {v:16, d:"2026-11-16", t:"충전기 터치스크린을 충전기 SOP 화면 기준 SOLPAC 가로형 화면으로 재구성(머리줄 · 알람 줄 · 아래 메뉴 11개 : 운전데이터 · 캠 포지션 1·2 · 이음매 · 수동점검 · 조작스위치 1·2 · 온도설정 · 이송기설정 · 품목저장 · Input/Output · 알람목록 · 주변기기 → 비전 Setup, 설정값은 SOP 사진 값), 조작반을 실제 버튼 배치(RUN · STOP · JOG · RESET · FILLING · BUZZER · 비상정지)로, 1인칭 충전기 화면을 가로형으로"},
@@ -5514,6 +5524,100 @@ function eduInit(){
   setInterval(()=>{ eduTick(); fixFocus(); },200);
 }
 
+/* ── v3/guide.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   다음 작업 안내 (모든 모드 공통 · 11/16 사용자 지시) — 화면 요소는 노란 테두리, 3D 현장에는 노란 화살표(위아래로 움직임) + 노란 고리
+   대상 위치 : 타일 → 그 작업의 손 목표(JOBS.reach) · 설비 화면/조작반 → 해당 설비 화면 · 빨간 ! → 조치 위치 · 점검 → 점검 위치 · 시연 버튼 → 단계 위치
+   ═══════════════════════════════════════════════════════════════════ */
+const TILEJOB={fMain:"power",fAir1:"air",fAir2:"air",fDust:"dust",fPanel:"panel",fDoor:"door",tAlign:"align",mLift:"lift",mScoop:"scoop",mRollOut:"rollOut",mPrn:"prn",tLeak:"leak",
+  pCtMain:"ctBack",pSfSw:"ctBack",pCtAir:"ctBack",pHm:"hm",pCw:"cwPow",pXr:"xrPow",pXrKey:"xrPow",pPr:"prPow",pMag:"mag",pLeaf:"leaf",pMagOut:"magOut",pBin:"bin"};
+const G3={m:null, ring:null, t:0};
+function guideTarget(){
+  if(!S||!S.session||!S.session.active||(isExam()&&!hintOn)) return null;
+  const sel=hintTarget(); if(!sel) return null; const s=String(sel).split(",")[0].trim();
+  try{
+    if(s==="#fixBtn"){ const h=recoveryStep(); return h&&h.f&&h.f.fix; }
+    if(s==="#demoAct"){ const st=curStep(); return st&&st.pos; }
+    if(s==="#lcCheck"){ const st=curStep(); if(!st) return null; let job=null; if(st.lc!==undefined) job=CLEAR[S.room][st.lc].job; else if(st.chk){ const c=st.chk(); job=c&&c.job; } return job&&JOBS[job]&&JOBS[job].reach; }
+    if(s==="#ipcTake"||s==="#ipcNext"||s==="#ipcDone") return ANC.ipc;
+    const id=(s.match(/^#([A-Za-z0-9]+)$/)||[])[1];
+    if(id==="mRed"||id==="mPlain"){ if(S.f.rollCarry) return [PROP.cartUnw[0],.9,PROP.cartUnw[1]]; return [PROP.cartHome[0],.9,PROP.cartHome[1]]; }
+    if(id==="tDoc") return S.room==="F"?ANC.docF:ANC.docP;
+    if(id&&TILEJOB[id]){ const j=JOBS[TILEJOB[id]]; return j&&(j.reach||[j.stand[0],1.0,j.stand[1]]); }
+    let el=null; try{ el=document.querySelector(s); }catch(e){}
+    if(el&&el.closest("#hmi,#panel,#hTabs")){ let k=hMach; const tab=s.match(/data-mt="([a-z]+)"/); if(tab) k=tab[1]; const m=monOf(k); if(m) return m.c; }
+  }catch(e){}
+  return null;
+}
+function guide3D(dt){
+  if(!V3||!V3.scene) return;
+  if(!G3.m){ const mat=new T3.MeshBasicMaterial({color:0xffcc00}), G=new T3.Group();
+    const cone=new T3.Mesh(new T3.ConeGeometry(.075,.16,20),mat); cone.rotation.x=Math.PI; cone.position.y=.08; G.add(cone);
+    const sh=new T3.Mesh(new T3.CylinderGeometry(.028,.028,.2,14),mat); sh.position.y=.26; G.add(sh);
+    const ol=new T3.Mesh(new T3.ConeGeometry(.088,.18,20),new T3.MeshBasicMaterial({color:0x7a5a00,side:T3.BackSide})); ol.rotation.x=Math.PI; ol.position.y=.08; G.add(ol);
+    G.renderOrder=999; G.traverse(o=>{ if(o.material){ o.material.depthTest=false; o.material.transparent=true; o.renderOrder=999; } });
+    V3.scene.add(G); G3.m=G;
+    const ring=new T3.Mesh(new T3.TorusGeometry(.13,.012,8,40),new T3.MeshBasicMaterial({color:0xffcc00,transparent:true,depthTest:false})); ring.renderOrder=998; V3.scene.add(ring); G3.ring=ring; }
+  const p=guideTarget(); G3.m.visible=G3.ring.visible=!!p; if(!p) return;
+  G3.t+=dt; const b=Math.abs(Math.sin(G3.t*3.2))*.09;
+  G3.m.position.set(p[0],p[1]+.12+b,p[2]); G3.m.rotation.y=G3.t*1.6;
+  const s=1+.25*Math.sin(G3.t*4); G3.ring.position.set(p[0],p[1],p[2]); G3.ring.scale.setScalar(s); G3.ring.lookAt(R3.eye?new T3.Vector3(...R3.eye):V3.camera.position);
+  G3.ring.material.opacity=.55+.35*Math.sin(G3.t*4);
+}
+
+/* ── v3/demo.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   시연모드 (11/16 사용자 지시) — 기본모드보다 훨씬 간단 : 라인 클리어런스 · 문서 · 점검 단계 없음
+   ① 충전기 전원 ON(일괄) → ② 포장실 설비 전원 ON(카토너 일괄) → ③ 진공 이송기 ON(원료 공급) → ④ 포장 라인 가동 → ⑤ 충전기 가동 → ⑥ 생산 · 수동 포장(대케이스 · 대박스 · 파렛트)
+   단계마다 [시연 실행] 버튼 하나 · 카메라가 해당 구역으로 이동 · 평가 없음
+   ═══════════════════════════════════════════════════════════════════ */
+const isDemo=()=>!!S&&S.mode==="demo";
+const DEMO_GOAL=48;   /* 수동 포장 완료 기준 카톤 수 (대케이스 6개 = 대박스 1개 반 · 파렛트 적재까지 보이도록) */
+function stepsDemo(){
+  const f=()=>S.f, p=()=>S.p, D=(k,t,d,btn,pos,cam,act,ok)=>T_(k,t,d,()=>"#demoAct",ok,{pts:1,btn,pos,cam,demoAct:act});
+  return [
+    D("dPowF","충전기 전원 ON (일괄)","버튼 한 번으로 메인 파워 · 압축공기 · 집진 · 컨트롤 판넬 · 터치스크린 로그인까지 켭니다. 히터 예열은 시연에서 생략합니다.","충전기 전원 ON",ANC.mainPow,"fill",
+      ()=>act("power",()=>{ Object.assign(S.f,{main:true, airV:[true,true], airP:6, dustV:true, panel:true, user:"PK2", heat:S.f.heatSV}); toast("충전기 전원 일괄 ON — 메인 · 에어 · 집진 · 판넬 · 로그인","good"); }),
+      ()=>f().panel&&!!f().user),
+    D("dPowP","포장실 설비 전원 ON (카토너 일괄)","카토너 메인스위치를 켜면 스틱공급장치 · 핫멜트 · 케이스 프린터 · 비전 · X-ray · 중량선별기까지 함께 켜지고 품목 설정이 불러와집니다.","카토너 · 포장실 전원 ON",ANC.ctMain,"pack",
+      ()=>act("ctBack",()=>{ Object.assign(S.p,{ctMain:true, sfSw:true, ctAir:true, hm:true, hmT:172, cwPow:true, xrPow:true, xrBoot:1, xrKey:true, prMain:true, prPow:true, ctUser:true, sfUser:true, vsUser:true, vsMode:true,
+          xrPre:true, xrX:true, xrCal:true, xrTest:true, cwProd:true, cwChk:true, mag:9999, leaf:9999, ctIcon:true, ctIcons:[true,true,true]}); S.p.lbl={lot:EXPECT.lot, exp:EXPECT.exp, saved:true, loaded:true}; S.flags.hmChk=true;
+          toast("포장실 설비 일괄 ON — 카토너 · 스틱공급장치 · 핫멜트 · 프린터 · 비전 · X-ray · 중량선별기","good"); }),
+      ()=>p().ctMain&&p().ctUser&&p().cwPow),
+    D("dIbc","진공 이송기 ON (원료 공급)","이송기 1(첨가제) · 3(백당)을 켜서 호퍼에 원료를 보냅니다. 주성분 공급 · 은박 장착 · 인쇄 설정은 시연에서 미리 된 상태로 둡니다.","진공 이송기 ON",ANC.ibc,"back",
+      ()=>{ Object.assign(S.f,{ibc:[true,false,true], mainLift:true, mainFed:true, roll:"red", jogDone:true, printOk:true, visChk:true, vision:true, tempChk:true, regChk:true, hopChk:true}); S.f.prn={exp:EXPECT.exp, lot:EXPECT.lot, saved:true}; S.hop={add:100, main:100, sug:100};
+        hMach="fl"; hScr="xfer"; drawHMI(); toast("진공 이송기 1 · 3 ON — 첨가제 · 백당 공급 (호퍼 3기 충전)","good"); },
+      ()=>f().ibc[0]&&f().ibc[2]),
+    D("dPack","포장 라인 가동","스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기를 가동하고 정렬컨베어를 켭니다.","포장 라인 가동",ANC.ctPanel,"pack",
+      ()=>{ Object.assign(S.p,{ctRun:true, sfServo:true, sfFeed:true, sfRun:true, vsRun:true, prRun:true, xrConv:true, cwRun:true, align:true}); toast("포장 라인 가동 — 스틱공급 · 카토너 · 프린터 · 비전 · X-ray · 중량선별","good"); },
+      ()=>p().ctRun&&p().sfRun),
+    D("dRun","충전기 가동 (RESET → RUN → FILLING ON)","후 공정 연동 상태에서 충전기를 가동하고 FILLING 을 켜서 충전을 시작합니다.","충전기 가동",ANC.panel,"front",
+      ()=>{ Object.assign(S.f,{link:true, linkChk:true, door:"closed", run:true, started:true, filling:true}); S.alarms=[]; hMach="fl"; hScr="run"; drawHMI(); toast("충전기 RESET → RUN → FILLING ON — 충전 시작","good"); },
+      ()=>f().run&&f().filling),
+    D("dWatch","생산 → 수동 포장 (대케이스 · 대박스 · 파렛트)","파우치가 정렬컨베어로 포장실에 넘어가 카톤 → 대케이스 → 대박스 → 파렛트까지 포장됩니다. "+DEMO_GOAL+"카톤이 되면 시연을 마칩니다.","수동 포장 보기",ANC.boxing,"hand",
+      ()=>{ camSet("hand"); toast("수동 포장 구역 — 대케이스 포장 → 대박스 테이핑 → 파렛트 적재","good"); S.flags.demoWatch=true; },
+      ()=>S.flags.demoWatch&&S.cnt.good>=DEMO_GOAL)
+  ];
+}
+/* 코치 패널의 [시연 실행] 버튼 */
+function demoCoach(st){
+  let b=$("#demoAct"); if(!b){ const lc=$("#lcCheck"); if(!lc) return; lc.insertAdjacentHTML("afterend",'<button id="demoAct" style="display:none"></button>'); b=$("#demoAct"); b.onclick=()=>{ const s=curStep(); if(s&&s.demoAct&&isDemo()){ if(s.cam&&!cam.fp) camSet(s.cam); s.demoAct(); setTimeout(stepCheck,50); } }; }
+  const on=isDemo()&&st&&st.demoAct&&!(st.k==="dWatch"&&S.flags.demoWatch);
+  b.style.display=on?"":"none"; if(on) b.textContent="▶ "+st.btn;
+  if(isDemo()&&st&&st.k==="dWatch"&&S.flags.demoWatch) $("#cStep").textContent="시연 · 생산 "+S.cnt.good+" / "+DEMO_GOAL+" 카톤 · 대케이스 "+S.cnt.cases+" 개";
+}
+function showDemoResult(){
+  $("#endBox").innerHTML='<h2>🎬 시연 완료</h2><p>장비 ON → 진공 이송기 → 포장 라인 · 충전기 가동 → 수동 포장까지 진행했습니다.</p>'+
+    '<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin:10px 0">'+kc(S.cnt.pouch.toLocaleString()+" 포","충전 파우치","hi")+kc(S.cnt.good+" 카톤","양품 카톤")+kc(S.cnt.cases+" 개","대케이스")+'</div>'+
+    '<div class="mbtn"><button class="pri" id="endAgain">다시 시연</button><button id="endHome">메인화면</button><button id="endClose">닫기</button></div>';
+  $("#mEnd").classList.add("on");
+  $("#endAgain").onclick=()=>{ $("#mEnd").classList.remove("on"); demoStart(); };
+  $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
+  $("#endClose").onclick=()=>$("#mEnd").classList.remove("on");
+}
+function demoStart(){ $("#splash").classList.add("hide"); startSession("demo","F"); if(typeof fpSet==="function") fpSet(false); camSet("fill"); toast("시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요 (자동재생 가능)"); }
+function demoInit(){ const b=$("#spDemo"); if(b) b.onclick=demoStart; }
+
 /* ── v3/boot.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    부팅 · 메인 루프 (새 3D 연결판)
@@ -5557,7 +5661,7 @@ function bindGfx(){
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit();
+  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);
