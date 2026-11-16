@@ -83,7 +83,8 @@ function fpTargetDefs(){
   const f=S.f, T=[], A=ANC;
   const add=(...a)=>T.push(TB(...a));
   if(S.room==="F"){
-    add("fMain","메인 파워 스위치",A.mainPow,.3,.3,.3,tileRun("fMain"),["#fMain"]);
+    add("fMain","메인스위치 (회전 절연 스위치)",A.mainPow,.22,.22,.22,tileRun("fMain"),["#fMain"]);
+    if(S.room==="F"&&typeof dialOpen==="function"){ add("dialF","원료조절부 (서쪽 · 첨가제 · 주성분) · 충전량 조절",A.dialF,.12,.2,.95,()=>startWork("dialF",()=>dialOpen("F")),[]); add("dialB","원료조절부 (동쪽 · 백당) · 충전량 조절",A.dialB,.12,.2,.95,()=>startWork("dialB",()=>dialOpen("B")),[]); }   /* 충전량 조절 미니게임 (11/16) */
     add("fAir1","압축공기 밸브 1",A.air1,.22,.26,.22,tileRun("fAir1"),["#fAir1"]);
     add("fAir2","압축공기 밸브 2",A.air2,.22,.26,.22,tileRun("fAir2"),["#fAir2"]);
     add("fDust","집진 밸브 (2층)",A.dust,.35,.35,.35,tileRun("fDust"),["#fDust"]);
@@ -163,6 +164,7 @@ function fpMoveHMI(into){
 }
 function fpPlaceMonitor(){
   const w=fpMonEl(); if(!w||w.hidden) return;
+  if(!FP.mod||FP.mod.mode!=="hmi"){ w.style.visibility="hidden"; return; }   /* 걸어 다닐 때는 3D 화면 그림(hmitex.js)만 · 누르고 다가간 뒤에만 조작 화면 (11/16) */
   const key=FP.monK||(monOf(hMach)&&Object.keys(FP_MON).find(k=>FP_MON[k]===monOf(hMach)));
   const m=key&&FP_MON[key]; if(!m){ w.style.visibility="hidden"; return; }
   const r=monRect(m), e=R3.eye, K=R3.W/Math.max(1,$("#view3d").clientWidth);
@@ -205,7 +207,7 @@ function fpInit(){
   FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH,
     setCamera:p=>{ cam.fp=p; }, canStand:fpCanStand, eyeY:fpEyeY, targets:fpTargets,
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
-    hmiInteractive:(on,t)=>{ if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
+    hmiInteractive:(on,t)=>{ if(on) toast("설비 화면 조작 중 — 시점 회전 잠금 · F 또는 Esc 로 뒤로"); if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
     crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.0 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },

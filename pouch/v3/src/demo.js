@@ -47,5 +47,5 @@ function showDemoResult(){
   $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
   $("#endClose").onclick=()=>$("#mEnd").classList.remove("on");
 }
-function demoStart(){ $("#splash").classList.add("hide"); startSession("demo","F"); if(typeof fpSet==="function") fpSet(false); camSet("fill"); toast("시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요 (자동재생 가능)"); }
+function demoStart(){ $("#splash").classList.add("hide"); startSession("demo","F"); if(typeof fpSet==="function") fpSet(false); camSet("fill"); toast("시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요"); }
 function demoInit(){ const b=$("#spDemo"); if(b) b.onclick=demoStart; }

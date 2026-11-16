@@ -97,3 +97,30 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #splash .go{grid-template-columns:repeat(4,1fr);max-width:1300px}
 #splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
 #demoAct{margin-top:8px;width:100%;padding:12px 10px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd84d,#f0b400);color:#3a2a00;font:800 17px/1.2 var(--ff);cursor:pointer;box-shadow:0 2px 0 #b98a00}
+/* 상단 그래픽 설정 메뉴 (11/16) */
+.gqMenu{display:flex;align-items:center;gap:6px}
+.gqMenu select{font:inherit;border:1px solid var(--line);border-radius:6px;padding:2px 4px;background:#fff;cursor:pointer}
+.gqMenu s{text-decoration:none;color:var(--mut,#667);font-size:11px}
+/* 1인칭 : 왼쪽 타일은 현황 표시만 */
+#main.fpMode .tile{cursor:default}
+#main.fpMode .tile:hover{filter:none}
+/* 충전량 조절 미니게임 (11/16) */
+#dialGame{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,12,16,.55);z-index:60}
+#dialGame.on{display:flex}
+#dialGame .dgBox{width:min(860px,94%);background:#12171c;color:#e8edf1;border-radius:14px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.5);font:14px/1.4 var(--ff)}
+#dialGame .dgHead{display:flex;align-items:center;gap:10px}#dialGame .dgHead b{font-size:17px}#dialGame .dgHead span{color:#9aa5ae}
+#dialGame .dgX{margin-left:auto;background:#2a3138;color:#e8edf1;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+#dialGame .dgTabs{display:flex;gap:6px;margin:10px 0}#dialGame .dgTab{background:#222a31;color:#cfd6dc;border:1px solid #39434c;border-radius:8px;padding:6px 12px;cursor:pointer}
+#dialGame .dgTab.on{background:#ffc400;color:#2a1f00;border-color:#ffc400;font-weight:800}
+#dialGame .dgMain{display:flex;gap:18px;align-items:center}
+#dialGame .dgInfo{flex:1}#dialGame .dgNz{font-size:16px}#dialGame .dgNz b{font-size:26px;color:#ffc400}
+#dialGame .dgPred{margin:6px 0;padding:8px 10px;border-radius:10px;background:#1d2329}#dialGame .dgPred b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
+#dialGame .dgPred.ok b{color:#3ddc84}#dialGame .dgPred.warn b{color:#ffcf33}#dialGame .dgPred.ng b{color:#ff6b5e}
+#dialGame .dgStd{color:#9aa5ae}#dialGame .dgKeys{margin-top:8px}#dialGame .dgKeys span{display:inline-block;min-width:22px;text-align:center;background:#2a3138;border:1px solid #4a555f;border-radius:5px;padding:1px 5px;margin:0 2px;font-weight:800}
+#dialGame .dgNote{margin-top:8px;color:#8b969f;font-size:12px}
+#dialGame .dgRow{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:10px}
+#dialGame .dgCell{display:flex;flex-direction:column;align-items:center;background:#1a2026;border:2px solid transparent;border-radius:8px;padding:4px 0;cursor:pointer}
+#dialGame .dgCell svg{width:100%;height:auto;max-width:62px}#dialGame .dgCell b{font-size:12px}#dialGame .dgCell s{text-decoration:none;font-size:11px;font-variant-numeric:tabular-nums}
+#dialGame .dgCell.ok s{color:#3ddc84}#dialGame .dgCell.warn s{color:#ffcf33}#dialGame .dgCell.ng s{color:#ff6b5e}
+#dialGame .dgCell.sel{border-color:#ffc400}
+#dialGame .dgFoot{margin-top:10px;color:#cfd6dc}#dialGame .okT{color:#3ddc84;font-weight:800}

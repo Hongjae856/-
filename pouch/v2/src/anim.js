@@ -31,6 +31,9 @@ function stepAnim(dt){
     o.scale.setScalar(vis?1:0); o.updateMatrix(); AN.im.setMatrixAt(i,o.matrix); }
   AN.im.instanceMatrix.needsUpdate=true;
   if(FM.stripTex) FM.stripTex.offset.y=AN.cyc+ez((t-.45)/.45);
+  if(FM.sealG){ const L=FM.stickL, cl=t<.4?0:t<.45?ez((t-.4)/.05):t<.96?1:1-ez((t-.96)/.04),
+      yy=t<.02?-L:t<.38?-L*(1-ez((t-.02)/.36)):t<.45?0:t<.9?-L*ez((t-.45)/.45):-L;
+    FM.sealG.position.x=FM.press*cl; FM.sealG.position.y=yy; }               /* 가로실바 : 위에서 눌러 잡음(.40) → 은박 인출과 함께 1포 길이만큼 내려옴(.45~.90) → 벌어짐 → 위로 복귀 */
   if(FM.pressG){ const pr=t>=.9?ez((t-.9)/.06):1-ez((t-.06)/.08); FM.pressG.position.x=FM.press*pr; }                 /* 프레싱 */
   stepPackAnim();
   if(FM.flaps){ const op=(t<TD-.02||t>=1)?0:ez((t-(TD-.02))/.05)*(1-ez((t-.54)/.07)); for(const f of FM.flaps) f.pv.rotation.x=f.sg*op*1.45; }   /* 바닥 게이트 */

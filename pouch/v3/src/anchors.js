@@ -10,7 +10,7 @@ function VW(e,t){ const dx=e[0]-t[0], dy=e[1]-t[1], dz=e[2]-t[2], d=Math.hypot(d
 
 /* ── 현장 위치 (조치 · 표식 공용) ── */
 const ANC={
-  mainPow:[3.875,1.15,3.60],            /* 제어함 문 회전 손잡이 = 메인 파워 */
+  mainPow:[2.60,1.36,2.21],             /* 메인스위치 : 본체 서쪽 면 · 컨트롤 판넬 바로 뒤 (11/16 사용자 확정) */
   panel:[2.29,1.53,1.833],              /* 충전기 컨트롤 판넬 화면 */
   panelSw:[2.28,1.21,1.833],            /* 판넬 하부 버튼 */
   panelIn:[2.40,1.25,1.833],            /* 판넬 함 내부 (서보 드라이브) */
@@ -25,8 +25,8 @@ const ANC={
   empty:[CVX-.25,0.5,ZC+.75],           /* 공포 배출 [확인 필요] */
   hop2:[XF,DY+1.0,ZC+.38],              /* 2번 호퍼 (주성분 · 원료투입구 쪽) */
   hops:[XF,DY+1.45,ZC],
-  dialF:[XF-.62,DY+.3,ZC],              /* 충전량 다이얼 (서쪽 · 첨가제 · 주성분) */
-  dialB:[XF+.66,DY+.3,ZC],              /* 백당 (동쪽) */
+  dialF:[XF-.51,DY+.57,ZC],              /* 충전량 다이얼 (서쪽 · 첨가제 · 주성분) */
+  dialB:[XF+.52,DY+.57,ZC],              /* 백당 (동쪽) */
   dust:[5.0,DY+.55,1.65],               /* 동쪽 데크 진공 생성기 · 집진 */
   roll:[4.71,0.70,ZC],                  /* 은박 롤 (언와인더) */
   prn:[4.35,1.70,ZC-.44],               /* 은박 인쇄부 (북쪽 면 오른쪽 칸 · 11/16 사진) */
@@ -104,7 +104,7 @@ const LBL3=[[4.2,4.15,ZC,"파우치 충전기 SP303 · 2층 데크","F"],[6.75,2
 /* ── 작업자 : 서는 자리(stand) · 손 목표(reach) · 데크 여부 · 들고 가는 물건 · 확대 시점 ── */
 const JOBS={
   look:   {stand:[1.4,4.9], reach:null, dur:1.4},
-  power:  {stand:[3.88,4.25], reach:ANC.mainPow, dur:1.2},
+  power:  {stand:[2.25,2.47], reach:ANC.mainPow, dur:1.2},
   air:    {stand:[6.05,1.12], reach:ANC.air1, dur:1.4},
   dust:   {stand:[5.2,1.95], deck:true, reach:ANC.dust, dur:1.4, view:"hopper"},
   panel:  {stand:[1.65,1.83], reach:ANC.panelSw, dur:1.0},

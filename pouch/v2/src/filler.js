@@ -17,11 +17,12 @@ function buildFiller(S){
   /* ── 난간 : 스테인리스 원형 파이프 (상단 935.6 + 가로 3단) · 난간 → 천장 지지봉 ── */
   const rail=(a,b)=>{ const L=Math.hypot(b[0]-a[0],b[1]-a[1]), n=Math.max(1,Math.round(L/1.0));
     for(let i=0;i<=n;i++){ const x=a[0]+(b[0]-a[0])*i/n, z=a[1]+(b[1]-a[1])*i/n; rod(g,[x,Y,z],[x,Y+F.rail,z],.021,M.ssMir); }
-    for(const h of [F.rail,.72,.5,.28]) rod(g,[a[0],Y+h,a[1]],[b[0],Y+h,b[1]],h===F.rail?.021:.014,M.ssMir); };
+    for(const h of [F.rail,.76,.58,.4,.22]) rod(g,[a[0],Y+h,a[1]],[b[0],Y+h,b[1]],h===F.rail?.021:.014,M.ssMir); };
   const e=.04, gx0=FM.xf-.3, gx1=FM.xf+.3;                                   /* 원료투입구 : 2번 호퍼 정면 (사용자 확정 11/11) */
   rail([xw+e,F.z0+e],[F.x1-e,F.z0+e]); rail([xw+e,F.z0+e],[xw+e,F.z1-e]); rail([F.x1-e,F.z0+e],[F.x1-e,STR.z0-.02]);
   rail([xw+e,F.z1-e],[gx0,F.z1-e]); rail([gx1,F.z1-e],[STR.x0-e,F.z1-e]);                                       /* 남쪽 : 원료투입구 개구 */
-  bx(g,gx0,gx1,Y+.0,Y+.05,F.z1-.07,F.z1-.01,M.haz); for(const y of [Y+.06,Y+F.rail]) rod(g,[gx0,y,F.z1-e],[gx1,y,F.z1-e],.012,M.yellow); for(const x of [gx0,gx1]) rod(g,[x,Y+.06,F.z1-e],[x,Y+F.rail,F.z1-e],.012,M.yellow);
+  bx(g,gx0,gx1,Y+.0,Y+.05,F.z1-.07,F.z1-.01,M.haz); for(const y of [Y+.5,Y+F.rail]) rod(g,[gx0,y,F.z1-e],[gx1,y,F.z1-e],.014,M.yellow); for(const x of [gx0,gx1]) rod(g,[x,Y+.05,F.z1-e],[x,Y+F.rail,F.z1-e],.014,M.yellow);
+  bx(g,gx0+.01,gx1-.01,Y+.05,Y+.49,F.z1-e-.004,F.z1-e+.004,M.ss); for(const h of [.22,.4]) rod(g,[gx0,Y+h,F.z1-e-.01],[gx1,Y+h,F.z1-e-.01],.01,M.ssMir);   /* 원료투입구 : 아래(0.5 m 까지)는 막힘 · 위만 열림 (11/16 사용자 확정) */
   plate(g,.42,.13,labelTex([["원료투입구","#111",90]],{w:512,h:160,border:"#c00"}),[gx1+.26,Y+.62,F.z1-.02],0);
   for(const [x,z] of [[xw+e,F.z0+e],[F.x1-e,F.z0+e],[xw+e,F.z1-e]]) rod(g,[x,Y+F.rail,z],[x,RM.fill.h,z],.016,M.ssMir);
   plate(g,.5,.14,labelTex([["머리충돌주의!","#111",80]],{w:640,h:170,bg:"#f2c400",border:"#111"}),[xw-.008,Y-.09,F.z1-.9],-Math.PI/2);

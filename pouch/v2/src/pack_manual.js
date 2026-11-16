@@ -165,7 +165,7 @@ function stepManual(){
   const B0=PA.B0==null?-Infinity:PA.B0, M0=B0===-Infinity?-Infinity:B0===Infinity?Infinity:Math.ceil((B0-7)/8), N0=M0===-Infinity?-Infinity:M0===Infinity?Infinity:Math.ceil((M0-3)/4);   /* 실제 제품이 든 첫 대케이스 · 대박스 (11/16) */
   const Tm=m=>t0+6*m, Arr=m=>Tm(m)+8.3+(MP.zB-MP.zK)/MP.vB+.6+(MP.zG0-MP.zE)/MP.vG, Bn=n=>Arr(4*n)+8.5, pkT=m=>{ const n=Math.floor(m/4); return Bn(n)+MP.pk[m-4*n]; };
   /* 작업자 1 · 2 */
-  for(const w of [0,1]){ const m=w+2*Math.floor((t-t0-6*w+3.5)/12), ta=m<M0?-9:t-Tm(m), sc=packScene(w?-1:1,ta);   /* 제품이 오기 전 : 준비 자세로 대기 */ poseHuman(MP.w[w],Object.assign(sc.pose,{dt})); }
+  for(const w of [0,1]){ const m=w+2*Math.floor((t-t0-6*w+3.5)/12), ta=m<M0?-9:t-Tm(m), sc=packScene(w?-1:1,ta); if(m<M0) Object.assign(sc.pose,{L:null,R:null,nL:null,nR:null});   /* 제품이 오기 전 : 팔을 내리고 편하게 서서 대기 (11/16) */ poseHuman(MP.w[w],Object.assign(sc.pose,{dt})); }
   /* 작업자 3 */
   const n3=Math.floor((t-Bn(0))/24), c3=n3<N0?0:t-Bn(n3), bs=boxScene(c3,n3); poseHuman(MP.w[2],Object.assign(bs.pose,{dt}));
   if(bs.bxA) MP.boxes[mod(n3,2)].set({p:bs.bxA.p,yaw:bs.bxA.yaw,b1:bs.b1,b2:bs.b2,tape:bs.tape}); else MP.boxes[mod(n3,2)].G.visible=false;

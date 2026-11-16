@@ -551,6 +551,33 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #splash .go{grid-template-columns:repeat(4,1fr);max-width:1300px}
 #splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
 #demoAct{margin-top:8px;width:100%;padding:12px 10px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd84d,#f0b400);color:#3a2a00;font:800 17px/1.2 var(--ff);cursor:pointer;box-shadow:0 2px 0 #b98a00}
+/* 상단 그래픽 설정 메뉴 (11/16) */
+.gqMenu{display:flex;align-items:center;gap:6px}
+.gqMenu select{font:inherit;border:1px solid var(--line);border-radius:6px;padding:2px 4px;background:#fff;cursor:pointer}
+.gqMenu s{text-decoration:none;color:var(--mut,#667);font-size:11px}
+/* 1인칭 : 왼쪽 타일은 현황 표시만 */
+#main.fpMode .tile{cursor:default}
+#main.fpMode .tile:hover{filter:none}
+/* 충전량 조절 미니게임 (11/16) */
+#dialGame{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,12,16,.55);z-index:60}
+#dialGame.on{display:flex}
+#dialGame .dgBox{width:min(860px,94%);background:#12171c;color:#e8edf1;border-radius:14px;padding:14px 16px;box-shadow:0 10px 40px rgba(0,0,0,.5);font:14px/1.4 var(--ff)}
+#dialGame .dgHead{display:flex;align-items:center;gap:10px}#dialGame .dgHead b{font-size:17px}#dialGame .dgHead span{color:#9aa5ae}
+#dialGame .dgX{margin-left:auto;background:#2a3138;color:#e8edf1;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+#dialGame .dgTabs{display:flex;gap:6px;margin:10px 0}#dialGame .dgTab{background:#222a31;color:#cfd6dc;border:1px solid #39434c;border-radius:8px;padding:6px 12px;cursor:pointer}
+#dialGame .dgTab.on{background:#ffc400;color:#2a1f00;border-color:#ffc400;font-weight:800}
+#dialGame .dgMain{display:flex;gap:18px;align-items:center}
+#dialGame .dgInfo{flex:1}#dialGame .dgNz{font-size:16px}#dialGame .dgNz b{font-size:26px;color:#ffc400}
+#dialGame .dgPred{margin:6px 0;padding:8px 10px;border-radius:10px;background:#1d2329}#dialGame .dgPred b{display:block;font-size:28px;font-variant-numeric:tabular-nums}
+#dialGame .dgPred.ok b{color:#3ddc84}#dialGame .dgPred.warn b{color:#ffcf33}#dialGame .dgPred.ng b{color:#ff6b5e}
+#dialGame .dgStd{color:#9aa5ae}#dialGame .dgKeys{margin-top:8px}#dialGame .dgKeys span{display:inline-block;min-width:22px;text-align:center;background:#2a3138;border:1px solid #4a555f;border-radius:5px;padding:1px 5px;margin:0 2px;font-weight:800}
+#dialGame .dgNote{margin-top:8px;color:#8b969f;font-size:12px}
+#dialGame .dgRow{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin-top:10px}
+#dialGame .dgCell{display:flex;flex-direction:column;align-items:center;background:#1a2026;border:2px solid transparent;border-radius:8px;padding:4px 0;cursor:pointer}
+#dialGame .dgCell svg{width:100%;height:auto;max-width:62px}#dialGame .dgCell b{font-size:12px}#dialGame .dgCell s{text-decoration:none;font-size:11px;font-variant-numeric:tabular-nums}
+#dialGame .dgCell.ok s{color:#3ddc84}#dialGame .dgCell.warn s{color:#ffcf33}#dialGame .dgCell.ng s{color:#ff6b5e}
+#dialGame .dgCell.sel{border-color:#ffc400}
+#dialGame .dgFoot{margin-top:10px;color:#cfd6dc}#dialGame .okT{color:#3ddc84;font-weight:800}
 
 /* OEE 연계 교육 (공통) */
 #oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
@@ -623,7 +650,8 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
     <div id="roomTag" class="pill"><b id="roomNm">-</b></div>
     <div class="pill" id="spdGrp"><button data-s="1" class="on">×1</button><button data-s="2">×2</button><button data-s="5">×5</button><button data-s="10">×10</button></div>
     <button class="gbtn" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>
-    <button class="gbtn" id="apBtn">▶ 자동재생</button>
+    <button class="gbtn" id="apBtn" hidden>▶ 자동재생</button>
+    <label class="gbtn gqMenu" title="그래픽 품질">🖥 그래픽 <select id="gqSel"><option value="ultra">최고</option><option value="high">상</option><option value="mid">중</option><option value="low">하</option><option value="auto">자동</option></select><s id="gqNow"></s></label>
     <div class="sp"></div>
     <button class="gbtn" id="soundBtn">사운드 OFF</button>
     <button class="gbtn" id="homeBtn">메인화면</button>
@@ -945,12 +973,15 @@ function buildForming(g,by1){
   /* ── 프레싱 묶음 : ① 가로 실링 · ② 무늬 · ③ 커팅 빔은 은박이 멈춘 동안 함께 동쪽(파우치를 누르는 방향)으로 눌렀다가 물러난다 (사용자 설명 11/11) ── */
   const tg=new T3.Group(); g.add(tg); FM.pressG=tg; wg=tg;
   /* 각형 공압 실린더 (모서리 볼트 · 가운데 캡) */
-  const cyl=(d0,y,z,sz)=>{ bx(tg,X(d0+.07),X(d0),y-sz/2,y+sz/2,z-sz/2,z+sz/2,M.alu); rod(tg,[X(d0+.07),y,z],[X(d0+.077),y,z],sz*.28,M.ssD,20); for(const a of [-1,1]) for(const b of [-1,1]) rod(tg,[X(d0+.07),y+a*sz*.36,z+b*sz*.36],[X(d0+.075),y+a*sz*.36,z+b*sz*.36],.007,M.dark,8); };
+  const cyl=(d0,y,z,sz,G)=>{ G=G||tg; bx(G,X(d0+.07),X(d0),y-sz/2,y+sz/2,z-sz/2,z+sz/2,M.alu); rod(G,[X(d0+.07),y,z],[X(d0+.077),y,z],sz*.28,M.ssD,20); for(const a of [-1,1]) for(const b of [-1,1]) rod(G,[X(d0+.07),y+a*sz*.36,z+b*sz*.36],[X(d0+.075),y+a*sz*.36,z+b*sz*.36],.007,M.dark,8); };
   const cz=[-.375,-.125,.125,.375];
   /* ① 가로 실링 빔 */
-  bx(tg,X(.27),X(.07),1.295,1.41,zc-.52,zc+.52,M.ss);
-  for(const c of cz){ cyl(.27,1.352,zc+c,.1); for(const b of [-1,1]){ rod(tg,[X(.3),1.302,zc+c+b*.03],[X(.3),1.272,zc+c+b*.03],.006,M.alu,8); rod(tg,[X(.3),1.272,zc+c+b*.03],[X(.26),1.245,zc+c+b*.045],.004,M.hose,6); } }
+  /* ① 가로 실링 빔(가로실바) : 은박을 눌러 잡은 채 아래로 내려오며 파우치를 끌어내림 → 벌어진 뒤 위로 복귀 (11/16 사용자 설명 · 동작은 anim.js) */
+  const sg=new T3.Group(); g.add(sg); FM.sealG=sg; wg=sg;
+  bx(sg,X(.27),X(.07),1.295,1.41,zc-.52,zc+.52,M.ss);
+  for(const c of cz){ cyl(.27,1.352,zc+c,.1,sg); for(const b of [-1,1]){ rod(sg,[X(.3),1.302,zc+c+b*.03],[X(.3),1.272,zc+c+b*.03],.006,M.alu,8); rod(sg,[X(.3),1.272,zc+c+b*.03],[X(.26),1.245,zc+c+b*.045],.004,M.hose,6); } }
   for(const s of [-1,1]) warn(X(.27),1.325,1.38,zc+s*.47-.035,zc+s*.47+.035); warn(X(.27),1.39,1.408,zc-.025,zc+.025);
+  wg=tg;
   /* ② 무늬 빔 (함 맨 아래) */
   bx(tg,X(.26),X(.07),1.03,1.14,zc-.52,zc+.52,M.ss); bx(tg,X(.3),X(.26),1.0,1.03,zc-.5,zc+.5,M.alu);
   for(const c of cz) bx(tg,X(.31),X(.26),1.05,1.12,zc+c-.045,zc+c+.045,M.alu);
@@ -988,6 +1019,10 @@ function buildForming(g,by1){
   for(const [D,z0,z] of [[D1,sp[1],zc-.115],[D2,sp[3],zc-.045]]){ rod(D,[-.04,1.28,z-z0],[-.04,1.44,z-z0],.008,fr,10); for(const y of [1.28,1.44]) rod(D,[0,y,z-z0],[-.04,y,z-z0],.006,fr,8); }
   for(const z of [sp[1],sp[3]]) for(const y of [1.12,1.7]) bx(g,xd-.012,xd-.004,y-.03,y+.03,z-.025,z+.025,fr);                 /* 경첩 */
   decal(g,.2,.075,textTex("SP303","#ffffff",512,190,170),[xd-.005,1.76,(sp[0]+sp[1])/2],WEST);
+  /* 메인스위치 : 3P 회전 절연 스위치(파란 몸통 · 노란 사각판 · 빨간 손잡이) — 본체 서쪽 면 · 컨트롤 판넬 바로 뒤 (11/16 사용자 확정). 손잡이 가로 = OFF · 세로 = ON */
+  { const z=sp[0]+.07, y=1.36, x=xd-.022; bx(g,x-.07,x,y-.055,y+.055,z-.05,z+.05,M.blue); bx(g,x-.077,x-.07,y-.062,y+.062,z-.062,z+.062,M.yellow);
+    plate(g,.05,.014,labelTex([["MAIN","#111",80]],{w:256,h:72,bg:"#ffd400"}),[x-.078,y+.048,z],WEST);
+    const SW=new T3.Group(); SW.position.set(x-.077,y,z); g.add(SW); rod(SW,[0,0,0],[-.018,0,0],.034,M.red,24); bx(SW,-.046,-.018,-.012,.012,-.068,.014,M.red); FM.mainSw=SW; }
   decal(g,.3,.075,textTex("SOLPAC","#ffffff",512,128,112),[xd-.005,1.3,(sp[3]+sp[4])/2],WEST);
   decal(g,.3,.1,tex(cvs(512,170,(c)=>{ c.clearRect(0,0,512,170); c.fillStyle="#fff"; c.font='72px Arial'; c.textAlign="left"; c.fillText("packaging",30,70); c.fillText("machine",30,150); }),1,1,true),[xd-.005,1.19,(sp[3]+sp[4])/2],WEST);
   plate(D2,.17,.13,labelTex([["금 지","#fff",64],["도어 인터락 작동중","#111",40],["운전중 개방금지","#c00",40]],{w:512,h:390,border:"#c00",bg:"#fff"}),[-.006,1.54,zc+.07-sp[3]],WEST);
@@ -1118,32 +1153,31 @@ function buildHoppers(g){
   for(let k=0;k<6;k++) rod(g,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
   rod(g,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(g,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(g,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
   for(const z of [zc-.3,zc+.3]){ rod(g,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(g,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
-  /* ── 도징박스 : 검은 한 뭉치 · 3칸 (칸마다 축 + 스크래퍼) ── */
-  const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4;
-  bx(g,xc-.3,xc+.3,Y,Y+.02,zc-.56,zc+.56,M.ss);                                                                 /* 본체 윗판 */
+  /* ── 스테인리스 틀 (11/16 사용자 설명) : 호퍼 · 도징박스 · 원료조절부가 모두 한 틀에 달림 · 아래는 막힌 함(데크 바닥에 부품 노출 없음) · 옆은 투명판(도징박스가 보임) ── */
+  const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4, fw=.46, fl=.58, ft=Y+.66;
+  bx(g,xc-fw,xc+fw,Y,Y+.2,zc-fl,zc+fl,M.ss); bx(g,xc-fw-.006,xc+fw+.006,Y+.2,Y+.215,zc-fl-.006,zc+fl+.006,M.ssMir);   /* 아래 막힌 함 · 윗테 */
+  for(const sx of [-1,1]) for(const sz of [-1,1]) bx(g,xc+sx*fw-.02,xc+sx*fw+.02,Y,ft,zc+sz*fl-.02,zc+sz*fl+.02,M.ss);       /* 기둥 4 */
+  for(const s of [-1,1]){ bx(g,xc+s*fw-.016,xc+s*fw+.016,ft-.032,ft,zc-fl,zc+fl,M.ss); bx(g,xc-fw,xc+fw,ft-.032,ft,zc+s*fl-.016,zc+s*fl+.016,M.ss);
+    bx(g,xc+s*fw-.003,xc+s*fw+.003,Y+.215,ft-.032,zc-fl+.02,zc+fl-.02,M.acryl); bx(g,xc-fw+.02,xc+fw-.02,Y+.215,ft-.032,zc+s*fl-.003,zc+s*fl+.003,M.acryl); }
+  /* 도징박스 : 검은 3칸 (칸마다 축 + 스크래퍼) — 호퍼 출구 바로 아래 */
   for(let k=0;k<3;k++){ const x0=xc-bw+k*(2*bw/3)+.003, x1=xc-bw+(k+1)*(2*bw/3)-.003; bx(g,x0,x1,dy0,dy1,zc-dl,zc+dl,M.black);
     for(const s of [-1,1]){ rod(g,[(x0+x1)/2,dy0+.085,zc+s*dl],[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],.03,M.ssD,20); rod(g,[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],[(x0+x1)/2,dy0+.085,zc+s*(dl+.03)],.012,M.ssMir,12); } }
-  /* 함량판 · 셔터 틀 : 호퍼 바깥면까지 넓은 스테인리스 틀 (2단) · 셔터 판 · 셔터 실린더 · 바이브레이터 */
-  const fy0=Y+.2, fy1=Y+.3, fl=.5, fw=.42;
-  for(const s of [-1,1]){ for(const [a,b] of [[fy0,fy0+.03],[fy1-.03,fy1],[Y+.44,Y+.47]]){ bx(g,xc+s*fw-.012,xc+s*fw+.012,a,b,zc-fl,zc+fl,M.ss); bx(g,xc-fw,xc+fw,a,b,zc+s*fl-.012,zc+s*fl+.012,M.ss); }
-    for(const z of [zc-fl,zc-.17,zc+.17,zc+fl]) bx(g,xc+s*fw-.012,xc+s*fw+.012,fy0,Y+.47,z-.012,z+.012,M.ss);
-    bx(g,xc+s*fw-.003,xc+s*fw+.003,fy1,Y+.44,zc-fl+.012,zc+fl-.012,M.acryl);                                    /* 투명 옆판 */
-    rod(g,[xc+s*(fw+.03),Y+.38,zc-.07],[xc+s*(fw+.03),Y+.38,zc+.07],.006,M.ssMir,8); for(const d of [-.07,.07]) rod(g,[xc+s*fw,Y+.38,zc+d],[xc+s*(fw+.03),Y+.38,zc+d],.005,M.ssMir,6);
-    ribbon(g,[[xc+s*fw,Y+.47],[xc+s*(bw+.01),Y+.47]],zc-dl,zc+dl,M.sheet); }
-  bx(g,xc-fw+.02,xc+fw-.02,fy0+.05,fy0+.062,zc-fl+.02,zc+fl-.02,M.dark); bx(g,xc-bw+.01,xc+bw-.01,fy0+.03,fy0+.04,zc-fl-.08,zc+fl-.04,M.green.clone());
-  rod(g,[xc,fy0+.035,zc-fl-.08],[xc,fy0+.035,zc-fl-.24],.02,M.alu,14); rod(g,[xc,fy0+.035,zc-fl-.24],[xc,fy0+.035,zc-fl-.26],.023,M.grey,14);
-  for(const s of [-1,1]){ bx(g,xc-.05,xc+.05,fy0-.005,fy0+.03,zc+s*(fl+.02)-.03,zc+s*(fl+.02)+.03,M.blue); bx(g,xc-.05,xc+.05,Y+.1,Y+.135,zc+s*(fl-.06)-.03,zc+s*(fl-.06)+.03,M.red); }
-  /* 열별 검은 유닛 줄 · 양쪽 긴 면의 알루미늄 레일 + 주황 속도 조절 밸브 10 · 흰 슬리브 */
-  for(const s of [-1,1]){ bx(g,xc+s*.4-.03,xc+s*.4+.03,Y+.07,Y+.115,zc-.44,zc+.44,M.alu); bx(g,xc+s*.33-.03,xc+s*.33+.03,Y+.02,Y+.07,zc-.46,zc+.46,M.ssD); }
-  for(let i=0;i<n;i++){ const z=pz(i); bx(g,xc-.34,xc+.34,Y+.115,fy0,z-.027,z+.027,M.black); rod(g,[xc,Y+.02,z],[xc,Y+.115,z],.018,M.cream,14);
-    for(const s of [-1,1]){ const xf=xc+s*.4; bx(g,xf-.016,xf+.016,Y+.115,Y+.155,z-.016,z+.016,M.orange); rod(g,[xf+s*.03,Y+.092,z],[xf+s*.07,Y+.092,z],.012,M.ssMir,12); rod(g,[xf+s*.03,Y+.092,z],[xf+s*.036,Y+.092,z],.016,M.ssD,12);
-      rod(g,[xc+s*.34,Y+.17,z-.012],[xc+s*.36,Y+.17,z-.012],.005,M.blue,8); rod(g,[xc+s*.34,Y+.17,z+.012],[xc+s*.36,Y+.17,z+.012],.005,M.blue,8); tube(g,[[xc+s*.36,Y+.17,z],[xc+s*.46,Y+.2,z+.01],[xc+s*.49,Y+.1,z+.03],[xc+s*.48,Y+.045,z+.06]],.0045,M.hose); } }
-  for(const s of [-1,1]) for(const dy of [0,.014]) tube(g,[[xc+s*.48,Y+.04+dy,zc-.4],[xc+s*.49,Y+.04+dy,zc],[xc+s*.48,Y+.04+dy,zc+.4],[xc+s*.2,Y+.05+dy,zc+.6]],.008,M.hose);
-  /* 위쪽 주황 밸브 4 (1번 호퍼 쪽 틀 위) */
-  bx(g,xc-fw-.03,xc-fw+.0,Y+.47,Y+.5,zc-.36,zc+.0,M.alu); for(let k=0;k<4;k++){ const z=zc-.32+k*.09; bx(g,xc-fw-.03,xc-fw-.004,Y+.5,Y+.535,z-.014,z+.014,M.orange); rod(g,[xc-fw-.017,Y+.535,z],[xc-fw-.017,Y+.56,z],.009,M.ssMir,10); }
+  bx(g,xc-bw-.02,xc+bw+.02,Y+.215,dy0,zc-dl-.02,zc+dl+.02,M.ssD);                                                  /* 도징박스 받침 (함 위) */
+  for(const s of [-1,1]) ribbon(g,[[xc+s*(fw-.02),dy1+.02],[xc+s*(bw+.01),dy1]],zc-dl,zc+dl,M.sheet);
+  /* 원료조절부 : 호퍼 끝에 붙은 10열 조절 다이얼 — 도징박스(윗면)보다 높음. 서쪽 = 1 첨가제(위) · 2 주성분(아래), 동쪽 = 3 백당 (11/16) */
+  FM.dials={add:[],main:[],sug:[]};
+  const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw;
+    bx(g,Math.min(x,x+side*.045),Math.max(x,x+side*.045),y-.03,y+.03,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.047),Math.max(x,x+side*.047),y-.022,y+.022,zc-.44,zc+.44,M.ssD);
+    rod(g,[xc+side*.27,y,zc-.45],[x,y,zc-.45],.012,M.ssMir,10); rod(g,[xc+side*.27,y,zc+.45],[x,y,zc+.45],.012,M.ssMir,10);          /* 호퍼 끝 브래킷 */
+    plate(g,.13,.035,labelTex([[nm,"#111",64]],{w:512,h:140,border:"#333"}),[x+side*.048,y+.045,zc-.33],side<0?-Math.PI/2:Math.PI/2);
+    for(let i=0;i<n;i++){ const z=pz(i), K=new T3.Group(); K.position.set(x+side*.047,y,z); g.add(K);
+      const kn=new T3.Mesh(new T3.CylinderGeometry(.017,.019,.03,22),M.black); kn.rotation.z=Math.PI/2; kn.position.x=side*.015; add(K,kn);
+      const pt=new T3.Mesh(new T3.BoxGeometry(.004,.022,.005),M.white); pt.position.set(side*.031,.006,0); add(K,pt);
+      FM.dials[key].push(K); } };
+  dialRow(-1,Y+.6,"add","1 첨가제"); dialRow(-1,Y+.53,"main","2 주성분"); dialRow(1,Y+.57,"sug","3 백당");
   /* 남쪽 끝 : 게이트 · 셔터 실린더 · 고정 브래킷 · 덮개 천 */
   const cyl=(x,y0,y1,z)=>{ rod(g,[x,y0,z],[x,y1,z],.019,M.alu,14); rod(g,[x,y1,z],[x,y1+.012,z],.022,M.grey,14); rod(g,[x,y0-.012,z],[x,y0,z],.022,M.grey,14); rod(g,[x,y0-.07,z],[x,y0-.012,z],.006,M.ssMir,8); };
-  for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,Y+.5,Y+.68,zc+D+.06);
+  for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,ft+.01,ft+.19,zc+D+.06);
   for(const x of [xc-.14,xc-.04,xc+.12]){ cyl(x,Y+.24,Y+.4,zc+fl+.06); bx(g,x-.028,x+.028,Y+.1,Y+.14,zc+fl+.03,zc+fl+.1,M.dark); }
   for(const s of [-1,1]) tube(g,[[xc+s*.13,Y+.4,zc+fl+.06],[xc+s*.22,Y+.52,zc+fl+.12],[xc+s*.3,Y+.3,zc+fl+.16],[xc+s*.27,Y+.05,zc+fl+.1]],.0055,M.hose);
   { const pts=[]; for(let k=0;k<=10;k++){ const a=Math.PI*k/10; pts.push([xc+.3*Math.cos(a)+.08,Y+.06+.015*Math.sin(a*3),zc+fl+.1+.16*Math.sin(a)]); } tube(g,pts,.032,new T3.MeshStandardMaterial({color:0x9ea3a8,roughness:.95})); }
@@ -1183,11 +1217,12 @@ function buildFiller(S){
   /* ── 난간 : 스테인리스 원형 파이프 (상단 935.6 + 가로 3단) · 난간 → 천장 지지봉 ── */
   const rail=(a,b)=>{ const L=Math.hypot(b[0]-a[0],b[1]-a[1]), n=Math.max(1,Math.round(L/1.0));
     for(let i=0;i<=n;i++){ const x=a[0]+(b[0]-a[0])*i/n, z=a[1]+(b[1]-a[1])*i/n; rod(g,[x,Y,z],[x,Y+F.rail,z],.021,M.ssMir); }
-    for(const h of [F.rail,.72,.5,.28]) rod(g,[a[0],Y+h,a[1]],[b[0],Y+h,b[1]],h===F.rail?.021:.014,M.ssMir); };
+    for(const h of [F.rail,.76,.58,.4,.22]) rod(g,[a[0],Y+h,a[1]],[b[0],Y+h,b[1]],h===F.rail?.021:.014,M.ssMir); };
   const e=.04, gx0=FM.xf-.3, gx1=FM.xf+.3;                                   /* 원료투입구 : 2번 호퍼 정면 (사용자 확정 11/11) */
   rail([xw+e,F.z0+e],[F.x1-e,F.z0+e]); rail([xw+e,F.z0+e],[xw+e,F.z1-e]); rail([F.x1-e,F.z0+e],[F.x1-e,STR.z0-.02]);
   rail([xw+e,F.z1-e],[gx0,F.z1-e]); rail([gx1,F.z1-e],[STR.x0-e,F.z1-e]);                                       /* 남쪽 : 원료투입구 개구 */
-  bx(g,gx0,gx1,Y+.0,Y+.05,F.z1-.07,F.z1-.01,M.haz); for(const y of [Y+.06,Y+F.rail]) rod(g,[gx0,y,F.z1-e],[gx1,y,F.z1-e],.012,M.yellow); for(const x of [gx0,gx1]) rod(g,[x,Y+.06,F.z1-e],[x,Y+F.rail,F.z1-e],.012,M.yellow);
+  bx(g,gx0,gx1,Y+.0,Y+.05,F.z1-.07,F.z1-.01,M.haz); for(const y of [Y+.5,Y+F.rail]) rod(g,[gx0,y,F.z1-e],[gx1,y,F.z1-e],.014,M.yellow); for(const x of [gx0,gx1]) rod(g,[x,Y+.05,F.z1-e],[x,Y+F.rail,F.z1-e],.014,M.yellow);
+  bx(g,gx0+.01,gx1-.01,Y+.05,Y+.49,F.z1-e-.004,F.z1-e+.004,M.ss); for(const h of [.22,.4]) rod(g,[gx0,Y+h,F.z1-e-.01],[gx1,Y+h,F.z1-e-.01],.01,M.ssMir);   /* 원료투입구 : 아래(0.5 m 까지)는 막힘 · 위만 열림 (11/16 사용자 확정) */
   plate(g,.42,.13,labelTex([["원료투입구","#111",90]],{w:512,h:160,border:"#c00"}),[gx1+.26,Y+.62,F.z1-.02],0);
   for(const [x,z] of [[xw+e,F.z0+e],[F.x1-e,F.z0+e],[xw+e,F.z1-e]]) rod(g,[x,Y+F.rail,z],[x,RM.fill.h,z],.016,M.ssMir);
   plate(g,.5,.14,labelTex([["머리충돌주의!","#111",80]],{w:640,h:170,bg:"#f2c400",border:"#111"}),[xw-.008,Y-.09,F.z1-.9],-Math.PI/2);
@@ -2030,7 +2065,7 @@ function stepManual(){
   const B0=PA.B0==null?-Infinity:PA.B0, M0=B0===-Infinity?-Infinity:B0===Infinity?Infinity:Math.ceil((B0-7)/8), N0=M0===-Infinity?-Infinity:M0===Infinity?Infinity:Math.ceil((M0-3)/4);   /* 실제 제품이 든 첫 대케이스 · 대박스 (11/16) */
   const Tm=m=>t0+6*m, Arr=m=>Tm(m)+8.3+(MP.zB-MP.zK)/MP.vB+.6+(MP.zG0-MP.zE)/MP.vG, Bn=n=>Arr(4*n)+8.5, pkT=m=>{ const n=Math.floor(m/4); return Bn(n)+MP.pk[m-4*n]; };
   /* 작업자 1 · 2 */
-  for(const w of [0,1]){ const m=w+2*Math.floor((t-t0-6*w+3.5)/12), ta=m<M0?-9:t-Tm(m), sc=packScene(w?-1:1,ta);   /* 제품이 오기 전 : 준비 자세로 대기 */ poseHuman(MP.w[w],Object.assign(sc.pose,{dt})); }
+  for(const w of [0,1]){ const m=w+2*Math.floor((t-t0-6*w+3.5)/12), ta=m<M0?-9:t-Tm(m), sc=packScene(w?-1:1,ta); if(m<M0) Object.assign(sc.pose,{L:null,R:null,nL:null,nR:null});   /* 제품이 오기 전 : 팔을 내리고 편하게 서서 대기 (11/16) */ poseHuman(MP.w[w],Object.assign(sc.pose,{dt})); }
   /* 작업자 3 */
   const n3=Math.floor((t-Bn(0))/24), c3=n3<N0?0:t-Bn(n3), bs=boxScene(c3,n3); poseHuman(MP.w[2],Object.assign(bs.pose,{dt}));
   if(bs.bxA) MP.boxes[mod(n3,2)].set({p:bs.bxA.p,yaw:bs.bxA.yaw,b1:bs.b1,b2:bs.b2,tape:bs.tape}); else MP.boxes[mod(n3,2)].G.visible=false;
@@ -2214,6 +2249,9 @@ function stepAnim(dt){
     o.scale.setScalar(vis?1:0); o.updateMatrix(); AN.im.setMatrixAt(i,o.matrix); }
   AN.im.instanceMatrix.needsUpdate=true;
   if(FM.stripTex) FM.stripTex.offset.y=AN.cyc+ez((t-.45)/.45);
+  if(FM.sealG){ const L=FM.stickL, cl=t<.4?0:t<.45?ez((t-.4)/.05):t<.96?1:1-ez((t-.96)/.04),
+      yy=t<.02?-L:t<.38?-L*(1-ez((t-.02)/.36)):t<.45?0:t<.9?-L*ez((t-.45)/.45):-L;
+    FM.sealG.position.x=FM.press*cl; FM.sealG.position.y=yy; }               /* 가로실바 : 위에서 눌러 잡음(.40) → 은박 인출과 함께 1포 길이만큼 내려옴(.45~.90) → 벌어짐 → 위로 복귀 */
   if(FM.pressG){ const pr=t>=.9?ez((t-.9)/.06):1-ez((t-.06)/.08); FM.pressG.position.x=FM.press*pr; }                 /* 프레싱 */
   stepPackAnim();
   if(FM.flaps){ const op=(t<TD-.02||t>=1)?0:ez((t-(TD-.02))/.05)*(1-ez((t-.54)/.07)); for(const f of FM.flaps) f.pv.rotation.x=f.sg*op*1.45; }   /* 바닥 게이트 */
@@ -2668,7 +2706,7 @@ function VW(e,t){ const dx=e[0]-t[0], dy=e[1]-t[1], dz=e[2]-t[2], d=Math.hypot(d
 
 /* ── 현장 위치 (조치 · 표식 공용) ── */
 const ANC={
-  mainPow:[3.875,1.15,3.60],            /* 제어함 문 회전 손잡이 = 메인 파워 */
+  mainPow:[2.60,1.36,2.21],             /* 메인스위치 : 본체 서쪽 면 · 컨트롤 판넬 바로 뒤 (11/16 사용자 확정) */
   panel:[2.29,1.53,1.833],              /* 충전기 컨트롤 판넬 화면 */
   panelSw:[2.28,1.21,1.833],            /* 판넬 하부 버튼 */
   panelIn:[2.40,1.25,1.833],            /* 판넬 함 내부 (서보 드라이브) */
@@ -2683,8 +2721,8 @@ const ANC={
   empty:[CVX-.25,0.5,ZC+.75],           /* 공포 배출 [확인 필요] */
   hop2:[XF,DY+1.0,ZC+.38],              /* 2번 호퍼 (주성분 · 원료투입구 쪽) */
   hops:[XF,DY+1.45,ZC],
-  dialF:[XF-.62,DY+.3,ZC],              /* 충전량 다이얼 (서쪽 · 첨가제 · 주성분) */
-  dialB:[XF+.66,DY+.3,ZC],              /* 백당 (동쪽) */
+  dialF:[XF-.51,DY+.57,ZC],              /* 충전량 다이얼 (서쪽 · 첨가제 · 주성분) */
+  dialB:[XF+.52,DY+.57,ZC],              /* 백당 (동쪽) */
   dust:[5.0,DY+.55,1.65],               /* 동쪽 데크 진공 생성기 · 집진 */
   roll:[4.71,0.70,ZC],                  /* 은박 롤 (언와인더) */
   prn:[4.35,1.70,ZC-.44],               /* 은박 인쇄부 (북쪽 면 오른쪽 칸 · 11/16 사진) */
@@ -2762,7 +2800,7 @@ const LBL3=[[4.2,4.15,ZC,"파우치 충전기 SP303 · 2층 데크","F"],[6.75,2
 /* ── 작업자 : 서는 자리(stand) · 손 목표(reach) · 데크 여부 · 들고 가는 물건 · 확대 시점 ── */
 const JOBS={
   look:   {stand:[1.4,4.9], reach:null, dur:1.4},
-  power:  {stand:[3.88,4.25], reach:ANC.mainPow, dur:1.2},
+  power:  {stand:[2.25,2.47], reach:ANC.mainPow, dur:1.2},
   air:    {stand:[6.05,1.12], reach:ANC.air1, dur:1.4},
   dust:   {stand:[5.2,1.95], deck:true, reach:ANC.dust, dur:1.4, view:"hopper"},
   panel:  {stand:[1.65,1.83], reach:ANC.panelSw, dur:1.0},
@@ -3373,7 +3411,7 @@ function startSession(mode,room){
   if(typeof buildTiles==="function") buildTiles();
   buildStatic(); cam.fp=null; camSet(room==="F"?"fill":"pack"); drawHMI(); renderCoach(); renderTiles();
   S.stepAt=tSim; if(typeof propsReset==="function") propsReset();
-  if(typeof fpSet==="function") fpSet(FP.want);
+  if(typeof fpSet==="function") fpSet(mode!=="demo");   /* 교육 시작 = 항상 1인칭 (11/16 사용자 지시) */
 }
 /* 충전실 과정 : 포장실 설비는 가동 상태 (정렬컨베어 스위치만 작업자 조작) */
 function presetPackAuto(){
@@ -3464,9 +3502,9 @@ function ipcCheck(){
 }
 /* 다이얼 편차가 반영된 원료별 1포 중량 */
 function ipcWeigh(k){
-  const d=S.f.dial, one=q=>IPC_STD[q].std*(1+(d[q]||0));
-  const m=k==="all"?one("add")+one("main")+one("sug"):one(k);
-  const list=[]; for(let i=0;i<IPC_STD[k].n;i++) list.push(Math.round((m+gauss()*IPC_STD[k].std*0.011)*1000)/1000);
+  const d=S.f.dial, one=(q,i)=>IPC_STD[q].std*(1+(typeof dialOff==="function"?dialOff(q,i):(d[q]||0)));   /* 노즐별 조절 다이얼 반영 (11/16 dial.js) */
+  const mm=i=>k==="all"?one("add",i)+one("main",i)+one("sug",i):one(k,i);
+  const list=[]; for(let i=0;i<IPC_STD[k].n;i++) list.push(Math.round((mm(i%10)+gauss()*IPC_STD[k].std*0.008)*1000)/1000);
   const avg=list.reduce((s,v)=>s+v,0)/list.length;
   return {list, avg, min:Math.min(...list), max:Math.max(...list)};
 }
@@ -3606,8 +3644,8 @@ const CASES={
     banner:"정기 공정검사(IPC)에서 주성분 측정 중량이 기준 범위를 벗어났습니다.",
     q:"IPC 결과 주성분 평균이 기준(2.000 g)보다 4% 넘게 낮습니다. 올바른 조치는?", a:"2층 데크 충전량 조절 다이얼에서 미달된 원료(주성분) · 열의 다이얼을 조정하고 재측정한다",
     w:["판정 기준을 ±10% 로 넓힌다","부적합 포를 정상품과 섞는다","백당 다이얼을 올려 총중량을 맞춘다"],
-    fix:[{fix:ANC.dialF,t:"전면 확장 데크의 주성분 충전량 조절 다이얼을 조정합니다 (빨간 ! 누르기).",done:()=>S.f.dial.main>=0,
-      act(){ return startWork("dialF",()=>{ S.f.dial.main=0; const r=S.ipc.res.main; if(r) r.stale=true; renderIpc(); toast("주성분 다이얼 조정 완료 — 재측정합니다","good"); }); }}]},
+    fix:[{fix:ANC.dialF,t:"전면 확장 데크의 주성분 충전량 조절 다이얼을 조정합니다 (빨간 ! 누르기).",done:()=>dialOK("main"),
+      act(){ return startWork("dialF",()=>dialOpen("F",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }}]},
   F2:{nm:"파우치 인쇄 불량 (사용기한 · 제조번호)", mk:"fl", room:"F", fire(){ S.f.headDirty=true; },
     banner:"비전이 파우치 인쇄 불량을 연속 검출해 배출하고 있습니다.",
     q:"비전이 같은 인쇄 불량을 계속 배출합니다. 원인과 조치로 옳은 것은?", a:"프린터 헤드 오염 · 리본 상태 불량 → 헤드를 세척하고 리본을 점검 · 교체한 뒤 한 스텝 작동해 확인한다",
@@ -3807,7 +3845,7 @@ function buildTiles(){
   const T=TILESET[S.room];
   const html=ids=>ids.map(id=>{ const t=TILE[id]; return '<div class="tile" id="'+id+'"><div class="e">'+t.e+'</div><b>'+t.b+'</b><s></s>'+(t.lv?'<div class="lv"><i></i></div>':'')+'</div>'; }).join("");
   $("#utilTiles").innerHTML=html(T.util); $("#matTiles").innerHTML=html(T.mat);
-  for(const id of [...T.util,...T.mat]) $("#"+id).onclick=()=>{ if(!S||!S.session) return; TILE[id].click(); };
+  for(const id of [...T.util,...T.mat]) $("#"+id).onclick=e=>{ if(!S||!S.session) return; if(typeof fpActive==="function"&&fpActive()){ toast("1인칭에서는 현장에서 직접 조작합니다 — 노란 화살표 위치로 가서 좌클릭(E)","bad"); return; } TILE[id].click(); };   /* 1인칭 : 왼쪽 타일은 ON/OFF 현황만 (11/16) */
   $("#roomNm").textContent=ROOM_NM[S.room];
   /* 3D 시점 버튼 */
   const V=S.room==="F"?[["all","전체"],["fill","충전실"],["front","전면"],["back","후면"],["deck","2층 데크"],["panel","판넬"],["conv","정렬컨베어"],["top","평면"]]
@@ -4229,7 +4267,7 @@ listen(canvas,'pointerdown',e=>{
   listen(canvas,'contextmenu',e=>{if(ready())e.preventDefault();});
   listen(window,'keydown',e=>{
     if(!active || blocked())return;
-    if(e.code==='Escape' && ['approach','hmi'].includes(mode)){
+    if((e.code==='Escape'||e.code==='KeyF') && ['approach','hmi'].includes(mode)){
       e.preventDefault();closeHMI();return;
     }
     if(e.target?.closest?.('input,textarea,select,[contenteditable=true]'))return;
@@ -4301,24 +4339,24 @@ const R3={ready:false,gl:null,cv:null,ctx:null,W:2,H:2,eye:[0,0,0],shadowOn:true
 let V3=null;
 
 /* ── 그래픽 단계 ── */
-const GQ={mode:"auto", lv:"high", q:1, acc:0, slow:0, fast:0, ema:1/60,
-  L:{high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}},
-  label(){ const n={high:"상",mid:"중",low:"하"}[this.lv]; return this.mode==="auto"?"자동("+n+")":n; }};
+const GQ={mode:"ultra", lv:"ultra",   /* 처음 시작 = 최고 (11/16 사용자 지시 : 자동(중)은 흐릿함) */ q:1, acc:0, slow:0, fast:0, ema:1/60,
+  L:{ultra:{q:1.3,sh:true,ao:true,sm:4096}, high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}},
+  label(){ const n={ultra:"최고",high:"상",mid:"중",low:"하"}[this.lv]; return this.mode==="auto"?"자동("+n+")":n; }};
 function gqApply(lv){
   GQ.lv=lv; const L=GQ.L[lv]; GQ.q=L.q; if(!V3) return;
   const sh=L.sh&&R3.shadowOn; V3.renderer.shadowMap.enabled=sh;
   V3.scene.traverse(o=>{ if(o.isDirectionalLight&&o.shadow){ o.castShadow=sh; if(o.shadow.mapSize.x!==L.sm){ o.shadow.mapSize.set(L.sm,L.sm); if(o.shadow.map){ o.shadow.map.dispose(); o.shadow.map=null; } } } if(o.material) [].concat(o.material).forEach(m=>m.needsUpdate=true); });
   V3.POST.mat.uniforms.ao.value=L.ao?1:0;
 }
-function gqSet(mode){ GQ.mode=mode; GQ.slow=GQ.fast=0; gqApply(mode==="auto"?GQ.lv:mode); const b=$("#gqBtn"); if(b) b.textContent="그래픽 "+GQ.label(); }
+function gqSet(mode){ GQ.mode=mode; GQ.slow=GQ.fast=0; gqApply(mode==="auto"?GQ.lv:mode); const s=$("#gqSel"); if(s&&s.value!==mode) s.value=mode; const n=$("#gqNow"); if(n) n.textContent=GQ.mode==="auto"?"자동 · "+GQ.label().replace(/^자동\(|\)$/g,""):""; }
 /* 자동 : 3 초 넘게 느리면 한 단계 내리고, 8 초 넘게 넉넉하면 한 단계 올린다 */
 function gfxAdapt(now){
   const dt=RDT||1/60; GQ.ema+=(dt-GQ.ema)*.05;
   if(GQ.mode!=="auto"||!V3) return;
   if(GQ.ema>1/28){ GQ.slow+=dt; GQ.fast=0; } else if(GQ.ema<1/52){ GQ.fast+=dt; GQ.slow=0; } else { GQ.slow=Math.max(0,GQ.slow-dt); GQ.fast=Math.max(0,GQ.fast-dt); }
-  const order=["low","mid","high"], i=order.indexOf(GQ.lv);
+  const order=["low","mid","high","ultra"], i=order.indexOf(GQ.lv);
   if(GQ.slow>3&&i>0){ gqApply(order[i-1]); GQ.slow=0; GQ.ema=1/45; gqSet("auto"); }
-  else if(GQ.fast>8&&i<2){ gqApply(order[i+1]); GQ.fast=0; gqSet("auto"); }
+  else if(GQ.fast>8&&i<3){ gqApply(order[i+1]); GQ.fast=0; gqSet("auto"); }
 }
 
 /* ── 초기화 : 렌더러 · 환경 반사 · 장면 · 후처리 ── */
@@ -4407,6 +4445,8 @@ function v3Sync(dt){
   if(PK2.xr) PK2.xr.pw=!(S&&S.session&&S.session.active)||machPower("xr");   /* 전원 OFF : 화면 꺼짐 */      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
+  if(FM.mainSw){ const on=!(S&&S.session&&S.session.active)||!!S.f.main; FM.mainSw.rotation.x+=((on?-Math.PI/2:0)-FM.mainSw.rotation.x)*Math.min(1,dt*10); }   /* 메인스위치 손잡이 : 가로 OFF · 세로 ON */
+  if(typeof dialDraw==="function") dialDraw(); if(typeof htxTick==="function") htxTick(dt);
   if(FILLPROP.hose){ const act=!!(S&&S.session&&S.session.active), hc=act&&S.f.hoseC; FILLPROP.hose.forEach((h,i)=>h.visible=!hc||!!hc[i]); }   /* IBC 진공호스 연결부 */
   scrPower(); if(typeof guide3D==="function") guide3D(dt); if(typeof lampTick==="function") lampTick(dt);
   if(typeof wkDraw==="function") wkDraw(dt);
@@ -4416,7 +4456,7 @@ function scrPower(){
   if(!V3.scr){ V3.scr=[]; const b=new T3.Box3(), c=new T3.Vector3(); V3.scene.updateMatrixWorld(true);
     V3.scene.traverse(o=>{ if(!o.isMesh||o.material!==M.scr) return; b.setFromObject(o); b.getCenter(c); let best=null, bd=.3;
       for(const [k,m] of Object.entries(FP_MON)){ const d=Math.hypot(c.x-m.c[0],c.y-m.c[1],c.z-m.c[2]); if(d<bd){ bd=d; best=k; } }
-      if(best){ o.material=M.scr.clone(); V3.scr.push({k:best,mat:o.material,on:null}); } }); }
+      if(best){ o.material=M.scr.clone(); V3.scr.push({k:best,mat:o.material,on:null,uid:o.uuid}); } }); }
   for(const s of V3.scr){ const on=!(S&&S.session&&S.session.active)||FP_MON[s.k].k.some(k=>machPower(k)); if(on===s.on) continue; s.on=on;
     s.mat.emissiveIntensity=on?.7:0; s.mat.color.setHex(on?0x10202c:0x07090b); }
 }
@@ -4849,7 +4889,8 @@ function fpTargetDefs(){
   const f=S.f, T=[], A=ANC;
   const add=(...a)=>T.push(TB(...a));
   if(S.room==="F"){
-    add("fMain","메인 파워 스위치",A.mainPow,.3,.3,.3,tileRun("fMain"),["#fMain"]);
+    add("fMain","메인스위치 (회전 절연 스위치)",A.mainPow,.22,.22,.22,tileRun("fMain"),["#fMain"]);
+    if(S.room==="F"&&typeof dialOpen==="function"){ add("dialF","원료조절부 (서쪽 · 첨가제 · 주성분) · 충전량 조절",A.dialF,.12,.2,.95,()=>startWork("dialF",()=>dialOpen("F")),[]); add("dialB","원료조절부 (동쪽 · 백당) · 충전량 조절",A.dialB,.12,.2,.95,()=>startWork("dialB",()=>dialOpen("B")),[]); }   /* 충전량 조절 미니게임 (11/16) */
     add("fAir1","압축공기 밸브 1",A.air1,.22,.26,.22,tileRun("fAir1"),["#fAir1"]);
     add("fAir2","압축공기 밸브 2",A.air2,.22,.26,.22,tileRun("fAir2"),["#fAir2"]);
     add("fDust","집진 밸브 (2층)",A.dust,.35,.35,.35,tileRun("fDust"),["#fDust"]);
@@ -4929,6 +4970,7 @@ function fpMoveHMI(into){
 }
 function fpPlaceMonitor(){
   const w=fpMonEl(); if(!w||w.hidden) return;
+  if(!FP.mod||FP.mod.mode!=="hmi"){ w.style.visibility="hidden"; return; }   /* 걸어 다닐 때는 3D 화면 그림(hmitex.js)만 · 누르고 다가간 뒤에만 조작 화면 (11/16) */
   const key=FP.monK||(monOf(hMach)&&Object.keys(FP_MON).find(k=>FP_MON[k]===monOf(hMach)));
   const m=key&&FP_MON[key]; if(!m){ w.style.visibility="hidden"; return; }
   const r=monRect(m), e=R3.eye, K=R3.W/Math.max(1,$("#view3d").clientWidth);
@@ -4971,7 +5013,7 @@ function fpInit(){
   FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH,
     setCamera:p=>{ cam.fp=p; }, canStand:fpCanStand, eyeY:fpEyeY, targets:fpTargets,
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
-    hmiInteractive:(on,t)=>{ if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
+    hmiInteractive:(on,t)=>{ if(on) toast("설비 화면 조작 중 — 시점 회전 잠금 · F 또는 Esc 로 뒤로"); if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
     crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.0 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },
@@ -5070,6 +5112,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:22, d:"2026-11-16", t:"교육 시작은 항상 1인칭, 1인칭에서 왼쪽 타일은 ON/OFF 현황만(조작은 현장에서), 메인스위치를 컨트롤 판넬 바로 뒤 본체 서쪽 면의 회전 절연 스위치로 이동, 그래픽 설정 메뉴(상단 · 처음 최고), 자동재생 버튼 삭제, 대케이스 작업자 대기 자세 수정, 2층 호퍼 · 도징박스 · 원료조절부를 한 스테인리스 틀로 재구성(아래 막힘 · 조절부는 호퍼 끝 · 도징박스보다 높음), 2층 난간 1단 추가 · 원료투입구 아래 막힘, 모든 설비 모니터에 실제 HMI 화면 표시 · 화면 조작은 다가간 뒤 직접(회전 잠금 · F 뒤로), 가로실바가 눌러 잡고 내려오며 파우치를 끌어내리는 동작, 충전량 조절 미니게임(10노즐 · A/D 다이얼 · 예상 충전량)"},
  {v:21, d:"2026-11-16", t:"상단 시점 버튼 표기를 현재 시점 + 전환으로 변경(3인칭일 때 \"🎥 3인칭 → 1인칭 전환\", 1인칭일 때 \"🧍 1인칭 → 3인칭 전환\")"},
  {v:20, d:"2026-11-16", t:"포장실 연출을 실제 제품 흐름과 연동(교육 시작 시 카토너 · 검사기 · 수동 포장이 비어 있고 충전기 가동 후 넘어온 제품만 표시), 심화 충전실에 IBC 진공호스 연결 · 클램프 체결 단계 추가(연결 전 이송기 ON 불가), IPC 채취 시 작업자가 배출 컨베이어에서 시료를 꺼내 저울 작업대에서 계량, 설비별 경광등(녹 가동 · 주황 정지 · 적 알람) · 알람 부저, 은박 롤 운반 · 장착 때 보조 작업자 1명이 2인 1조로 함께 움직임"},
  {v:19, d:"2026-11-16", t:"다음 작업 안내를 모든 모드에서 노란 테두리 + 3D 노란 화살표(위아래로 움직임) · 노란 고리로 표시, 메인화면에 시연모드 추가(충전기 전원 일괄 → 카토너 · 포장실 전원 일괄 → 진공 이송기 → 포장 라인 · 충전기 가동 → 수동 포장까지, 라인 클리어런스 등 생략), 교육 시작 시 배출 컨베이어를 비운 상태로 시작"},
@@ -5470,8 +5513,8 @@ const RC={
     banner:"정기 공정검사(IPC)에서 주성분 측정 중량이 기준 범위를 벗어났습니다.",
     q:"중량 점검 결과 주성분 평균이 기준(2.000 g)보다 4% 넘게 낮습니다. 올바른 조치는?", a:"2층 데크 충전량 조절 다이얼에서 미달된 원료(주성분) 다이얼을 조정하고 재측정한다",
     w:["판정 기준을 ±10% 로 넓힌다","부적합 포를 정상품과 섞는다","백당 다이얼을 올려 총중량을 맞춘다"],
-    fix:[{fix:ANC.dialF,t:"전면 데크의 주성분 충전량 조절 다이얼을 조정합니다 (빨간 ! 누르기).",done:()=>S.f.dial.main>=0,
-      act(){ return startWork("dialF",()=>{ S.f.dial.main=0; const r=S.ipc.res.main; if(r) r.stale=true; renderIpc(); toast("주성분 다이얼 조정 완료 — 재측정합니다","good"); }); }}]},
+    fix:[{fix:ANC.dialF,t:"전면 데크의 주성분 충전량 조절 다이얼을 조정합니다 (빨간 ! 누르기).",done:()=>dialOK("main"),
+      act(){ return startWork("dialF",()=>dialOpen("F",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }}]},
   /* ── 포장실 ── */
   RP1:{nm:"정렬기 타이밍 · 그룹핑 불량", mk:"sf", room:"P", src:"포장- 정렬기 타이밍오류 (35분) · 그룹핑불량 (10분) · 대책 : 정렬기 작동 속도 조정, 정렬부 서보모터 교체", fire(){ S.flags.rc={}; },
     banner:"스틱공급장치 정렬부에서 파우치 묶음(그룹핑)이 카토너 투입 타이밍과 맞지 않습니다.",
@@ -5692,6 +5735,140 @@ function lampTick(dt){
   if(al&&!al.ack){ LAMP.bz-=dt; if(LAMP.bz<=0){ LAMP.bz=.7; beep(2300,.22,"square",.03); } } else LAMP.bz=0;
 }
 
+/* ── v3/hmitex.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   설비 화면 3D 표시 (11/16 사용자 지시) — 모든 HMI 모니터에 실제 HMI 화면을 그림으로 표시 (X-ray 화면처럼 · 파란 빛 대신)
+   · 같은 실의 모니터만, 화면 내용이 바뀐 경우에만 0.5 초에 1 대씩 다시 그림 (HTML → SVG foreignObject → 캔버스 텍스처)
+   · 전원 OFF = 검은 화면 · X-ray 는 기존 투과 영상 화면 유지
+   · 조작은 1인칭에서 화면을 누르면 시점이 화면 앞으로 다가간 뒤(회전 잠금) 그 화면에서 직접 — F · Esc 로 뒤로
+   · 그림으로 만들 수 없는 브라우저(캔버스 보안 제한 등)에서는 기존 표시로 둠
+   ═══════════════════════════════════════════════════════════════════ */
+const HTX={css:null, t:0, i:0, last:{}, busy:false, scr:{}, fail:false};
+function htxCss(){ if(HTX.css==null) HTX.css=[...document.querySelectorAll("style")].map(s=>s.textContent).join("\n").replace(/\]\]>/g,""); return HTX.css; }
+/* 화면 크기 (메시 경계 상자 · 화면이 바라보는 축 제외) */
+function htxDims(s){ if(s.dim) return s.dim; const b=new T3.Box3(), m=V3.scene.getObjectByProperty("uuid",s.uid); if(!m) return null; b.setFromObject(m); const z=b.getSize(new T3.Vector3()), n=FP_MON[s.k].n;
+  s.dim=Math.abs(n[0])>.5?[z.z,z.y]:[z.x,z.y]; return s.dim; }
+/* 설비 k 의 현재 HMI 를 HTML 로 (현재 보고 있는 설비는 그대로 · 다른 설비는 잠깐 바꿔 그린 뒤 되돌림 — 한 번의 실행 안이라 화면 깜빡임 없음) */
+function htxSnap(k){
+  if(hMach===k) HTX.scr[k]=hScr;
+  const keep=[hMach,hScr,FPMON], swap=hMach!==k;
+  if(swap&&((FP.mod&&FP.mod.mode&&FP.mod.mode!=="walk"&&cam.fp)||(document.activeElement&&document.activeElement.closest&&document.activeElement.closest("#hmi")))) return null;   /* 화면 조작 중에는 다른 설비로 바꿔 그리지 않음 */
+  if(swap){ FPMON=null; hMach=k; hScr=HTX.scr[k]||(k==="fl"?"run":"main"); drawHMI(); if(hMach!==k){ [hMach,hScr,FPMON]=keep; drawHMI(); return null; } }
+  const el=$("#hmi"), w=el.offsetWidth, h=el.offsetHeight, html=new XMLSerializer().serializeToString(el);
+  if(swap){ [hMach,hScr,FPMON]=keep; drawHMI(); }
+  return {html,w,h};
+}
+async function htxDraw(s){
+  const mk=FP_MON[s.k].k.find(q=>machPower(q))||FP_MON[s.k].k[0];
+  if(!machPower(mk)){ if(s.tex){ s.mat.map=null; s.mat.emissiveMap=null; s.mat.needsUpdate=true; s.tex.dispose(); s.tex=null; s.key=null; } return; }
+  const d=htxDims(s); if(!d) return;
+  const snap=htxSnap(mk); if(!snap||!snap.w) return;
+  const W=Math.max(200,Math.min(560,snap.w)), H=Math.round(W*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
+  if(s.key===key) return; s.key=key;
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(W*2)+'" height="'+(H*2)+'" viewBox="0 0 '+W+' '+H+'"><foreignObject width="'+W+'" height="'+H+'"><div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;height:'+H+'px;overflow:hidden;background:#000"><style><![CDATA['+htxCss()+']]></style><div style="width:'+snap.w+'px;transform:scale('+(W/snap.w)+');transform-origin:0 0">'+snap.html+'</div></div></foreignObject></svg>';
+  const img=new Image(); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
+  await img.decode();
+  const cv=s.cv||(s.cv=document.createElement("canvas")); cv.width=W*2; cv.height=H*2; const c=cv.getContext("2d"); c.drawImage(img,0,0,W*2,H*2);
+  c.getImageData(0,0,1,1);                                                        /* 보안 제한(타 브라우저) 확인 — 실패 시 catch */
+  if(!s.tex){ s.tex=new T3.CanvasTexture(cv); s.tex.encoding=T3.sRGBEncoding; s.tex.anisotropy=4; } else s.tex.needsUpdate=true;
+  s.mat.map=s.tex; s.mat.emissiveMap=s.tex; s.mat.color.setHex(0x0a0a0a); s.mat.emissive.setHex(0xffffff); s.mat.emissiveIntensity=.92; s.mat.needsUpdate=true;
+}
+function htxTick(dt){
+  if(HTX.fail||!V3||!V3.scr||!S||!S.session||!S.session.active||HTX.busy) return;
+  HTX.t+=dt; if(HTX.t<.5) return; HTX.t=0;
+  const L=V3.scr.filter(s=>s.k!=="xr"&&(S.room==="F"?FP_MON[s.k].c[2]>0:FP_MON[s.k].c[2]<0)); if(!L.length) return;
+  const s=L[HTX.i++%L.length]; HTX.busy=true;
+  htxDraw(s).catch(e=>{ HTX.fail=true; console.warn("설비 화면 그림 표시 불가 — 기존 표시 유지",e); }).finally(()=>{ HTX.busy=false; });
+}
+
+/* ── v3/dial.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   충전량 조절 미니게임 (11/16 사용자 지시) — 2층 데크 원료조절부를 누르면 10개 노즐 다이얼을 하나씩 돌려 충전량을 맞춤
+   · A / D : 선택한 노즐 다이얼을 왼쪽(감소) · 오른쪽(증가)으로 돌림   · ← / → : 노즐 선택   · 1 / 2 : 원료 선택(서쪽 조절부)   · F · Esc : 닫기
+   · 노즐마다 대략적인 예상 충전량 표시 (예 : 2.150 ~ 2.200 g) — 초록 = 기준 ±2 % 이내 · 노랑 = ±4 % 이내 · 빨강 = 벗어남
+   · 다이얼 값은 공정검사(IPC) 계량값에 노즐별로 반영 (course.js ipcWeigh 패치)
+   ═══════════════════════════════════════════════════════════════════ */
+const DIAL={open:false, side:"F", k:"main", i:0, onClose:null, max:.10, step:.0025, ok:.02};
+const DIAL_SIDE={F:["add","main"], B:["sug"]};             /* 서쪽(F) = 1 첨가제 · 2 주성분 / 동쪽(B) = 3 백당 */
+/* 노즐별 다이얼 값 (기준 대비 비율) — 세션마다 노즐 사이 작은 차이(±1.2 %)로 시작, 이상사례 등으로 원료 전체 값이 바뀌면 노즐 전체를 같이 이동 */
+function dialArr(k){
+  if(!S||!S.f) return null;
+  const f=S.f; if(!f.dialN){ f.dialN={}; for(const q of ["add","main","sug"]){ const a=[]; for(let i=0;i<10;i++) a.push(Math.round((Math.random()*2-1)*.012/DIAL.step)*DIAL.step); const m=a.reduce((s,v)=>s+v,0)/10; f.dialN[q]=a.map(v=>v-m+(f.dial[q]||0)); } }
+  const a=f.dialN[k], m=a.reduce((s,v)=>s+v,0)/10, d=(f.dial[k]||0)-m;
+  if(Math.abs(d)>1e-6) for(let i=0;i<10;i++) a[i]+=d;                       /* 외부 변경(이상사례 · 프리셋) 반영 */
+  return a;
+}
+function dialOff(k,i){ const a=dialArr(k); return a?a[((i%10)+10)%10]:0; }
+function dialSet(k,i,v){ const a=dialArr(k); if(!a) return; a[i]=clamp(v,-DIAL.max,DIAL.max); S.f.dial[k]=a.reduce((s,x)=>s+x,0)/10; }
+const dialOK=k=>{ const a=dialArr(k); return !!a&&a.every(v=>Math.abs(v)<=DIAL.ok+1e-9); };
+const dialRange=(k,v)=>{ const s=IPC_STD[k].std, c=s*(1+v), h=s*.0125; return [c-h,c+h]; };
+const dialCls=v=>Math.abs(v)<=DIAL.ok+1e-9?"ok":Math.abs(v)<=.04+1e-9?"warn":"ng";
+
+function dialOpen(side,onClose){
+  if(!S||!S.session||!S.session.active) return;
+  DIAL.open=true; DIAL.side=side||"F"; DIAL.k=DIAL_SIDE[DIAL.side].includes(DIAL.k)?DIAL.k:DIAL_SIDE[DIAL.side][DIAL_SIDE[DIAL.side].length-1]; DIAL.onClose=onClose||null;
+  if(DIAL.side==="F"&&S.activeTrouble) DIAL.k="main";
+  let el=$("#dialGame"); if(!el){ $("#main").insertAdjacentHTML("beforeend",'<div id="dialGame" class="modal"></div>'); el=$("#dialGame"); }
+  el.classList.add("on"); if(document.pointerLockElement) document.exitPointerLock();
+  dialRender();
+}
+function dialClose(){
+  if(!DIAL.open) return; DIAL.open=false; $("#dialGame").classList.remove("on");
+  for(const q of DIAL_SIDE[DIAL.side]){ const r=S.ipc&&S.ipc.res&&S.ipc.res[q]; if(r&&!r.pass&&dialOK(q)) r.stale=true; } if(typeof renderIpc==="function") renderIpc();   /* 조절 후 재측정 */
+  const cb=DIAL.onClose; DIAL.onClose=null; try{ cb&&cb(); }catch(e){ console.error(e); }
+  renderCoach&&renderCoach(); stepCheck&&stepCheck();
+}
+function dialSvg(v,big){
+  const R=big?92:26, a=v/DIAL.max*135, W=R*2+(big?24:8), c=W/2, arc=(a0,a1,col,w)=>{ const p=t=>{ const r=(t-90)*Math.PI/180; return [c+R*Math.cos(r),c+R*Math.sin(r)]; }, [x0,y0]=p(a0), [x1,y1]=p(a1);
+    return '<path d="M'+x0+' '+y0+' A'+R+' '+R+' 0 '+(Math.abs(a1-a0)>180?1:0)+' 1 '+x1+' '+y1+'" stroke="'+col+'" stroke-width="'+w+'" fill="none"/>'; };
+  const z=x=>x/DIAL.max*135, sw=big?9:4;
+  let s='<svg viewBox="0 0 '+W+' '+W+'" width="'+W+'" height="'+W+'">'+'<circle cx="'+c+'" cy="'+c+'" r="'+(R+(big?8:3))+'" fill="#1d2329"/>'+
+    arc(-135,z(-.04),"#c9372c",sw)+arc(z(-.04),z(-DIAL.ok),"#e0a800",sw)+arc(z(-DIAL.ok),z(DIAL.ok),"#22a35a",sw)+arc(z(DIAL.ok),z(.04),"#e0a800",sw)+arc(z(.04),135,"#c9372c",sw);
+  if(big) for(let t=-10;t<=10;t+=2){ const r=(z(t/100)-90)*Math.PI/180; s+='<line x1="'+(c+(R-14)*Math.cos(r))+'" y1="'+(c+(R-14)*Math.sin(r))+'" x2="'+(c+(R-5)*Math.cos(r))+'" y2="'+(c+(R-5)*Math.sin(r))+'" stroke="#9aa5ae" stroke-width="2"/>'+
+    '<text x="'+(c+(R-28)*Math.cos(r))+'" y="'+(c+(R-28)*Math.sin(r)+4)+'" fill="#cfd6dc" font-size="11" text-anchor="middle">'+(t>0?"+":"")+t+'</text>'; }
+  const r=(a-90)*Math.PI/180;
+  s+='<circle cx="'+c+'" cy="'+c+'" r="'+(R*.42)+'" fill="#0d1013" stroke="#59646d" stroke-width="2"/>'+
+    '<line x1="'+c+'" y1="'+c+'" x2="'+(c+R*.9*Math.cos(r))+'" y2="'+(c+R*.9*Math.sin(r))+'" stroke="#f4f6f7" stroke-width="'+(big?5:2.5)+'" stroke-linecap="round"/>'+
+    '<circle cx="'+c+'" cy="'+c+'" r="'+(big?7:3)+'" fill="#f4f6f7"/></svg>';
+  return s;
+}
+function dialRender(){
+  const el=$("#dialGame"); if(!el||!DIAL.open) return;
+  const k=DIAL.k, a=dialArr(k), v=a[DIAL.i], rg=dialRange(k,v), std=IPC_STD[k].std, f3=x=>x.toFixed(3);
+  const tabs=DIAL_SIDE[DIAL.side].map((q,j)=>'<button class="dgTab'+(q===k?" on":"")+'" data-k="'+q+'">'+(DIAL.side==="F"?(j+1)+" · ":"3 · ")+IPC_STD[q].nm+(dialOK(q)?" ✓":"")+'</button>').join("");
+  el.innerHTML='<div class="dgBox"><div class="dgHead"><b>🎛️ 원료조절부 · 충전량 조절</b><span>'+(DIAL.side==="F"?"서쪽 조절부":"동쪽 조절부")+'</span><button class="dgX" id="dgX">닫기 (F · Esc)</button></div>'+
+    '<div class="dgTabs">'+tabs+'</div>'+
+    '<div class="dgMain"><div class="dgBig">'+dialSvg(v,true)+'</div><div class="dgInfo"><div class="dgNz">노즐 <b>'+(DIAL.i+1)+'</b> / 10</div>'+
+      '<div class="dgPred '+dialCls(v)+'">예상 충전량<b>'+f3(rg[0])+' ~ '+f3(rg[1])+' g</b></div>'+
+      '<div class="dgStd">기준 '+f3(std)+' g · 다이얼 '+(v>=0?"+":"")+(v*100).toFixed(1)+' %</div>'+
+      '<div class="dgKeys"><span>A</span> 감소 <span>D</span> 증가 · <span>←</span><span>→</span> 노즐 선택'+(DIAL_SIDE[DIAL.side].length>1?' · <span>1</span><span>2</span> 원료':'')+'</div>'+
+      '<div class="dgNote">초록 = 기준 ±2 % 이내 · 노랑 = ±4 % 이내 · 빨강 = 벗어남. 예상값은 대략적인 범위이며 실제는 공정검사(IPC) 계량으로 확인합니다.</div></div></div>'+
+    '<div class="dgRow">'+a.map((x,i)=>{ const r=dialRange(k,x); return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'">'+dialSvg(x,false)+'<b>'+(i+1)+'</b><s>'+f3((r[0]+r[1])/2)+'</s></div>'; }).join("")+'</div>'+
+    '<div class="dgFoot">'+(dialOK(k)?'<span class="okT">✓ '+IPC_STD[k].nm+' 10개 노즐 모두 기준 ±2 % 이내</span>':'<span>'+IPC_STD[k].nm+' : 범위를 벗어난 노즐 '+a.filter(x=>Math.abs(x)>DIAL.ok+1e-9).length+' 개</span>')+'</div></div>';
+  $("#dgX").onclick=dialClose;
+  $$("#dialGame [data-k]").forEach(b=>b.onclick=()=>{ DIAL.k=b.dataset.k; dialRender(); });
+  $$("#dialGame [data-i]").forEach(b=>b.onclick=()=>{ DIAL.i=+b.dataset.i; dialRender(); });
+}
+function dialKey(e){
+  if(!DIAL.open) return;
+  const c=e.code, side=DIAL_SIDE[DIAL.side];
+  if(c==="KeyA"||c==="KeyD"){ const a=dialArr(DIAL.k), v=a[DIAL.i], nv=clamp(v+(c==="KeyD"?1:-1)*DIAL.step,-DIAL.max,DIAL.max); dialSet(DIAL.k,DIAL.i,Math.round(nv/DIAL.step)*DIAL.step); beep(nv===v?180:1200,.03,"square",.02); }
+  else if(c==="ArrowLeft"||c==="ArrowRight") DIAL.i=clamp(DIAL.i+(c==="ArrowRight"?1:-1),0,9);
+  else if((c==="Digit1"||c==="Digit2")&&side.length>1) DIAL.k=side[c==="Digit1"?0:1];
+  else if(c==="KeyF"||c==="Escape"){ e.preventDefault(); e.stopPropagation(); dialClose(); return; }
+  else return;
+  e.preventDefault(); e.stopPropagation(); dialRender();
+}
+/* 3D 조절 다이얼 회전 (bridge v3Sync) */
+function dialDraw(){
+  if(typeof FM==="undefined"||!FM.dials||!S||!S.f) return;
+  for(const k of ["add","main","sug"]){ const a=S.session&&S.session.active?dialArr(k):null; FM.dials[k].forEach((K,i)=>{ K.rotation.x=(a?a[i]:0)/DIAL.max*2.36*(k==="sug"?-1:1); }); }
+}
+function dialInit(){ addEventListener("keydown",dialKey,true); }
+/* 자재 타일 : 충전량 조절부 (3인칭 — 작업자가 2층 데크 서쪽 조절부로 이동한 뒤 미니게임) */
+TILE.mDial={e:"🎛️",b:"충전량 조절부",s:()=>S&&S.f&&["add","main","sug"].every(dialOK)?"10노즐 기준 이내":"조절 필요",on:()=>!!(S&&S.f&&["add","main","sug"].every(dialOK)),click(){ startWork("dialF",()=>dialOpen("F")); }};
+if(!TILESET.F.mat.includes("mDial")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mScoop")+1,0,"mDial");
+
 /* ── v3/demo.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    시연모드 (11/16 사용자 지시) — 기본모드보다 훨씬 간단 : 라인 클리어런스 · 문서 · 점검 단계 없음
@@ -5742,7 +5919,7 @@ function showDemoResult(){
   $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
   $("#endClose").onclick=()=>$("#mEnd").classList.remove("on");
 }
-function demoStart(){ $("#splash").classList.add("hide"); startSession("demo","F"); if(typeof fpSet==="function") fpSet(false); camSet("fill"); toast("시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요 (자동재생 가능)"); }
+function demoStart(){ $("#splash").classList.add("hide"); startSession("demo","F"); if(typeof fpSet==="function") fpSet(false); camSet("fill"); toast("시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요"); }
 function demoInit(){ const b=$("#spDemo"); if(b) b.onclick=demoStart; }
 
 /* ── v3/boot.js ── */
@@ -5782,13 +5959,12 @@ function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 /* 그래픽 단계 버튼 (자동 → 상 → 중 → 하) */
 function bindGfx(){
-  const g=$("#v3Grp"); if(!g||$("#gqBtn")) return;
-  g.insertAdjacentHTML("beforeend",'<button class="tg" id="gqBtn" title="그래픽 품질 : 자동 · 상 · 중 · 하">그래픽 '+GQ.label()+'</button>');
-  $("#gqBtn").onclick=()=>{ const o=["auto","high","mid","low"]; gqSet(o[(o.indexOf(GQ.mode)+1)%o.length]); };
+  /* 상단 그래픽 설정 메뉴 (11/16) : 최고 · 상 · 중 · 하 · 자동 — 처음은 최고 */
+  const s=$("#gqSel"); if(!s) return; s.value=GQ.mode; s.onchange=()=>{ gqSet(s.value); toast("그래픽 : "+s.options[s.selectedIndex].text); };
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit();
+  bindPanel(); bindHeader(); bindAuto(); $("#apBtn").hidden=true; bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit(); dialInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);

@@ -31,12 +31,15 @@ function buildForming(g,by1){
   /* ── 프레싱 묶음 : ① 가로 실링 · ② 무늬 · ③ 커팅 빔은 은박이 멈춘 동안 함께 동쪽(파우치를 누르는 방향)으로 눌렀다가 물러난다 (사용자 설명 11/11) ── */
   const tg=new T3.Group(); g.add(tg); FM.pressG=tg; wg=tg;
   /* 각형 공압 실린더 (모서리 볼트 · 가운데 캡) */
-  const cyl=(d0,y,z,sz)=>{ bx(tg,X(d0+.07),X(d0),y-sz/2,y+sz/2,z-sz/2,z+sz/2,M.alu); rod(tg,[X(d0+.07),y,z],[X(d0+.077),y,z],sz*.28,M.ssD,20); for(const a of [-1,1]) for(const b of [-1,1]) rod(tg,[X(d0+.07),y+a*sz*.36,z+b*sz*.36],[X(d0+.075),y+a*sz*.36,z+b*sz*.36],.007,M.dark,8); };
+  const cyl=(d0,y,z,sz,G)=>{ G=G||tg; bx(G,X(d0+.07),X(d0),y-sz/2,y+sz/2,z-sz/2,z+sz/2,M.alu); rod(G,[X(d0+.07),y,z],[X(d0+.077),y,z],sz*.28,M.ssD,20); for(const a of [-1,1]) for(const b of [-1,1]) rod(G,[X(d0+.07),y+a*sz*.36,z+b*sz*.36],[X(d0+.075),y+a*sz*.36,z+b*sz*.36],.007,M.dark,8); };
   const cz=[-.375,-.125,.125,.375];
   /* ① 가로 실링 빔 */
-  bx(tg,X(.27),X(.07),1.295,1.41,zc-.52,zc+.52,M.ss);
-  for(const c of cz){ cyl(.27,1.352,zc+c,.1); for(const b of [-1,1]){ rod(tg,[X(.3),1.302,zc+c+b*.03],[X(.3),1.272,zc+c+b*.03],.006,M.alu,8); rod(tg,[X(.3),1.272,zc+c+b*.03],[X(.26),1.245,zc+c+b*.045],.004,M.hose,6); } }
+  /* ① 가로 실링 빔(가로실바) : 은박을 눌러 잡은 채 아래로 내려오며 파우치를 끌어내림 → 벌어진 뒤 위로 복귀 (11/16 사용자 설명 · 동작은 anim.js) */
+  const sg=new T3.Group(); g.add(sg); FM.sealG=sg; wg=sg;
+  bx(sg,X(.27),X(.07),1.295,1.41,zc-.52,zc+.52,M.ss);
+  for(const c of cz){ cyl(.27,1.352,zc+c,.1,sg); for(const b of [-1,1]){ rod(sg,[X(.3),1.302,zc+c+b*.03],[X(.3),1.272,zc+c+b*.03],.006,M.alu,8); rod(sg,[X(.3),1.272,zc+c+b*.03],[X(.26),1.245,zc+c+b*.045],.004,M.hose,6); } }
   for(const s of [-1,1]) warn(X(.27),1.325,1.38,zc+s*.47-.035,zc+s*.47+.035); warn(X(.27),1.39,1.408,zc-.025,zc+.025);
+  wg=tg;
   /* ② 무늬 빔 (함 맨 아래) */
   bx(tg,X(.26),X(.07),1.03,1.14,zc-.52,zc+.52,M.ss); bx(tg,X(.3),X(.26),1.0,1.03,zc-.5,zc+.5,M.alu);
   for(const c of cz) bx(tg,X(.31),X(.26),1.05,1.12,zc+c-.045,zc+c+.045,M.alu);
@@ -74,6 +77,10 @@ function buildForming(g,by1){
   for(const [D,z0,z] of [[D1,sp[1],zc-.115],[D2,sp[3],zc-.045]]){ rod(D,[-.04,1.28,z-z0],[-.04,1.44,z-z0],.008,fr,10); for(const y of [1.28,1.44]) rod(D,[0,y,z-z0],[-.04,y,z-z0],.006,fr,8); }
   for(const z of [sp[1],sp[3]]) for(const y of [1.12,1.7]) bx(g,xd-.012,xd-.004,y-.03,y+.03,z-.025,z+.025,fr);                 /* 경첩 */
   decal(g,.2,.075,textTex("SP303","#ffffff",512,190,170),[xd-.005,1.76,(sp[0]+sp[1])/2],WEST);
+  /* 메인스위치 : 3P 회전 절연 스위치(파란 몸통 · 노란 사각판 · 빨간 손잡이) — 본체 서쪽 면 · 컨트롤 판넬 바로 뒤 (11/16 사용자 확정). 손잡이 가로 = OFF · 세로 = ON */
+  { const z=sp[0]+.07, y=1.36, x=xd-.022; bx(g,x-.07,x,y-.055,y+.055,z-.05,z+.05,M.blue); bx(g,x-.077,x-.07,y-.062,y+.062,z-.062,z+.062,M.yellow);
+    plate(g,.05,.014,labelTex([["MAIN","#111",80]],{w:256,h:72,bg:"#ffd400"}),[x-.078,y+.048,z],WEST);
+    const SW=new T3.Group(); SW.position.set(x-.077,y,z); g.add(SW); rod(SW,[0,0,0],[-.018,0,0],.034,M.red,24); bx(SW,-.046,-.018,-.012,.012,-.068,.014,M.red); FM.mainSw=SW; }
   decal(g,.3,.075,textTex("SOLPAC","#ffffff",512,128,112),[xd-.005,1.3,(sp[3]+sp[4])/2],WEST);
   decal(g,.3,.1,tex(cvs(512,170,(c)=>{ c.clearRect(0,0,512,170); c.fillStyle="#fff"; c.font='72px Arial'; c.textAlign="left"; c.fillText("packaging",30,70); c.fillText("machine",30,150); }),1,1,true),[xd-.005,1.19,(sp[3]+sp[4])/2],WEST);
   plate(D2,.17,.13,labelTex([["금 지","#fff",64],["도어 인터락 작동중","#111",40],["운전중 개방금지","#c00",40]],{w:512,h:390,border:"#c00",bg:"#fff"}),[-.006,1.54,zc+.07-sp[3]],WEST);

@@ -34,13 +34,12 @@ function clock(){ const d=new Date(), p=n=>String(n).padStart(2,"0");
   $("#hClock").innerHTML=d.getFullYear()+"."+p(d.getMonth()+1)+"."+p(d.getDate())+"<br>"+p(d.getHours())+":"+p(d.getMinutes())+":"+p(d.getSeconds()); }
 /* 그래픽 단계 버튼 (자동 → 상 → 중 → 하) */
 function bindGfx(){
-  const g=$("#v3Grp"); if(!g||$("#gqBtn")) return;
-  g.insertAdjacentHTML("beforeend",'<button class="tg" id="gqBtn" title="그래픽 품질 : 자동 · 상 · 중 · 하">그래픽 '+GQ.label()+'</button>');
-  $("#gqBtn").onclick=()=>{ const o=["auto","high","mid","low"]; gqSet(o[(o.indexOf(GQ.mode)+1)%o.length]); };
+  /* 상단 그래픽 설정 메뉴 (11/16) : 최고 · 상 · 중 · 하 · 자동 — 처음은 최고 */
+  const s=$("#gqSel"); if(!s) return; s.value=GQ.mode; s.onchange=()=>{ gqSet(s.value); toast("그래픽 : "+s.options[s.selectedIndex].text); };
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit();
+  bindPanel(); bindHeader(); bindAuto(); $("#apBtn").hidden=true; bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit(); dialInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);

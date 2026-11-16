@@ -15,24 +15,24 @@ const R3={ready:false,gl:null,cv:null,ctx:null,W:2,H:2,eye:[0,0,0],shadowOn:true
 let V3=null;
 
 /* ── 그래픽 단계 ── */
-const GQ={mode:"auto", lv:"high", q:1, acc:0, slow:0, fast:0, ema:1/60,
-  L:{high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}},
-  label(){ const n={high:"상",mid:"중",low:"하"}[this.lv]; return this.mode==="auto"?"자동("+n+")":n; }};
+const GQ={mode:"ultra", lv:"ultra",   /* 처음 시작 = 최고 (11/16 사용자 지시 : 자동(중)은 흐릿함) */ q:1, acc:0, slow:0, fast:0, ema:1/60,
+  L:{ultra:{q:1.3,sh:true,ao:true,sm:4096}, high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}},
+  label(){ const n={ultra:"최고",high:"상",mid:"중",low:"하"}[this.lv]; return this.mode==="auto"?"자동("+n+")":n; }};
 function gqApply(lv){
   GQ.lv=lv; const L=GQ.L[lv]; GQ.q=L.q; if(!V3) return;
   const sh=L.sh&&R3.shadowOn; V3.renderer.shadowMap.enabled=sh;
   V3.scene.traverse(o=>{ if(o.isDirectionalLight&&o.shadow){ o.castShadow=sh; if(o.shadow.mapSize.x!==L.sm){ o.shadow.mapSize.set(L.sm,L.sm); if(o.shadow.map){ o.shadow.map.dispose(); o.shadow.map=null; } } } if(o.material) [].concat(o.material).forEach(m=>m.needsUpdate=true); });
   V3.POST.mat.uniforms.ao.value=L.ao?1:0;
 }
-function gqSet(mode){ GQ.mode=mode; GQ.slow=GQ.fast=0; gqApply(mode==="auto"?GQ.lv:mode); const b=$("#gqBtn"); if(b) b.textContent="그래픽 "+GQ.label(); }
+function gqSet(mode){ GQ.mode=mode; GQ.slow=GQ.fast=0; gqApply(mode==="auto"?GQ.lv:mode); const s=$("#gqSel"); if(s&&s.value!==mode) s.value=mode; const n=$("#gqNow"); if(n) n.textContent=GQ.mode==="auto"?"자동 · "+GQ.label().replace(/^자동\(|\)$/g,""):""; }
 /* 자동 : 3 초 넘게 느리면 한 단계 내리고, 8 초 넘게 넉넉하면 한 단계 올린다 */
 function gfxAdapt(now){
   const dt=RDT||1/60; GQ.ema+=(dt-GQ.ema)*.05;
   if(GQ.mode!=="auto"||!V3) return;
   if(GQ.ema>1/28){ GQ.slow+=dt; GQ.fast=0; } else if(GQ.ema<1/52){ GQ.fast+=dt; GQ.slow=0; } else { GQ.slow=Math.max(0,GQ.slow-dt); GQ.fast=Math.max(0,GQ.fast-dt); }
-  const order=["low","mid","high"], i=order.indexOf(GQ.lv);
+  const order=["low","mid","high","ultra"], i=order.indexOf(GQ.lv);
   if(GQ.slow>3&&i>0){ gqApply(order[i-1]); GQ.slow=0; GQ.ema=1/45; gqSet("auto"); }
-  else if(GQ.fast>8&&i<2){ gqApply(order[i+1]); GQ.fast=0; gqSet("auto"); }
+  else if(GQ.fast>8&&i<3){ gqApply(order[i+1]); GQ.fast=0; gqSet("auto"); }
 }
 
 /* ── 초기화 : 렌더러 · 환경 반사 · 장면 · 후처리 ── */
@@ -121,6 +121,8 @@ function v3Sync(dt){
   if(PK2.xr) PK2.xr.pw=!(S&&S.session&&S.session.active)||machPower("xr");   /* 전원 OFF : 화면 꺼짐 */      /* X-ray 화면 : 교육 중에는 X선 ON 일 때만 투과 영상 */
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
+  if(FM.mainSw){ const on=!(S&&S.session&&S.session.active)||!!S.f.main; FM.mainSw.rotation.x+=((on?-Math.PI/2:0)-FM.mainSw.rotation.x)*Math.min(1,dt*10); }   /* 메인스위치 손잡이 : 가로 OFF · 세로 ON */
+  if(typeof dialDraw==="function") dialDraw(); if(typeof htxTick==="function") htxTick(dt);
   if(FILLPROP.hose){ const act=!!(S&&S.session&&S.session.active), hc=act&&S.f.hoseC; FILLPROP.hose.forEach((h,i)=>h.visible=!hc||!!hc[i]); }   /* IBC 진공호스 연결부 */
   scrPower(); if(typeof guide3D==="function") guide3D(dt); if(typeof lampTick==="function") lampTick(dt);
   if(typeof wkDraw==="function") wkDraw(dt);
@@ -130,7 +132,7 @@ function scrPower(){
   if(!V3.scr){ V3.scr=[]; const b=new T3.Box3(), c=new T3.Vector3(); V3.scene.updateMatrixWorld(true);
     V3.scene.traverse(o=>{ if(!o.isMesh||o.material!==M.scr) return; b.setFromObject(o); b.getCenter(c); let best=null, bd=.3;
       for(const [k,m] of Object.entries(FP_MON)){ const d=Math.hypot(c.x-m.c[0],c.y-m.c[1],c.z-m.c[2]); if(d<bd){ bd=d; best=k; } }
-      if(best){ o.material=M.scr.clone(); V3.scr.push({k:best,mat:o.material,on:null}); } }); }
+      if(best){ o.material=M.scr.clone(); V3.scr.push({k:best,mat:o.material,on:null,uid:o.uuid}); } }); }
   for(const s of V3.scr){ const on=!(S&&S.session&&S.session.active)||FP_MON[s.k].k.some(k=>machPower(k)); if(on===s.on) continue; s.on=on;
     s.mat.emissiveIntensity=on?.7:0; s.mat.color.setHex(on?0x10202c:0x07090b); }
 }

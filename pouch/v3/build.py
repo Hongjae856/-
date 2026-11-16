@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "demo.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "demo.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -39,6 +39,7 @@ PATCH = {
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
     "ui.js": [
+        ('$("#"+id).onclick=()=>{ if(!S||!S.session) return; TILE[id].click(); };', '$("#"+id).onclick=e=>{ if(!S||!S.session) return; if(typeof fpActive==="function"&&fpActive()){ toast("1인칭에서는 현장에서 직접 조작합니다 — 노란 화살표 위치로 가서 좌클릭(E)","bad"); return; } TILE[id].click(); };   /* 1인칭 : 왼쪽 타일은 ON/OFF 현황만 (11/16) */', 1),
         ('mLift:{e:"🛗",b:"주성분 STS 용기",s:()=>S.f.mainLift?"2층 데크 도착":"리프터로 올림"', 'mLift:{e:"🛗",b:"주성분 리프터 운반",s:()=>S.f.mainLift?"2층 데크 도착":"봉투 → 적재칸 → 데크"', 1),   # 11/16 : STS 용기의 봉투를 리프터 적재칸으로 옮겨 올림
         ('toast("주성분 STS 용기를 먼저 리프터로 올리세요.","bad")', 'toast("주성분을 먼저 리프터로 2층 데크에 올리세요.","bad")', 1),
         ('const nm=what==="roll"?"적색 인쇄 은박 롤":"주성분 STS 용기";', 'const nm=what==="roll"?"적색 인쇄 은박 롤":"주성분 봉투 · 드럼리프터";', 1),
@@ -62,12 +63,16 @@ PATCH = {
     ],
     "fps.js": [
         ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
+        ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||e.code==='KeyF') && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
     ],
     "data.js": [
         ('nm:"리프터 · STS 용기", en:"LIFTER · STS CONTAINER"', 'nm:"드럼리프터 · 주성분", en:"DRUM LIFTER"', 1),
         ('d:"주성분 STS 용기를 2층 데크로 올립니다. 은박 · STS 용기는 반드시 2인 1조로 옮깁니다."', 'd:"STS 용기(맨 동쪽 중앙 파렛트)에 담긴 주성분 봉투를 리프터 적재칸으로 옮겨 원료투입구 아래에서 2층 데크로 올립니다. 리프터는 3인 1조(1명 운전 · 2명 하역)."', 1),
     ],
     "course.js": [
+        ('  const d=S.f.dial, one=q=>IPC_STD[q].std*(1+(d[q]||0));\n  const m=k==="all"?one("add")+one("main")+one("sug"):one(k);\n  const list=[]; for(let i=0;i<IPC_STD[k].n;i++) list.push(Math.round((m+gauss()*IPC_STD[k].std*0.011)*1000)/1000);',
+         '  const d=S.f.dial, one=(q,i)=>IPC_STD[q].std*(1+(typeof dialOff==="function"?dialOff(q,i):(d[q]||0)));   /* 노즐별 조절 다이얼 반영 (11/16 dial.js) */\n  const mm=i=>k==="all"?one("add",i)+one("main",i)+one("sug",i):one(k,i);\n  const list=[]; for(let i=0;i<IPC_STD[k].n;i++) list.push(Math.round((mm(i%10)+gauss()*IPC_STD[k].std*0.008)*1000)/1000);', 1),
+        ('done:()=>S.f.dial.main>=0,\n      act(){ return startWork("dialF",()=>{ S.f.dial.main=0; const r=S.ipc.res.main; if(r) r.stale=true; renderIpc(); toast("주성분 다이얼 조정 완료 — 재측정합니다","good"); }); }', 'done:()=>dialOK("main"),\n      act(){ return startWork("dialF",()=>dialOpen("F",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }', 1),
         ('A.push(T_("lift","주성분 STS 용기 리프터로 2층 데크에 올림","[주성분 STS 용기] 를 눌러 리프터로 2층 데크에 올립니다."', 'A.push(T_("lift","주성분 봉투를 리프터 적재칸에 옮겨 2층 데크로 올림","[주성분 리프터 운반] 을 눌러 STS 용기의 주성분 봉투를 드럼리프터 적재칸에 옮겨 담고, 원료투입구 아래로 밀고 가서 2층 데크로 올립니다."', 1),
         ('주성분 STS 용기를 리', '주성분 봉투를 리', 1),
         ('const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy");', 'const isExam=()=>!!S&&(S.mode==="exam"||S.mode==="examEasy"||S.mode==="incExam");', 1),
@@ -77,7 +82,8 @@ PATCH = {
         ("정기 공정검사(IPC)와 알람에 대응합니다.", "정기 공정검사(IPC)를 수행합니다.", 1),
         ("화면 오류를 감시하고 이상사례에 대응합니다.", "화면 오류를 감시합니다.", 1),
         ("  showResult(manual);\n", "  (isDemo()?showDemoResult:isInc()?showIncResult:showResult)(manual);\n", 1),
-        ("  S.stepAt=tSim;\n  if(typeof fpSet", "  S.stepAt=tSim; if(typeof propsReset===\"function\") propsReset();\n  if(typeof fpSet", 1),   # 새 세션 : 작업자 작업 · 끌던 대차 초기화
+        ("  S.stepAt=tSim;\n  if(typeof fpSet", "  S.stepAt=tSim; if(typeof propsReset===\"function\") propsReset();\n  if(typeof fpSet", 1),
+        ('  if(typeof fpSet==="function") fpSet(FP.want);', '  if(typeof fpSet==="function") fpSet(mode!=="demo");   /* 교육 시작 = 항상 1인칭 (11/16 사용자 지시) */', 1),   # 새 세션 : 작업자 작업 · 끌던 대차 초기화
         ('  if(isEasy()) presetEasy();\n', '  if(isEasy()) presetEasy();\n  S.f.hoseC=(mode==="guide"||mode==="exam")&&room==="F"?[false,false]:null;   /* 심화 충전실 : IBC 진공호스 분리 상태에서 시작 (11/16 · [0] 첨가제 · [1] 백당) */\n', 1),
         ('function ipcTake(){\n  const I=S.ipc, h=ipcStep(); if(!h||h.k!=="take") return;\n', 'function ipcTake(){\n  const I=S.ipc, h=ipcStep(); if(!h||h.k!=="take") return;\n  if(!S.flags.ipcGo&&typeof startWork==="function"){ if(S.flags.ipcBusy) return; S.flags.ipcBusy=true;   /* 작업자가 배출 컨베이어에서 시료를 꺼내 저울 작업대로 가서 계량한 뒤 결과 반영 (11/16) */\n    const ok=startWork("ipc",()=>{ S.flags.ipcBusy=false; S.flags.ipcGo=true; try{ ipcTake(); }finally{ S.flags.ipcGo=false; } });\n    if(!ok){ S.flags.ipcBusy=false; toast("작업자가 다른 작업 중입니다."); } else if(!cam.fp) toast("시료 채취 — 배출 컨베이어에서 "+IPC_STD[I.targets[I.cur]].n+"포를 꺼내 저울 작업대에서 계량합니다."); return; }\n', 1),
         ('    A.push(T_("ibc1","이송기 1(첨가제) ON",', '    A.push(T_("hose","IBC 진공호스 연결 · 클램프 체결 (백당 · 첨가제)","IBC 받침 호퍼 배출구에 진공호스를 끼우고 클램프로 체결합니다. 백당 → 첨가제 순으로 연결하고 체결 상태를 확인한 뒤 이송기를 켭니다.",()=>"#lcCheck",()=>!f().hoseC||f().hoseC[0]&&f().hoseC[1],{pts:2,chk:()=>f().hoseC&&!(f().hoseC[0]&&f().hoseC[1])?{job:"hose",t:"IBC 진공호스 연결",set(){ f().hoseC=[true,true]; toast("IBC 진공호스 연결 · 클램프 체결 완료 (백당 · 첨가제)","good"); }}:null}));\n    A.push(T_("ibc1","이송기 1(첨가제) ON",', 1),
@@ -122,6 +128,7 @@ def load(folder: str, name: str) -> str:
 
 BODY_PATCH = [   # 메인화면 : 순서도 삭제 · 과정 → 기본 · 심화 · OEE
     ('<button class="gbtn" id="fpBtn">🧍 1인칭</button>', '<button class="gbtn" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>', 1),   # 버튼 = 현재 시점 + 전환 (11/16)
+    ('<button class="gbtn" id="apBtn">▶ 자동재생</button>', '<button class="gbtn" id="apBtn" hidden>▶ 자동재생</button>\n    <label class="gbtn gqMenu" title="그래픽 품질">🖥 그래픽 <select id="gqSel"><option value="ultra">최고</option><option value="high">상</option><option value="mid">중</option><option value="low">하</option><option value="auto">자동</option></select><s id="gqNow"></s></label>', 1),   # 자동재생 버튼 삭제 · 그래픽 설정 메뉴 (11/16)
     ('상단 [🎥 3인칭 보기] 로', '상단 [🧍 1인칭 → 3인칭 전환] 으로', 1),
     ('<span>R · 우클릭</span>', '<span>C</span>앉기 · 일어서기 (눈높이 약 1.1 m)<span>R · 우클릭</span>', 1),
     ('      <div id="lineStrip"></div>\n', '', 1),

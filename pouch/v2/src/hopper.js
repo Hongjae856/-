@@ -30,32 +30,31 @@ function buildHoppers(g){
   for(let k=0;k<6;k++) rod(g,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
   rod(g,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(g,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(g,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
   for(const z of [zc-.3,zc+.3]){ rod(g,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(g,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
-  /* ── 도징박스 : 검은 한 뭉치 · 3칸 (칸마다 축 + 스크래퍼) ── */
-  const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4;
-  bx(g,xc-.3,xc+.3,Y,Y+.02,zc-.56,zc+.56,M.ss);                                                                 /* 본체 윗판 */
+  /* ── 스테인리스 틀 (11/16 사용자 설명) : 호퍼 · 도징박스 · 원료조절부가 모두 한 틀에 달림 · 아래는 막힌 함(데크 바닥에 부품 노출 없음) · 옆은 투명판(도징박스가 보임) ── */
+  const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4, fw=.46, fl=.58, ft=Y+.66;
+  bx(g,xc-fw,xc+fw,Y,Y+.2,zc-fl,zc+fl,M.ss); bx(g,xc-fw-.006,xc+fw+.006,Y+.2,Y+.215,zc-fl-.006,zc+fl+.006,M.ssMir);   /* 아래 막힌 함 · 윗테 */
+  for(const sx of [-1,1]) for(const sz of [-1,1]) bx(g,xc+sx*fw-.02,xc+sx*fw+.02,Y,ft,zc+sz*fl-.02,zc+sz*fl+.02,M.ss);       /* 기둥 4 */
+  for(const s of [-1,1]){ bx(g,xc+s*fw-.016,xc+s*fw+.016,ft-.032,ft,zc-fl,zc+fl,M.ss); bx(g,xc-fw,xc+fw,ft-.032,ft,zc+s*fl-.016,zc+s*fl+.016,M.ss);
+    bx(g,xc+s*fw-.003,xc+s*fw+.003,Y+.215,ft-.032,zc-fl+.02,zc+fl-.02,M.acryl); bx(g,xc-fw+.02,xc+fw-.02,Y+.215,ft-.032,zc+s*fl-.003,zc+s*fl+.003,M.acryl); }
+  /* 도징박스 : 검은 3칸 (칸마다 축 + 스크래퍼) — 호퍼 출구 바로 아래 */
   for(let k=0;k<3;k++){ const x0=xc-bw+k*(2*bw/3)+.003, x1=xc-bw+(k+1)*(2*bw/3)-.003; bx(g,x0,x1,dy0,dy1,zc-dl,zc+dl,M.black);
     for(const s of [-1,1]){ rod(g,[(x0+x1)/2,dy0+.085,zc+s*dl],[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],.03,M.ssD,20); rod(g,[(x0+x1)/2,dy0+.085,zc+s*(dl+.012)],[(x0+x1)/2,dy0+.085,zc+s*(dl+.03)],.012,M.ssMir,12); } }
-  /* 함량판 · 셔터 틀 : 호퍼 바깥면까지 넓은 스테인리스 틀 (2단) · 셔터 판 · 셔터 실린더 · 바이브레이터 */
-  const fy0=Y+.2, fy1=Y+.3, fl=.5, fw=.42;
-  for(const s of [-1,1]){ for(const [a,b] of [[fy0,fy0+.03],[fy1-.03,fy1],[Y+.44,Y+.47]]){ bx(g,xc+s*fw-.012,xc+s*fw+.012,a,b,zc-fl,zc+fl,M.ss); bx(g,xc-fw,xc+fw,a,b,zc+s*fl-.012,zc+s*fl+.012,M.ss); }
-    for(const z of [zc-fl,zc-.17,zc+.17,zc+fl]) bx(g,xc+s*fw-.012,xc+s*fw+.012,fy0,Y+.47,z-.012,z+.012,M.ss);
-    bx(g,xc+s*fw-.003,xc+s*fw+.003,fy1,Y+.44,zc-fl+.012,zc+fl-.012,M.acryl);                                    /* 투명 옆판 */
-    rod(g,[xc+s*(fw+.03),Y+.38,zc-.07],[xc+s*(fw+.03),Y+.38,zc+.07],.006,M.ssMir,8); for(const d of [-.07,.07]) rod(g,[xc+s*fw,Y+.38,zc+d],[xc+s*(fw+.03),Y+.38,zc+d],.005,M.ssMir,6);
-    ribbon(g,[[xc+s*fw,Y+.47],[xc+s*(bw+.01),Y+.47]],zc-dl,zc+dl,M.sheet); }
-  bx(g,xc-fw+.02,xc+fw-.02,fy0+.05,fy0+.062,zc-fl+.02,zc+fl-.02,M.dark); bx(g,xc-bw+.01,xc+bw-.01,fy0+.03,fy0+.04,zc-fl-.08,zc+fl-.04,M.green.clone());
-  rod(g,[xc,fy0+.035,zc-fl-.08],[xc,fy0+.035,zc-fl-.24],.02,M.alu,14); rod(g,[xc,fy0+.035,zc-fl-.24],[xc,fy0+.035,zc-fl-.26],.023,M.grey,14);
-  for(const s of [-1,1]){ bx(g,xc-.05,xc+.05,fy0-.005,fy0+.03,zc+s*(fl+.02)-.03,zc+s*(fl+.02)+.03,M.blue); bx(g,xc-.05,xc+.05,Y+.1,Y+.135,zc+s*(fl-.06)-.03,zc+s*(fl-.06)+.03,M.red); }
-  /* 열별 검은 유닛 줄 · 양쪽 긴 면의 알루미늄 레일 + 주황 속도 조절 밸브 10 · 흰 슬리브 */
-  for(const s of [-1,1]){ bx(g,xc+s*.4-.03,xc+s*.4+.03,Y+.07,Y+.115,zc-.44,zc+.44,M.alu); bx(g,xc+s*.33-.03,xc+s*.33+.03,Y+.02,Y+.07,zc-.46,zc+.46,M.ssD); }
-  for(let i=0;i<n;i++){ const z=pz(i); bx(g,xc-.34,xc+.34,Y+.115,fy0,z-.027,z+.027,M.black); rod(g,[xc,Y+.02,z],[xc,Y+.115,z],.018,M.cream,14);
-    for(const s of [-1,1]){ const xf=xc+s*.4; bx(g,xf-.016,xf+.016,Y+.115,Y+.155,z-.016,z+.016,M.orange); rod(g,[xf+s*.03,Y+.092,z],[xf+s*.07,Y+.092,z],.012,M.ssMir,12); rod(g,[xf+s*.03,Y+.092,z],[xf+s*.036,Y+.092,z],.016,M.ssD,12);
-      rod(g,[xc+s*.34,Y+.17,z-.012],[xc+s*.36,Y+.17,z-.012],.005,M.blue,8); rod(g,[xc+s*.34,Y+.17,z+.012],[xc+s*.36,Y+.17,z+.012],.005,M.blue,8); tube(g,[[xc+s*.36,Y+.17,z],[xc+s*.46,Y+.2,z+.01],[xc+s*.49,Y+.1,z+.03],[xc+s*.48,Y+.045,z+.06]],.0045,M.hose); } }
-  for(const s of [-1,1]) for(const dy of [0,.014]) tube(g,[[xc+s*.48,Y+.04+dy,zc-.4],[xc+s*.49,Y+.04+dy,zc],[xc+s*.48,Y+.04+dy,zc+.4],[xc+s*.2,Y+.05+dy,zc+.6]],.008,M.hose);
-  /* 위쪽 주황 밸브 4 (1번 호퍼 쪽 틀 위) */
-  bx(g,xc-fw-.03,xc-fw+.0,Y+.47,Y+.5,zc-.36,zc+.0,M.alu); for(let k=0;k<4;k++){ const z=zc-.32+k*.09; bx(g,xc-fw-.03,xc-fw-.004,Y+.5,Y+.535,z-.014,z+.014,M.orange); rod(g,[xc-fw-.017,Y+.535,z],[xc-fw-.017,Y+.56,z],.009,M.ssMir,10); }
+  bx(g,xc-bw-.02,xc+bw+.02,Y+.215,dy0,zc-dl-.02,zc+dl+.02,M.ssD);                                                  /* 도징박스 받침 (함 위) */
+  for(const s of [-1,1]) ribbon(g,[[xc+s*(fw-.02),dy1+.02],[xc+s*(bw+.01),dy1]],zc-dl,zc+dl,M.sheet);
+  /* 원료조절부 : 호퍼 끝에 붙은 10열 조절 다이얼 — 도징박스(윗면)보다 높음. 서쪽 = 1 첨가제(위) · 2 주성분(아래), 동쪽 = 3 백당 (11/16) */
+  FM.dials={add:[],main:[],sug:[]};
+  const dialRow=(side,y,key,nm)=>{ const x=xc+side*fw;
+    bx(g,Math.min(x,x+side*.045),Math.max(x,x+side*.045),y-.03,y+.03,zc-.45,zc+.45,M.ss); bx(g,Math.min(x,x+side*.047),Math.max(x,x+side*.047),y-.022,y+.022,zc-.44,zc+.44,M.ssD);
+    rod(g,[xc+side*.27,y,zc-.45],[x,y,zc-.45],.012,M.ssMir,10); rod(g,[xc+side*.27,y,zc+.45],[x,y,zc+.45],.012,M.ssMir,10);          /* 호퍼 끝 브래킷 */
+    plate(g,.13,.035,labelTex([[nm,"#111",64]],{w:512,h:140,border:"#333"}),[x+side*.048,y+.045,zc-.33],side<0?-Math.PI/2:Math.PI/2);
+    for(let i=0;i<n;i++){ const z=pz(i), K=new T3.Group(); K.position.set(x+side*.047,y,z); g.add(K);
+      const kn=new T3.Mesh(new T3.CylinderGeometry(.017,.019,.03,22),M.black); kn.rotation.z=Math.PI/2; kn.position.x=side*.015; add(K,kn);
+      const pt=new T3.Mesh(new T3.BoxGeometry(.004,.022,.005),M.white); pt.position.set(side*.031,.006,0); add(K,pt);
+      FM.dials[key].push(K); } };
+  dialRow(-1,Y+.6,"add","1 첨가제"); dialRow(-1,Y+.53,"main","2 주성분"); dialRow(1,Y+.57,"sug","3 백당");
   /* 남쪽 끝 : 게이트 · 셔터 실린더 · 고정 브래킷 · 덮개 천 */
   const cyl=(x,y0,y1,z)=>{ rod(g,[x,y0,z],[x,y1,z],.019,M.alu,14); rod(g,[x,y1,z],[x,y1+.012,z],.022,M.grey,14); rod(g,[x,y0-.012,z],[x,y0,z],.022,M.grey,14); rod(g,[x,y0-.07,z],[x,y0-.012,z],.006,M.ssMir,8); };
-  for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,Y+.5,Y+.68,zc+D+.06);
+  for(const x of [xc-.3,xc+.02,xc+.3]) cyl(x,ft+.01,ft+.19,zc+D+.06);
   for(const x of [xc-.14,xc-.04,xc+.12]){ cyl(x,Y+.24,Y+.4,zc+fl+.06); bx(g,x-.028,x+.028,Y+.1,Y+.14,zc+fl+.03,zc+fl+.1,M.dark); }
   for(const s of [-1,1]) tube(g,[[xc+s*.13,Y+.4,zc+fl+.06],[xc+s*.22,Y+.52,zc+fl+.12],[xc+s*.3,Y+.3,zc+fl+.16],[xc+s*.27,Y+.05,zc+fl+.1]],.0055,M.hose);
   { const pts=[]; for(let k=0;k<=10;k++){ const a=Math.PI*k/10; pts.push([xc+.3*Math.cos(a)+.08,Y+.06+.015*Math.sin(a*3),zc+fl+.1+.16*Math.sin(a)]); } tube(g,pts,.032,new T3.MeshStandardMaterial({color:0x9ea3a8,roughness:.95})); }
