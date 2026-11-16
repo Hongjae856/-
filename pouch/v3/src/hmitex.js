@@ -25,13 +25,13 @@ async function htxDraw(s){
   if(!machPower(mk)){ if(s.tex){ s.mat.map=null; s.mat.emissiveMap=null; s.mat.needsUpdate=true; s.tex.dispose(); s.tex=null; s.key=null; } return; }
   const d=htxDims(s); if(!d) return;
   const snap=htxSnap(mk); if(!snap||!snap.w) return;
-  const W=Math.max(200,Math.min(560,snap.w)), H=Math.round(W*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
+  const LW=s.k==="fl"?600:((FP_MON[s.k].dom||{}).w||560), W=Math.min(600,LW), H=Math.round(W*d[1]/d[0]), LH=Math.round(LW*d[1]/d[0]), key=mk+"|"+W+"|"+snap.html.length+"|"+snap.html.slice(0,4000)+snap.html.slice(-4000);
   if(s.key===key) return; s.key=key;
-  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(W*2)+'" height="'+(H*2)+'" viewBox="0 0 '+W+' '+H+'"><foreignObject width="'+W+'" height="'+H+'"><div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;height:'+H+'px;overflow:hidden;background:#000"><style><![CDATA['+htxCss()+']]></style><div style="width:'+snap.w+'px;transform:scale('+(W/snap.w)+');transform-origin:0 0">'+snap.html+'</div></div></foreignObject></svg>';
+  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="'+(W*2)+'" height="'+(H*2)+'" viewBox="0 0 '+W+' '+H+'"><foreignObject width="'+W+'" height="'+H+'"><div xmlns="http://www.w3.org/1999/xhtml" style="width:'+W+'px;height:'+H+'px;overflow:hidden;background:#000"><style><![CDATA['+htxCss()+'\n#hmi{width:'+LW+'px!important;height:'+LH+'px!important;max-width:none!important}#hTabs,#hAlarmTick{display:none!important}*{scrollbar-width:none!important}*::-webkit-scrollbar{display:none!important}]]></style><div style="width:'+LW+'px;height:'+LH+'px;overflow:hidden;transform:scale('+(W/LW)+');transform-origin:0 0">'+snap.html+'</div></div></foreignObject></svg>';
   const img=new Image(); img.src="data:image/svg+xml;charset=utf-8,"+encodeURIComponent(svg);
   await img.decode();
   const cv=s.cv||(s.cv=document.createElement("canvas")); cv.width=W*2; cv.height=H*2; const c=cv.getContext("2d"); c.drawImage(img,0,0,W*2,H*2);
-  c.getImageData(0,0,1,1);                                                        /* 보안 제한(타 브라우저) 확인 — 실패 시 catch */
+  if(!HTX.chk){ c.getImageData(0,0,1,1); HTX.chk=true; }                                                        /* 보안 제한(타 브라우저) 확인 — 실패 시 catch */
   if(!s.tex){ s.tex=new T3.CanvasTexture(cv); s.tex.encoding=T3.sRGBEncoding; s.tex.anisotropy=4; } else s.tex.needsUpdate=true;
   s.mat.map=s.tex; s.mat.emissiveMap=s.tex; s.mat.color.setHex(0x0a0a0a); s.mat.emissive.setHex(0xffffff); s.mat.emissiveIntensity=.92; s.mat.needsUpdate=true;
 }
@@ -39,6 +39,6 @@ function htxTick(dt){
   if(HTX.fail||!V3||!V3.scr||!S||!S.session||!S.session.active||HTX.busy) return;
   HTX.t+=dt; if(HTX.t<.5) return; HTX.t=0;
   const L=V3.scr.filter(s=>s.k!=="xr"&&(S.room==="F"?FP_MON[s.k].c[2]>0:FP_MON[s.k].c[2]<0)); if(!L.length) return;
-  const s=L[HTX.i++%L.length]; HTX.busy=true;
-  htxDraw(s).catch(e=>{ HTX.fail=true; console.warn("설비 화면 그림 표시 불가 — 기존 표시 유지",e); }).finally(()=>{ HTX.busy=false; });
+  const s=L[HTX.i++%L.length]; if((s.fail||0)>2) return; HTX.busy=true;
+  htxDraw(s).catch(e=>{ s.fail=(s.fail||0)+1; if(e&&e.name==="SecurityError") HTX.fail=true; console.warn("설비 화면 그림 표시 실패 — 기존 표시 유지",e); }).finally(()=>{ HTX.busy=false; });
 }
