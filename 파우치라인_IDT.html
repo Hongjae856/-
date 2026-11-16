@@ -4660,6 +4660,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:10, d:"2026-11-16", t:"OEE 관리 대시보드에 Apps Script 주소 연결 추가(배포 관리의 웹 앱 주소 붙여넣기 → ?format=json 으로 읽어 IDT DB 저장 · 열 때 30 분 경과 시 자동 갱신), 실패 원인 안내"},
  {v:9, d:"2026-11-16", t:"1인칭 작업자 눈높이 1.55 m → 1.65 m (2층 데크에서 3.65 m · 천장 4.2 m), 이상사례 대처 교육 중요도 등급(상 · 중 · 하) 확정"},
  {v:8, d:"2026-11-16", t:"메인화면 왼쪽 아래에 OEE 연동 표시등 추가(초록 = Drive 시트 · IDT DB 데이터 연결, 빨강 = 미연동 · 누르면 OEE 관리 대시보드)"},
  {v:7, d:"2026-11-16", t:"메인화면 개편(과정 → 기본 · 심화 · OEE, 순서도 삭제), 기본 · 심화는 라인 가동 절차만 교육(이상상황 제외), OEE 에 [OEE 관리 대시보드](Google Drive 시트 직접 읽기 + IDT 자체 DB) · [이상사례 대처 교육](부동시간 · 빈도 · 중요도 순 학습 · 평가) 신설, 1인칭 설비 화면 실제 크기, 설비 전원에 따른 화면 꺼짐 · 은박 롤 소진 표시, 입력칸 붙여넣기 오류 수정"},
@@ -4767,7 +4768,7 @@ const OEEEDU=(function(){
     if(!cap.db||st.canWrite===false) return "skip";
     const n=Math.ceil(raw.length/CHUNK), old=(st.meta&&st.meta.chunks)||0;
     for(let i=0;i<n;i++) await cap.db.doc("oee_rows/c"+i).set({rows:raw.slice(i*CHUNK,(i+1)*CHUNK)});
-    const meta={fileId:file.id, fileName:file.title||"", syncedAt:Date.now(), sheets, n:raw.length, chunks:n};
+    const meta={fileId:file.id||"", url:file.url||"", fileName:file.title||"", syncedAt:Date.now(), sheets, n:raw.length, chunks:n};
     await cap.db.doc("oee/meta").set(meta); st.meta=meta;
     for(let i=n;i<old;i++){ try{ await cap.db.doc("oee_rows/c"+i).delete(); }catch(e){} }
     return "ok";
@@ -4812,8 +4813,27 @@ const OEEEDU=(function(){
     }catch(e){ st.msg="Drive 읽기 실패 — "+errMsg(e)+(st.rows.length?" (기존 데이터 유지)":""); console.warn("drive",e); }
     st.busy=""; render();
   }
-  function autoSync(){ if(st.autoTried||!cap.mcp||!st.meta||!st.meta.fileId||st.demo) return; if(!$o("#oeeWrap.on")) return; if(Date.now()-(st.meta.syncedAt||0)<STALE) return;
-    st.autoTried=true; sync({id:st.meta.fileId, title:st.meta.fileName},true); }
+  /* ── Apps Script 주소 (대시보드 doGet 에 ?format=json 출력 추가 필요 · pouch-idt/OEE_LINK.md 3-1) ── */
+  function jsonUrl(u){ u=String(u||"").trim(); if(!/^https:\/\/script\.google(usercontent)?\.com\//.test(u)) throw new Error("Apps Script 웹 앱 주소(https://script.google.com/macros/s/…/exec)를 넣으세요."); return /[?&]format=json/.test(u)?u:u+(u.includes("?")?"&":"?")+"format=json"; }
+  async function syncUrl(u,quiet){
+    st.busy="Apps Script 주소에서 읽는 중…"; render();
+    try{
+      const url=jsonUrl(u); let res;
+      try{ res=await fetch(url,{redirect:"follow",credentials:"omit"}); }catch(e){ throw new Error("연결이 막혔습니다 (아티팩트 보안 정책 · 사내망 차단 가능성). [Google Drive 시트 연결] 을 쓰세요."); }
+      if(!res.ok) throw new Error("응답 "+res.status);
+      const txt=await res.text(); if(/^\s*</.test(txt)) throw new Error("JSON 대신 웹 화면이 왔습니다. doGet 에 format=json 출력이 추가 · 재배포되었는지, 웹 앱 액세스 권한이 '모든 사용자' 인지 확인하세요.");
+      const raw=parseText(txt); if(!raw.length) throw new Error("받은 데이터가 0 건입니다.");
+      setRows(raw,"Apps Script ("+kst(Date.now())+" 읽음)",false);
+      let saved="skip"; try{ saved=await dbSave(raw,{url:u,title:"Apps Script 주소"},["Apps Script"]); }catch(e){ saved="fail"; console.warn("db save",e); }
+      st.msg=raw.length+" 건 읽음 — "+(saved==="ok"?"IDT DB 에 저장했습니다. 이후 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.":saved==="fail"?"IDT DB 저장은 권한이 없어 건너뜀 (화면에만 표시).":"IDT DB 를 쓸 수 없어 화면에만 표시합니다.");
+      try{ localStorage.setItem("oeeedu.url",u); }catch(e){}
+      if(!quiet) st.tab="trend";
+    }catch(e){ st.msg="Apps Script 읽기 실패 — "+e.message+(st.rows.length?" (기존 데이터 유지)":""); console.warn("url",e); }
+    st.busy=""; render();
+  }
+  function autoSync(){ if(st.autoTried||!st.meta||st.demo) return; if(!$o("#oeeWrap.on")) return; if(Date.now()-(st.meta.syncedAt||0)<STALE) return;
+    if(st.meta.url){ st.autoTried=true; syncUrl(st.meta.url,true); }
+    else if(cap.mcp&&st.meta.fileId){ st.autoTried=true; sync({id:st.meta.fileId, title:st.meta.fileName},true); } }
 
   /* ── 분석 ── */
   function view(){ return st.rows.filter(r=>(!st.line||r.line===st.line)&&(!st.from||r.date.slice(0,7)>=st.from)&&(!st.to||r.date.slice(0,7)<=st.to)); }
@@ -4833,7 +4853,7 @@ const OEEEDU=(function(){
     const l=localLog(); l.push(ent); lsSet(LS.log,JSON.stringify(l.slice(-1500)));
   }
   /* ── 연동 표시등 (메인화면 구석) : 초록 = Drive 시트 또는 IDT DB 의 실제 데이터 연결, 빨강 = 미연결 ── */
-  function lamp(){ const el=$o("#oeeLamp"); if(!el) return; const M=st.meta, live=!st.demo&&(st.src.startsWith("Google Drive")||st.src.startsWith("IDT DB"));
+  function lamp(){ const el=$o("#oeeLamp"); if(!el) return; const M=st.meta, live=!st.demo&&(st.src.startsWith("Google Drive")||st.src.startsWith("IDT DB")||st.src.startsWith("Apps Script"));
     el.className=live?"on":"off";
     el.title=live?"OEE 연동됨 — "+(M?"마지막 동기화 "+kst(M.syncedAt)+" · "+(M.fileName||"")+" · "+(M.n||st.rows.length)+" 건":st.src):"OEE 미연동 — "+({none:"아티팩트 밖에서는 IDT DB · Drive 를 쓸 수 없음",loading:"IDT DB 확인 중",timeout:"IDT DB 응답 지연",error:"IDT DB 읽기 실패",ok:"저장된 OEE 데이터 없음 ([OEE › OEE 관리 대시보드 › ① 데이터 연결])"}[st.dbState]||"");
     el.querySelector("span").textContent=live?"OEE 연동":"OEE 미연동"; }
@@ -4842,10 +4862,10 @@ const OEEEDU=(function(){
   function close(){ const w=$o("#oeeWrap"); if(w) w.classList.remove("on"); }
   function render(){
     lamp(); const w=$o("#oeeWrap"); if(!w||!w.classList.contains("on")) return; const tabs=[["data","① 데이터 연결"],["trend","② 부동 트렌드"],["effect","③ 교육 효과"]];
-    const keep=$o("#oeeText")?$o("#oeeText").value:"", kw=$o("#oeeKw")?$o("#oeeKw").value:null;
+    const keep=$o("#oeeText")?$o("#oeeText").value:"", kw=$o("#oeeKw")?$o("#oeeKw").value:null; const uv=$o("#oeeUrl")?$o("#oeeUrl").value:null;
     w.innerHTML='<div class="oeeBox"><div class="oeeHead"><b>OEE 관리 대시보드 <small>'+esc(st.cfg.title||"")+'</small></b><div class="oeeTabs">'+tabs.map(([k,t])=>'<button data-tab="'+k+'" class="'+(st.tab===k?"on":"")+'">'+t+'</button>').join("")+'</div><button data-act="close" class="oeeX">닫기</button></div>'+
       (st.demo?'<div class="oeeDemo">예시 데이터로 표시 중입니다 — 실제 실적이 아닙니다.</div>':'')+(st.busy?'<div class="oeeMsg">⏳ '+esc(st.busy)+'</div>':'')+(st.msg?'<div class="oeeMsg">'+esc(st.msg)+'</div>':'')+'<div class="oeeBody">'+({data:tabData,trend:tabTrend,effect:tabEffect}[st.tab]())+'</div></div>';
-    if($o("#oeeText")) $o("#oeeText").value=keep; if(kw!=null&&$o("#oeeKw")) $o("#oeeKw").value=kw;
+    if($o("#oeeText")) $o("#oeeText").value=keep; if(kw!=null&&$o("#oeeKw")) $o("#oeeKw").value=kw; if(uv!=null&&$o("#oeeUrl")) $o("#oeeUrl").value=uv;
   }
   function filterBar(){ const lines=[...new Set(st.rows.map(r=>r.line))].sort(), months=[...new Set(st.rows.map(r=>r.date.slice(0,7)))].sort(), op=(l,v)=>l.map(x=>'<option'+(x===v?" selected":"")+'>'+esc(x)+'</option>').join("");
     return '<div class="oeeFilter">라인 <select data-f="line"><option value="">전체</option>'+op(lines,st.line)+'</select> 기간 <select data-f="from">'+op(months,st.from)+'</select> ~ <select data-f="to">'+op(months,st.to)+'</select><span>'+view().length+' 건</span></div>'; }
@@ -4853,13 +4873,17 @@ const OEEEDU=(function(){
   function tabData(){
     const M=st.meta, dbTxt={none:"이 화면에서는 IDT DB 를 쓸 수 없습니다 (claude.ai 아티팩트로 열면 사용).",loading:"IDT DB 읽는 중…",timeout:"IDT DB 응답이 늦습니다.",error:"IDT DB 를 읽지 못했습니다.",ok:M?"마지막 동기화 "+kst(M.syncedAt)+" · "+esc(M.fileName||"")+" · "+(M.n||0)+" 건 ("+esc((M.sheets||[]).join(" · "))+")":"아직 저장된 데이터가 없습니다."}[st.dbState];
     const files=st.files?(st.files.length?'<table class="oeeT"><tr><th>시트 파일</th><th>수정</th><th></th></tr>'+st.files.map(f=>'<tr><td>'+esc(f.title)+'</td><td>'+esc(String(f.modified).slice(0,10))+'</td><td><button data-act="pick" data-id="'+esc(f.id)+'" data-t="'+esc(f.title)+'">이 시트 연결</button></td></tr>').join("")+'</table>':'<p class="oeeEmpty">찾은 시트가 없습니다.</p>'):"";
+    const savedUrl=(M&&M.url)||lsGet("oeeedu.url")||"";
     return '<div class="oeeCols"><div>'+
-      '<h3>1. Google Drive 시트 연결 (권장)</h3><p>보는 사람의 Google Drive 권한으로 OEE 시트를 직접 읽어 IDT DB 에 저장합니다. 연결 후에는 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.</p>'+
+      '<h3>1. Apps Script 주소 연결</h3><p>대시보드 [배포 › 배포 관리] 의 웹 앱 주소(…/exec)를 붙여 넣고 [연결] 을 누릅니다. IDT 가 끝에 ?format=json 을 붙여 읽고 IDT DB 에 저장합니다.</p>'+
+      '<div class="oeeRow"><input id="oeeUrl" placeholder="https://script.google.com/macros/s/…/exec" value="'+esc(savedUrl)+'"><button data-act="url">연결</button></div>'+
+      (M&&M.url?'<p><button data-act="reurl">지금 다시 읽기</button> <span class="oeeNote">연결된 주소로 마지막 동기화 '+kst(M.syncedAt)+'</span></p>':'')+
+      '<h3>2. Google Drive 시트 연결</h3><p>보는 사람의 Google Drive 권한으로 OEE 시트를 직접 읽어 IDT DB 에 저장합니다. 연결 후에는 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.</p>'+
       (cap.mcp?'<div class="oeeRow"><input id="oeeKw" placeholder="시트 이름 낱말 (예: OEE)" value="OEE"><button data-act="search">Drive 에서 찾기</button></div>'+files+
         (M&&M.fileId?'<p><button data-act="resync">지금 다시 읽기</button> <span class="oeeNote">연결된 시트 : '+esc(M.fileName||M.fileId)+'</span></p>':''):
         '<p class="oeeEmpty">이 화면에서는 Drive 연결을 쓸 수 없습니다. claude.ai 에서 아티팩트로 열고, 설정 › 커넥터에서 Google Drive 를 연결하세요.</p>')+
-      '<h3>2. 붙여넣기 (보조)</h3><p>시트에서 머리줄을 포함해 범위를 복사(Ctrl+C)한 뒤 아래 칸에 붙여 넣습니다 (Ctrl+V). 이 화면에만 표시하며 IDT DB 에는 저장하지 않습니다.</p><textarea id="oeeText" placeholder="작업기간	제조번호(LOT)	포장라인	제품명	…	시간가동률(%)	성능가동률(%)	수율(%)	OEE(%)	부동사유	대책"></textarea><button data-act="paste">적용</button>'+
-      '<h3>3. 예시 데이터</h3><p>화면 확인용으로 규칙에 따라 만든 값입니다 (실제 실적 아님).</p><button data-act="demo">예시 데이터로 보기</button></div>'+
+      '<h3>3. 붙여넣기 (보조)</h3><p>시트에서 머리줄을 포함해 범위를 복사(Ctrl+C)한 뒤 아래 칸에 붙여 넣습니다 (Ctrl+V). 이 화면에만 표시하며 IDT DB 에는 저장하지 않습니다.</p><textarea id="oeeText" placeholder="작업기간	제조번호(LOT)	포장라인	제품명	…	시간가동률(%)	성능가동률(%)	수율(%)	OEE(%)	부동사유	대책"></textarea><button data-act="paste">적용</button>'+
+      '<h3>4. 예시 데이터</h3><p>화면 확인용으로 규칙에 따라 만든 값입니다 (실제 실적 아님).</p><button data-act="demo">예시 데이터로 보기</button></div>'+
       '<div><h3>IDT DB</h3><p>'+dbTxt+'</p>'+(st.canWrite===false?'<p class="oeeNote">※ 이 계정은 IDT DB 를 읽기만 할 수 있습니다. Drive 에서 읽은 값은 화면에만 표시됩니다.</p>':'')+
       '<h3>현재 표시 중</h3>'+(st.rows.length?'<p>'+esc(st.src)+' · '+st.rows.length+' 건 · '+esc(st.rows.map(r=>r.date).sort()[0])+' ~ '+esc(st.rows.map(r=>r.date).sort().pop())+'</p>'+
         '<p>부동 유형 코드 입력 '+st.rows.filter(r=>r.codes.length&&!r.auto).length+' 건 · 자유 기재 사유를 낱말로 분류 '+st.rows.filter(r=>r.auto).length+' 건 (이 중 미분류 '+st.rows.filter(r=>r.auto&&r.codes.includes("ETC")).length+' 건)</p>':'<p class="oeeEmpty">표시 중인 데이터가 없습니다.</p>')+
@@ -4892,6 +4916,8 @@ const OEEEDU=(function(){
     else if(a==="search"){ const w=($o("#oeeKw")&&$o("#oeeKw").value.trim())||"OEE"; st.busy="Drive 에서 '"+w+"' 시트 찾는 중…"; render();
       driveSearch(w).then(f=>{ st.files=f; }).catch(err=>{ st.msg="Drive 검색 실패 — "+errMsg(err); }).then(()=>{ st.busy=""; render(); }); }
     else if(a==="pick") sync({id:b.dataset.id, title:b.dataset.t});
+    else if(a==="url") syncUrl($o("#oeeUrl").value);
+    else if(a==="reurl"&&st.meta&&st.meta.url) syncUrl(st.meta.url);
     else if(a==="resync"&&st.meta) sync({id:st.meta.fileId, title:st.meta.fileName});
     else if(a==="inc"){ close(); st.cfg.openInc(); }
     else if(a==="clearLog"){ lsSet(LS.log,null); render(); } }

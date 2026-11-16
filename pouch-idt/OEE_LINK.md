@@ -19,6 +19,22 @@
 - 한 기록에 코드가 여럿(쉼표 구분)이면 부동시간을 똑같이 나눈다.
 
 ## 3. 대시보드 쪽에서 추가할 것 (사용자 작업 · 확인 필요)
+### 3-0. Apps Script 주소 연결 (11/16 V10 · 사용자 요청으로 다시 추가)
+1. 대시보드 Apps Script 의 `doGet` 맨 앞에 아래 3줄을 넣는다 (나머지는 기존 그대로).
+```js
+function doGet(e) {
+  if (e && e.parameter && e.parameter.format === 'json') {            // IDT 용 읽기 전용 출력
+    return ContentService.createTextOutput(JSON.stringify(getDashboardData())).setMimeType(ContentService.MimeType.JSON);
+  }
+  // … 기존 return HtmlService… 그대로
+}
+```
+2. [배포 › 배포 관리 › 연필(수정) › 버전 : 새 버전 › 배포] — 새 버전으로 다시 배포해야 반영된다. 웹 앱 주소(…/exec)는 그대로 유지된다.
+3. 웹 앱 액세스 권한 : '모든 사용자'(로그인 없이 읽기)여야 IDT 가 읽을 수 있다. 주소를 아는 누구나 실적을 읽을 수 있으므로 사내 보안 방침 확인 필요.
+4. IDT › OEE › OEE 관리 대시보드 › ① 데이터 연결 › [1. Apps Script 주소 연결] 칸에 …/exec 주소를 붙여 넣고 [연결]. IDT 가 `?format=json` 을 붙여 읽고 IDT DB 에 저장한다(주소도 DB 에 저장 → 이후 열 때 30 분 경과 시 자동 갱신).
+5. 실패 안내 : '웹 화면이 왔습니다' = 3줄 미추가 · 재배포 안 됨 · 권한 문제 / '연결이 막혔습니다' = 아티팩트 보안 정책 또는 사내망 차단 → 3-1(Drive 연결) 사용.
+- 주소는 저장소에 넣지 않는다 (IDT DB 에만 저장).
+
 ### 3-1. 시트 연결 — Google Drive 직접 읽기 + IDT 자체 DB (11/16 V7, Apps Script 주소 방식 대체)
 Apps Script 주소(…/exec)는 아티팩트 안에서 다른 사이트 호출이 막힐 수 있고 '모든 사용자' 공개가 필요해 보안상 불리하므로, **claude.ai 의 Google Drive 커넥터**로 바꾼다.
 
