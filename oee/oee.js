@@ -105,13 +105,15 @@ const OEEEDU=(function(){
   }
   let xlsxP=null;
   function loadXlsx(){ if(window.XLSX) return Promise.resolve(window.XLSX); if(!xlsxP) xlsxP=new Promise((ok,no)=>{ const s=document.createElement("script"); s.src=XLSX_URL; s.onload=()=>window.XLSX?ok(window.XLSX):no(new Error("SheetJS 로드 실패")); s.onerror=()=>{ xlsxP=null; no(new Error("SheetJS(cdnjs) 를 불러오지 못했습니다")); }; document.head.appendChild(s); }); return xlsxP; }
+  /* 이 IDT 라인(cfg.line)만 저장 (11/16 사용자 결정 : 파우치 IDT 는 파우치 시트 · 행만) */
+  const mine=(rows,sheet)=>rows.filter(r=>String(r.line||"").includes(st.cfg.line)||(!String(r.line||"").trim()&&String(sheet||"").includes(st.cfg.line)));
   async function driveRead(file){
     const r=await cap.mcp.callTool(DRIVE,"download_file_content",{fileId:file.id, exportMimeType:XLSX_MIME});
     const b64=b64Of(r); if(!b64) throw new Error("내려받은 내용에서 시트 파일을 찾지 못했습니다.");
     const X=await loadXlsx(), wb=X.read(b64.replace(/\s/g,""),{type:"base64", cellDates:true});
     const raw=[], sheets=[];
-    for(const nm of wb.SheetNames){ const rows=X.utils.sheet_to_json(wb.Sheets[nm],{header:1, raw:true, defval:""}), got=fromTable(rows,nm); if(got.length){ raw.push(...got); sheets.push(nm); } }
-    if(!raw.length) throw new Error("시트에서 '작업기간' · '포장라인' 머리줄을 찾지 못했습니다.");
+    for(const nm of wb.SheetNames){ const rows=X.utils.sheet_to_json(wb.Sheets[nm],{header:1, raw:true, defval:""}), got=mine(fromTable(rows,nm),nm); if(got.length){ raw.push(...got); sheets.push(nm); } }
+    if(!raw.length) throw new Error("'"+st.cfg.line+"' 시트 · 행을 찾지 못했습니다 (머리줄 '작업기간' · '포장라인' 확인).");
     return {raw, sheets};
   }
   async function sync(file,quiet){
@@ -135,7 +137,7 @@ const OEEEDU=(function(){
       try{ res=await fetch(url,{redirect:"follow",credentials:"omit"}); }catch(e){ st.blocked=true; if(cap.mcp&&!st.files) driveSearch("OEE").then(f=>{ st.files=f; render(); }).catch(()=>{}); throw new Error("연결이 막혔습니다 (claude.ai 아티팩트는 외부 주소 호출을 막음). 위 [1. Google Drive 시트 연결] 목록에서 OEE 시트의 [이 시트 연결] 을 누르세요."); }
       if(!res.ok) throw new Error("응답 "+res.status);
       const txt=await res.text(); if(/^\s*</.test(txt)) throw new Error("JSON 대신 웹 화면이 왔습니다. doGet 에 format=json 출력이 추가 · 재배포되었는지, 웹 앱 액세스 권한이 '모든 사용자' 인지 확인하세요.");
-      const raw=parseText(txt); if(!raw.length) throw new Error("받은 데이터가 0 건입니다.");
+      const raw=mine(parseText(txt)); if(!raw.length) throw new Error("'"+st.cfg.line+"' 라인 데이터가 0 건입니다.");
       setRows(raw,"Apps Script ("+kst(Date.now())+" 읽음)",false);
       let saved="skip"; try{ saved=await dbSave(raw,{url:u,title:"Apps Script 주소"},["Apps Script"]); }catch(e){ saved="fail"; console.warn("db save",e); }
       st.msg=raw.length+" 건 읽음 — "+(saved==="ok"?"IDT DB 에 저장했습니다. 이후 대시보드를 열 때 30 분이 지났으면 자동으로 다시 읽습니다.":saved==="fail"?"IDT DB 저장은 권한이 없어 건너뜀 (화면에만 표시).":"IDT DB 를 쓸 수 없어 화면에만 표시합니다.");
