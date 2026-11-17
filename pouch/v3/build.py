@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "demo.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -75,16 +75,17 @@ PATCH = {
     ],
     "sim.js": [   # 무작위 소량 불량 (11/17 사용자 선택) : 중량 NG 약 0.15 % · 실링 불량 약 0.15 %
         ('  const printed=f.prn.saved;', '  const printed=f.prn.saved&&f.prn.lot===EXPECT.lot&&f.prn.exp===EXPECT.exp;   /* 포장지시기록서와 다른 값 = 인쇄 불량 (11/17) */', 1),
-        ('  const printBad=!printed||f.headDirty||f.ribbon<5;', '  const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }', 1),
+        ('  const printBad=!printed||f.headDirty||f.ribbon<5;', '  const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }\n  const sealS=Math.random()<.0015;   /* 공포배출 게이트는 10열 일괄 (reject.js) → 실링 불량 판정 시 그 스트로크 10포 모두 배출 */', 1),
         ('c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":"ok"):"none";', 'c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":(p.lbl.lot!==EXPECT.lot||p.lbl.exp!==EXPECT.exp)?"bad":"ok"):"none";', 1),
         ('const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35;', 'const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35+(Math.random()<.0015?(Math.random()<.5?-1:1)*(PROD.cw.hi+1.5):0);', 1),
-        ('    const toEmpty=empty||vis||!S.p.align;', '    const sealNG=!empty&&!vis&&Math.random()<.0015; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;\n    const toEmpty=empty||vis||sealNG||!S.p.align;', 1),
+        ('    const toEmpty=empty||vis||!S.p.align;', '    const sealNG=!empty&&!vis&&sealS; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;\n    const toEmpty=empty||vis||sealNG||!S.p.align;', 1),
     ],
     "data.js": [
         ('nm:"리프터 · STS 용기", en:"LIFTER · STS CONTAINER"', 'nm:"드럼리프터 · 주성분", en:"DRUM LIFTER"', 1),
         ('d:"주성분 STS 용기를 2층 데크로 올립니다. 은박 · STS 용기는 반드시 2인 1조로 옮깁니다."', 'd:"STS 용기(맨 동쪽 중앙 파렛트)에 담긴 주성분 봉투를 리프터 적재칸으로 옮겨 원료투입구 아래에서 2층 데크로 올립니다. 리프터는 3인 1조(1명 운전 · 2명 하역)."', 1),
     ],
     "course.js": [
+        ('  CLEAR.F.forEach((c,i)=>A.push(T_("lc"+i,"라인 클리어런스 "+(i+1)+" — "+c.t,', '  CLEAR.F.forEach((c,i)=>A.push(T_("lc"+i,"라인 클리어런스 "+(c.add?"(추가)":(i+1))+" — "+c.t,', 1),   # 11/17 : 추가 점검 항목은 SOP 번호와 섞이지 않게 (추가) 표기
         ('A.push(T_("scoop","2번 호퍼에 주성분 스쿱 공급","[주성분 스쿱 공급] 을 눌러 2번 호퍼에 주성분을 공급합니다.",', 'A.push(T_("scoop","2번 호퍼에 주성분 스쿱 공급 (뚜껑 들어냄)","[주성분 스쿱 공급] 을 누르면 작업자가 2번 호퍼 뚜껑의 남 · 북 토글 클램프를 풀고 뚜껑을 들어내 남쪽 난간에 세운 뒤 스쿱으로 투입하고, 뚜껑을 다시 덮어 클램프를 체결합니다.",', 1),
         ('    A.push(T_("prn","은박 프린터 사용기한 · 배치번호 입력 · 저장","[은박 프린터] 를 눌러 포장지시기록서의 사용기한 · 배치번호를 입력하고 저장합니다.",()=>"#mPrn",()=>f().prn.saved,{pts:3}));', '    A.push(T_("prn","인쇄기 컨트롤러 — 제조번호 · 사용기한 직접 입력 · 저장","충전기 북쪽 인쇄기 컨트롤러 위 모니터에서 포장지시기록서의 제조번호("+EXPECT.lot+") · 사용기한("+EXPECT.exp+")을 입력하고 저장합니다.",()=>firstOf([[()=>f().prnD&&f().prnD.lot===EXPECT.lot,()=>hmiRoute("fp","main",HB("fp_lot"))],[()=>f().prnD&&f().prnD.exp===EXPECT.exp,()=>hmiRoute("fp","main",HB("fp_exp"))],[()=>f().prn.saved&&f().prn.lot===EXPECT.lot&&f().prn.exp===EXPECT.exp,()=>hmiRoute("fp","main",HB("fp_save"))]]),()=>f().prn.saved&&f().prn.lot===EXPECT.lot&&f().prn.exp===EXPECT.exp,{pts:3,hmi:true}));   /* 11/17 : 직접 입력 */', 1),
         ('  const prLbl=[[()=>p().lbl.lot,()=>hmiRoute("pr","edit",HB("pr_lot"))],[()=>p().lbl.exp,()=>hmiRoute("pr","edit",HB("pr_exp"))]];', '  const prLbl=[[()=>p().lbl.lot===EXPECT.lot,()=>hmiRoute("pr","edit",HB("pr_lot"))],[()=>p().lbl.exp===EXPECT.exp,()=>hmiRoute("pr","edit",HB("pr_exp"))]];   /* 11/17 : 직접 입력 */', 1),

@@ -1033,8 +1033,15 @@ function buildForming(g,by1){
   { const e=prof[prof.length-1]; for(const t of [.085,.17]) prof.push([e[0]-t*Math.sin(a1),e[1]-t*Math.cos(a1)]); }
   FM.chute=prof.map(q=>[q[0],q[1]]);
   const lip=prof.map((q,k)=>{ const a=prof[Math.max(0,k-1)], b=prof[Math.min(prof.length-1,k+1)], tx=b[0]-a[0], ty=b[1]-a[1], l=Math.hypot(tx,ty); return [q[0]+ty/l*.008,q[1]-tx/l*.008]; });
-  for(let i=0;i<n;i++){ const z=pz(i); ribbon(g,prof,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(g,prof,lip,z+s*.02,M.sheet); bx(g,xn-.014,xn+.002,cy-.03,cy,z-.02,z+.02,M.white); }
-  bx(g,xn+.004,xn+.03,cy-.12,cy,zc-.4,zc+.4,M.ssD);
+  /* 슈트 입구 게이트 (공포배출 · 11/17 사용자 설명 · 선택) : 슈트 윗부분(KG 구간) + 뒤쪽 흰 보강을 커팅 바로 아래 축에 묶음.
+     공포배출 실린더(남 · 북 끝 2개, 10열 일괄)가 게이트 아래쪽을 동쪽으로 젖히면 스틱이 슈트를 타지 않고 그대로 수직 낙하 → 슈트 안쪽 공포배출 컨베이어 (reject.js) */
+  const KG=5, pv=prof[0], rel=a=>a.map(q=>[q[0]-pv[0],q[1]-pv[1]]), gG=new T3.Group(); gG.position.set(pv[0],pv[1],0); g.add(gG); FM.rejG=gG;
+  const pG=rel(prof.slice(0,KG+1)), lG=rel(lip.slice(0,KG+1)), pF=prof.slice(KG), lF=lip.slice(KG);
+  for(let i=0;i<n;i++){ const z=pz(i); ribbon(g,pF,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(g,pF,lF,z+s*.02,M.sheet);
+    ribbon(gG,pG,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(gG,pG,lG,z+s*.02,M.sheet); bx(gG,.0005,.012,-.03,0,z-.02,z+.02,M.white); }
+  rod(gG,[.006,-.03,zc-.4],[.006,-.03,zc+.4],.004,M.ssMir,10);                                   /* 게이트 연결봉 (10열 일괄) */
+  for(const s of [-1,1]){ rod(gG,[.006,-.03,zc+s*.4],[.02,-.03,zc+s*.4],.003,M.ssMir,8);           /* 실린더 로드 */
+    bx(g,xn+.016,X(.03),pv[1]-.045,pv[1]-.013,zc+s*.4-.014,zc+s*.4+.014,M.alu); rod(g,[xn+.016,pv[1]-.029,zc+s*.4],[xn+.013,pv[1]-.029,zc+s*.4],.006,M.ssD,10); }   /* 공포배출 실린더 (뒤판에 고정) */
   /* 아크릴 함 (알루미늄 틀) : 북쪽 판(SP303) · 가운데 문 2 · 남쪽 판(SOLPAC packaging machine) · 옆면 */
   const dd=.42, y0=.97, y1=by1-.02, zN=zc-.64, zS=zc+.64, xd=X(dd), fr=new T3.MeshStandardMaterial({color:0xe6e8ea,metalness:.6,roughness:.45});
   for(const z of [zN,zS]){ bx(g,xd-.02,xd+.02,y0,y1,z-.02,z+.02,fr); bx(g,xd+.02,X(.03),y0,y0+.03,z-.015,z+.015,fr); bx(g,xd+.02,X(.03),y1-.03,y1,z-.015,z+.015,fr); bx(g,xd,X(.03),y0+.03,y1-.03,z-.003,z+.003,M.acryl); }
@@ -2271,7 +2278,8 @@ function initAnim(S){
   AN.Lc=cum[cum.length-1];
   AN.pose=s=>{ if(s<=0) return {x:pr[0][0],y:pr[0][1]-s,tx:0,ty:-1}; let i=1; while(i<pr.length-1&&cum[i]<s) i++; const a=pr[i-1],b=pr[i],l=cum[i]-cum[i-1],f=(s-cum[i-1])/l; return {x:a[0]+(b[0]-a[0])*f,y:a[1]+(b[1]-a[1])*f,tx:(b[0]-a[0])/l,ty:(b[1]-a[1])/l}; };
   AN.im=new T3.InstancedMesh(stickGeo(L,FM.stickW,.009),M.stick,n); AN.im.castShadow=true; AN.im.frustumCulled=false; S.add(AN.im);
-  AN.o=new T3.Object3D(); AN.ld=new Uint8Array(n).fill(1);
+  AN.o=new T3.Object3D(); AN.ld=new Uint8Array(n).fill(1); Object.assign(AN,{rjF:false,rjT:false,emF:false,emT:false,dec:true,gate:0,
+    qV:new T3.Quaternion().setFromEuler(new T3.Euler(0,0,Math.PI/2)), qF:new T3.Quaternion().setFromEuler(new T3.Euler(0,-Math.PI/2,0))});   /* 공포배출 : 수직 → 벨트 위에 누움 */
   AN.u0=((CV.zS-FM.pz(0))%P+P)%P;                                         /* 안착 순간 칸 중심 = 열 위치 */
   AN.u=()=>AN.u0+n*P*(AN.cyc+AN.ph-AN.TG);
   CV.full.fill(0);                                                        /* 시작 시 배출 컨베이어는 비어 있음 (11/16 사용자 지시 · 미리 채우지 않음) */
@@ -2279,19 +2287,25 @@ function initAnim(S){
 }
 function stepAnim(dt){
   const n=FM.n, L=FM.stickL, P=FM.P, o=AN.o, TL=AN.TL, TD=AN.TD, TG=AN.TG, ez=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
-  if(AN.run){ AN.ph+=dt/AN.T; if(AN.ph>=1){ AN.ph-=1; AN.cyc++; AN.ld.fill(0); AN.made+=n; } }
+  if(AN.run){ AN.ph+=dt/AN.T; if(AN.ph>=1){ AN.ph-=1; AN.cyc++; AN.ld.fill(0); AN.made+=n; AN.rjT=AN.rjF; AN.emT=AN.emF; AN.rjF=false; AN.emF=false; AN.dec=false; } }
   const t=AN.ph, u=AN.u(), uL=AN.u0+n*P*AN.cyc;
-  if(t>=TG) for(let i=0;i<n;i++) if(!AN.ld[i]){ AN.ld[i]=1; CV.full[((Math.round((CV.zS-FM.pz(i)-uL)/P)%CV.N)+CV.N)%CV.N]=1; }       /* 받침 안착 : 열 아래 받침으로 넘김 */
+  if(!AN.dec&&t>=.40){ AN.dec=true; const d=typeof rejDecide==="function"?rejDecide():null; AN.rjF=!!(d&&d.rej); AN.emF=!!(d&&d.empty); }   /* 다음 스틱 묶음 : 공포 · 비전 NG · 실링 불량 · 정렬컨베어 OFF → 공포배출 (reject.js) */
+  if(t>=TG) for(let i=0;i<n;i++) if(!AN.ld[i]){ AN.ld[i]=1; if(AN.rjT){ if(typeof rejLand==="function") rejLand(FM.pz(i),AN.emT); continue; } CV.full[((Math.round((CV.zS-FM.pz(i)-uL)/P)%CV.N)+CV.N)%CV.N]=1; }       /* 받침 안착 : 열 아래 받침으로 넘김 */
   CV.set(u);
   const yR=FM.gateY+.0052, yC=FM.beltY+CV.hb+.0052;                                   /* 칸 바닥 위 · 받침 위 높이 */
-  for(let i=0;i<n;i++){ const z=FM.pz(i); let vis=true;
-    if(!AN.ld[i]){ const q=Math.min(1,Math.max(0,t/TL)), sEnd=AN.Lc-.03;
+  const xV=FM.xf-.005, yV=FM.chute[0][1];                                                    /* 공포배출 : 게이트가 젖혀진 동안 스틱은 커팅 바로 아래로 수직 */
+  for(let i=0;i<n;i++){ const z=FM.pz(i); let vis=true, em=false;
+    if(!AN.ld[i]&&AN.rjT){ const fT=.17, f=Math.min(1,t/fT); em=AN.emT;
+      if(t>=fT){ AN.ld[i]=1; vis=false; if(typeof rejLand==="function") rejLand(z,AN.emT); }
+      else { const y0=yV-L/2, x1=typeof REJ!=="undefined"?REJ.x:xV, y1=(typeof REJ!=="undefined"?REJ.y:.4)+.005; o.position.set(xV+(x1-xV)*f*f,y0-(y0-y1)*f*f,z); o.quaternion.slerpQuaternions(AN.qV,AN.qF,ez(f)); } }
+    else if(!AN.ld[i]){ const q=Math.min(1,Math.max(0,t/TL)), sEnd=AN.Lc-.03;
       if(q<.72){ const p=AN.pose(L/2+(sEnd-L/2)*Math.pow(q/.72,2)); o.position.set(p.x+p.ty*.005,p.y-p.tx*.005,z); o.rotation.set(0,0,Math.atan2(p.ty,p.tx)+Math.PI); }
       else if(q<1){ const p=AN.pose(sEnd), f=1-Math.pow(1-(q-.72)/.28,2), a0=Math.atan2(p.ty,p.tx)+Math.PI, x0=p.x+p.ty*.005, yy=p.y-p.tx*.005; o.position.set(x0+(CVX-x0)*f,yy+(yR-yy)*f*f,z); o.rotation.set(0,0,a0*(1-f)); }
       else { const d=Math.min(1,Math.max(0,(t-TD)/(TG-TD))); o.position.set(CVX,yR-(yR-yC)*d*d,z); o.rotation.set(0,0,0); } }      /* 칸에서 잠깐 머문 뒤 바닥이 열리면 수직 낙하 */
     else if(t<.45) vis=false;
+    else if(AN.rjF){ em=AN.emF; o.position.set(xV,yV+L/2-L*ez((t-.45)/.45),z); o.rotation.set(0,0,Math.PI/2); }
     else { const p=AN.pose(-L/2+L*ez((t-.45)/.45)); o.position.set(p.x+p.ty*.005,p.y-p.tx*.005,z); o.rotation.set(0,0,Math.atan2(p.ty,p.tx)+Math.PI); }
-    o.scale.setScalar(vis?1:0); o.updateMatrix(); AN.im.setMatrixAt(i,o.matrix); }
+    if(vis) o.scale.set(1,em?.3:1,1); else o.scale.setScalar(0); o.updateMatrix(); AN.im.setMatrixAt(i,o.matrix); }      /* 공포(내용물 없음)는 납작하게 */
   AN.im.instanceMatrix.needsUpdate=true;
   if(FM.stripTex) FM.stripTex.offset.y=AN.cyc+ez((t-.45)/.45);
   if(FM.sealG){ const L=FM.stickL, cl=t<.4?0:t<.45?ez((t-.4)/.05):t<.96?1:1-ez((t-.96)/.04),
@@ -2299,6 +2313,8 @@ function stepAnim(dt){
     FM.sealG.position.x=FM.press*cl; FM.sealG.position.y=yy; }               /* 가로실바 : 위에서 눌러 잡음(.40) → 은박 인출과 함께 1포 길이만큼 내려옴(.45~.90) → 벌어짐 → 위로 복귀 */
   if(FM.pressG){ const pr=t>=.9?ez((t-.9)/.06):1-ez((t-.06)/.08); FM.pressG.position.x=FM.press*pr; }                 /* 프레싱 */
   stepPackAnim();
+  if(FM.rejG){ const want=(AN.rjT&&t<.24)||(AN.rjF&&t>=.36)?1:0; AN.gate+=Math.max(-dt*9,Math.min(dt*9,want-AN.gate)); FM.rejG.rotation.z=.5*ez(AN.gate); }   /* 공포배출 실린더 : 게이트 젖힘 */
+  if(typeof rejStep==="function") rejStep(dt);
   if(FM.flaps){ const op=(t<TD-.02||t>=1)?0:ez((t-(TD-.02))/.05)*(1-ez((t-.54)/.07)); for(const f of FM.flaps) f.pv.rotation.x=f.sg*op*1.45; }   /* 바닥 게이트 */
 }
 
@@ -2638,10 +2654,11 @@ function stroke(){
   if(fill){ S.hop.main=Math.max(0,S.hop.main-0.045); S.hop.add=Math.max(0,S.hop.add-0.02); S.hop.sug=Math.max(0,S.hop.sug-0.05); }
   const printed=f.prn.saved&&f.prn.lot===EXPECT.lot&&f.prn.exp===EXPECT.exp;   /* 포장지시기록서와 다른 값 = 인쇄 불량 (11/17) */
   const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }
+  const sealS=Math.random()<.0015;   /* 공포배출 게이트는 10열 일괄 (reject.js) → 실링 불량 판정 시 그 스트로크 10포 모두 배출 */
   for(let i=0;i<NOZ.n;i++){
     const empty=!fill;
     const vis=f.vision&&printBad;
-    const sealNG=!empty&&!vis&&Math.random()<.0015; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;
+    const sealNG=!empty&&!vis&&sealS; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;
     const toEmpty=empty||vis||sealNG||!S.p.align;
     S.cnt.pouch++;
     if(toEmpty){ S.cnt.empty++; LN.empty.push({x:FIL.x0-40-Math.random()*40, t:0, i}); if(LN.empty.length>60) LN.empty.shift(); continue; }
@@ -3200,7 +3217,7 @@ const SPS={
  save(){ return spHead("save")+'<div class="spC"><table class="spTb"><tr><th>번호</th><th>품목명</th><th>길이</th><th>운전속도</th><th>기능</th></tr><tr><td>1</td><td class="v">판콜에이치건조시럽</td><td class="v">147</td><td class="v">20</td><td><span class="spR" data-hb="sp_view">불러오기</span></td></tr>'+[2,3,4].map(i=>'<tr><td>'+i+'</td><td class="v">-</td><td class="v">-</td><td class="v">-</td><td></td></tr>').join("")+'</table><div class="spNote">품목 저장 · 불러오기는 담당자 권한 (SOP 에 화면 사진 없음 — 구성 추정 · 확인 필요)</div></div>'+spFoot(); },
  io(){ const f=S.f, lp=(t,on)=>'<div class="spIo'+(on?" on":"")+'"><i></i>'+t+'</div>';
   return spHead("io")+'<div class="spC two"><div><div class="spLb l">INPUT</div><div class="spIoG">'+lp("비상정지",!f.emg)+lp("안전도어",f.door==="closed")+lp("에어체크",f.airV[0]&&f.airV[1])+lp("아이마크 센서",f.run)+lp("이음매 센서",false)+lp("공포감지",f.run&&f.filling)+lp("호퍼 레벨1",S.hop.add>20)+lp("호퍼 레벨2",S.hop.main>20)+lp("호퍼 레벨3",S.hop.sug>20)+lp("후 공정 운전",S.p.ctRun&&S.p.sfRun)+'</div></div>'+
-   '<div><div class="spLb l">OUTPUT</div><div class="spIoG">'+lp("세로실바",f.run)+lp("가로실바",f.run)+lp("당김모터",f.run)+lp("도징1",f.run&&f.filling&&f.dose[0])+lp("도징2",f.run&&f.filling&&f.dose[1])+lp("도징3",f.run&&f.filling&&f.dose[2])+lp("집진",f.dustV)+lp("부저",tripAlarms().length>0)+lp("외부전등",true)+lp("공포배출",false)+'</div></div></div><div class="spNote">입출력 점검 화면 (SOP 에 사진 없음 — 구성 추정 · 확인 필요)</div>'+spFoot(); },
+   '<div><div class="spLb l">OUTPUT</div><div class="spIoG">'+lp("세로실바",f.run)+lp("가로실바",f.run)+lp("당김모터",f.run)+lp("도징1",f.run&&f.filling&&f.dose[0])+lp("도징2",f.run&&f.filling&&f.dose[1])+lp("도징3",f.run&&f.filling&&f.dose[2])+lp("집진",f.dustV)+lp("부저",tripAlarms().length>0)+lp("외부전등",true)+lp("공포배출",typeof AN!=="undefined"&&AN.gate>.5)+'</div></div></div><div class="spNote">입출력 점검 화면 (SOP 에 사진 없음 — 구성 추정 · 확인 필요)</div>'+spFoot(); },
  alarm(){ const L=(S.hist||[]).filter(h=>ALARMS[h.key]&&ALARMS[h.key].mk==="fl").slice(0,8), act=new Set(tripAlarms());
   return spHead("alarm")+'<div class="spC">'+spT(["발생 시각 (교육 경과)","알람 내용","상태"],L.length?L.map(h=>{ const s=Math.floor(h.at); return [sp2(Math.floor(s/60))+":"+sp2(s%60),h.t,act.has(h.key)?'<b class="rd">발생 중</b>':"해제"]; }):[["-","알람 이력 없음","-"]])+'</div>'+spFoot(); },
  aux(){ return spHead("aux")+'<div class="spC three"><div class="spAux" data-hb="sp_go_vis">👁<b>비전 Setup</b></div><div class="spAux" data-hb="sp_view">🖨<b>프린터</b></div><div class="spAux" data-hb="sp_view">💨<b>집진기</b></div></div><div class="spNote">비전 Setup 은 주변기기에서 들어갑니다 (사용자 확인). 그 밖의 버튼 구성은 추정 · 확인 필요</div>'+spFoot(); },
@@ -3274,7 +3291,7 @@ const T_=(k,t,d,plan,ok,o)=>Object.assign({k,t,d,plan,ok},o||{});
 const CHK=(job,set,t)=>()=>({job,set,t});
 function stepsFill(easy){
   const A=[], f=()=>S.f, p=()=>S.p;
-  CLEAR.F.forEach((c,i)=>A.push(T_("lc"+i,"라인 클리어런스 "+(i+1)+" — "+c.t,c.d,()=>"#lcCheck",()=>S.clear.includes(i),{lc:i,pts:easy?4:2})));
+  CLEAR.F.forEach((c,i)=>A.push(T_("lc"+i,"라인 클리어런스 "+(c.add?"(추가)":(i+1))+" — "+c.t,c.d,()=>"#lcCheck",()=>S.clear.includes(i),{lc:i,pts:easy?4:2})));
   const powerAll=[[()=>f().main,"#fMain"],[()=>f().airV[0],"#fAir1"],[()=>f().airV[1],"#fAir2"],[()=>f().dustV,"#fDust"],[()=>f().panel,"#fPanel"]];
   const matAll=[[()=>f().ibc[0],()=>hmiRoute("fl","xfer",HB("fl_ibc0"))],[()=>f().ibc[2],()=>hmiRoute("fl","xfer",HB("fl_ibc2"))],
     [()=>f().mainLift,"#mLift"],[()=>f().mainFed,"#mScoop"],[()=>f().rollCarry==="red"||f().roll==="red","#mRed"],[()=>f().roll==="red","#mRed"]];
@@ -4417,7 +4434,7 @@ function v3Build(){
   renderer.shadowMap.enabled=true; renderer.shadowMap.type=T3.PCFSoftShadowMap; renderer.setPixelRatio(1);
   renderer.domElement.addEventListener("webglcontextlost",e=>{ e.preventDefault(); R3.gl=null; });
   const scene=new T3.Scene(); scene.background=new T3.Color(0xdfe4e1);
-  buildFillRoom(scene); buildFiller(scene); buildConveyor(scene); buildFillZone(scene); buildPackRoom(scene); if(typeof buildStaging==="function") buildStaging(scene); if(typeof buildKits==="function") buildKits(scene); initAnim(scene); initManual(scene); initPackAnim(scene);
+  buildFillRoom(scene); buildFiller(scene); buildConveyor(scene); if(typeof buildReject==="function") buildReject(scene); buildFillZone(scene); buildPackRoom(scene); if(typeof buildStaging==="function") buildStaging(scene); if(typeof buildKits==="function") buildKits(scene); initAnim(scene); initManual(scene); initPackAnim(scene);
   scene.traverse(o=>{ if(!o.material) return; for(const m of [].concat(o.material)) for(const k of ["map","emissiveMap"]) if(m[k]&&m[k].encoding!==T3.sRGBEncoding){ m[k].encoding=T3.sRGBEncoding; m[k].needsUpdate=true; } });
   /* 장면 자체를 찍어 스테인리스 반사에 사용 */
   { const pm=new T3.PMREMGenerator(renderer), c=[4.6,1.7,5.4]; scene.position.set(-c[0],-c[1],-c[2]); scene.updateMatrixWorld(true); M.led.emissiveIntensity=28; const rt=pm.fromScene(scene,.015,.05,40); M.led.emissiveIntensity=1.6; scene.position.set(0,0,0); scene.updateMatrixWorld(true); scene.environment=rt.texture; pm.dispose(); }
@@ -5208,6 +5225,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:28, d:"2026-11-17", t:"충전기 공포배출 구조 반영(사용자 설명) : 커팅 후 정상 제품은 슈트 → 배출 컨베이어, 불량(공포 · 비전 인쇄 NG · 실링 불량 · 정렬컨베어 OFF 중 제품)은 슈트 입구 게이트가 젖혀져(공포배출 실린더 · 10열 일괄) 커팅 바로 아래 슈트 안쪽 공포배출 컨베이어로 수직 낙하 → 남쪽 기기 끝 불량통으로 이송 · 쌓임(공포는 납작하게 표시), 충전기 Input/Output 화면 공포배출 표시 연동, 라인 클리어런스에 공포배출 컨베이어 · 불량통 잔량 확인 추가(작업자가 남쪽 끝에서 컨베이어 끝 · 불량통 안을 확인), 실링 불량 판정을 스트로크 단위로 변경(게이트 일괄 배출에 맞춤)"},
  {v:27, d:"2026-11-17", t:"제조번호 2F001 · 사용기한 2029.01.30 으로 변경, 충전실 인쇄기 컨트롤러 위 모니터에 인쇄 검사(OCR) 화면 · 포장실 카톤 프린터 모니터에 인쇄 검사(비전) 화면 표시(X-ray 화면처럼), 인쇄기 컨트롤러 · 카톤 프린터에서 제조번호 · 사용기한 직접 입력(시연 · 기본은 미리 설정, 심화는 직접 입력 단계 · 값이 다르면 인쇄 불량으로 검사에서 배출), 2번 호퍼 주성분 투입 시 토글 클램프 해제 → 뚜껑을 들어내 난간에 세움 → 리프터 발판 봉투에서 스쿱 투입 → 뚜껑 덮고 체결, 작업자 동작 전수 점검 반영(호퍼 내부 확인 = 점검창 · 뚜껑 들어 확인, 경사 컨베이어 확인 위치 정정, 무지 롤 확인은 보기만, 기밀도 시험 시료 채취, 적색 롤 제거 → 대차 → 예비 팔레트, 컷팅 날 세척 위치 정정, 포장실 자재 대차에서 카톤 · 설명서 · 잉크 집어 투입, 불량배출부 · 카토너 내부 확인 위치 정정, 카토너 내부 조치는 아크릴 문을 열고 작업 후 닫음, 세척 · 윤활 조치는 청소 도구를 가져와 작업 후 제자리에)"},
  {v:26, d:"2026-11-17", t:"자연 변동 · 자재 소모 추가(사용자 선택) : 실링 히터 온도(영역별 ±2 ℃) · 압축공기 압력(±0.2) 흔들림, 무작위 소량 불량(중량 NG · 실링 불량 각 약 0.15 %), 은박 롤 잔량 감소(3D 지름 · 소진 시 필름 알람) · 2번 호퍼 주성분 재공급 안내 · 카톤 · 설명서 보충 안내 · 은박 프린터 리본 · 케이스 프린터 잉크 잔량과 교체 작업"},
  {v:25, d:"2026-11-17", t:"운전(RUN · FILLING ON) 중 시간이 지나면 노즐별 실제 충전량이 다이얼 설정에서 ±1~2 % 내외로 랜덤하게 변하도록 추가(원료 공통 + 노즐별 변동 · 최대 ±2 %), 예상 충전량 · 판정 · IPC 계량값에 반영"},
@@ -6321,6 +6339,90 @@ for(const k of KITJ) if(JOBS[k]){ const J=JOBS[k]; if(J.seqFn) J.seqBase=J.seqFn
 function buildKits(sc){ const g=new T3.Group(); sc.add(g);
   for(const [x,y,z] of [ANC.kitF,ANC.kitP]){ rod(g,[x-.05,y-.03,z],[x-.05,y+.13,z],.03,M.white,16); bx(g,x-.065,x-.035,y+.13,y+.17,z-.02,z+.03,M.blue);
     bx(g,x+.0,x+.14,y-.03,y+.05,z-.06,z+.06,new T3.MeshStandardMaterial({color:0x3a7bd5,roughness:.6})); rod(g,[x+.1,y-.03,z+.09],[x+.1,y+.1,z+.09],.022,M.yellow,14); } }
+
+/* ── v3/reject.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   충전기 공포배출 (11/17 사용자 설명 · 선택)
+   커팅 후 정상 제품 = 슈트 → 배출 컨베이어
+   불량 = 슈트 입구 게이트가 젖혀져(form.js FM.rejG · anim.js) 커팅 바로 아래로 수직 낙하 → 슈트 안쪽 공포배출 컨베이어 →
+          남쪽(기기 끝)으로 이송 → 불량통
+   배출 대상 = 옛 IDT 판정과 같음 : 공포(FILLING OFF · 도징 OFF) · 비전 인쇄 NG · 실링 불량(무작위) · 정렬컨베어 OFF
+   게이트는 10열 일괄 — 충전기 화면(수동점검 · Input/Output)에 '공포배출실린더' · '공포배출' 이 1계통으로만 있는 것을 근거로 함 (확인 필요)
+   라인 클리어런스 : 공포배출 컨베이어 · 불량통 잔량 확인 추가 (사용자 선택)
+   ═══════════════════════════════════════════════════════════════════ */
+const REJ={ x:FM.xf+.015, y:.40, z0:FL.zc-.43, zEnd:FL.zc+.82, v:.32, items:[], pile:[], n:0, seal:0, cap:220,
+  bin:{x0:FM.xf-.05, x1:FM.xf+.23, z0:FL.zc+.77, z1:FL.zc+1.08, h:.30} };
+/* 다음 스틱 묶음(10열)의 배출 여부 — sim.js stroke() 판정과 같은 조건 */
+function rejDecide(){
+  if(typeof S==="undefined"||!S||!S.session||!S.f) return null;
+  const f=S.f, fill=f.filling&&f.dose.every(x=>x);
+  const pb=!f.prn.saved||!(typeof prnMatch==="function"?prnMatch(f.prn.lot,f.prn.exp):true)||f.headDirty||f.ribbon<5;
+  let rej=!fill||(f.vision&&pb)||!(S.p&&S.p.align);
+  const sn=(S.cnt&&S.cnt.sealNG)||0; if(sn<REJ.seal) REJ.seal=sn; if(sn>REJ.seal){ REJ.seal=sn; rej=true; }
+  return {rej, empty:!fill};
+}
+function rejLand(z,em){ REJ.items.push({z, em:!!em, f:null}); }
+function rejStep(dt){
+  for(const it of REJ.items){ if(it.f==null){ it.z+=REJ.v*dt; if(it.z>=REJ.zEnd) it.f=0; } else it.f+=dt; }
+  const keep=[]; for(const it of REJ.items){ if(it.f!=null&&it.f>=.3){ rejPile(it); continue; } keep.push(it); }
+  REJ.items=keep; rejDraw();
+}
+/* 불량통 안에 쌓임 : 떨어지는 자리(컨베이어 끝) 둘레로 퍼지고 층층이 올라감 */
+function rejPile(it){
+  REJ.n++; if(REJ.pile.length>=REJ.cap) return;
+  const B=REJ.bin, k=REJ.pile.length, sp=.03+Math.min(.09,k*.0012), r=()=>(Math.random()+Math.random()-1);
+  const x=clamp(REJ.x+r()*sp,B.x0+.06,B.x1-.06), z=clamp(B.z0+.11+Math.abs(r())*sp*1.6,B.z0+.06,B.z1-.06);
+  REJ.pile.push({x, z, y:.016+Math.min(B.h-.05,Math.floor(k/16)*.007)+Math.random()*.004, ry:Math.random()*Math.PI, rx:(Math.random()-.5)*.2, em:it.em});
+}
+const rejTop=()=>.016+Math.min(REJ.bin.h-.05,Math.floor(REJ.pile.length/16)*.007);
+function rejDraw(){
+  if(!REJ.imB) return; const o=REJ.o, e=new T3.Euler();
+  let k=0; for(const it of REJ.items){ if(k>=REJ.imB.count0) break;
+    if(it.f==null){ o.position.set(REJ.x,REJ.y+.0045,it.z); e.set(0,-Math.PI/2,0); }
+    else { const f=Math.min(1,it.f/.3); o.position.set(REJ.x,REJ.y+.0045-(REJ.y-rejTop())*f*f,REJ.zEnd+.07*f); e.set(1.1*f,-Math.PI/2,0); }
+    o.rotation.copy(e); o.scale.set(1,it.em?.3:1,1); o.updateMatrix(); REJ.imB.setMatrixAt(k++,o.matrix); }
+  REJ.imB.count=k; REJ.imB.instanceMatrix.needsUpdate=true;
+  const P=REJ.pile; for(let i=0;i<P.length;i++){ const q=P[i]; o.position.set(q.x,q.y,q.z); o.rotation.set(q.rx,q.ry,0); o.scale.set(1,q.em?.3:1,1); o.updateMatrix(); REJ.imP.setMatrixAt(i,o.matrix); }
+  REJ.imP.count=P.length; REJ.imP.instanceMatrix.needsUpdate=true;
+}
+function rejReset(){
+  REJ.items=[]; REJ.pile=[]; REJ.n=0; REJ.seal=(typeof S!=="undefined"&&S&&S.cnt&&S.cnt.sealNG)||0;
+  if(typeof AN!=="undefined"&&AN.ld){ Object.assign(AN,{rjF:false,rjT:false,emF:false,emT:false,dec:false,gate:0}); if(FM.rejG) FM.rejG.rotation.z=0; }
+  rejDraw();
+}
+/* 3D : 공포배출 컨베이어 (슈트 안쪽 · 커팅 바로 아래 → 남쪽) · 구동 모터 · 다리 · 불량통 */
+function buildReject(sc){
+  const g=new T3.Group(); sc.add(g); const x=REJ.x, y=REJ.y, z0=REJ.z0, z1=REJ.zEnd, hw=.04, B=REJ.bin;
+  bx(g,x-hw-.015,x+hw+.015,y-.05,y-.006,z0,z1,M.alu);                                         /* 받침 틀 */
+  bx(g,x-hw,x+hw,y-.006,y,z0,z1,M.belt);                                                       /* 벨트 */
+  for(const s of [-1,1]) bx(g,x+s*(hw+.009)-.004,x+s*(hw+.009)+.004,y,y+.03,z0,z1-.03,M.ss);    /* 옆 가이드 */
+  bx(g,x-hw-.013,x+hw+.013,y,y+.03,z0-.006,z0,M.ss);                                           /* 북쪽 끝막이 */
+  for(const z of [z0+.02,z1-.02]) rod(g,[x-hw-.016,y-.022,z],[x+hw+.016,y-.022,z],.021,M.ssD,16);   /* 롤러 */
+  for(const z of [z0+.14,FL.zc+.45]){ rod(g,[x,.03,z],[x,y-.05,z],.012,M.ssD,10); rod(g,[x,0,z],[x,.03,z],.03,M.ss,16); }   /* 다리 */
+  bx(g,x+hw+.015,x+hw+.075,y-.065,y-.005,z0,z0+.09,M.dark); rod(g,[x+hw+.075,y-.035,z0+.045],[x+hw+.1,y-.035,z0+.045],.025,M.blue,16);   /* 구동 모터 (북쪽 끝) */
+  /* 불량통 (남쪽 끝 바닥) : 회색 사출 통 · 빨간 표지 */
+  const bm=new T3.MeshStandardMaterial({color:0xd5dade,roughness:.55,metalness:.05}), t=.008;
+  bx(g,B.x0,B.x1,0,.012,B.z0,B.z1,bm);
+  bx(g,B.x0,B.x0+t,0,B.h,B.z0,B.z1,bm); bx(g,B.x1-t,B.x1,0,B.h,B.z0,B.z1,bm); bx(g,B.x0,B.x1,0,B.h,B.z0,B.z0+t,bm); bx(g,B.x0,B.x1,0,B.h,B.z1-t,B.z1,bm);
+  for(const [a,b,c,d] of [[B.x0-.006,B.x1+.006,B.z0-.006,B.z0+.012],[B.x0-.006,B.x1+.006,B.z1-.012,B.z1+.006],[B.x0-.006,B.x0+.012,B.z0,B.z1],[B.x1-.012,B.x1+.006,B.z0,B.z1]]) bx(g,a,b,B.h-.012,B.h,c,d,bm);   /* 테두리 */
+  plate(g,.2,.07,labelTex([["불 량","#c00",90]],{w:400,h:140,border:"#c00"}),[(B.x0+B.x1)/2,B.h*.6,B.z1+.002],0);
+  /* 스틱 : 벨트 위 · 떨어지는 중 / 통 안 */
+  REJ.o=new T3.Object3D(); const geo=stickGeo(FM.stickL,FM.stickW,.009);
+  REJ.imB=new T3.InstancedMesh(geo,M.stick,90); REJ.imB.count0=90; REJ.imB.count=0; REJ.imB.frustumCulled=false; REJ.imB.castShadow=true; g.add(REJ.imB);
+  REJ.imP=new T3.InstancedMesh(geo,M.stick,REJ.cap); REJ.imP.count=0; REJ.imP.frustumCulled=false; g.add(REJ.imP);
+  rejDraw();
+}
+/* 3D 이름표 · 1인칭 장애물 · 새 세션 초기화 */
+LBL3.push([REJ.x,.78,REJ.zEnd+.12,"공포배출 컨베이어 · 불량통","F"]);
+{ const f0=fpObstacles; fpObstacles=function(){ const L=f0(), B=REJ.bin; L.push([B.x0-.02,B.x1+.02,B.z0-.1,B.z1+.02]); return L; }; }
+{ const r0=propsReset; propsReset=function(){ r0(); rejReset(); }; }
+/* 라인 클리어런스 추가 : 공포배출 컨베이어 · 불량통 잔량 확인 (사용자 선택 11/17) */
+CLEAR.F.push({t:"공포배출 컨베이어 · 불량통 잔량 확인", d:"충전기 슈트 안쪽의 공포배출 컨베이어와 남쪽 끝 불량통에 이전 작업의 파우치가 남아 있지 않은지 확인합니다.", job:"fRejChk", add:true});
+WORKVIEW.frej=VW([2.25,1.45,4.75],[3.1,.35,3.35]);
+{ const st=[REJ.x+.07,REJ.bin.z1+.2], B=REJ.bin;
+  JOBS.fRejChk={stand:st, reach:[REJ.x,REJ.y+.04,REJ.zEnd-.06], dur:1.2, view:"frej",
+    seqFn:()=>[{stand:st, reach:[REJ.x,REJ.y+.04,REJ.zEnd-.06], dur:1.2},                           /* 공포배출 컨베이어 끝 */
+               {stand:st, reach:[(B.x0+B.x1)/2,.24,(B.z0+B.z1)/2], dur:1.5}]}; }                /* 불량통 안 */
 
 /* ── v3/demo.js ── */
 /* ═══════════════════════════════════════════════════════════════════

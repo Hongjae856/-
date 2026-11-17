@@ -61,8 +61,15 @@ function buildForming(g,by1){
   { const e=prof[prof.length-1]; for(const t of [.085,.17]) prof.push([e[0]-t*Math.sin(a1),e[1]-t*Math.cos(a1)]); }
   FM.chute=prof.map(q=>[q[0],q[1]]);
   const lip=prof.map((q,k)=>{ const a=prof[Math.max(0,k-1)], b=prof[Math.min(prof.length-1,k+1)], tx=b[0]-a[0], ty=b[1]-a[1], l=Math.hypot(tx,ty); return [q[0]+ty/l*.008,q[1]-tx/l*.008]; });
-  for(let i=0;i<n;i++){ const z=pz(i); ribbon(g,prof,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(g,prof,lip,z+s*.02,M.sheet); bx(g,xn-.014,xn+.002,cy-.03,cy,z-.02,z+.02,M.white); }
-  bx(g,xn+.004,xn+.03,cy-.12,cy,zc-.4,zc+.4,M.ssD);
+  /* 슈트 입구 게이트 (공포배출 · 11/17 사용자 설명 · 선택) : 슈트 윗부분(KG 구간) + 뒤쪽 흰 보강을 커팅 바로 아래 축에 묶음.
+     공포배출 실린더(남 · 북 끝 2개, 10열 일괄)가 게이트 아래쪽을 동쪽으로 젖히면 스틱이 슈트를 타지 않고 그대로 수직 낙하 → 슈트 안쪽 공포배출 컨베이어 (reject.js) */
+  const KG=5, pv=prof[0], rel=a=>a.map(q=>[q[0]-pv[0],q[1]-pv[1]]), gG=new T3.Group(); gG.position.set(pv[0],pv[1],0); g.add(gG); FM.rejG=gG;
+  const pG=rel(prof.slice(0,KG+1)), lG=rel(lip.slice(0,KG+1)), pF=prof.slice(KG), lF=lip.slice(KG);
+  for(let i=0;i<n;i++){ const z=pz(i); ribbon(g,pF,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(g,pF,lF,z+s*.02,M.sheet);
+    ribbon(gG,pG,z-.02,z+.02,M.emboss); for(const s of [-1,1]) fin(gG,pG,lG,z+s*.02,M.sheet); bx(gG,.0005,.012,-.03,0,z-.02,z+.02,M.white); }
+  rod(gG,[.006,-.03,zc-.4],[.006,-.03,zc+.4],.004,M.ssMir,10);                                   /* 게이트 연결봉 (10열 일괄) */
+  for(const s of [-1,1]){ rod(gG,[.006,-.03,zc+s*.4],[.02,-.03,zc+s*.4],.003,M.ssMir,8);           /* 실린더 로드 */
+    bx(g,xn+.016,X(.03),pv[1]-.045,pv[1]-.013,zc+s*.4-.014,zc+s*.4+.014,M.alu); rod(g,[xn+.016,pv[1]-.029,zc+s*.4],[xn+.013,pv[1]-.029,zc+s*.4],.006,M.ssD,10); }   /* 공포배출 실린더 (뒤판에 고정) */
   /* 아크릴 함 (알루미늄 틀) : 북쪽 판(SP303) · 가운데 문 2 · 남쪽 판(SOLPAC packaging machine) · 옆면 */
   const dd=.42, y0=.97, y1=by1-.02, zN=zc-.64, zS=zc+.64, xd=X(dd), fr=new T3.MeshStandardMaterial({color:0xe6e8ea,metalness:.6,roughness:.45});
   for(const z of [zN,zS]){ bx(g,xd-.02,xd+.02,y0,y1,z-.02,z+.02,fr); bx(g,xd+.02,X(.03),y0,y0+.03,z-.015,z+.015,fr); bx(g,xd+.02,X(.03),y1-.03,y1,z-.015,z+.015,fr); bx(g,xd,X(.03),y0+.03,y1-.03,z-.003,z+.003,M.acryl); }
