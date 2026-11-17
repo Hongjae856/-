@@ -3488,7 +3488,7 @@ function startSession(mode,room){
   initState(); lineInit(); STEPS_CACHE=null; hintOn=false;
   S.room=room; S.mode=mode; S.session={active:true, ended:false, start:performance.now(), sec:0};
   S.flags.fault={};
-  if(S.mode!=="demo"){ if(room==="F") presetPackAuto(); else presetFillAuto(); }   /* 시연모드 : 모든 설비 꺼진 상태에서 시작 */
+  if(room==="F") presetPackAuto(); else presetFillAuto();   /* 시연모드도 작업자(실)별 — 다른 실 설비는 자동 운전 (11/17 · 이전 : 모든 설비 꺼짐) */
   if(isEasy()) presetEasy();
   S.f.hoseC=(mode==="guide"||mode==="exam")&&room==="F"?[false,false]:null;   /* 심화 충전실 : IBC 진공호스 분리 상태에서 시작 (11/16 · [0] 첨가제 · [1] 백당) */
   hMach=room==="F"?"fl":"sf"; hScr=hMach==="fl"?"run":"main";
