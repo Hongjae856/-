@@ -20,14 +20,14 @@ const spOn=(t,v,id,cls)=>'<div class="spSw'+(v?" on":"")+(cls?" "+cls:"")+'"'+(i
 const spChk=(id,on,t)=>'<div class="spChk'+(on?" on":"")+'" data-hb="'+id+'">✔ '+t+' <s>IDT 확인</s></div>';
 const spT=(head,rows,cls)=>'<table class="spTb'+(cls?" "+cls:"")+'"><tr>'+head.map(h=>'<th>'+h+'</th>').join("")+'</tr>'+rows.map(r=>'<tr>'+r.map((c,i)=>'<td'+(i?' class="v"':'')+'>'+c+'</td>').join("")+'</tr>').join("")+'</table>';
 const SPV={vert:[182.0,182.0,184.0,183.0,183.0,183.0,182.0,183.0,182.4,182.5]};
-const spPV=(v)=>S.f.main?fmt(Math.min(v,v*S.f.heat/S.f.heatSV),1):"-";
+const spPV=(v,i)=>typeof heatPV==="function"?heatPV(v,i||0):(S.f.main?fmt(Math.min(v,v*S.f.heat/S.f.heatSV),1):"-");   /* 영역별 온도 흔들림 (consume.js) */
 const SPS={
  run(){ const f=S.f;
   return spHead("run")+'<div class="spC two"><div>'+
    '<table class="spTb"><tr><th>종류</th><th>수량</th><th>기능</th></tr><tr><td>생산카운터(Cut)</td><td class="v">'+Math.floor(S.cnt.pouch/10)+'</td><td><span class="spR" data-hb="sp_rst">리 셋</span></td></tr><tr><td>생산카운터(Ea)</td><td class="v">'+S.cnt.pouch+'</td><td></td></tr><tr><td>필름카운터(Cut)</td><td class="v">'+f.strokes+'</td><td><span class="spR" data-hb="sp_rst">리 셋</span></td></tr></table>'+
    '<table class="spTb"><tr><th>종류</th><th>설정</th><th>기능</th></tr><tr><td>길이<s>(Range 70~200mm)</s></td><td class="v">147</td><td><span class="spUp" data-hb="sp_view">▲</span><span class="spDn" data-hb="sp_view">▼</span></td></tr><tr><td>운전속도<s>(Range 10~60ppm)</s></td><td class="v">20</td><td></td></tr>'+
    '<tr><td>구동기어비</td><td class="v"><s>하강</s> 10</td><td class="v"><s>상승</s> <i class="bl">10</i></td></tr><tr><td></td><td class="v"><s>하 지연</s> <i class="rd">20</i> ms</td><td class="v"><s>상 지연</s> <i class="rd">20</i> ms</td></tr></table></div><div>'+
-   '<div class="spTg">'+SPV.vert.map((v,i)=>'<div><s>세로접착'+(i+1)+'</s><b>'+spPV(v)+'</b></div>').join("")+f.endSV.map((v,i)=>'<div><s>가로접착 '+["1-1","1-2","2-1","2-2"][i]+'</s><b>'+spPV(v)+'</b></div>').join("")+'</div>'+
+   '<div class="spTg">'+SPV.vert.map((v,i)=>'<div><s>세로접착'+(i+1)+'</s><b>'+spPV(v,i)+'</b></div>').join("")+f.endSV.map((v,i)=>'<div><s>가로접착 '+["1-1","1-2","2-1","2-2"][i]+'</s><b>'+spPV(v,10+i)+'</b></div>').join("")+'</div>'+
    '<div class="spFn">'+["아이마크","히터","세로실바","가로실바","무늬바","컷팅","카운터"].map(t=>spOn(t,null,null,"red")).join("")+spOn("운전중<br>수동배출",null)+'</div>'+
    '<div class="spRow"><div class="spSw" data-hb="sp_view">아이마크,무늬,컷팅 위치조절</div><div class="spLb">장비시작<br>배출카운트</div><div class="spVal rd">5</div></div></div></div>'+spFoot(); },
  cam(){ return spHead("cam","cam2")+'<div class="spC two">'+spT(["종류","시작위치","종료위치"],[["마크구간",10,200],["세로실바",170,280],["가로실바",345,160],["무늬바",160,310],["컷팅(R-컷팅)",175,190],["구동 실린더",180,300]],"cam")+
@@ -51,10 +51,10 @@ const SPS={
   return spHead("sw2","back")+'<div class="spC sw2"><div class="spCol">'+spOn("후 공정 연동",f.link,"fl_link")+spOn("호퍼 2 바이브레이터",false,"sp_view")+spOn("외부 전등",true,"sp_view")+'</div><div class="spCol3">'+
    [1,2,3].map(i=>spOn("호퍼게이트"+i+" 카운트",false,"sp_view")).join("")+[1,2,3].map(i=>cnt(["하부셔터"+i+" 횟수",10])).join("")+[1,2,3].map(i=>cnt(["호퍼게이트"+i+" 횟수",1])).join("")+'</div></div>'+
    '<div class="spChkRow">'+spChk("fl_linkChk",f.linkChk,"후 공정 연동 ON 확인")+'</div>'+spFoot(); },
- temp(){ const f=S.f, pw=f.main?"ON":"OFF", pvs=v=>f.main?fmt(Math.min(v,v*f.heat/f.heatSV),1):"-";
+ temp(){ const f=S.f, pw=f.main?"ON":"OFF", pvs=(v,i)=>typeof heatPV==="function"?heatPV(v,i):(f.main?fmt(Math.min(v,v*f.heat/f.heatSV),1):"-");
   const V=SPV.vert.map(()=>f.heatSV), H=[1,2,3,4,5,6,7,8,9,10];
-  return spHead("temp").replace('온도 설정</div>','온도 설정 <small class="spEx">예시값</small></div>')+'<div class="spC"><table class="spTb tmp"><tr><th>세로접착</th>'+H.map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+SPV.vert.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+V.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+H.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER</td>'+V.map(v=>'<td class="v">'+(v+10)+'</td>').join("")+'</tr><tr><td>LOWER</td>'+V.map(v=>'<td class="v">'+(v-10)+'</td>').join("")+'</tr></table>'+
-   '<table class="spTb tmp"><tr><th>가로접착</th>'+["1-1","1-2","2-1","2-2"].map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+f.endSV.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+f.endSV.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+f.endSV.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER / LOWER</td>'+f.endSV.map(v=>'<td class="v">'+(v+10)+' / '+(v-10)+'</td>').join("")+'</tr></table></div>'+
+  return spHead("temp").replace('온도 설정</div>','온도 설정 <small class="spEx">예시값</small></div>')+'<div class="spC"><table class="spTb tmp"><tr><th>세로접착</th>'+H.map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+SPV.vert.map((v,i)=>'<td class="v">'+pvs(v,i)+'</td>').join("")+'</tr><tr><td>SV</td>'+V.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+H.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER</td>'+V.map(v=>'<td class="v">'+(v+10)+'</td>').join("")+'</tr><tr><td>LOWER</td>'+V.map(v=>'<td class="v">'+(v-10)+'</td>').join("")+'</tr></table>'+
+   '<table class="spTb tmp"><tr><th>가로접착</th>'+["1-1","1-2","2-1","2-2"].map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+f.endSV.map((v,i)=>'<td class="v">'+pvs(v,10+i)+'</td>').join("")+'</tr><tr><td>SV</td>'+f.endSV.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+f.endSV.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER / LOWER</td>'+f.endSV.map(v=>'<td class="v">'+(v+10)+' / '+(v-10)+'</td>').join("")+'</tr></table></div>'+
    '<div class="spChkRow">'+spChk("fl_temp",f.tempChk,"PV · SV 일치 확인")+'<span class="spNote">UPPER · LOWER 는 SV ± 10 ℃ 로 표시 (사진 없음 · 확인 필요)</span></div>'+spFoot(); },
  xfer(){ const f=S.f, V=[9.0,8.0,9.0];
   return spHead("xfer")+'<div class="spC three">'+[0,1,2].map(i=>'<div class="spX"><div class="spXh">이송기설정 <b class="rd">'+(i+1)+'</b>'+spOn("이송기",f.ibc[i],"fl_ibc"+i)+'</div>'+spOn("수동점검",false,"sp_view","dk")+

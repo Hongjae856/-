@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "demo.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "demo.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -64,6 +64,10 @@ PATCH = {
     "fps.js": [
         ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
         ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||e.code==='KeyF') && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
+    ],
+    "sim.js": [   # 무작위 소량 불량 (11/17 사용자 선택) : 중량 NG 약 0.15 % · 실링 불량 약 0.15 %
+        ('const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35;', 'const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35+(Math.random()<.0015?(Math.random()<.5?-1:1)*(PROD.cw.hi+1.5):0);', 1),
+        ('    const toEmpty=empty||vis||!S.p.align;', '    const sealNG=!empty&&!vis&&Math.random()<.0015; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;\n    const toEmpty=empty||vis||sealNG||!S.p.align;', 1),
     ],
     "data.js": [
         ('nm:"리프터 · STS 용기", en:"LIFTER · STS CONTAINER"', 'nm:"드럼리프터 · 주성분", en:"DRUM LIFTER"', 1),

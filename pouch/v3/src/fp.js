@@ -99,6 +99,7 @@ function fpTargetDefs(){
     add("redPal","적색 인쇄 은박 롤 (예비 은박)",A.redPal,1.0,.5,.45,tileRun("mRed"),()=>f.rollCarry!=="red"?["#mRed"]:[],{visible:f.roll!=="red"&&f.rollCarry!=="red"});
     add("plainPal","무지 은박 롤 (예비 은박)",A.plainPal,1.0,.5,.45,tileRun("mPlain"),["#mPlain"],{visible:f.roll!=="plain"});
     add("mPrn","은박 프린터",A.prn,.35,.4,.5,tileRun("mPrn"),["#mPrn"]);
+    if(TILE.fRib) add("fRib","은박 프린터 리본 교체",[A.prn[0],A.prn[1]-.22,A.prn[2]],.3,.16,.4,tileRun("fRib"),["#fRib"]);   /* 리본 교체 (11/17) */
     add("tLeak","기밀도 시험대",A.leak,.6,.3,.9,tileRun("tLeak"),["#tLeak"]);
     add("ipc","IPC 저울 (채취 · 계량)",A.ipc,.6,.3,.9,()=>{ const h=S.ipc.open&&ipcStep(); if(!h){ toast("지금은 공정검사 시점이 아닙니다."); return; }
       if(h.k==="take") ipcTake(); else if(h.k==="next") ipcNext(); else if(h.k==="done") ipcDone(); else toast(h.t); },["#ipcTake","#ipcNext","#ipcDone"],{visible:S.ipc.open});
@@ -112,6 +113,7 @@ function fpTargetDefs(){
     add("pXr","X-ray 주 전원",A.xrPow,.16,.2,.12,tileRun("pXr"),["#pXr"]);
     add("pXrKey","X선 키 스위치",A.xrKey,.16,.2,.12,tileRun("pXrKey"),["#pXrKey"]);
     add("pPr","케이스 프린터 전원",A.prPow,.3,.3,.3,tileRun("pPr"),["#pPr"]);
+    if(TILE.pInk) add("pInk","케이스 프린터 잉크 교체",A.prHead,.25,.25,.25,tileRun("pInk"),["#pInk"]);   /* 잉크 교체 (11/17) */
     add("pMag","카톤 매거진",A.mag,.4,.4,.5,tileRun("pMag"),["#pMag"]);
     add("pLeaf","설명서 공급장치",A.leaf,.4,.4,.4,tileRun("pLeaf"),["#pLeaf"]);
     add("pMagOut","매거진 자재 회수함",A.magOut,.3,.3,.3,tileRun("pMagOut"),["#pMagOut"]);

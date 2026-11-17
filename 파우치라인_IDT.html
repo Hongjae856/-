@@ -2630,7 +2630,8 @@ function stroke(){
   for(let i=0;i<NOZ.n;i++){
     const empty=!fill;
     const vis=f.vision&&printBad;
-    const toEmpty=empty||vis||!S.p.align;
+    const sealNG=!empty&&!vis&&Math.random()<.0015; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;
+    const toEmpty=empty||vis||sealNG||!S.p.align;
     S.cnt.pouch++;
     if(toEmpty){ S.cnt.empty++; LN.empty.push({x:FIL.x0-40-Math.random()*40, t:0, i}); if(LN.empty.length>60) LN.empty.shift(); continue; }
     LN.pouch.push({s:-i*POUCH_GAP*0.9, col:i, bad:printBad, skew:f.alnBad?(Math.random()-0.5)*1.6:0});
@@ -2668,7 +2669,7 @@ function cartonerTick(dt){
   if(LN.buf<PROD.perCarton||p.mag<=0||p.leaf<=0||!hmReady()) { LN.ctT=per; return; }
   LN.ctT=0; LN.buf-=PROD.perCarton; p.mag--; if(!p.leafBad) p.leaf--;
   S.cnt.carton++;
-  const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35;
+  const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35+(Math.random()<.0015?(Math.random()<.5?-1:1)*(PROD.cw.hi+1.5):0);
   LN.cartons.push({x:CPATH.x0, leaf:!p.leafBad, print:null, w, foreign:p.xrForeign>0&&Math.random()<0.5, rej:null, seen:{}});
   if(p.xrForeign>0) p.xrForeign--;
 }
@@ -3147,14 +3148,14 @@ const spOn=(t,v,id,cls)=>'<div class="spSw'+(v?" on":"")+(cls?" "+cls:"")+'"'+(i
 const spChk=(id,on,t)=>'<div class="spChk'+(on?" on":"")+'" data-hb="'+id+'">✔ '+t+' <s>IDT 확인</s></div>';
 const spT=(head,rows,cls)=>'<table class="spTb'+(cls?" "+cls:"")+'"><tr>'+head.map(h=>'<th>'+h+'</th>').join("")+'</tr>'+rows.map(r=>'<tr>'+r.map((c,i)=>'<td'+(i?' class="v"':'')+'>'+c+'</td>').join("")+'</tr>').join("")+'</table>';
 const SPV={vert:[182.0,182.0,184.0,183.0,183.0,183.0,182.0,183.0,182.4,182.5]};
-const spPV=(v)=>S.f.main?fmt(Math.min(v,v*S.f.heat/S.f.heatSV),1):"-";
+const spPV=(v,i)=>typeof heatPV==="function"?heatPV(v,i||0):(S.f.main?fmt(Math.min(v,v*S.f.heat/S.f.heatSV),1):"-");   /* 영역별 온도 흔들림 (consume.js) */
 const SPS={
  run(){ const f=S.f;
   return spHead("run")+'<div class="spC two"><div>'+
    '<table class="spTb"><tr><th>종류</th><th>수량</th><th>기능</th></tr><tr><td>생산카운터(Cut)</td><td class="v">'+Math.floor(S.cnt.pouch/10)+'</td><td><span class="spR" data-hb="sp_rst">리 셋</span></td></tr><tr><td>생산카운터(Ea)</td><td class="v">'+S.cnt.pouch+'</td><td></td></tr><tr><td>필름카운터(Cut)</td><td class="v">'+f.strokes+'</td><td><span class="spR" data-hb="sp_rst">리 셋</span></td></tr></table>'+
    '<table class="spTb"><tr><th>종류</th><th>설정</th><th>기능</th></tr><tr><td>길이<s>(Range 70~200mm)</s></td><td class="v">147</td><td><span class="spUp" data-hb="sp_view">▲</span><span class="spDn" data-hb="sp_view">▼</span></td></tr><tr><td>운전속도<s>(Range 10~60ppm)</s></td><td class="v">20</td><td></td></tr>'+
    '<tr><td>구동기어비</td><td class="v"><s>하강</s> 10</td><td class="v"><s>상승</s> <i class="bl">10</i></td></tr><tr><td></td><td class="v"><s>하 지연</s> <i class="rd">20</i> ms</td><td class="v"><s>상 지연</s> <i class="rd">20</i> ms</td></tr></table></div><div>'+
-   '<div class="spTg">'+SPV.vert.map((v,i)=>'<div><s>세로접착'+(i+1)+'</s><b>'+spPV(v)+'</b></div>').join("")+f.endSV.map((v,i)=>'<div><s>가로접착 '+["1-1","1-2","2-1","2-2"][i]+'</s><b>'+spPV(v)+'</b></div>').join("")+'</div>'+
+   '<div class="spTg">'+SPV.vert.map((v,i)=>'<div><s>세로접착'+(i+1)+'</s><b>'+spPV(v,i)+'</b></div>').join("")+f.endSV.map((v,i)=>'<div><s>가로접착 '+["1-1","1-2","2-1","2-2"][i]+'</s><b>'+spPV(v,10+i)+'</b></div>').join("")+'</div>'+
    '<div class="spFn">'+["아이마크","히터","세로실바","가로실바","무늬바","컷팅","카운터"].map(t=>spOn(t,null,null,"red")).join("")+spOn("운전중<br>수동배출",null)+'</div>'+
    '<div class="spRow"><div class="spSw" data-hb="sp_view">아이마크,무늬,컷팅 위치조절</div><div class="spLb">장비시작<br>배출카운트</div><div class="spVal rd">5</div></div></div></div>'+spFoot(); },
  cam(){ return spHead("cam","cam2")+'<div class="spC two">'+spT(["종류","시작위치","종료위치"],[["마크구간",10,200],["세로실바",170,280],["가로실바",345,160],["무늬바",160,310],["컷팅(R-컷팅)",175,190],["구동 실린더",180,300]],"cam")+
@@ -3178,10 +3179,10 @@ const SPS={
   return spHead("sw2","back")+'<div class="spC sw2"><div class="spCol">'+spOn("후 공정 연동",f.link,"fl_link")+spOn("호퍼 2 바이브레이터",false,"sp_view")+spOn("외부 전등",true,"sp_view")+'</div><div class="spCol3">'+
    [1,2,3].map(i=>spOn("호퍼게이트"+i+" 카운트",false,"sp_view")).join("")+[1,2,3].map(i=>cnt(["하부셔터"+i+" 횟수",10])).join("")+[1,2,3].map(i=>cnt(["호퍼게이트"+i+" 횟수",1])).join("")+'</div></div>'+
    '<div class="spChkRow">'+spChk("fl_linkChk",f.linkChk,"후 공정 연동 ON 확인")+'</div>'+spFoot(); },
- temp(){ const f=S.f, pw=f.main?"ON":"OFF", pvs=v=>f.main?fmt(Math.min(v,v*f.heat/f.heatSV),1):"-";
+ temp(){ const f=S.f, pw=f.main?"ON":"OFF", pvs=(v,i)=>typeof heatPV==="function"?heatPV(v,i):(f.main?fmt(Math.min(v,v*f.heat/f.heatSV),1):"-");
   const V=SPV.vert.map(()=>f.heatSV), H=[1,2,3,4,5,6,7,8,9,10];
-  return spHead("temp").replace('온도 설정</div>','온도 설정 <small class="spEx">예시값</small></div>')+'<div class="spC"><table class="spTb tmp"><tr><th>세로접착</th>'+H.map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+SPV.vert.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+V.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+H.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER</td>'+V.map(v=>'<td class="v">'+(v+10)+'</td>').join("")+'</tr><tr><td>LOWER</td>'+V.map(v=>'<td class="v">'+(v-10)+'</td>').join("")+'</tr></table>'+
-   '<table class="spTb tmp"><tr><th>가로접착</th>'+["1-1","1-2","2-1","2-2"].map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+f.endSV.map(v=>'<td class="v">'+pvs(v)+'</td>').join("")+'</tr><tr><td>SV</td>'+f.endSV.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+f.endSV.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER / LOWER</td>'+f.endSV.map(v=>'<td class="v">'+(v+10)+' / '+(v-10)+'</td>').join("")+'</tr></table></div>'+
+  return spHead("temp").replace('온도 설정</div>','온도 설정 <small class="spEx">예시값</small></div>')+'<div class="spC"><table class="spTb tmp"><tr><th>세로접착</th>'+H.map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+SPV.vert.map((v,i)=>'<td class="v">'+pvs(v,i)+'</td>').join("")+'</tr><tr><td>SV</td>'+V.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+H.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER</td>'+V.map(v=>'<td class="v">'+(v+10)+'</td>').join("")+'</tr><tr><td>LOWER</td>'+V.map(v=>'<td class="v">'+(v-10)+'</td>').join("")+'</tr></table>'+
+   '<table class="spTb tmp"><tr><th>가로접착</th>'+["1-1","1-2","2-1","2-2"].map(i=>'<th>'+i+'</th>').join("")+'</tr><tr><td>PV</td>'+f.endSV.map((v,i)=>'<td class="v">'+pvs(v,10+i)+'</td>').join("")+'</tr><tr><td>SV</td>'+f.endSV.map(v=>'<td class="v rd">'+v+'</td>').join("")+'</tr><tr><td>POWER</td>'+f.endSV.map(()=>'<td class="v">'+pw+'</td>').join("")+'</tr><tr><td>UPPER / LOWER</td>'+f.endSV.map(v=>'<td class="v">'+(v+10)+' / '+(v-10)+'</td>').join("")+'</tr></table></div>'+
    '<div class="spChkRow">'+spChk("fl_temp",f.tempChk,"PV · SV 일치 확인")+'<span class="spNote">UPPER · LOWER 는 SV ± 10 ℃ 로 표시 (사진 없음 · 확인 필요)</span></div>'+spFoot(); },
  xfer(){ const f=S.f, V=[9.0,8.0,9.0];
   return spHead("xfer")+'<div class="spC three">'+[0,1,2].map(i=>'<div class="spX"><div class="spXh">이송기설정 <b class="rd">'+(i+1)+'</b>'+spOn("이송기",f.ibc[i],"fl_ibc"+i)+'</div>'+spOn("수동점검",false,"sp_view","dk")+
@@ -4480,7 +4481,7 @@ function v3Sync(dt){
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
   if(FM.mainSw){ const on=!(S&&S.session&&S.session.active)||!!S.f.main; FM.mainSw.rotation.x+=((on?-Math.PI/2:0)-FM.mainSw.rotation.x)*Math.min(1,dt*10); }   /* 메인스위치 손잡이 : 가로 OFF · 세로 ON */
-  if(typeof dialDraw==="function") dialDraw(); if(typeof htxTick==="function") htxTick(dt);
+  if(typeof dialDraw==="function") dialDraw(); if(typeof consDraw==="function") consDraw(); if(typeof htxTick==="function") htxTick(dt);
   if(FILLPROP.hose){ const act=!!(S&&S.session&&S.session.active), hc=act&&S.f.hoseC; FILLPROP.hose.forEach((h,i)=>h.visible=!hc||!!hc[i]); }   /* IBC 진공호스 연결부 */
   scrPower(); if(typeof guide3D==="function") guide3D(dt); if(typeof lampTick==="function") lampTick(dt);
   if(typeof wkDraw==="function") wkDraw(dt);
@@ -4939,6 +4940,7 @@ function fpTargetDefs(){
     add("redPal","적색 인쇄 은박 롤 (예비 은박)",A.redPal,1.0,.5,.45,tileRun("mRed"),()=>f.rollCarry!=="red"?["#mRed"]:[],{visible:f.roll!=="red"&&f.rollCarry!=="red"});
     add("plainPal","무지 은박 롤 (예비 은박)",A.plainPal,1.0,.5,.45,tileRun("mPlain"),["#mPlain"],{visible:f.roll!=="plain"});
     add("mPrn","은박 프린터",A.prn,.35,.4,.5,tileRun("mPrn"),["#mPrn"]);
+    if(TILE.fRib) add("fRib","은박 프린터 리본 교체",[A.prn[0],A.prn[1]-.22,A.prn[2]],.3,.16,.4,tileRun("fRib"),["#fRib"]);   /* 리본 교체 (11/17) */
     add("tLeak","기밀도 시험대",A.leak,.6,.3,.9,tileRun("tLeak"),["#tLeak"]);
     add("ipc","IPC 저울 (채취 · 계량)",A.ipc,.6,.3,.9,()=>{ const h=S.ipc.open&&ipcStep(); if(!h){ toast("지금은 공정검사 시점이 아닙니다."); return; }
       if(h.k==="take") ipcTake(); else if(h.k==="next") ipcNext(); else if(h.k==="done") ipcDone(); else toast(h.t); },["#ipcTake","#ipcNext","#ipcDone"],{visible:S.ipc.open});
@@ -4952,6 +4954,7 @@ function fpTargetDefs(){
     add("pXr","X-ray 주 전원",A.xrPow,.16,.2,.12,tileRun("pXr"),["#pXr"]);
     add("pXrKey","X선 키 스위치",A.xrKey,.16,.2,.12,tileRun("pXrKey"),["#pXrKey"]);
     add("pPr","케이스 프린터 전원",A.prPow,.3,.3,.3,tileRun("pPr"),["#pPr"]);
+    if(TILE.pInk) add("pInk","케이스 프린터 잉크 교체",A.prHead,.25,.25,.25,tileRun("pInk"),["#pInk"]);   /* 잉크 교체 (11/17) */
     add("pMag","카톤 매거진",A.mag,.4,.4,.5,tileRun("pMag"),["#pMag"]);
     add("pLeaf","설명서 공급장치",A.leaf,.4,.4,.4,tileRun("pLeaf"),["#pLeaf"]);
     add("pMagOut","매거진 자재 회수함",A.magOut,.3,.3,.3,tileRun("pMagOut"),["#pMagOut"]);
@@ -5164,6 +5167,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:26, d:"2026-11-17", t:"자연 변동 · 자재 소모 추가(사용자 선택) : 실링 히터 온도(영역별 ±2 ℃) · 압축공기 압력(±0.2) 흔들림, 무작위 소량 불량(중량 NG · 실링 불량 각 약 0.15 %), 은박 롤 잔량 감소(3D 지름 · 소진 시 필름 알람) · 2번 호퍼 주성분 재공급 안내 · 카톤 · 설명서 보충 안내 · 은박 프린터 리본 · 케이스 프린터 잉크 잔량과 교체 작업"},
  {v:25, d:"2026-11-17", t:"운전(RUN · FILLING ON) 중 시간이 지나면 노즐별 실제 충전량이 다이얼 설정에서 ±1~2 % 내외로 랜덤하게 변하도록 추가(원료 공통 + 노즐별 변동 · 최대 ±2 %), 예상 충전량 · 판정 · IPC 계량값에 반영"},
  {v:24, d:"2026-11-16", t:"동쪽 함량조절부를 한 줄로 정정(노즐마다 왼쪽 은색 소켓 = 백당 · 오른쪽 주황 카운터 다이얼 = 주성분), 주황 다이얼은 숫자 창 아래 가운데에 큰 크롬 육각 소켓, 육각 렌치 구멍 크게(3D · 미니게임), 백당 미니게임은 카운터 없이 둘레 눈금으로 표시"},
  {v:23, d:"2026-11-16", t:"함량조절다이얼을 현장 사진대로(주황 카운터 + 크롬 육각 소켓) 바꾸고 배치 정정(서쪽 = 첨가제 · 동쪽 = 주성분 · 백당), 충전량 조절 미니게임을 아날로그형으로(육각 렌치가 꽂힌 다이얼을 가까이서 A/D 로 돌림 · 카운터 숫자가 굴러감 · 예상 충전량 표시 · 아래 10개 다이얼 참고), HMI 팝업 전면 삭제(3인칭 크게 보기 삭제 · 1인칭 조작 화면은 모니터 유리면에만 맞춤 · 버튼 판 대신 실제 판넬 버튼을 직접 눌러 조작)"},
@@ -5993,6 +5997,72 @@ TILE.mDial={e:"🔧",b:"충전량 조절 (함량조절다이얼)",s:()=>S&&S.f&&
   click(){ const bad=["main","sug"].some(q=>!dialOK(q))&&dialOK("add"); bad?startWork("dialB",()=>dialOpen("B")):startWork("dialF",()=>dialOpen("F")); }};
 if(!TILESET.F.mat.includes("mDial")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mScoop")+1,0,"mDial");
 
+/* ── v3/consume.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   자연 변동 · 자재 소모 (11/17 사용자 선택) — 모든 수치는 교육용 설정값 (확인 필요)
+   · 실링 히터 온도 : 세로 10 · 가로 4 영역이 각각 SV 주변에서 흔들림 (표준편차 약 0.8 ℃ · 최대 ±2 ℃) — 승온이 끝난 뒤
+   · 압축공기 압력 : 6.0 kgf/cm² 주변 ±0.2 이내 흔들림 (표시)
+   · 무작위 소량 불량 : 중량 NG 약 0.15 % (카톤 · 중량선별기 배출) · 실링 불량 약 0.15 % (파우치 · 충전기 불량 배출) — sim.js 패치
+   · 은박 롤 잔량 : 1롤 = 1,200 스트로크(12,000 포) 기준으로 감소 · 3D 롤 지름 감소 · 15 % 이하 교체 준비 안내 · 0 % 면 필름 알람으로 정지 → 새 롤 교체
+   · 2번 호퍼(주성분) : 충전 스트로크(10포)마다 0.28 % 감소(약 360 회) · 30 % 이하 재공급 안내 (포장실 과정 · 시연에서는 충전실 작업자가 보충한 것으로 처리)
+   · 카톤 · 설명서 : 매거진 400 매 투입 후 1 카톤마다 감소 · 100 매 이하 보충 안내 (충전실 과정에서는 포장실 작업자가 보충)
+   · 은박 프린터 리본 : 1,500 스트로크 · 케이스 프린터 잉크 : 1,000 카톤 기준으로 감소 · 15 % 이하 교체 안내 · 교체 타일
+   ═══════════════════════════════════════════════════════════════════ */
+const CONS={t:null, st:null, roll:null, s:null, air:0, ct:null, warn:{}};
+const CONS_N={foil:1200, hop2:.28, rib:1500, ink:1000};   /* 2번 호퍼 : 충전 스트로크 약 360 회 (충전실 과정 1회 ≈ 250 회 충전) */
+const ouStep=(x,th,s,dt,lim)=>clamp(x-th*x*dt+s*Math.sqrt(2*th*dt)*gauss(),-lim,lim);
+/* 표시용 실링 온도 PV (영역 i : 0~9 세로 · 10~13 가로) */
+function heatPV(v,i){ const f=S.f; if(!f.main) return "-"; const base=Math.min(v,v*f.heat/f.heatSV), n=(f.tN&&f.tN[i])||0; return fmt(base+(f.heat>=f.heatSV-1?n:0),1); }
+const airShow=()=>S.f.airP+(S.f.airP>5?CONS.air:0);
+function consWarn(key,on,msg,kind){ if(on&&!CONS.warn[key]){ CONS.warn[key]=1; toast(msg,kind||"bad"); } else if(!on) CONS.warn[key]=0; }
+function consTick(){
+  if(!S||!S.session||!S.session.active||!S.f){ CONS.t=null; return; }
+  const f=S.f, p=S.p;
+  if(CONS.s!==S||CONS.t==null||tSim<CONS.t){ CONS.s=S; CONS.t=tSim; CONS.st=f.strokes; CONS.roll=f.roll; CONS.ct=S.cnt.carton; CONS.warn={}; if(f.foil==null) f.foil=100; if(f.tN==null) f.tN=Array(14).fill(0); return; }
+  const dt=tSim-CONS.t; CONS.t=tSim; if(dt<=0||dt>120) return;
+  /* 온도 · 공기압 흔들림 */
+  for(let i=0;i<14;i++) f.tN[i]=ouStep(f.tN[i],1/40,.8,dt,2);
+  CONS.air=ouStep(CONS.air,1/20,.08,dt,.2);
+  /* 은박 롤 */
+  if(f.roll==="red"&&CONS.roll!=="red") f.foil=100; CONS.roll=f.roll;
+  const ds=Math.max(0,f.strokes-CONS.st); CONS.st=f.strokes;
+  if(ds&&f.roll==="red"){ f.foil=Math.max(0,f.foil-ds*100/CONS_N.foil);
+    if(f.foil<=0){ f.roll="none"; S.flags.redTaken=false; CONS.roll="none"; toast("은박 롤 소진 — 필름 알람 정지. 예비 적색 인쇄 은박 롤로 교체하세요.","bad"); } }
+  consWarn("foil",f.roll==="red"&&f.foil<15,"은박 롤 잔량 "+Math.round(f.foil)+" % — 교체할 예비 롤을 준비하세요.");
+  /* 2번 호퍼 (sim 기본 소모 0.045 % 에 더함) */
+  if(ds&&f.filling&&f.dose.every(x=>x)) S.hop.main=Math.max(0,S.hop.main-ds*(CONS_N.hop2-.045));
+  if((S.room!=="F"||S.mode==="demo")&&S.hop.main<30) S.hop.main=100;
+  consWarn("hop2",S.room==="F"&&S.mode!=="demo"&&S.hop.main<30,"2번 호퍼 주성분 "+Math.round(S.hop.main)+" % — 스쿱으로 재공급하세요.");
+  /* 은박 프린터 리본 */
+  if(ds&&f.prn&&f.prn.saved) f.ribbon=Math.max(0,f.ribbon-ds*100/CONS_N.rib);
+  consWarn("rib",S.room==="F"&&f.ribbon<15,"은박 프린터 리본 "+Math.round(f.ribbon)+" % — 리본을 교체하세요.");
+  /* 카톤 · 설명서 · 잉크 */
+  const dc=Math.max(0,S.cnt.carton-CONS.ct); CONS.ct=S.cnt.carton;
+  if(dc) p.ink=Math.max(0,p.ink-dc*(100/CONS_N.ink-.02));                      /* sim 기본 소모 0.02 % 에 더함 */
+  if(S.room==="F"){ if(p.mag<60) p.mag=400; if(p.leaf<60) p.leaf=400; if(p.ink<20) p.ink=100; }   /* 충전실 과정 : 포장실 작업자가 보충 */
+  else { consWarn("mag",p.mag>0&&p.mag<=100,"카톤 매거진 잔량 "+p.mag+" 매 — 카톤을 보충하세요."); consWarn("leaf",p.leaf>0&&p.leaf<=100,"설명서 잔량 "+p.leaf+" 매 — 설명서를 보충하세요.");
+    consWarn("ink",p.ink<15,"케이스 프린터 잉크 "+Math.round(p.ink)+" % — 잉크를 교체하세요."); }
+}
+/* 3D 은박 롤 지름 (bridge v3Sync) */
+function consDraw(){
+  if(typeof FM==="undefined"||!FM.roll||!S||!S.f) return;
+  const act=S.session&&S.session.active, q=act?clamp((S.f.foil==null?100:S.f.foil)/100,0,1):1, R=.165, rc=.052, k=Math.sqrt(rc*rc+(R*R-rc*rc)*q)/R;
+  const [roll,...ends]=FM.roll; if(roll&&roll.scale.x!==k){ roll.scale.set(k,1,k); for(const e of ends) e.scale.set(k,k,1); }
+}
+/* 타일 표시 · 교체 작업 */
+{ const s0=TILE.mRed.s, w0=TILE.mRed.warn; TILE.mRed.s=()=>S.f.roll==="red"?"장착 · 잔량 "+Math.round(S.f.foil==null?100:S.f.foil)+" %":s0(); TILE.mRed.warn=()=>w0()||S.f.roll==="red"&&S.f.foil<15;
+  TILE.mScoop.warn=()=>S.hop.main<30;
+  const p0=TILE.mPrn.s; TILE.mPrn.s=()=>p0()+" · 리본 "+Math.round(S.f.ribbon)+" %"; TILE.mPrn.warn=()=>S.f.ribbon<15;
+  TILE.pMag.warn=()=>S.p.mag>0&&S.p.mag<=100; TILE.pLeaf.warn=()=>S.p.leaf>0&&S.p.leaf<=100;
+  const a0=TILE.fAir1.s; TILE.fAir1.s=()=>fmt(airShow(),1)+" kgf/cm²";
+  TILE.fRib={e:"🎞️",b:"은박 프린터 리본 교체",s:()=>"리본 "+Math.round(S.f.ribbon)+" %",lv:()=>S.f.ribbon,on:()=>S.f.ribbon>=20,warn:()=>S.f.ribbon<15,
+    click(){ if(S.f.run){ toast("운전 중에는 리본을 교체하지 않습니다. 먼저 STOP.","bad"); return; } act("prn",()=>{ S.f.ribbon=100; toast("은박 프린터 리본 교체 완료","good"); }); }};
+  TILE.pInk={e:"🧴",b:"케이스 프린터 잉크 교체",s:()=>"잉크 "+Math.round(S.p.ink)+" %",lv:()=>S.p.ink,on:()=>S.p.ink>=20,warn:()=>S.p.ink<15,
+    click(){ act("ink",()=>{ S.p.ink=100; toast("케이스 프린터 잉크 교체 완료","good"); }); }};
+  if(!TILESET.F.mat.includes("fRib")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mPrn")+1,0,"fRib");
+  if(!TILESET.P.mat.includes("pInk")) TILESET.P.mat.splice(TILESET.P.mat.indexOf("pLeaf")+1,0,"pInk"); }
+function consInit(){ setInterval(consTick,250); }
+
 /* ── v3/demo.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    시연모드 (11/16 사용자 지시) — 기본모드보다 훨씬 간단 : 라인 클리어런스 · 문서 · 점검 단계 없음
@@ -6088,7 +6158,7 @@ function bindGfx(){
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); $("#apBtn").hidden=true; bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit(); dialInit();
+  bindPanel(); bindHeader(); bindAuto(); $("#apBtn").hidden=true; bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit(); dialInit(); consInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);
