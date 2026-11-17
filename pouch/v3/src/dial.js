@@ -17,9 +17,22 @@ function dialArr(k){
   if(Math.abs(d)>1e-6) for(let i=0;i<10;i++) a[i]+=d;                       /* 외부 변경(이상사례 · 프리셋) 반영 */
   return a;
 }
-function dialOff(k,i){ const a=dialArr(k); return a?a[((i%10)+10)%10]:0; }
+/* ── 시간에 따른 충전량 변동 (11/17 사용자 지시 : 1~2 % 내외 랜덤) ──
+   운전(RUN · FILLING ON) 중에만 원료 흐름 · 밀도 변화로 실제 충전량이 다이얼 설정에서 조금씩 벗어남.
+   원료 공통 성분 + 노즐별 성분, 각각 평균으로 되돌아오는 랜덤 변동(상관시간 약 5분 · 표준편차 약 0.6 %), 합계 ±2 % 이내.
+   다이얼(카운터 숫자)은 그대로이고, 예상 충전량 · 판정 · IPC 계량값에는 변동이 들어감 → IPC 로 확인하고 다이얼로 보정 */
+const DRIFT={th:1/300, sc:.006, sn:.006, max:.02, t:null};
+function dialDr(){ const f=S.f; if(!f.dialD){ const z=()=>Array(10).fill(0); f.dialD={c:{add:0,main:0,sug:0}, e:{add:z(),main:z(),sug:z()}}; } return f.dialD; }
+function dialAct(k,i){ const a=dialArr(k); if(!a) return 0; const D=dialDr(), j=((i%10)+10)%10; return a[j]+clamp(D.c[k]+D.e[k][j],-DRIFT.max,DRIFT.max); }
+function dialDriftTick(){
+  if(!S||!S.session||!S.session.active||!S.f){ DRIFT.t=null; return; }
+  if(DRIFT.t==null||tSim<DRIFT.t){ DRIFT.t=tSim; return; } const dt=tSim-DRIFT.t; DRIFT.t=tSim; if(dt<=0||dt>120||!(S.f.run&&S.f.filling)) return;
+  const D=dialDr(), ou=(x,s)=>clamp(x-DRIFT.th*x*dt+s*Math.sqrt(2*DRIFT.th*dt)*gauss(),-DRIFT.max,DRIFT.max);
+  for(const k of ["add","main","sug"]){ D.c[k]=ou(D.c[k],DRIFT.sc); for(let i=0;i<10;i++) D.e[k][i]=ou(D.e[k][i],DRIFT.sn); }
+}
+function dialOff(k,i){ return dialAct(k,i); }   /* IPC 계량값 = 다이얼 설정 + 변동 */
 function dialSet(k,i,v){ const a=dialArr(k); if(!a) return; a[i]=clamp(v,-DIAL.max,DIAL.max); S.f.dial[k]=a.reduce((s,x)=>s+x,0)/10; }
-const dialOK=k=>{ const a=dialArr(k); return !!a&&a.every(v=>Math.abs(v)<=DIAL.ok+1e-9); };
+const dialOK=k=>{ const a=dialArr(k); return !!a&&a.every((v,i)=>Math.abs(dialAct(k,i))<=DIAL.ok+1e-9); };   /* 판정은 실제 충전량(설정 + 변동) 기준 */
 const dialRange=(k,v)=>{ const s=IPC_STD[k].std, c=s*(1+v), h=s*.0125; return [c-h,c+h]; };
 const dialCls=v=>Math.abs(v)<=DIAL.ok+1e-9?"ok":Math.abs(v)<=.04+1e-9?"warn":"ng";
 const dialSideOf=k=>k==="add"?"F":"B";
@@ -71,27 +84,27 @@ function dialScene(){
   return s;
 }
 function dialMini(k,x,i){
-  const c=dialCount(x), r=dialRange(k,x);
+  const c=dialCount(x), ac=dialAct(k,i), r=dialRange(k,ac); x=ac;   /* 숫자 = 다이얼 설정 · 색 · 예상값 = 실제 */
   if(k==="sug") return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'"><i class="dgMiniSil"></i><s>'+((r[0]+r[1])/2).toFixed(3)+'</s><b>'+(i+1)+'</b></div>';   /* 백당 : 은색 소켓 (카운터 없음) */
   return '<div class="dgCell '+dialCls(x)+(i===DIAL.i?" sel":"")+'" data-i="'+i+'"><div class="dgMiniBox"><span>'+String(c).padStart(4,"0")+'</span><i class="dgMiniHex"></i></div><b>'+(i+1)+'</b></div>';
 }
 function dialRender(){
   const el=$("#dialGame"); if(!el||!DIAL.open) return;
-  const k=DIAL.k, a=dialArr(k), v=a[DIAL.i], rg=dialRange(k,v), std=IPC_STD[k].std, f3=x=>x.toFixed(3);
+  const k=DIAL.k, a=dialArr(k), v=dialAct(k,DIAL.i), rg=dialRange(k,v), std=IPC_STD[k].std, f3=x=>x.toFixed(3);
   const tabs=DIAL_SIDE[DIAL.side].map((q,j)=>'<button class="dgTab'+(q===k?" on":"")+'" data-k="'+q+'">'+(DIAL_SIDE[DIAL.side].length>1?(j+1)+" · ":"")+IPC_STD[q].nm+(dialOK(q)?" ✓":"")+'</button>').join("");
   el.innerHTML='<div class="dgBox"><div class="dgHead"><b>🔧 함량조절다이얼 · 충전량 조절</b><span>'+(DIAL.side==="F"?"서쪽(전면) · 첨가제":"동쪽(후면) · 주성분(주황) · 백당(은색)")+'</span><button class="dgX" id="dgX">닫기 (F · Esc)</button></div>'+
     '<div class="dgTabs">'+tabs+'</div>'+
     '<div class="dgMain"><div class="dgBig" id="dgBig">'+dialScene()+'</div><div class="dgInfo">'+
       '<div class="dgPred '+dialCls(v)+'" id="dgPred">예상 충전량<b>'+f3(rg[0])+' ~ '+f3(rg[1])+' g</b><s>기준 '+f3(std)+' g</s></div>'+
       '<div class="dgKeys"><span>A</span> 감소 · <span>D</span> 증가 (누르고 있으면 계속)<br><span>←</span><span>→</span> 노즐 선택'+(DIAL_SIDE[DIAL.side].length>1?' · <span>1</span><span>2</span> 원료':'')+'</div>'+
-      '<div class="dgNote">예상값은 대략적인 범위입니다. 조절 후 공정검사(IPC) 계량으로 확인합니다.</div></div></div>'+
+      '<div class="dgNote">예상값은 대략적인 범위입니다. 운전 중에는 원료 흐름 · 밀도 변화로 충전량이 조금씩(±1~2 %) 달라지므로 정기 공정검사(IPC) 계량으로 확인하고 다이얼로 보정합니다.</div></div></div>'+
     '<div class="dgRow">'+a.map((x,i)=>dialMini(k,x,i)).join("")+'</div>'+
     '<div class="dgFoot" id="dgFoot">'+dialFoot(k,a)+'</div></div>';
   $("#dgX").onclick=dialClose;
   $$("#dialGame [data-k]").forEach(b=>b.onclick=()=>{ DIAL.k=b.dataset.k; dialSnap(); dialRender(); });
   $$("#dialGame [data-i]").forEach(b=>b.onclick=()=>{ DIAL.i=+b.dataset.i; dialSnap(); dialRender(); });
 }
-const dialFoot=(k,a)=>dialOK(k)?'<span class="okT">✓ '+IPC_STD[k].nm+' 10개 노즐 모두 기준 ±2 % 이내</span>':'<span>'+IPC_STD[k].nm+' : 기준 ±2 % 를 벗어난 노즐 '+a.filter(x=>Math.abs(x)>DIAL.ok+1e-9).length+' 개</span>';
+const dialFoot=(k,a)=>dialOK(k)?'<span class="okT">✓ '+IPC_STD[k].nm+' 10개 노즐 모두 기준 ±2 % 이내</span>':'<span>'+IPC_STD[k].nm+' : 기준 ±2 % 를 벗어난 노즐 '+a.filter((x,i)=>Math.abs(dialAct(k,i))>DIAL.ok+1e-9).length+' 개</span>';
 function dialSnap(){ DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*24; }
 /* 애니메이션 : 카운터 숫자가 굴러가고 렌치가 돌아감 */
 function dialLoop(){
@@ -103,13 +116,13 @@ function dialLoop(){
   DIAL.raf=requestAnimationFrame(dialLoop);
 }
 function dialKey(e){
-  if(!DIAL.open) return;
+  if(!DIAL.open) return; DIAL.keyAt=performance.now();
   const c=e.code, side=DIAL_SIDE[DIAL.side];
   if(c==="KeyA"||c==="KeyD"){ const a=dialArr(DIAL.k), v=a[DIAL.i], nv=clamp(v+(c==="KeyD"?1:-1)*DIAL.step,-DIAL.max,DIAL.max);
     if(nv===v){ DIAL.shake=1; beep(160,.05,"square",.02); } else { dialSet(DIAL.k,DIAL.i,Math.round(nv/DIAL.step)*DIAL.step); beep(1500,.012,"square",.012); }
     e.preventDefault(); e.stopPropagation();
-    const k=DIAL.k, x=dialArr(k)[DIAL.i], rg=dialRange(k,x), P=$("#dgPred"), cell=$('#dialGame [data-i="'+DIAL.i+'"]');
-    if(P){ P.className="dgPred "+dialCls(x); P.querySelector("b").textContent=rg[0].toFixed(3)+" ~ "+rg[1].toFixed(3)+" g"; }
+    const k=DIAL.k, x=dialArr(k)[DIAL.i], rg=dialRange(k,dialAct(k,DIAL.i)), P=$("#dgPred"), cell=$('#dialGame [data-i="'+DIAL.i+'"]');
+    if(P){ P.className="dgPred "+dialCls(dialAct(k,DIAL.i)); P.querySelector("b").textContent=rg[0].toFixed(3)+" ~ "+rg[1].toFixed(3)+" g"; }
     if(cell) cell.outerHTML=dialMini(k,x,DIAL.i); const idx=DIAL.i, nc=$('#dialGame [data-i="'+idx+'"]'); if(nc) nc.onclick=()=>{ DIAL.i=idx; dialSnap(); dialRender(); };
     const F=$("#dgFoot"); if(F) F.innerHTML=dialFoot(k,dialArr(k));
     return; }
@@ -127,7 +140,7 @@ function dialDraw(){
       if(D.hex) D.hex.rotation.x=v/DIAL.step*.42;
       if(D.cnt!==c&&D.ctx){ D.cnt=c; const x=D.ctx; x.fillStyle="#111"; x.fillRect(0,0,128,48); x.fillStyle="#f2f2ee"; x.font="bold 36px monospace"; x.textAlign="center"; x.fillText(String(c).padStart(4,"0"),64,38); D.tex.needsUpdate=true; } }); }
 }
-function dialInit(){ addEventListener("keydown",dialKey,true); }
+function dialInit(){ addEventListener("keydown",dialKey,true); setInterval(()=>{ dialDriftTick(); if(DIAL.open&&!DIAL.keyAt||DIAL.open&&performance.now()-DIAL.keyAt>1500){ DIAL.rt=(DIAL.rt||0)+1; if(DIAL.rt%4===0) dialRender(); } },500); }   /* 변동 · 열린 화면 예상값 갱신(2초) */
 /* 자재 타일 : 충전량 조절 (3인칭 — 작업자가 2층 데크 조절부로 이동한 뒤 미니게임) */
 TILE.mDial={e:"🔧",b:"충전량 조절 (함량조절다이얼)",s:()=>S&&S.f&&["add","main","sug"].every(dialOK)?"30노즐 기준 이내":"조절 필요",on:()=>!!(S&&S.f&&["add","main","sug"].every(dialOK)),
   click(){ const bad=["main","sug"].some(q=>!dialOK(q))&&dialOK("add"); bad?startWork("dialB",()=>dialOpen("B")):startWork("dialF",()=>dialOpen("F")); }};
