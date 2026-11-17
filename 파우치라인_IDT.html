@@ -2278,7 +2278,7 @@ function initAnim(S){
   AN.Lc=cum[cum.length-1];
   AN.pose=s=>{ if(s<=0) return {x:pr[0][0],y:pr[0][1]-s,tx:0,ty:-1}; let i=1; while(i<pr.length-1&&cum[i]<s) i++; const a=pr[i-1],b=pr[i],l=cum[i]-cum[i-1],f=(s-cum[i-1])/l; return {x:a[0]+(b[0]-a[0])*f,y:a[1]+(b[1]-a[1])*f,tx:(b[0]-a[0])/l,ty:(b[1]-a[1])/l}; };
   AN.im=new T3.InstancedMesh(stickGeo(L,FM.stickW,.009),M.stick,n); AN.im.castShadow=true; AN.im.frustumCulled=false; S.add(AN.im);
-  AN.o=new T3.Object3D(); AN.ld=new Uint8Array(n).fill(1); Object.assign(AN,{rjF:false,rjT:false,emF:false,emT:false,dec:true,gate:0,
+  AN.o=new T3.Object3D(); AN.ld=new Uint8Array(n).fill(1); Object.assign(AN,{rjF:false,rjT:false,emF:false,emT:false,dec:false,gate:0,
     qV:new T3.Quaternion().setFromEuler(new T3.Euler(0,0,Math.PI/2)), qF:new T3.Quaternion().setFromEuler(new T3.Euler(0,-Math.PI/2,0))});   /* 공포배출 : 수직 → 벨트 위에 누움 */
   AN.u0=((CV.zS-FM.pz(0))%P+P)%P;                                         /* 안착 순간 칸 중심 = 열 위치 */
   AN.u=()=>AN.u0+n*P*(AN.cyc+AN.ph-AN.TG);
@@ -2289,7 +2289,7 @@ function stepAnim(dt){
   const n=FM.n, L=FM.stickL, P=FM.P, o=AN.o, TL=AN.TL, TD=AN.TD, TG=AN.TG, ez=x=>x<=0?0:x>=1?1:x*x*(3-2*x);
   if(AN.run){ AN.ph+=dt/AN.T; if(AN.ph>=1){ AN.ph-=1; AN.cyc++; AN.ld.fill(0); AN.made+=n; AN.rjT=AN.rjF; AN.emT=AN.emF; AN.rjF=false; AN.emF=false; AN.dec=false; } }
   const t=AN.ph, u=AN.u(), uL=AN.u0+n*P*AN.cyc;
-  if(!AN.dec&&t>=.40){ AN.dec=true; const d=typeof rejDecide==="function"?rejDecide():null; AN.rjF=!!(d&&d.rej); AN.emF=!!(d&&d.empty); }   /* 다음 스틱 묶음 : 공포 · 비전 NG · 실링 불량 · 정렬컨베어 OFF → 공포배출 (reject.js) */
+  if(!AN.dec&&t>=.40){ const d=typeof rejDecide==="function"?rejDecide():null; if(d){ AN.dec=true; AN.rjF=d.rej; AN.emF=d.empty; } }   /* 다음 스틱 묶음 : 공포 · 비전 NG · 실링 불량 · 정렬컨베어 OFF → 공포배출 (reject.js) */
   if(t>=TG) for(let i=0;i<n;i++) if(!AN.ld[i]){ AN.ld[i]=1; if(AN.rjT){ if(typeof rejLand==="function") rejLand(FM.pz(i),AN.emT); continue; } CV.full[((Math.round((CV.zS-FM.pz(i)-uL)/P)%CV.N)+CV.N)%CV.N]=1; }       /* 받침 안착 : 열 아래 받침으로 넘김 */
   CV.set(u);
   const yR=FM.gateY+.0052, yC=FM.beltY+CV.hb+.0052;                                   /* 칸 바닥 위 · 받침 위 높이 */
@@ -2313,7 +2313,7 @@ function stepAnim(dt){
     FM.sealG.position.x=FM.press*cl; FM.sealG.position.y=yy; }               /* 가로실바 : 위에서 눌러 잡음(.40) → 은박 인출과 함께 1포 길이만큼 내려옴(.45~.90) → 벌어짐 → 위로 복귀 */
   if(FM.pressG){ const pr=t>=.9?ez((t-.9)/.06):1-ez((t-.06)/.08); FM.pressG.position.x=FM.press*pr; }                 /* 프레싱 */
   stepPackAnim();
-  if(FM.rejG){ const want=(AN.rjT&&t<.24)||(AN.rjF&&t>=.36)?1:0; AN.gate+=Math.max(-dt*9,Math.min(dt*9,want-AN.gate)); FM.rejG.rotation.z=.5*ez(AN.gate); }   /* 공포배출 실린더 : 게이트 젖힘 */
+  if(FM.rejG){ const want=(AN.rjT&&t<.24)||(AN.rjF&&t>=.36)?1:0; AN.gate=dt>0?AN.gate+Math.max(-dt*9,Math.min(dt*9,want-AN.gate)):want; FM.rejG.rotation.z=.5*ez(AN.gate); }   /* 공포배출 실린더 : 게이트 젖힘 */
   if(typeof rejStep==="function") rejStep(dt);
   if(FM.flaps){ const op=(t<TD-.02||t>=1)?0:ez((t-(TD-.02))/.05)*(1-ez((t-.54)/.07)); for(const f of FM.flaps) f.pv.rotation.x=f.sg*op*1.45; }   /* 바닥 게이트 */
 }
