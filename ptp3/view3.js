@@ -11,13 +11,16 @@ const V3P={R:null, sc:null, cam:null, objs:{}, t:{gen:0,genMs:0,fps:0,n:0,t0:0},
   orbit:{yaw:-0.42,pitch:0.42,dist:12500,tx:2600,ty:700,tz:200}};
 /* ── 재질 : 정점색(sRGB → 선형) · 정점별 금속도 · 밝기 · 무광 ── */
 function v3Mat(kind,transparent){
-  const m=new T3.MeshStandardMaterial({vertexColors:true, roughness:.5, metalness:0, envMapIntensity:1.25, transparent:!!transparent, depthWrite:!transparent, side:T3.DoubleSide});
+  const m=new T3.MeshStandardMaterial({vertexColors:true, roughness:.5, metalness:0, envMapIntensity:1.45, transparent:!!transparent, depthWrite:!transparent, side:T3.DoubleSide});
   m.onBeforeCompile=sh=>{
-    sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute float aMet; attribute float aBr; attribute float aFl; varying float vMet; varying float vFl; varying vec3 vSrgb;")
-      .replace("#include <color_vertex>","#include <color_vertex>\nvSrgb=vColor.rgb; vColor.rgb=pow(max(vColor.rgb,vec3(0.0)),vec3(2.2))*"+(kind==="l"?"1.0":"pow(max(aBr,0.05),2.2)")+"; vMet=aMet; vFl=aFl;");
-    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying float vMet; varying float vFl; varying vec3 vSrgb;\n"+
-        "float lMet(vec3 c){float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b)),L=(mx+mn)*0.5; if(mx-mn<0.07&&L>0.52&&L<0.935)return 0.55; if(L<0.30)return 0.16; return 0.12;}")
-      .replace("#include <roughnessmap_fragment>","float metalnessFactor="+(kind==="l"?"lMet(vSrgb)":"(vMet!=vMet?0.1:(vMet<-0.5?lMet(vSrgb):clamp(vMet,0.0,1.0)))")+";\nfloat roughnessFactor=mix(0.58,0.24,metalnessFactor);")
+    sh.vertexShader=sh.vertexShader.replace("#include <common>","#include <common>\nattribute float aMet; attribute float aBr; attribute float aFl; varying float vMet; varying float vFl; varying vec3 vSrgb; varying vec3 vWP;")
+      .replace("#include <color_vertex>","#include <color_vertex>\nvSrgb=vColor.rgb; vColor.rgb=pow(max(vColor.rgb,vec3(0.0)),vec3(2.2))*"+(kind==="l"?"1.0":"pow(max(aBr,0.05),2.2)")+"; vMet=aMet; vFl=aFl;")
+      .replace("#include <worldpos_vertex>","#include <worldpos_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz;");
+    sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying float vMet; varying float vFl; varying vec3 vSrgb; varying vec3 vWP;\n"+
+        "float lMet(vec3 c){float mx=max(c.r,max(c.g,c.b)),mn=min(c.r,min(c.g,c.b)),L=(mx+mn)*0.5; if(mx-mn<0.07&&L>0.52&&L<0.935)return 0.95; return 0.0;}\n"+
+        "float hHash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }\n"+
+        "float hLine(vec3 w){ vec2 q=vec2(w.y*900.0+w.z*900.0, floor(w.x*6.0)); return hHash(floor(q))*0.6+hHash(floor(q*0.37))*0.4; }")
+      .replace("#include <roughnessmap_fragment>","float metalnessFactor="+(kind==="l"?"lMet(vSrgb)":"(vMet!=vMet?0.1:(vMet<-0.5?lMet(vSrgb):clamp(vMet,0.0,1.0)))")+";\nfloat roughnessFactor=metalnessFactor>0.6?(0.20+0.12*hLine(vWP)):(metalnessFactor>0.25?0.40:0.55);\nmetalnessFactor=metalnessFactor>0.6?1.0:metalnessFactor;")
       .replace("#include <metalnessmap_fragment>","")
       .replace("#include <normal_fragment_maps>","#include <normal_fragment_maps>\nif(dot(normal,vViewPosition)<0.0) normal=-normal;")
       .replace("#include <dithering_fragment>","#include <dithering_fragment>\nif(vFl>0.5) gl_FragColor=linearToOutputTexel(vec4(vColor.rgb,diffuseColor.a));");
@@ -67,7 +70,7 @@ function v3SetLine(o,k,P,N,C){
 function v3Init(){
   const cv=document.getElementById("cv");
   const R=new T3.WebGLRenderer({canvas:cv, antialias:true, preserveDrawingBuffer:true});
-  R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.95;
+  R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.82;
   R.shadowMap.enabled=true; R.shadowMap.type=T3.PCFSoftShadowMap;
   const sc=new T3.Scene(); sc.background=new T3.Color(0xe7ebee);
   const L=ROOMBUS.L, cx=(L.dMinX+L.gMaxX)/2*MM, cz=(L.backZ+L.frontZ)/2*MM, W=(L.gMaxX-L.dMinX)*MM, D=(L.frontZ-L.backZ)*MM;
@@ -94,6 +97,13 @@ function v3Init(){
   v3Inter("room",[0,0,0],1); v3Inter("dyn",[0,0,0],1);
   v3Inter("filler",[-3680,1128,L.fillerZ],4); v3Line("line",[8000,0,0],5);
   V3P.ready=true;
+}
+/* 실제 장면을 찍어 반사에 사용 (파우치와 같은 방식) — 형상을 처음 받은 뒤 한 번 */
+function v3EnvCapture(){
+  const pm=new T3.PMREMGenerator(V3P.R), sc=V3P.sc, c=[-1.2,1.7,1.2]; sc.position.set(-c[0],-c[1],-c[2]); sc.updateMatrixWorld(true);
+  const keep=V3P.inner&&V3P.inner.visible; if(V3P.inner) V3P.inner.visible=true;
+  const rt=pm.fromScene(sc,.02,.05,40); sc.position.set(0,0,0); sc.updateMatrixWorld(true); if(V3P.inner) V3P.inner.visible=keep;
+  sc.environment=rt.texture;
 }
 const appWin=k=>UNI_HUB.win(k);
 /* 형상 받기 : 방(정적 · 판 바뀔 때만) · 팩 · 두 설비 (설비는 번갈아 · 초당 약 30 회) */

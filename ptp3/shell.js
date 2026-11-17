@@ -24,14 +24,14 @@ let last=0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.1,last?(now-last)/1000:0); last=now;
-  walkTick(dt); v3Frame(now);
+  walkTick(dt); crew3Tick(dt); v3Frame(now);
   if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps · 형상 "+V3P.t.genMs.toFixed(1)+" ms"; }
 }
 function boot(){
   if(!appsReady()){ setTimeout(boot,100); return; }
-  v3Init(); v3Orbit(); walkBind();
-  v3Gen(true); v3Gen(true); gridBuild();
+  v3Init(); v3Orbit(); walkBind(); crew3Init();
+  v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
   document.querySelectorAll("#views button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
-  $("#load").style.display="none"; hud(); requestAnimationFrame(loop);
+  $("#load").style.display="none"; setView("F"); requestAnimationFrame(loop);   /* 1인칭이 기본 (11/17 사용자 지시) */
 }
 boot();

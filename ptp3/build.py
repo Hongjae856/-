@@ -27,15 +27,23 @@ APP_PATCH = [
     ("window.UNI_GEN=function(cam){",
      "window.UNI_ROOM=function(){ if(!ROOM||ROOM.ver!==HUB.roomVer){ ROOM=buildRoom(); ROOM.ver=HUB.roomVer; } return ROOM; };\n"
      "window.UNI_DYN=function(){ const fw=HUB.win('filler'), ink=(fw&&fw.UNI_INK&&fw.UNI_INK())||{ink:[1,1,1],film:'#dfeaf0',foil:'#cfd3d8'}; return packsMesh(ink); };\n"
-     "window.UNI_GEN=function(cam){", 1),
+     "window.UNI_GEN=function(cam){", 1, ("filler", "line")),
+    # PTP 원본 작업자 모형은 그리지 않고 위치만 셸에 알림 → 셸이 파우치 작업자(human.js)로 그림 (11/17 사용자 지시 : 작업자 디자인 파우치처럼)
+    ("worker3=function(){ WK.forEach(drawWorker); };",
+     "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
+    ("worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});",
+     "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "view3.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
+FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
 
 def app(key: str) -> str:
     text = ONE.patched(key)
-    for old, new, n in APP_PATCH:
+    for old, new, n, keys in APP_PATCH:
+        if key not in keys:
+            continue
         c = text.count(old)
         if c != n:
             sys.exit(f"{key}: '{old[:50]}' 가 {c} 번 (기대 {n})")
@@ -46,7 +54,8 @@ def app(key: str) -> str:
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    js = "\n".join(f"/* ── {name} ── */\n" + ((ROOT / "ptp_one" / name) if name in FROM_ONE else (HERE / name)).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
+    src = lambda n: (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
         if "</script" in t.lower():
