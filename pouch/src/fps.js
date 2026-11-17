@@ -1,6 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 모듈 (다른 IDT V12 에서 이식 · 사용자 제공 11/10)
    · 변경점 : advance() 이동 거리 반환, host.eyeY() 로 계단 · 데크 눈높이 보정 (파우치 IDT 추가)
+   · 11/17 공통 조작 표시 : 보이는 거리(host.look) 안에서 조준 · 손 닿는 거리(host.inReach) 안에서만 조작, 밖이면 host.tooFar · '가까이 가세요'
    ═══════════════════════════════════════════════════════════════════ */
 // 일반 script에서 사용할 수 있는 독립 모듈. Y-up, yaw=0일 때 -Z 전방.
 function createIDTFirstPerson(host) {
@@ -36,7 +37,7 @@ function createIDTFirstPerson(host) {
   function rayDistance(t) {
     const cp=Math.cos(pose.pitch);
     const direction=[-Math.sin(pose.yaw)*cp,-Math.sin(pose.pitch),-Math.cos(pose.yaw)*cp];
-    let near=0, far=t.reach ?? host.reach;
+    let near=0, far=t.reach ?? host.look ?? host.reach;
     for(const [i,axis] of ['x','y','z'].entries()) {
       const half=[t.w,t.h,t.d][i]/2, offset=t[axis]-pose[axis], dir=direction[i];
       if(Math.abs(dir)<1e-8){if(Math.abs(offset)>half)return Infinity;continue;}
@@ -61,6 +62,7 @@ function createIDTFirstPerson(host) {
 function use(){
     if(!ready())return;
     const t=select(host.targets()); if(!t)return;
+    if(host.inReach && !host.inReach(t,pose)){host.tooFar?.(t,pose);return;}
     if(!t.hmiPose){host.use(t);return;}
     if(host.canOpenHMI?.(t)===false)return;
     returnPose={...pose};monitor=t;mode='approach';unlock();
@@ -113,12 +115,12 @@ function use(){
     host.setCamera({...pose});
     const list=ready()?host.targets():[];
     target=select(list);ui.hidden=!ready();
-    label.textContent=target ? target.name+' · 좌클릭' : '';
+    label.textContent=!target ? '' : (!host.inReach||host.inReach(target,pose)) ? target.name+' · 좌클릭' : (host.farText?.(target,pose) ?? '가까이 가세요 · '+target.name);
     const goal=list.find(t=>t.goal);
     if(goal && host.showGuide?.()!==false){
       const angle=Math.atan2(-(goal.x-pose.x),-(goal.z-pose.z))-pose.yaw;
       const a=Math.atan2(Math.sin(angle),Math.cos(angle));
-      guide.textContent=(Math.abs(a)<.22?'↓':a>0?'←':'→')+' '+goal.name;
+      guide.textContent=(Math.abs(a)<.22?'↓':a>0?'←':'→')+' '+goal.name+(host.goalDist?' · '+host.goalDist(goal,pose).toFixed(1)+' m':'');
     }else guide.textContent='';
     host.highlight?.(host.showGuide?.()===false?null:goal??null,target);
   }

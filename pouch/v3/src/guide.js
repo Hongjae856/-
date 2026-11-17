@@ -23,18 +23,19 @@ function guideTarget(){
   }catch(e){}
   return null;
 }
+/* 3D 표시 : 공통 모듈 aimmark.js (11/17 사용자 결정 — 투시 화살표 · 상자 대신 조작 지점 마커 · 가려지면 안 보임 · 화면 밖은 가장자리 화살표) */
+const _grc=new T3.Raycaster();
+function guideOcc(eye,q){ const d=Math.hypot(q[0]-eye[0],q[1]-eye[1],q[2]-eye[2]); if(d<.1) return false;
+  _grc.set(new T3.Vector3(...eye),new T3.Vector3(q[0]-eye[0],q[1]-eye[1],q[2]-eye[2]).normalize()); _grc.far=d-.08;
+  return _grc.intersectObjects(V3.scene.children,true).some(h=>h.object.visible&&h.object.isMesh&&!(h.object.material&&h.object.material.transparent)&&!G3.own.has(h.object)); }
 function guide3D(dt){
   if(!V3||!V3.scene) return;
-  if(!G3.m){ const mat=new T3.MeshBasicMaterial({color:0xffcc00}), G=new T3.Group();
-    const cone=new T3.Mesh(new T3.ConeGeometry(.075,.16,20),mat); cone.rotation.x=Math.PI; cone.position.y=.08; G.add(cone);
-    const sh=new T3.Mesh(new T3.CylinderGeometry(.028,.028,.2,14),mat); sh.position.y=.26; G.add(sh);
-    const ol=new T3.Mesh(new T3.ConeGeometry(.088,.18,20),new T3.MeshBasicMaterial({color:0x7a5a00,side:T3.BackSide})); ol.rotation.x=Math.PI; ol.position.y=.08; G.add(ol);
-    G.renderOrder=999; G.traverse(o=>{ if(o.material){ o.material.depthTest=false; o.material.transparent=true; o.renderOrder=999; } });
-    V3.scene.add(G); G3.m=G;
-    const ring=new T3.Mesh(new T3.TorusGeometry(.13,.012,8,40),new T3.MeshBasicMaterial({color:0xffcc00,transparent:true,depthTest:false})); ring.renderOrder=998; V3.scene.add(ring); G3.ring=ring; }
-  const p=guideTarget(); G3.m.visible=G3.ring.visible=!!p; if(!p) return;
-  G3.t+=dt; const b=Math.abs(Math.sin(G3.t*3.2))*.09;
-  G3.m.position.set(p[0],p[1]+.12+b,p[2]); G3.m.rotation.y=G3.t*1.6;
-  const s=1+.25*Math.sin(G3.t*4); G3.ring.position.set(p[0],p[1],p[2]); G3.ring.scale.setScalar(s); G3.ring.lookAt(R3.eye?new T3.Vector3(...R3.eye):V3.camera.position);
-  G3.ring.material.opacity=.55+.35*Math.sin(G3.t*4);
+  if(!G3.am){ const n0=V3.scene.children.length; G3.am=createAimMark({T3, scene:V3.scene, camera:()=>V3.camera, canvas:()=>document.getElementById("cv3d"), unit:1, occluded:guideOcc});
+    G3.own=new Set(); V3.scene.children.slice(n0).forEach(o=>o.traverse(x=>G3.own.add(x))); }
+  const busy=document.querySelectorAll(".modal.on").length>0||!document.getElementById("splash").classList.contains("hide");
+  const fp=typeof fpActive==="function"&&fpActive(), eye=R3.eye;
+  let goal=null, aim=null;
+  if(fp){ goal=FP.hl.goal?fpAM(FP.hl.goal):null; aim=FP.hl.aim?fpAM(FP.hl.aim):null; }
+  if(!goal){ const p=guideTarget(); if(p) goal={id:"guide",name:"다음 작업",c:p,s:[.08,.08,.08],pt:p}; }
+  G3.res=G3.am.update({eye, goal, aim:fp?aim:null, off:busy||!eye||(fp&&FP.mod&&FP.mod.mode!=="walk")});
 }

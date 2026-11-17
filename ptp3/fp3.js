@@ -4,7 +4,7 @@
      → 3D 위치(아래 표 · 장치 번호 라벨 · 장비 시점 위치에서 산출, 일부 추정)에 상자로 둠. 누르면 앱의 그 요소를 그대로 누름
    · 설비 화면 : 누르면 화면 앞으로 다가가고(시점 고정) 오른쪽 설비 화면을 조작 — F 또는 Esc 로 뒤로
    · 1인칭 중에는 앱의 타일 · 판넬 버튼은 현황만(직접 클릭 막음) — 파우치와 같음
-   · 다음 작업 : 앱 안내(노란 테두리 대상)를 3D 노란 화살표 · 고리로 표시
+   · 대상 표시 : 공통 모듈 idt_common/aimmark.js (11/17 사용자 결정 — 조작 지점 마커 · 손 닿는 거리 1.2 m 안에서만 조작 · 가려지면 안 보임 · 화면 밖은 가장자리 화살표)
    ═══════════════════════════════════════════════════════════════════ */
 const FP3={T:[], aim:null, goal:null, hmi:false, t:0, ui:null};
 /* 3D 위치 (mm) — 충전기 : 장치 라벨(M3LBL, 2D → 3D) · 판넬 'P' / 포장라인 : 장비 시점 중심(m1~m5) */
@@ -31,17 +31,35 @@ function fp3Build(){
         if(e) q=[4*(e[1]-620)-3680, 4*(380-e[2])+1128, 560]; }catch(x){} }
     q=q||(CREW.cur==="F"?[-3300,1200,560]:[4000,1200,650]);
     FP3.T.push({id:"lcCheck", nm:"점검 : "+(((d.getElementById("cTitle")||{}).textContent)||"확인"), p:q, s:[.6,.6,.6], el:lc}); }
-  FP3.goal=h?(FP3.T.find(t=>t.el&&(t.el===h||t.el.contains(h)))||null):null;
+  FP3.goal=h&&MODE3.kind!=="free"?(FP3.T.find(t=>t.el&&(t.el===h||t.el.contains(h)))||null):null;   /* 자유모드 : 다음 작업 안내 없음 */
 }
-/* 조준 : 화면 가운데 방향과 가장 가까운 대상 (2.6 m 안) */
+/* 조준 : 화면 가운데 방향과 가장 가까운 대상 (보이는 거리 6 m 안 · 조작은 손 닿는 거리 1.2 m 안만) */
+const fp3T=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s, pt:fp3Snap(t), reachMax:t.reachMax};
+/* 조작 지점을 실제 설비 표면에 붙임 : 위치 값(일부 추정)에서 수평 4방향으로 광선 → 0.7 m 안의 가장 가까운 설비 면 (없으면 위치 값 그대로) (실별 1회 계산 · 저장)
+   설비 앞 빈 공간에 놓인 위치 값 때문에 마커가 공중에 뜨는 것을 막음 */
+const FP3_SNAP={};
+function fp3Snap(t){ if(t.id==="lcCheck") return null; const k=CREW.cur+":"+t.id+":"+t.p.join(","); if(k in FP3_SNAP) return FP3_SNAP[k];
+  const L=[]; for(const [n,o] of Object.entries(V3P.objs)) if(n!=="room"&&o&&o.m&&o.m[0]){ o.m[0].geometry.boundingSphere=null; L.push(o.m[0]); }
+  if(!L.length) return null; const o3=new T3.Vector3(t.p[0]*MM,t.p[1]*MM,t.p[2]*MM); let best=null;
+  for(const d of [[0,0,-1],[0,0,1],[1,0,0],[-1,0,0]]){ _rc.set(o3,new T3.Vector3(...d)); _rc.far=.7; const h=_rc.intersectObjects(L,false)[0]; if(h&&(!best||h.distance<best.distance)) best=h; }
+  return FP3_SNAP[k]=best?[best.point.x,best.point.y,best.point.z]:null; }
+const fp3Eye=()=>[WALK.x*MM,WALK.y*MM,WALK.z*MM];
 function fp3Aim(){
-  FP3.aim=null; if(V3P.view==="orbit"||FP3.hmi) return; const f=walkFwd(); let best=1e9;
-  for(const t of FP3.T){ const dx=t.p[0]-WALK.x, dy=t.p[1]-WALK.y, dz=t.p[2]-WALK.z, L=Math.hypot(dx,dy,dz); if(L>2600) continue;
-    const c=(dx*f[0]+dy*f[1]+dz*f[2])/L, r=Math.max(t.s[0],t.s[1])*1000; const ang=Math.acos(Math.min(1,c)), tol=Math.atan2(r*.7+60,L);
-    if(ang<tol&&L<best){ best=L; FP3.aim=t; } }
+  FP3.aim=null; FP3.aimIn=false; if(V3P.view==="orbit"||FP3.hmi) return; const f=walkFwd(); let best=1e9;
+  for(const t of FP3.T){ const q=fp3Snap(t), P=q?[q[0]*1000,q[1]*1000,q[2]*1000]:t.p, dx=P[0]-WALK.x, dy=P[1]-WALK.y, dz=P[2]-WALK.z, L=Math.hypot(dx,dy,dz); if(L>AIM_LOOK*1000) continue;
+    const c=(dx*f[0]+dy*f[1]+dz*f[2])/L, r=Math.max(t.s[0],t.s[1])*1000; const ang=Math.acos(Math.min(1,c)), tol=Math.atan2(r*.5+40,L);
+    const sc=ang/tol+L/20000; if(ang<tol&&sc<best){ best=sc; FP3.aim=t; } }   /* 십자선에 가장 가까운 대상 우선 */
+  if(FP3.aim) FP3.aimIn=aimInReach(fp3T(FP3.aim),fp3Eye());
 }
+/* 가림 판정 : 설비 형상에 광선 (0.25 초마다 · 조준이 손 닿는 거리 밖일 때만) */
+const _rc=new T3.Raycaster();
+function fp3Occ(eye,q){ const d=Math.hypot(q[0]-eye[0],q[1]-eye[1],q[2]-eye[2]); if(d<.1) return false;
+  _rc.set(new T3.Vector3(...eye),new T3.Vector3(q[0]-eye[0],q[1]-eye[1],q[2]-eye[2]).normalize()); _rc.far=d-.08;
+  const L=[]; for(const o of Object.values(V3P.objs)) if(o&&o.m&&o.m[0]){ o.m[0].geometry.boundingSphere=null; L.push(o.m[0]); }
+  return _rc.intersectObjects(L,false).length>0; }
 function fp3Act(){
   const t=FP3.aim; if(!t) return false;
+  if(!FP3.aimIn){ FP3.far=performance.now(); fp3Hud(); return false; }   /* 손 닿는 거리 밖 */
   if(t.hmi){ fp3Hmi(true); return true; }
   const d=fp3Doc(); if(!d) return false; d.body.classList.remove("fpLock"); try{ t.el.click(); }finally{ d.body.classList.add("fpLock"); }
   return true;
@@ -55,17 +73,14 @@ function fp3Hmi(on){
 }
 function fp3Hud(){ const h=$("#fpTip"); if(!h) return;
   if(V3P.view==="orbit"||!CREW.cur){ h.hidden=true; return; } h.hidden=false;
+  const R=FP3.res||{}, a=FP3.aim, g=FP3.goal, m=x=>x==null?"":" · "+x.toFixed(1)+" m";
   h.innerHTML=FP3.hmi?"<b>설비 화면 조작 중</b> · 오른쪽 설비 화면을 누르세요 · <kbd>F</kbd> 또는 <kbd>Esc</kbd> 뒤로"
-    :FP3.aim?"<kbd>E</kbd> / 클릭 · <b>"+FP3.aim.nm+"</b>"+(FP3.goal===FP3.aim?" <s>다음 작업</s>":""):(FP3.goal?"다음 작업 : <b>"+FP3.goal.nm+"</b> (노란 화살표)":""); }
-/* 3D : 조준 상자 · 다음 작업 화살표 */
+    :a&&FP3.aimIn?"<kbd>E</kbd> / 클릭 · <b>"+a.nm+"</b>"+(g===a?" <s>다음 작업</s>":"")
+    :a&&!R.aimHidden?"<span class='far'>가까이 가세요"+m(R.aimDist)+"</span> · <b>"+a.nm+"</b>"+(g===a?" <s>다음 작업</s>":"")
+    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" <em>"+(R.goalDir||"")+"</em>":""; }
+/* 3D : 조작 지점 마커 (공통 모듈) */
 function fp3Init(){
-  const box=new T3.LineSegments(new T3.EdgesGeometry(new T3.BoxGeometry(1,1,1)),new T3.LineBasicMaterial({color:0xffffff,depthTest:false,transparent:true,opacity:.95}));
-  box.renderOrder=9; box.visible=false; V3P.sc.add(box);
-  const ar=new T3.Group(), am=new T3.MeshBasicMaterial({color:0xffd22e,depthTest:false});
-  const c=new T3.Mesh(new T3.ConeGeometry(.07,.16,18),am); c.rotation.x=Math.PI; ar.add(c); const s=new T3.Mesh(new T3.CylinderGeometry(.025,.025,.16,12),am); s.position.y=.16; ar.add(s);
-  const ring=new T3.Mesh(new T3.TorusGeometry(.12,.012,8,32),am); ring.rotation.x=Math.PI/2; ring.position.y=-.2; ar.add(ring);
-  ar.children.forEach(m=>m.renderOrder=10); ar.visible=false; V3P.sc.add(ar);
-  FP3.ui={box,ar};
+  FP3.am=createAimMark({T3, scene:V3P.sc, camera:()=>V3P.cam, canvas:()=>$("#cv"), unit:1, occluded:fp3Occ});
   /* 앱 화면 : 1인칭 중 타일 · 판넬 버튼은 현황만 / 설비 화면은 다가간 뒤에만 */
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(!w) continue; const st=w.document.createElement("style");
     st.textContent="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock .tile{cursor:default}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}";
@@ -81,10 +96,9 @@ function fp3Key(e){
 function fp3Tick(now){
   const on=!!CREW.cur&&V3P.view!=="orbit";
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(w&&w.document.body) w.document.body.classList.toggle("fpLock",on&&APPK[CREW.cur]===k); }
-  if(!on){ if(FP3.ui){ FP3.ui.box.visible=false; FP3.ui.ar.visible=false; } if(FP3.hmi) fp3Hmi(false); fp3Hud(); return; }
+  if(!on){ if(FP3.am) FP3.am.hide(); if(FP3.hmi) fp3Hmi(false); fp3Hud(); return; }
   if(now-FP3.t>300){ FP3.t=now; fp3Build(); }
-  fp3Aim(); const U=FP3.ui;
-  if(FP3.aim){ const t=FP3.aim; U.box.visible=true; U.box.position.set(t.p[0]*MM,t.p[1]*MM,t.p[2]*MM); U.box.scale.set(...t.s); U.box.material.color.set(FP3.goal===t?0xffd22e:0xffffff); } else U.box.visible=false;
-  if(FP3.goal&&!FP3.hmi){ const p=FP3.goal.p; U.ar.visible=true; U.ar.position.set(p[0]*MM,p[1]*MM+FP3.goal.s[1]/2+.32+Math.sin(now/260)*.05,p[2]*MM); } else U.ar.visible=false;
+  fp3Aim();
+  FP3.res=FP3.am.update({eye:fp3Eye(), goal:FP3.hmi?null:fp3T(FP3.goal), aim:FP3.hmi?null:fp3T(FP3.aim), now, off:document.body.classList.contains("appModal")});
   fp3Hud();
 }

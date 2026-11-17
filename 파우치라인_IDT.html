@@ -4218,6 +4218,7 @@ function bindHeader(){
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 모듈 (다른 IDT V12 에서 이식 · 사용자 제공 11/10)
    · 변경점 : advance() 이동 거리 반환, host.eyeY() 로 계단 · 데크 눈높이 보정 (파우치 IDT 추가)
+   · 11/17 공통 조작 표시 : 보이는 거리(host.look) 안에서 조준 · 손 닿는 거리(host.inReach) 안에서만 조작, 밖이면 host.tooFar · '가까이 가세요'
    ═══════════════════════════════════════════════════════════════════ */
 // 일반 script에서 사용할 수 있는 독립 모듈. Y-up, yaw=0일 때 -Z 전방.
 function createIDTFirstPerson(host) {
@@ -4253,7 +4254,7 @@ function createIDTFirstPerson(host) {
   function rayDistance(t) {
     const cp=Math.cos(pose.pitch);
     const direction=[-Math.sin(pose.yaw)*cp,-Math.sin(pose.pitch),-Math.cos(pose.yaw)*cp];
-    let near=0, far=t.reach ?? host.reach;
+    let near=0, far=t.reach ?? host.look ?? host.reach;
     for(const [i,axis] of ['x','y','z'].entries()) {
       const half=[t.w,t.h,t.d][i]/2, offset=t[axis]-pose[axis], dir=direction[i];
       if(Math.abs(dir)<1e-8){if(Math.abs(offset)>half)return Infinity;continue;}
@@ -4278,6 +4279,7 @@ function createIDTFirstPerson(host) {
 function use(){
     if(!ready())return;
     const t=select(host.targets()); if(!t)return;
+    if(host.inReach && !host.inReach(t,pose)){host.tooFar?.(t,pose);return;}
     if(!t.hmiPose){host.use(t);return;}
     if(host.canOpenHMI?.(t)===false)return;
     returnPose={...pose};monitor=t;mode='approach';unlock();
@@ -4330,12 +4332,12 @@ function use(){
     host.setCamera({...pose});
     const list=ready()?host.targets():[];
     target=select(list);ui.hidden=!ready();
-    label.textContent=target ? target.name+' · 좌클릭' : '';
+    label.textContent=!target ? '' : (!host.inReach||host.inReach(target,pose)) ? target.name+' · 좌클릭' : (host.farText?.(target,pose) ?? '가까이 가세요 · '+target.name);
     const goal=list.find(t=>t.goal);
     if(goal && host.showGuide?.()!==false){
       const angle=Math.atan2(-(goal.x-pose.x),-(goal.z-pose.z))-pose.yaw;
       const a=Math.atan2(Math.sin(angle),Math.cos(angle));
-      guide.textContent=(Math.abs(a)<.22?'↓':a>0?'←':'→')+' '+goal.name;
+      guide.textContent=(Math.abs(a)<.22?'↓':a>0?'←':'→')+' '+goal.name+(host.goalDist?' · '+host.goalDist(goal,pose).toFixed(1)+' m':'');
     }else guide.textContent='';
     host.highlight?.(host.showGuide?.()===false?null:goal??null,target);
   }
@@ -5076,9 +5078,11 @@ function fpGoalId(T){
   return null;
 }
 let FP_T=[];
+/* 공통 조작 표시(aimmark.js) 형식 : 중심 c · 크기 s (m) · 조작 지점 pt */
+const fpAM=t=>t&&{id:t.id, name:t.name, c:[t.x,t.y,t.z], s:[t.w,t.h,t.d], pt:t.pt, reachMax:t.reachMax};
 function fpTargets(){
   const T=fpTargetDefs(), g=(S.session&&(!isExam()||hintOn))?fpGoalId(T):null;
-  for(const t of T){ t.goal=t.id===g; if(t.reach==null) t.reach=FP_REACH; }
+  for(const t of T){ t.goal=t.id===g; }   /* 조준 = 보이는 거리 6 m · 조작 = 손 닿는 거리 1.2 m (공통 aimmark.js · 11/17) */
   FP_T=T; return T;
 }
 /* 실 사이 벽(z = 0, 문 없음) · 설비 화면 뒷면 가림 */
@@ -5138,7 +5142,10 @@ function fpReturnPart(){
 const fpBusy=()=>!S||!S.session||!S.session.active||!$("#splash").classList.contains("hide")||$$(".modal.on").length>0;
 
 function fpInit(){
-  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH,
+  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH, look:AIM_LOOK,
+    inReach:(t,p)=>aimInReach(fpAM(t),[p.x,p.y,p.z]), goalDist:(t,p)=>aimReachDist(fpAM(t),[p.x,p.y,p.z]),
+    farText:(t,p)=>"가까이 가세요 · "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m)",
+    tooFar:(t,p)=>toast("가까이 가세요 — "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m · 손 닿는 거리 1.2 m)"),
     setCamera:p=>{ cam.fp=p; }, canStand:fpCanStand, eyeY:fpEyeY, targets:fpTargets,
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on) toast("설비 화면 조작 중 — 시점 회전 잠금 · F 또는 Esc 로 뒤로"); if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
@@ -5173,14 +5180,7 @@ function fpFrame(now){
 }
 function fpOverlay(g,K){
   if(!fpActive()) return;
-  const edge=(t,col,lw)=>{ const xs=[t.x-t.w/2,t.x+t.w/2], ys=[t.y-t.h/2,t.y+t.h/2], zs=[t.z-t.d/2,t.z+t.d/2], P=[];
-    for(const x of xs) for(const y of ys) for(const z of zs) P.push(prj(x,y,z));
-    if(P.some(q=>!q)) return;
-    const E2=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
-    g.lineWidth=lw*K; g.strokeStyle=col; g.beginPath(); for(const [a,b] of E2){ g.moveTo(P[a].x,P[a].y); g.lineTo(P[b].x,P[b].y); } g.stroke(); };
-  const {goal,aim}=FP.hl;
-  if(goal&&goal!==aim) edge(goal,"rgba(255,214,60,.95)",2.6);
-  if(aim) edge(aim,aim===goal?"rgba(120,255,160,.98)":"rgba(255,255,255,.9)",2.2);
+  /* 대상 상자 테두리는 그리지 않음 — 조작 지점 마커(guide.js · aimmark.js)로 표시 (11/17 사용자 결정) */
   const f=S.f, carry=f.rollCarry==="red"?"적색 인쇄 은박 롤 운반 중 (2인 1조) · R 반납":"";
   const lv=FP.feet>=FL.deckY-.05?"2층 데크":FP.feet>.05?"계단":"1층";
   g.textAlign="left"; g.textBaseline="alphabetic"; g.font="800 "+(12*K).toFixed(0)+"px sans-serif";
@@ -5251,6 +5251,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:31,d:'2026-11-17',t:'조작 대상 표시 방식 변경 (세 IDT 공통 모듈 idt_common/aimmark.js · 11/17 사용자 결정) — 설비를 투시하던 큰 상자 테두리 · 노란 화살표를 없애고, 실제 누르는 지점에 작은 원형 마커(다음 작업 = 노란 점 + 고리, 조준 = 초록 고리 · 멀면 회색 고리)를 붙임. 설비에 가려지면 마커도 가려지고, 다음 작업이 화면 밖이면 화면 가장자리에 노란 화살표 + 이름 · 거리. 손 닿는 거리(가슴 높이에서 1.2 m) 안에서만 조작되고 밖이면 「가까이 가세요 (거리)」 표시'},
  {v:30, d:"2026-11-17", t:"메인화면 모드 버튼 글자가 단어 중간에서 끊기지 않도록 줄바꿈 정리(OEE 관리 / 대시보드 · 이상사례 대처 / 교육 등), 버튼 글자 크기 조정"},
  {v:29, d:"2026-11-17", t:"메인화면을 모드 → 작업자 선택으로 변경(① 기본 · 심화 · 시연 · 자유 · OEE 중 모드 선택 → ② 상단 충전실 작업자 / 포장실 작업자를 누르면 그 작업장 1인칭으로 시작, 작업자마다 그 실의 단계 적용 · 시연모드도 작업자별 단계), 교육 중 상단 [충전실 작업자 · 포장실 작업자] 버튼으로 작업자 교체(기본 · 심화 · 시연은 작업장마다 진행 상태를 따로 보관하고 이어서 진행, 자유 · 이상사례는 같은 라인 공유), 자유모드 신설(순서 · 감점 · 평가 없음, 설비 인터록 해제 — 실제와 다름, 문 · 덮개 자유 개폐 : 충전기 안전도어 · 2번 호퍼 뚜껑 · 충전실 남쪽 출입문 2 · 카토너 아크릴 문 3 · 포장실 북쪽 출입문, [정상 운전 상태로] · [전체 OFF 초기화] 버튼, 두 실 모두 전원 OFF 에서 시작)"},
  {v:28, d:"2026-11-17", t:"충전기 공포배출 구조 반영(사용자 설명) : 커팅 후 정상 제품은 슈트 → 배출 컨베이어, 불량(공포 · 비전 인쇄 NG · 실링 불량 · 정렬컨베어 OFF 중 제품)은 슈트 입구 게이트가 젖혀져(공포배출 실린더 · 10열 일괄) 커팅 바로 아래 슈트 안쪽 공포배출 컨베이어로 수직 낙하 → 남쪽 기기 끝 불량통으로 이송 · 쌓임(공포는 납작하게 표시), 충전기 Input/Output 화면 공포배출 표시 연동, 라인 클리어런스에 공포배출 컨베이어 · 불량통 잔량 확인 추가(작업자가 남쪽 끝에서 컨베이어 끝 · 불량통 안을 확인), 실링 불량 판정을 스트로크 단위로 변경(게이트 일괄 배출에 맞춤)"},
@@ -5811,6 +5812,82 @@ function eduInit(){
   setInterval(()=>{ eduTick(); fixFocus(); },200);
 }
 
+/* ── common/aimmark.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   조작 대상 표시 — 모든 IDT 공통 (파우치 · 블리스터(PTP) · 병, 11/17 사용자 결정)
+   · 큰 가상 상자 테두리 · 설비를 투시하는 노란 화살표를 쓰지 않음 (거리감이 없어 헷갈림)
+   · 조작 지점 마커 : 실제로 누르는 지점(대상 면 중 눈에 가장 가까운 점 또는 지정 지점 pt)에 작은 원형 마커
+       - 다음 작업 = 노란 점 + 고리 (깜박임) · 조준 중 = 초록 고리(손 닿음) / 회색 고리(멂)
+       - 깊이 반영 : 설비에 가려지면 마커도 가려짐 (투시 안 함)
+       - 화면 밖 : 화면 가장자리에 노란 화살표 + 이름 · 거리
+   · 조작 거리 : 손 닿는 거리(가슴 높이에서 대상까지 1.2 m) 안에서만 조작 — 밖이면 '가까이 가세요 (거리)'
+   · 사용 : const AM=createAimMark({T3, scene, camera:()=>cam, canvas:()=>canvasEl, unit:1 (m)});
+            AM.update({eye:[x,y,z], goal:{c,s,pt,name}|null, aim:{...}|null, now}) → {aimIn, aimDist, goalDist, goalDir}
+            대상 형식 : c = 중심 [x,y,z], s = 크기 [w,h,d] (m), pt = 조작 지점(선택), name
+   ═══════════════════════════════════════════════════════════════════ */
+const AIM_REACH=1.2, AIM_LOOK=6, AIM_CHEST=.3;
+function aimNearest(t,p){ return [0,1,2].map(i=>Math.max(t.c[i]-t.s[i]/2,Math.min(t.c[i]+t.s[i]/2,p[i]))); }
+/* 손 닿는 거리 : 가슴(눈 - 0.3 m)에서 대상 상자의 가장 가까운 점까지 */
+function aimReachDist(t,eye){ const ch=[eye[0],eye[1]-AIM_CHEST,eye[2]], q=t.pt||aimNearest(t,ch); return Math.hypot(q[0]-ch[0],q[1]-ch[1],q[2]-ch[2]); }
+function aimInReach(t,eye){ return aimReachDist(t,eye)<=(t.reachMax||AIM_REACH); }
+function createAimMark(o){
+  const T3=o.T3, sc=o.scene, mat=(c,op)=>new T3.MeshBasicMaterial({color:c,transparent:true,opacity:op,depthTest:true,depthWrite:false,side:T3.DoubleSide});
+  const ring=(ri,ro,m)=>{ const x=new T3.Mesh(new T3.RingGeometry(ri,ro,40),m); x.renderOrder=20; return x; };
+  const dot=(r,m)=>{ const x=new T3.Mesh(new T3.CircleGeometry(r,28),m); x.renderOrder=21; return x; };
+  /* 다음 작업 : 노란 점 + 고리 (테두리 짙은 노랑으로 밝은 배경에서도 보임) */
+  const G=new T3.Group(); const gm=mat(0xffd22e,.95), gk=mat(0x7a5600,.9);
+  G.add(ring(.62,.8,gk)); G.add(ring(.66,.76,gm)); G.add(dot(.3,gm)); const gd=G.children[2];
+  /* 조준 : 초록(손 닿음) · 회색(멂) 고리 */
+  const A=new T3.Group(); const am=mat(0x3ddc84,.98), ak=mat(0x0d3b22,.85);
+  A.add(ring(.92,1.14,ak)); A.add(ring(.96,1.1,am));
+  G.visible=A.visible=false; sc.add(G); sc.add(A);
+  /* 화면 가장자리 화살표 */
+  const E=document.createElement("div"); E.className="aimEdge"; E.hidden=true;
+  E.innerHTML='<i></i><span></span>'; document.body.appendChild(E);
+  if(!document.getElementById("aimEdgeCss")){ const st=document.createElement("style"); st.id="aimEdgeCss";
+    st.textContent=".aimEdge{position:fixed;z-index:60;pointer-events:none;display:flex;align-items:center;gap:6px;font:800 12.5px 'Malgun Gothic',sans-serif;color:#1d2a36}"+
+      ".aimEdge i{width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:20px solid #ffd22e;filter:drop-shadow(0 0 1px #7a5600) drop-shadow(0 1px 2px #0006)}"+
+      ".aimEdge span{background:#ffd22ef0;border:1px solid #7a5600;border-radius:8px;padding:2px 7px;white-space:nowrap}.aimEdge[hidden]{display:none}";
+    document.head.appendChild(st); }
+  const v=new T3.Vector3(), U=o.unit||1, occ={};
+  /* 조작 지점 : 지정 지점 또는 상자에서 눈에 가장 가까운 점 → 눈 쪽으로 조금 당김(자기 면에 묻히지 않게, 다른 설비에는 가려짐) */
+  function pointOf(t,eye){ const p=t.pt||aimNearest(t,eye), d=Math.hypot(eye[0]-p[0],eye[1]-p[1],eye[2]-p[2])||1, k=Math.min(.05,d*.04)/d; return {p:[p[0]+(eye[0]-p[0])*k,p[1]+(eye[1]-p[1])*k,p[2]+(eye[2]-p[2])*k], d}; }
+  function place(M,q,cam,size){ M.visible=true; M.position.set(q[0]*U,q[1]*U,q[2]*U); M.quaternion.copy(cam.quaternion); M.scale.setScalar(size*U); }
+  const sizeAt=d=>Math.max(.022,Math.min(.13,d*.02));
+  /* 가림 판정(선택 · 0.25 초마다) : o.occluded(eye, point) */
+  function hidden(t,eye,q,now){ if(!o.occluded) return false; const k=t.id||t.name||"?"; const c=occ[k];
+    if(c&&now-c.t<250) return c.v; let r=false; try{ r=!!o.occluded(eye,q); }catch(e){} occ[k]={t:now,v:r}; return r; }
+  function dirOf(cam,q){ cam.updateMatrixWorld(); v.set(q[0]*U,q[1]*U,q[2]*U).applyMatrix4(cam.matrixWorldInverse); const a=Math.atan2(v.x,-v.z);
+    return {a, behind:v.z>0, txt:Math.abs(a)<.35?"↑ 앞":Math.abs(a)>2.4?"↓ 뒤":a<0?"← 왼쪽":"→ 오른쪽"}; }
+  function edge(cam,q,name,dist){
+    const cv=o.canvas&&o.canvas(); if(!cv){ E.hidden=true; return false; } const R=cv.getBoundingClientRect(); if(R.width<50){ E.hidden=true; return false; }
+    v.set(q[0]*U,q[1]*U,q[2]*U).project(cam); const dz=dirOf(cam,q); let x=v.x, y=v.y;
+    if(!dz.behind&&Math.abs(x)<=.96&&Math.abs(y)<=.92){ E.hidden=true; return false; }   /* 화면 안 : 화살표 없음 */
+    if(dz.behind){ x=-x; y=-y; if(Math.hypot(x,y)<1e-3){ x=0; y=-1; } }
+    const s=1/Math.max(Math.abs(x)/.9,Math.abs(y)/.82,1e-6); x*=s; y*=s;
+    const px=R.left+(x*.5+.5)*R.width, py=R.top+(1-(y*.5+.5))*R.height, ang=Math.atan2(-y*R.height,x*R.width);
+    E.hidden=false; E.style.flexDirection=Math.cos(ang)<0?"row":"row-reverse"; E.firstChild.style.transform="rotate("+ang+"rad)";
+    const w=E.offsetWidth||120, h=E.offsetHeight||24;   /* 화살표 · 이름이 3D 화면 안에 머물게 */
+    E.style.left=Math.max(R.left+6,Math.min(R.right-w-6,px-w/2))+"px"; E.style.top=Math.max(R.top+6,Math.min(R.bottom-h-6,py-h/2))+"px";
+    E.lastChild.textContent=name+" · "+dist.toFixed(1)+" m"; return true; }
+  return {
+    update(a){
+      const cam=o.camera(), eye=a.eye, now=a.now||performance.now(), out={aimIn:false,aimDist:null,goalDist:null,goalDir:"",aimHidden:false};
+      if(!cam||!eye||a.off){ G.visible=A.visible=false; E.hidden=true; return out; }
+      if(a.goal){ const {p,d}=pointOf(a.goal,eye); out.goalDist=aimReachDist(a.goal,eye); out.goalDir=dirOf(cam,p).txt;
+        place(G,p,cam,sizeAt(d)); const pu=.72+.28*Math.sin(now/180); G.children[1].material.opacity=.95*pu; gd.material.opacity=.95*pu;
+        if(!a.hideEdge) edge(cam,p,a.goal.name||"다음 작업",out.goalDist); else E.hidden=true;
+      } else { G.visible=false; E.hidden=true; }
+      if(a.aim){ const {p,d}=pointOf(a.aim,eye); out.aimDist=aimReachDist(a.aim,eye); out.aimIn=out.aimDist<=(a.aim.reachMax||AIM_REACH);
+        out.aimHidden=!out.aimIn&&hidden(a.aim,eye,p,now);
+        if(out.aimHidden) A.visible=false; else { place(A,p,cam,sizeAt(d)); const c=out.aimIn?0x3ddc84:0xb8c0c8; A.children[1].material.color.setHex(c); A.children[0].material.color.setHex(out.aimIn?0x0d3b22:0x39424b); }
+      } else A.visible=false;
+      return out; },
+    hide(){ G.visible=A.visible=false; E.hidden=true; },
+    pointOf, reachDist:aimReachDist, inReach:aimInReach
+  };
+}
+
 /* ── v3/guide.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    다음 작업 안내 (모든 모드 공통 · 11/16 사용자 지시) — 화면 요소는 노란 테두리, 3D 현장에는 노란 화살표(위아래로 움직임) + 노란 고리
@@ -5837,20 +5914,21 @@ function guideTarget(){
   }catch(e){}
   return null;
 }
+/* 3D 표시 : 공통 모듈 aimmark.js (11/17 사용자 결정 — 투시 화살표 · 상자 대신 조작 지점 마커 · 가려지면 안 보임 · 화면 밖은 가장자리 화살표) */
+const _grc=new T3.Raycaster();
+function guideOcc(eye,q){ const d=Math.hypot(q[0]-eye[0],q[1]-eye[1],q[2]-eye[2]); if(d<.1) return false;
+  _grc.set(new T3.Vector3(...eye),new T3.Vector3(q[0]-eye[0],q[1]-eye[1],q[2]-eye[2]).normalize()); _grc.far=d-.08;
+  return _grc.intersectObjects(V3.scene.children,true).some(h=>h.object.visible&&h.object.isMesh&&!(h.object.material&&h.object.material.transparent)&&!G3.own.has(h.object)); }
 function guide3D(dt){
   if(!V3||!V3.scene) return;
-  if(!G3.m){ const mat=new T3.MeshBasicMaterial({color:0xffcc00}), G=new T3.Group();
-    const cone=new T3.Mesh(new T3.ConeGeometry(.075,.16,20),mat); cone.rotation.x=Math.PI; cone.position.y=.08; G.add(cone);
-    const sh=new T3.Mesh(new T3.CylinderGeometry(.028,.028,.2,14),mat); sh.position.y=.26; G.add(sh);
-    const ol=new T3.Mesh(new T3.ConeGeometry(.088,.18,20),new T3.MeshBasicMaterial({color:0x7a5a00,side:T3.BackSide})); ol.rotation.x=Math.PI; ol.position.y=.08; G.add(ol);
-    G.renderOrder=999; G.traverse(o=>{ if(o.material){ o.material.depthTest=false; o.material.transparent=true; o.renderOrder=999; } });
-    V3.scene.add(G); G3.m=G;
-    const ring=new T3.Mesh(new T3.TorusGeometry(.13,.012,8,40),new T3.MeshBasicMaterial({color:0xffcc00,transparent:true,depthTest:false})); ring.renderOrder=998; V3.scene.add(ring); G3.ring=ring; }
-  const p=guideTarget(); G3.m.visible=G3.ring.visible=!!p; if(!p) return;
-  G3.t+=dt; const b=Math.abs(Math.sin(G3.t*3.2))*.09;
-  G3.m.position.set(p[0],p[1]+.12+b,p[2]); G3.m.rotation.y=G3.t*1.6;
-  const s=1+.25*Math.sin(G3.t*4); G3.ring.position.set(p[0],p[1],p[2]); G3.ring.scale.setScalar(s); G3.ring.lookAt(R3.eye?new T3.Vector3(...R3.eye):V3.camera.position);
-  G3.ring.material.opacity=.55+.35*Math.sin(G3.t*4);
+  if(!G3.am){ const n0=V3.scene.children.length; G3.am=createAimMark({T3, scene:V3.scene, camera:()=>V3.camera, canvas:()=>document.getElementById("cv3d"), unit:1, occluded:guideOcc});
+    G3.own=new Set(); V3.scene.children.slice(n0).forEach(o=>o.traverse(x=>G3.own.add(x))); }
+  const busy=document.querySelectorAll(".modal.on").length>0||!document.getElementById("splash").classList.contains("hide");
+  const fp=typeof fpActive==="function"&&fpActive(), eye=R3.eye;
+  let goal=null, aim=null;
+  if(fp){ goal=FP.hl.goal?fpAM(FP.hl.goal):null; aim=FP.hl.aim?fpAM(FP.hl.aim):null; }
+  if(!goal){ const p=guideTarget(); if(p) goal={id:"guide",name:"다음 작업",c:p,s:[.08,.08,.08],pt:p}; }
+  G3.res=G3.am.update({eye, goal, aim:fp?aim:null, off:busy||!eye||(fp&&FP.mod&&FP.mod.mode!=="walk")});
 }
 
 /* ── v3/lamp.js ── */

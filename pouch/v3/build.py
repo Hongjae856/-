@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("common", "aimmark.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -146,7 +146,7 @@ PATCH = {
 
 
 def load(folder: str, name: str) -> str:
-    base = {"old": OLD, "v3": SRC, "oee": H.parent.parent / "oee"}[folder]
+    base = {"old": OLD, "v3": SRC, "oee": H.parent.parent / "oee", "common": H.parent.parent / "idt_common"}[folder]
     text = (base / name).read_text(encoding="utf-8")
     if folder == "old" and name in RENAME_CV:
         text = re.sub(r"\bCV\b", "CVL", text)          # 새 3D 의 CV(배출 컨베이어) 와 이름 충돌 방지

@@ -154,9 +154,11 @@ function fpGoalId(T){
   return null;
 }
 let FP_T=[];
+/* 공통 조작 표시(aimmark.js) 형식 : 중심 c · 크기 s (m) · 조작 지점 pt */
+const fpAM=t=>t&&{id:t.id, name:t.name, c:[t.x,t.y,t.z], s:[t.w,t.h,t.d], pt:t.pt, reachMax:t.reachMax};
 function fpTargets(){
   const T=fpTargetDefs(), g=(S.session&&(!isExam()||hintOn))?fpGoalId(T):null;
-  for(const t of T){ t.goal=t.id===g; if(t.reach==null) t.reach=FP_REACH; }
+  for(const t of T){ t.goal=t.id===g; }   /* 조준 = 보이는 거리 6 m · 조작 = 손 닿는 거리 1.2 m (공통 aimmark.js · 11/17) */
   FP_T=T; return T;
 }
 /* 실 사이 벽(z = 0, 문 없음) · 설비 화면 뒷면 가림 */
@@ -216,7 +218,10 @@ function fpReturnPart(){
 const fpBusy=()=>!S||!S.session||!S.session.active||!$("#splash").classList.contains("hide")||$$(".modal.on").length>0;
 
 function fpInit(){
-  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH,
+  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH, look:AIM_LOOK,
+    inReach:(t,p)=>aimInReach(fpAM(t),[p.x,p.y,p.z]), goalDist:(t,p)=>aimReachDist(fpAM(t),[p.x,p.y,p.z]),
+    farText:(t,p)=>"가까이 가세요 · "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m)",
+    tooFar:(t,p)=>toast("가까이 가세요 — "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m · 손 닿는 거리 1.2 m)"),
     setCamera:p=>{ cam.fp=p; }, canStand:fpCanStand, eyeY:fpEyeY, targets:fpTargets,
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on) toast("설비 화면 조작 중 — 시점 회전 잠금 · F 또는 Esc 로 뒤로"); if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
@@ -251,14 +256,7 @@ function fpFrame(now){
 }
 function fpOverlay(g,K){
   if(!fpActive()) return;
-  const edge=(t,col,lw)=>{ const xs=[t.x-t.w/2,t.x+t.w/2], ys=[t.y-t.h/2,t.y+t.h/2], zs=[t.z-t.d/2,t.z+t.d/2], P=[];
-    for(const x of xs) for(const y of ys) for(const z of zs) P.push(prj(x,y,z));
-    if(P.some(q=>!q)) return;
-    const E2=[[0,1],[2,3],[4,5],[6,7],[0,2],[1,3],[4,6],[5,7],[0,4],[1,5],[2,6],[3,7]];
-    g.lineWidth=lw*K; g.strokeStyle=col; g.beginPath(); for(const [a,b] of E2){ g.moveTo(P[a].x,P[a].y); g.lineTo(P[b].x,P[b].y); } g.stroke(); };
-  const {goal,aim}=FP.hl;
-  if(goal&&goal!==aim) edge(goal,"rgba(255,214,60,.95)",2.6);
-  if(aim) edge(aim,aim===goal?"rgba(120,255,160,.98)":"rgba(255,255,255,.9)",2.2);
+  /* 대상 상자 테두리는 그리지 않음 — 조작 지점 마커(guide.js · aimmark.js)로 표시 (11/17 사용자 결정) */
   const f=S.f, carry=f.rollCarry==="red"?"적색 인쇄 은박 롤 운반 중 (2인 1조) · R 반납":"";
   const lv=FP.feet>=FL.deckY-.05?"2층 데크":FP.feet>.05?"계단":"1층";
   g.textAlign="left"; g.textBaseline="alphabetic"; g.font="800 "+(12*K).toFixed(0)+"px sans-serif";
