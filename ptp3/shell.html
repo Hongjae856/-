@@ -2,6 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PTP 라인 IDT</title>
 <style>
+/*__OEECSS__*/
 :root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#dfe4e1;color:var(--ink);font-family:"Malgun Gothic",Arial,sans-serif;overflow:hidden}
 button{font-family:inherit}
@@ -46,6 +47,24 @@ button{font-family:inherit}
 #cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;display:block;outline:none}
 #hud{position:absolute;left:12px;bottom:12px;z-index:2;background:#ffffffd9;border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.6;color:var(--ink);max-width:520px}
 #hud b{font-weight:800}
+#fpTip{position:absolute;z-index:2;transform:translateX(-50%);background:#142b47e6;color:#fff;border-radius:999px;padding:7px 16px;font-size:14px;white-space:nowrap;pointer-events:none}
+#fpTip kbd{display:inline-block;min-width:20px;padding:1px 6px;border-radius:5px;background:#fff;color:#142b47;font:800 12px "Malgun Gothic",Arial,sans-serif;margin:0 2px}
+#fpTip s{text-decoration:none;margin-left:8px;padding:1px 8px;border-radius:999px;background:#ffd22e;color:#3a2a00;font-weight:800;font-size:12px}
+#shCoach{position:absolute;z-index:3;display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:12px;background:#fff;border-left:6px solid #2b8a4b;box-shadow:0 2px 10px #142b4718}
+#shCoach.free{border-left-color:#5b3fa0;background:#f8f5ff}
+#shCoach .t{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+#shCoach .t small{font:800 12.5px "Malgun Gothic",Arial,sans-serif;color:#2b8a4b}#shCoach.free .t small{color:#5b3fa0}
+#shCoach .t b{font:800 18px "Malgun Gothic",Arial,sans-serif;color:var(--ink)}#shCoach .t span{font-size:13px;color:var(--sub);line-height:1.4}
+#shCoach .b{display:flex;gap:6px;flex:0 0 auto}
+#shCoach button{padding:10px 14px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd84d,#f0b400);color:#3a2a00;font:800 15px "Malgun Gothic",Arial,sans-serif;cursor:pointer}
+#shCoach.free button{background:#5b3fa0;color:#fff}#shCoach.free button+button{background:#fff;color:#45307c;border:1px solid #5b3fa0}
+#incPick{width:min(980px,100%);background:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 4px 20px #142b4714}
+#incPick h3{margin:0 0 4px;font:800 20px "Malgun Gothic",Arial,sans-serif}#incPick p{margin:0 0 10px;color:var(--sub);font-size:13.5px}
+#incPick .ip{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid #e3e8ee}
+#incPick .ip span{width:26px;text-align:center;font-weight:800;color:var(--sub)}#incPick .ip b{flex:1;font-size:15.5px}#incPick .ip b s{display:block;text-decoration:none;font:600 12px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
+#incPick .ip button,#incBack{padding:8px 14px;border-radius:10px;border:1px solid #c85d38;background:#e0714a;color:#fff;font:800 14px "Malgun Gothic",Arial,sans-serif;cursor:pointer}
+#incPick .ip button.e{background:#fff;color:#b04a26}#incBack{margin-top:10px;background:#fff;color:var(--ink);border-color:#b7c4d2}
+#shCoach.inc{border-left-color:#e0714a;background:#fff7ee}#shCoach.inc .t small{color:#b04a26}#shCoach.inc button{background:#e0714a;color:#fff}
 #cross{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;z-index:2;pointer-events:none;display:none}
 #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
 #cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
@@ -65,6 +84,8 @@ button{font-family:inherit}
   <canvas id="cv" tabindex="0"></canvas>
   <div id="cross"></div>
   <div id="hud"></div>
+  <div id="fpTip" hidden></div>
+  <div id="shCoach" hidden></div>
   <div id="splash">
     <h1>PTP 라인 IDT</h1><p class="sub">PTP Line · Interactive Digital Tutor · 블리스터 충전 → 카톤 포장</p>
     <div id="crewHint"></div>
@@ -75,10 +96,11 @@ button{font-family:inherit}
     <div id="modes">
       <div class="mcol"><h4>가동</h4><button data-c="operation" data-m="easy">기본 · 학습<small>가동 핵심 절차</small></button><button class="e" data-c="operation" data-m="examEasy">기본 · 평가</button><button data-c="operation" data-m="guide">심화 · 학습<small>가동 전체 절차</small></button><button class="e" data-c="operation" data-m="exam">심화 · 평가</button></div>
       <div class="mcol ch"><h4>체인지파트</h4><button data-c="change" data-m="easy">기본 · 학습<small>교체부품 6묶음</small></button><button class="e" data-c="change" data-m="examEasy">기본 · 평가</button><button data-c="change" data-m="guide">심화 · 학습<small>교체부품 18종</small></button><button class="e" data-c="change" data-m="exam">심화 · 평가</button></div>
-      <div class="mcol demo"><h4>시연</h4><button disabled>시연모드<small>다음 단계(P4)에서 연결</small></button></div>
-      <div class="mcol free"><h4>자유</h4><button disabled>자유모드<small>다음 단계(P4)에서 연결</small></button></div>
-      <div class="mcol oee"><h4>OEE</h4><button disabled>OEE 관리 대시보드<small>다음 단계(P5)에서 연결</small></button><button disabled>이상사례 대처 교육<small>다음 단계(P5)</small></button></div>
+      <div class="mcol demo"><h4>시연</h4><button data-c="operation" data-m="demo">시연모드<small>작업자별 장비 준비 → 가동 → 생산까지 간단히</small></button></div>
+      <div class="mcol free"><h4>자유</h4><button data-c="operation" data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 인터락 해제</small></button></div>
+      <div class="mcol oee"><h4>OEE</h4><button id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="e" data-c="inc" data-m="inc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div>
     </div>
+    <div id="incPick" hidden></div>
   </div>
   <div id="load">설비 불러오는 중…</div>
 </div>

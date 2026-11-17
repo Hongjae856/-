@@ -24,9 +24,11 @@ function crewMark(){
 }
 function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:b.closest(".mcol").querySelector("h4").textContent+" · "+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room) crewGo(); }
 function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode) crewGo(); }
-function crewGo(){ CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
+function crewGo(){ if(CREW.mode&&CREW.mode.c==="inc"){ inc3Pick(CREW.room); return; } CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
 function startRoom(r){
   const k=APPK[r], c=crs(k), M=CREW.mode;
+  if(M.m==="demo"||M.m==="free"){ MODE3.kind=M.m; DSTEP[r]=0; mode3Start(r); CREW.started[r]=true; show(r); return; }
+  MODE3.kind=null;
   try{ if(k==="filler"){ c.begin(M.c,M.m); setTimeout(()=>{ try{ c.quickStart(); }catch(e){ console.error(e); } },150); } else c.begin(M.c,M.m,"A"); }catch(e){ console.error("과정 시작",e); }
   CREW.started[r]=true; show(r);
 }
@@ -43,7 +45,8 @@ function crewHead(){
   $("#fpBtn").textContent=V3P.view!=="orbit"?"🧍 1인칭 → 3인칭 전환":"🎥 3인칭 → 1인칭 전환"; $("#fpBtn").disabled=!CREW.cur;
 }
 function goHome(){
-  for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); }
+  for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); try{ const w=UNI_HUB.win(k); w.document.body.classList.remove("mode3"); if(w.__sc0){ w.startChecks=w.__sc0; w.deduct=w.__dd0; } w.FREE3=false; }catch(e){} }   /* 자유모드 인터락 해제 원복 */
+  MODE3.kind=null; INC3.k=null; $("#incPick").hidden=true; $("#modes").hidden=false;
   CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent="";
   if(document.pointerLockElement) document.exitPointerLock(); crewMark(); crewHead();
 }
@@ -65,7 +68,8 @@ function placeCanvas(){
   if(CREW.cur){ try{ const d=UNI_HUB.win(APPK[CREW.cur]).document, w3=d.getElementById("mimic3dWrap"), el=w3&&w3.offsetParent?w3:d.getElementById("mimic"); if(el){ const q=el.getBoundingClientRect(); if(q.width>40) r=q; } }catch(e){} }
   const k=[r.left,r.top,r.width,r.height].map(v=>Math.round(v)).join(",");
   if(k!==placeCanvas.k){ placeCanvas.k=k; Object.assign(cv.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
-    Object.assign($("#cross").style,{left:(r.left+r.width/2)+"px",top:(r.top+r.height/2)+"px"}); Object.assign($("#hud").style,{left:(r.left+10)+"px",top:(r.top+r.height-44)+"px",bottom:"auto"}); }
+    Object.assign($("#cross").style,{left:(r.left+r.width/2)+"px",top:(r.top+r.height/2)+"px"}); Object.assign($("#hud").style,{left:(r.left+10)+"px",top:(r.top+r.height-44)+"px",bottom:"auto"});
+    Object.assign($("#fpTip").style,{left:(r.left+r.width/2)+"px",top:(r.top+r.height/2+40)+"px"}); }
 }
 /* 앱 화면에 초점이 있어도 걷기 키가 셸로 오게 (입력칸 제외) */
 function forwardKeys(){
@@ -77,12 +81,13 @@ let last=0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.1,last?(now-last)/1000:0); last=now;
-  placeCanvas(); walkTick(dt); crew3Tick(dt); v3Frame(now);
+  placeCanvas(); walkTick(dt); crew3Tick(dt); fp3Tick(now); v3Frame(now);
+  if(now-(loop.m||0)>300){ loop.m=now; inc3Tick(); mode3Coach(); }
   if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps"; }
 }
 function boot(){
   if(!appsReady()){ setTimeout(boot,100); return; }
-  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys();
+  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
   document.querySelectorAll("#modes button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
   $("#chooseF").onclick=()=>pickRoom("F"); $("#chooseP").onclick=()=>pickRoom("P");

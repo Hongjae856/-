@@ -35,7 +35,7 @@ function walkSpawn(room){
   best=best||want; Object.assign(WALK,{x:best[0],z:best[1],y:1600,yaw:0,pitch:-.1,room});
 }
 function walkTick(dt){
-  if(V3P.view==="orbit") return;
+  if(V3P.view==="orbit"||(typeof FP3!=="undefined"&&FP3.hmi)) return;
   const k=WALK.keys, sp=(k.ShiftLeft||k.ShiftRight?2.6:1.4)*1000*dt; let mx=0,mz=0;
   if(k.KeyW||k.ArrowUp) mz-=1; if(k.KeyS||k.ArrowDown) mz+=1; if(k.KeyA||k.ArrowLeft) mx-=1; if(k.KeyD||k.ArrowRight) mx+=1;
   if(!mx&&!mz) return; const l=Math.hypot(mx,mz); mx/=l; mz/=l;
@@ -47,10 +47,11 @@ function walkBind(){
   addEventListener("keydown",e=>{ WALK.keys[e.code]=true; if(V3P.view!=="orbit"&&/^(Arrow|Space)/.test(e.code)) e.preventDefault(); });
   addEventListener("keyup",e=>{ WALK.keys[e.code]=false; });
   addEventListener("blur",()=>{ WALK.keys={}; });
-  cv.addEventListener("click",()=>{ if(V3P.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
+  cv.addEventListener("click",()=>{ if(V3P.view!=="orbit"&&typeof FP3!=="undefined"&&(FP3.hmi||(FP3.aim&&fp3Act()))) return;
+    if(V3P.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
   cv.addEventListener("mousedown",e=>{ if(V3P.view!=="orbit") drag={x:e.clientX,y:e.clientY}; });
   addEventListener("mouseup",()=>drag=null);
-  addEventListener("mousemove",e=>{ if(V3P.view==="orbit") return; let dx=0,dy=0;
+  addEventListener("mousemove",e=>{ if(V3P.view==="orbit"||(typeof FP3!=="undefined"&&FP3.hmi)) return; let dx=0,dy=0;
     if(document.pointerLockElement===cv){ dx=e.movementX; dy=e.movementY; } else if(drag){ dx=e.clientX-drag.x; dy=e.clientY-drag.y; drag.x=e.clientX; drag.y=e.clientY; } else return;
     WALK.yaw-=dx*.0025; WALK.pitch=Math.max(-1.3,Math.min(1.3,WALK.pitch-dy*.0025)); });
 }

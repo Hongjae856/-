@@ -33,8 +33,11 @@ APP_PATCH = [
      "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
     ("worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});",
      "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
+    # 자유모드 인터록 해제 : 메인 전원 없이도 START (실제와 다름 · 사용자 선택) — window.FREE3 일 때만
+    ('if(!S.main){ toast("메인 전원을 먼저 투입하세요.","bad"); return; }', 'if(!S.main&&!window.FREE3){ toast("메인 전원을 먼저 투입하세요.","bad"); return; }', 1, ("filler",)),
+    ('if(!S.main){toast("메인 전원을 먼저 투입하세요.","bad");return;}', 'if(!S.main&&!window.FREE3){toast("메인 전원을 먼저 투입하세요.","bad");return;}', 2, ("line",)),
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
@@ -54,13 +57,13 @@ def app(key: str) -> str:
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    src = lambda n: (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
         if "</script" in t.lower():
             sys.exit("script text must not contain </script")
-    for key, val in (("/*__THREE__*/", three), ("__APPS__", json.dumps(apps, separators=(",", ":"))), ("/*__SHELL_JS__*/", js)):
+    for key, val in (("/*__OEECSS__*/", (ROOT / "oee" / "oee.css").read_text(encoding="utf-8")), ("/*__THREE__*/", three), ("__APPS__", json.dumps(apps, separators=(",", ":"))), ("/*__SHELL_JS__*/", js)):
         if shell.count(key) != 1:
             sys.exit(f"shell.html must contain {key} exactly once")
         shell = shell.replace(key, val)
