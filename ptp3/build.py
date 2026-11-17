@@ -33,9 +33,7 @@ APP_PATCH = [
      "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
     ("worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});",
      "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
-    # 자유모드 인터록 해제 : 메인 전원 없이도 START (실제와 다름 · 사용자 선택) — window.FREE3 일 때만
-    ('if(!S.main){ toast("메인 전원을 먼저 투입하세요.","bad"); return; }', 'if(!S.main&&!window.FREE3){ toast("메인 전원을 먼저 투입하세요.","bad"); return; }', 1, ("filler",)),
-    ('if(!S.main){toast("메인 전원을 먼저 투입하세요.","bad");return;}', 'if(!S.main&&!window.FREE3){toast("메인 전원을 먼저 투입하세요.","bad");return;}', 2, ("line",)),
+    # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
 SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}

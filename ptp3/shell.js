@@ -45,7 +45,7 @@ function crewHead(){
   $("#fpBtn").textContent=V3P.view!=="orbit"?"🧍 1인칭 → 3인칭 전환":"🎥 3인칭 → 1인칭 전환"; $("#fpBtn").disabled=!CREW.cur;
 }
 function goHome(){
-  for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); try{ const w=UNI_HUB.win(k); w.document.body.classList.remove("mode3"); if(w.__sc0){ w.startChecks=w.__sc0; w.deduct=w.__dd0; } w.FREE3=false; }catch(e){} }   /* 자유모드 인터락 해제 원복 */
+  for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); try{ const w=UNI_HUB.win(k); w.document.body.classList.remove("mode3"); if(w.__sc0){ w.startChecks=w.__sc0; w.deduct=w.__dd0; w.alarm=w.__al0; } if(w.__door0){ w.document.getElementById("uDoor").onclick=w.__door0; w.__door0=null; } w.FREE3=false; }catch(e){} }   /* 자유모드 인터락 해제 원복 */
   MODE3.kind=null; INC3.k=null; $("#incPick").hidden=true; $("#modes").hidden=false;
   CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent="";
   if(document.pointerLockElement) document.exitPointerLock(); crewMark(); crewHead();
