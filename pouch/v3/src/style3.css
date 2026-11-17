@@ -170,3 +170,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #freeBar{display:flex;gap:6px;margin-top:8px}
 #freeBar button{flex:1;padding:10px 8px;border:1px solid #5b3fa0;border-radius:10px;background:#fff;color:#45307c;font:800 14px/1.2 var(--ff);cursor:pointer}
 #freeBar button:first-child{background:#5b3fa0;color:#fff}
+/* 메인화면 모드 버튼 : 단어 중간에서 줄바꿈하지 않음 (11/17 · "OEE 관리 / 대시보드") */
+#splash .go button,#splash .go small{word-break:keep-all;overflow-wrap:break-word}
+#splash .go button{font-size:23px;padding:22px 18px;line-height:1.3}
+#splash .go .e,#splash .go .o2{font-size:20px}
