@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PTP 라인 IDT</title>
+<style>
+:root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#dfe4e1;color:var(--ink);font-family:"Malgun Gothic",Arial,sans-serif;overflow:hidden}
+button{font-family:inherit}
+#bar{position:fixed;left:0;right:0;top:0;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#fff;border-bottom:1px solid var(--line);z-index:20;white-space:nowrap}
+.brand{font-weight:800;font-size:16px;letter-spacing:-.5px}
+.seg{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden}
+.seg button{border:0;background:#fff;color:var(--ink);font:800 14px "Malgun Gothic",Arial,sans-serif;padding:8px 14px;cursor:pointer}
+.seg button+button{border-left:1px solid #b7c4d2}
+.seg button.on{background:var(--ink);color:#fff}
+.chip{font-size:12.5px;color:#6b4e00;background:#fff4cc;border-radius:999px;padding:4px 10px;font-weight:700}
+.sp{flex:1}
+#info{font-size:12.5px;color:var(--sub)}
+#stage{position:fixed;left:0;right:0;top:52px;bottom:0}
+#apps{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:0}
+#apps iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+#cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;display:block;outline:none}
+#hud{position:absolute;left:12px;bottom:12px;z-index:2;background:#ffffffd9;border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.6;color:var(--ink);max-width:520px}
+#hud b{font-weight:800}
+#cross{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;z-index:2;pointer-events:none;display:none}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
+#cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
+#load{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:#eef1f4;font-size:18px;font-weight:700;color:var(--sub)}
+</style></head><body>
+<div id="bar">
+  <div class="brand">PTP 라인 IDT</div>
+  <span class="chip">P1 미리보기 · 설비 형상 이식 · 1인칭 이동</span>
+  <div class="seg" id="views"><button data-v="orbit" class="on">🎥 3인칭 전체</button><button data-v="F">🧍 충전실 작업자</button><button data-v="P">🧍 포장실 작업자</button></div>
+  <div class="sp"></div>
+  <span id="info"></span>
+</div>
+<div id="stage">
+  <div id="apps"></div>
+  <canvas id="cv" tabindex="0"></canvas>
+  <div id="cross"></div>
+  <div id="hud"></div>
+  <div id="load">설비 불러오는 중…</div>
+</div>
+<script>/*__THREE__*/</script>
+<script id="apps-data" type="application/json">__APPS__</script>
+<script>
+const T3=THREE;
+/*__SHELL_JS__*/
+</script>
+</body></html>
