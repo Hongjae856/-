@@ -16,6 +16,32 @@ button{font-family:inherit}
 #info{font-size:12.5px;color:var(--sub)}
 #stage{position:fixed;left:0;right:0;top:52px;bottom:0}
 #apps{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:0}
+#apps.live{opacity:1;pointer-events:auto}
+#apps iframe.off{visibility:hidden}
+.gb{border:1px solid #b7c4d2;border-radius:10px;background:#fff;color:var(--ink);font:700 13.5px "Malgun Gothic",Arial,sans-serif;padding:7px 12px;cursor:pointer}
+.gb.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#splash{position:absolute;inset:0;z-index:5;background:linear-gradient(180deg,#f5f7f9,#e8edf1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:24px}
+#splash.hide{display:none}
+#splash h1{margin:0;font:800 44px "Malgun Gothic",Arial,sans-serif;letter-spacing:-1px;color:var(--ink)}
+#splash .sub{margin:-6px 0 0;font:700 14px "Malgun Gothic",Arial,sans-serif;color:var(--sub);letter-spacing:1px}
+#crewHint{font:600 16px/1.5 "Malgun Gothic",Arial,sans-serif;color:#40566e;text-align:center}
+#crewHint b{color:var(--ink)} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
+#workers{display:grid;grid-template-columns:1fr 1fr;gap:22px;width:min(900px,100%)}
+#workers button{padding:22px 24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#142b47;color:#fff;cursor:pointer;font-family:inherit}
+#workers button small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
+#workers button strong{display:block;font-size:28px;margin:8px 0}
+#workers button span{display:block;font-size:16px;line-height:1.5}
+#workers button.wait{opacity:.55} #workers button.sel{outline:4px solid #f5b400;outline-offset:3px}
+#modes{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;width:min(1380px,100%)}
+.mcol{display:flex;flex-direction:column;gap:10px}
+.mcol h4{margin:0;text-align:center;font:800 18px "Malgun Gothic",Arial,sans-serif;color:#5d7086;letter-spacing:3px}
+.mcol button{font:700 19px "Malgun Gothic",Arial,sans-serif;padding:14px 12px;border:1px solid #152c4b;border-radius:14px;cursor:pointer;background:#142b47;color:#fff;word-break:keep-all}
+.mcol button.e{background:#fff;color:#142b47}
+.mcol button small{display:block;font:600 12.5px/1.4 "Malgun Gothic",Arial,sans-serif;opacity:.75;margin-top:4px}
+.mcol button.sel{outline:4px solid #f5b400;outline-offset:3px}
+.mcol button:disabled{opacity:.42;cursor:not-allowed}
+.mcol.ch button{background:#1d5c7a;border-color:#174a62} .mcol.ch button.e{background:#fff;color:#174a62}
+.mcol.demo button{background:#2b8a4b;border-color:#1d6b38} .mcol.free button{background:#5b3fa0;border-color:#45307c} .mcol.oee button{background:#e0714a;border-color:#c85d38}
 #apps iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;display:block;outline:none}
 #hud{position:absolute;left:12px;bottom:12px;z-index:2;background:#ffffffd9;border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.6;color:var(--ink);max-width:520px}
@@ -23,12 +49,14 @@ button{font-family:inherit}
 #cross{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;z-index:2;pointer-events:none;display:none}
 #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
 #cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
-#load{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:#eef1f4;font-size:18px;font-weight:700;color:var(--sub)}
+#load{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:#eef1f4;font-size:18px;font-weight:700;color:var(--sub)}
 </style></head><body>
 <div id="bar">
   <div class="brand">PTP 라인 IDT</div>
-  <span class="chip">P1 미리보기 · 설비 형상 이식 · 1인칭 이동</span>
-  <div class="seg" id="views"><button data-v="orbit" class="on">🎥 3인칭 전체</button><button data-v="F">🧍 충전실 작업자</button><button data-v="P">🧍 포장실 작업자</button></div>
+  <span class="chip" id="modeChip">개발 중 (P2)</span>
+  <div class="seg" id="crewSw"><button data-r="F">🧍 충전실 작업자</button><button data-r="P">🧍 포장실 작업자</button></div>
+  <button class="gb" id="fpBtn">🧍 1인칭 → 3인칭 전환</button>
+  <button class="gb" id="homeBtn">메인화면</button>
   <div class="sp"></div>
   <span id="info"></span>
 </div>
@@ -37,6 +65,21 @@ button{font-family:inherit}
   <canvas id="cv" tabindex="0"></canvas>
   <div id="cross"></div>
   <div id="hud"></div>
+  <div id="splash">
+    <h1>PTP 라인 IDT</h1><p class="sub">PTP Line · Interactive Digital Tutor · 블리스터 충전 → 카톤 포장</p>
+    <div id="crewHint"></div>
+    <div id="workers">
+      <button id="chooseF"><small>작업자 1 · FILLING ROOM (D구역)</small><strong>🧍 충전실 작업자</strong><span>블리스터 포장기 HM 400P · 성형 · 실링 · 펀칭</span></button>
+      <button id="chooseP"><small>작업자 2 · PACKING ROOM (G구역)</small><strong>🧍 포장실 작업자</strong><span>카토너 · 카톤 인쇄기 · 중량선별기 · 박스포장기 · 팔렛타이저</span></button>
+    </div>
+    <div id="modes">
+      <div class="mcol"><h4>가동</h4><button data-c="operation" data-m="easy">기본 · 학습<small>가동 핵심 절차</small></button><button class="e" data-c="operation" data-m="examEasy">기본 · 평가</button><button data-c="operation" data-m="guide">심화 · 학습<small>가동 전체 절차</small></button><button class="e" data-c="operation" data-m="exam">심화 · 평가</button></div>
+      <div class="mcol ch"><h4>체인지파트</h4><button data-c="change" data-m="easy">기본 · 학습<small>교체부품 6묶음</small></button><button class="e" data-c="change" data-m="examEasy">기본 · 평가</button><button data-c="change" data-m="guide">심화 · 학습<small>교체부품 18종</small></button><button class="e" data-c="change" data-m="exam">심화 · 평가</button></div>
+      <div class="mcol demo"><h4>시연</h4><button disabled>시연모드<small>다음 단계(P4)에서 연결</small></button></div>
+      <div class="mcol free"><h4>자유</h4><button disabled>자유모드<small>다음 단계(P4)에서 연결</small></button></div>
+      <div class="mcol oee"><h4>OEE</h4><button disabled>OEE 관리 대시보드<small>다음 단계(P5)에서 연결</small></button><button disabled>이상사례 대처 교육<small>다음 단계(P5)</small></button></div>
+    </div>
+  </div>
   <div id="load">설비 불러오는 중…</div>
 </div>
 <script>/*__THREE__*/</script>

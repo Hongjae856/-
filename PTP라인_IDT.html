@@ -16,6 +16,32 @@ button{font-family:inherit}
 #info{font-size:12.5px;color:var(--sub)}
 #stage{position:fixed;left:0;right:0;top:52px;bottom:0}
 #apps{position:absolute;inset:0;opacity:0;pointer-events:none;z-index:0}
+#apps.live{opacity:1;pointer-events:auto}
+#apps iframe.off{visibility:hidden}
+.gb{border:1px solid #b7c4d2;border-radius:10px;background:#fff;color:var(--ink);font:700 13.5px "Malgun Gothic",Arial,sans-serif;padding:7px 12px;cursor:pointer}
+.gb.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+#splash{position:absolute;inset:0;z-index:5;background:linear-gradient(180deg,#f5f7f9,#e8edf1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:24px}
+#splash.hide{display:none}
+#splash h1{margin:0;font:800 44px "Malgun Gothic",Arial,sans-serif;letter-spacing:-1px;color:var(--ink)}
+#splash .sub{margin:-6px 0 0;font:700 14px "Malgun Gothic",Arial,sans-serif;color:var(--sub);letter-spacing:1px}
+#crewHint{font:600 16px/1.5 "Malgun Gothic",Arial,sans-serif;color:#40566e;text-align:center}
+#crewHint b{color:var(--ink)} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
+#workers{display:grid;grid-template-columns:1fr 1fr;gap:22px;width:min(900px,100%)}
+#workers button{padding:22px 24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#142b47;color:#fff;cursor:pointer;font-family:inherit}
+#workers button small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
+#workers button strong{display:block;font-size:28px;margin:8px 0}
+#workers button span{display:block;font-size:16px;line-height:1.5}
+#workers button.wait{opacity:.55} #workers button.sel{outline:4px solid #f5b400;outline-offset:3px}
+#modes{display:grid;grid-template-columns:repeat(5,1fr);gap:18px;width:min(1380px,100%)}
+.mcol{display:flex;flex-direction:column;gap:10px}
+.mcol h4{margin:0;text-align:center;font:800 18px "Malgun Gothic",Arial,sans-serif;color:#5d7086;letter-spacing:3px}
+.mcol button{font:700 19px "Malgun Gothic",Arial,sans-serif;padding:14px 12px;border:1px solid #152c4b;border-radius:14px;cursor:pointer;background:#142b47;color:#fff;word-break:keep-all}
+.mcol button.e{background:#fff;color:#142b47}
+.mcol button small{display:block;font:600 12.5px/1.4 "Malgun Gothic",Arial,sans-serif;opacity:.75;margin-top:4px}
+.mcol button.sel{outline:4px solid #f5b400;outline-offset:3px}
+.mcol button:disabled{opacity:.42;cursor:not-allowed}
+.mcol.ch button{background:#1d5c7a;border-color:#174a62} .mcol.ch button.e{background:#fff;color:#174a62}
+.mcol.demo button{background:#2b8a4b;border-color:#1d6b38} .mcol.free button{background:#5b3fa0;border-color:#45307c} .mcol.oee button{background:#e0714a;border-color:#c85d38}
 #apps iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
 #cv{position:absolute;inset:0;width:100%;height:100%;z-index:1;display:block;outline:none}
 #hud{position:absolute;left:12px;bottom:12px;z-index:2;background:#ffffffd9;border-radius:10px;padding:8px 12px;font-size:12.5px;line-height:1.6;color:var(--ink);max-width:520px}
@@ -23,12 +49,14 @@ button{font-family:inherit}
 #cross{position:absolute;left:50%;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;z-index:2;pointer-events:none;display:none}
 #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
 #cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
-#load{position:absolute;inset:0;z-index:3;display:flex;align-items:center;justify-content:center;background:#eef1f4;font-size:18px;font-weight:700;color:var(--sub)}
+#load{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:#eef1f4;font-size:18px;font-weight:700;color:var(--sub)}
 </style></head><body>
 <div id="bar">
   <div class="brand">PTP 라인 IDT</div>
-  <span class="chip">P1 미리보기 · 설비 형상 이식 · 1인칭 이동</span>
-  <div class="seg" id="views"><button data-v="orbit" class="on">🎥 3인칭 전체</button><button data-v="F">🧍 충전실 작업자</button><button data-v="P">🧍 포장실 작업자</button></div>
+  <span class="chip" id="modeChip">개발 중 (P2)</span>
+  <div class="seg" id="crewSw"><button data-r="F">🧍 충전실 작업자</button><button data-r="P">🧍 포장실 작업자</button></div>
+  <button class="gb" id="fpBtn">🧍 1인칭 → 3인칭 전환</button>
+  <button class="gb" id="homeBtn">메인화면</button>
   <div class="sp"></div>
   <span id="info"></span>
 </div>
@@ -37,6 +65,21 @@ button{font-family:inherit}
   <canvas id="cv" tabindex="0"></canvas>
   <div id="cross"></div>
   <div id="hud"></div>
+  <div id="splash">
+    <h1>PTP 라인 IDT</h1><p class="sub">PTP Line · Interactive Digital Tutor · 블리스터 충전 → 카톤 포장</p>
+    <div id="crewHint"></div>
+    <div id="workers">
+      <button id="chooseF"><small>작업자 1 · FILLING ROOM (D구역)</small><strong>🧍 충전실 작업자</strong><span>블리스터 포장기 HM 400P · 성형 · 실링 · 펀칭</span></button>
+      <button id="chooseP"><small>작업자 2 · PACKING ROOM (G구역)</small><strong>🧍 포장실 작업자</strong><span>카토너 · 카톤 인쇄기 · 중량선별기 · 박스포장기 · 팔렛타이저</span></button>
+    </div>
+    <div id="modes">
+      <div class="mcol"><h4>가동</h4><button data-c="operation" data-m="easy">기본 · 학습<small>가동 핵심 절차</small></button><button class="e" data-c="operation" data-m="examEasy">기본 · 평가</button><button data-c="operation" data-m="guide">심화 · 학습<small>가동 전체 절차</small></button><button class="e" data-c="operation" data-m="exam">심화 · 평가</button></div>
+      <div class="mcol ch"><h4>체인지파트</h4><button data-c="change" data-m="easy">기본 · 학습<small>교체부품 6묶음</small></button><button class="e" data-c="change" data-m="examEasy">기본 · 평가</button><button data-c="change" data-m="guide">심화 · 학습<small>교체부품 18종</small></button><button class="e" data-c="change" data-m="exam">심화 · 평가</button></div>
+      <div class="mcol demo"><h4>시연</h4><button disabled>시연모드<small>다음 단계(P4)에서 연결</small></button></div>
+      <div class="mcol free"><h4>자유</h4><button disabled>자유모드<small>다음 단계(P4)에서 연결</small></button></div>
+      <div class="mcol oee"><h4>OEE</h4><button disabled>OEE 관리 대시보드<small>다음 단계(P5)에서 연결</small></button><button disabled>이상사례 대처 교육<small>다음 단계(P5)</small></button></div>
+    </div>
+  </div>
   <div id="load">설비 불러오는 중…</div>
 </div>
 <script>/**
@@ -51,6 +94,7 @@ button{font-family:inherit}
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:2,d:'2026-11-17',t:'파우치 방식 P2 — 메인화면을 파우치처럼(① 모드 : 가동 · 체인지파트 각 기본 · 심화 학습/평가 → ② 충전실 · 포장실 작업자 선택 → 그 작업자 1인칭으로 시작 · 그 실 과정 적용), 교육 중 상단 작업자 교체(실마다 진행 상태 유지), 1인칭 기본 · 3인칭 전환 버튼, 작업자를 파우치 인체 모델(충전실 흰 방진복 · 포장실 파란 가운)로 교체, 재질을 파우치처럼(스테인리스 헤어라인 결 · 실제 장면 반사), 설비 형상은 원본 유지'},
  {v:1,d:'2026-11-17',t:'PTP 라인 IDT 파우치 방식 전환 착수 (P1) — PTP 충전기 · 포장라인 설비 형상을 파우치 엔진(Three.js)으로 그림(치수 · 색 · 동작은 원본 그대로), 충전실 · 포장실 한 장면, 3인칭 전체 보기 · 충전실 / 포장실 작업자 1인칭 이동(설비 · 칸막이 벽 충돌)'}
 ];
 
@@ -713,40 +757,97 @@ function crew3Tick(dt){
 
 /* ── shell.js ── */
 /* ═══════════════════════════════════════════════════════════════════
-   셸 (P1) — PTP 두 앱(충전기 · 포장라인)을 보이지 않는 iframe 으로 띄워 두고(과정 · 시뮬레이션 · 형상 생성),
-   3D 는 셸의 Three.js 가 그린다. 두 앱은 직접 그리지 않음(UNI_HUB.active = "three").
+   셸 — PTP 두 앱(충전기 · 포장라인)을 iframe 으로 띄워 두고(과정 · HMI · 시뮬레이션 · 형상 생성), 3D 는 셸의 Three.js 가 그림
+   · 메인화면 (파우치와 같음) : ① 모드 → ② 작업자(충전실 · 포장실) → 그 작업자 1인칭으로 시작 · 그 실 앱의 과정 단계 적용
+   · 교육 중 : 보이는 앱의 조작 화면(타일 · 안내 · 설비 화면 · 판넬)은 그대로, 3D 영역(#mimic3d 자리)만 셸 화면으로 덮음
+   · 작업자 교체 : 상단 [충전실 작업자 · 포장실 작업자] — 실마다 앱이 따로라 진행 상태가 그대로 이어짐 (처음 가는 실은 같은 모드로 시작)
    ═══════════════════════════════════════════════════════════════════ */
 const $=s=>document.querySelector(s);
 const APPS=JSON.parse(document.getElementById("apps-data").textContent);
 const decode=b=>new TextDecoder().decode(Uint8Array.from(atob(b),c=>c.charCodeAt(0)));
-const ROOM_NM={F:"충전실 작업자",P:"포장실 작업자"};
+const ROOM_NM={F:"충전실 작업자",P:"포장실 작업자"}, APPK={F:"filler",P:"line"};
 UNI_HUB.active="three";                                    /* 두 앱 모두 자기 캔버스에 그리지 않음 — 형상만 만듦 */
-for(const k of ["filler","line"]){ const f=document.createElement("iframe"); f.dataset.room=k; f.title=k==="filler"?"PTP 충전기 (형상 · 과정)":"PTP 포장라인 (형상 · 과정)"; f.srcdoc=decode(APPS[k]); $("#apps").appendChild(f); }
-function appsReady(){ const f=UNI_HUB.win("filler"), l=UNI_HUB.win("line"); return !!(f&&l&&f.UNI_GEN&&l.UNI_GEN&&f.UNI_ROOM&&f.UNI_DYN); }
+const FR={};
+for(const k of ["filler","line"]){ const f=document.createElement("iframe"); f.dataset.room=k; f.title=k==="filler"?"PTP 충전기 조작 화면":"PTP 포장라인 조작 화면"; f.srcdoc=decode(APPS[k]); f.classList.add("off"); $("#apps").appendChild(f); FR[k]=f; }
+function appsReady(){ const f=UNI_HUB.win("filler"), l=UNI_HUB.win("line"); return !!(f&&l&&f.UNI_GEN&&l.UNI_GEN&&f.UNI_ROOM&&f.UNI_DYN&&f.UNI_COURSE&&l.UNI_COURSE); }
+const crs=k=>{ const w=UNI_HUB.win(k); return w&&w.UNI_COURSE; };
+
+/* ── 메인화면 : 모드 → 작업자 ── */
+const CREW={mode:null, room:null, cur:null, started:{F:false,P:false}, pose:{}, fp:true};
+function crewMark(){
+  document.querySelectorAll("#modes button[data-m]").forEach(b=>b.classList.toggle("sel",!!CREW.mode&&b.dataset.c===CREW.mode.c&&b.dataset.m===CREW.mode.m));
+  for(const r of ["F","P"]){ const b=$("#choose"+r); b.classList.toggle("sel",CREW.room===r); b.classList.toggle("wait",!CREW.mode); }
+  $("#crewHint").innerHTML=CREW.mode?'<b>② 작업자 선택</b> — 위의 충전실 · 포장실 작업자를 누르면 그 작업장 1인칭으로 시작합니다 <s>모드 : '+CREW.mode.nm+'</s>'
+    :'<b>① 모드 선택</b> — 아래에서 모드를 고른 뒤 <b>② 작업자</b>를 누르면 그 작업장 작업자 1인칭으로 시작합니다';
+}
+function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:b.closest(".mcol").querySelector("h4").textContent+" · "+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room) crewGo(); }
+function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode) crewGo(); }
+function crewGo(){ CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
+function startRoom(r){
+  const k=APPK[r], c=crs(k), M=CREW.mode;
+  try{ if(k==="filler"){ c.begin(M.c,M.m); setTimeout(()=>{ try{ c.quickStart(); }catch(e){ console.error(e); } },150); } else c.begin(M.c,M.m,"A"); }catch(e){ console.error("과정 시작",e); }
+  CREW.started[r]=true; show(r);
+}
+function show(r){
+  if(CREW.cur&&V3P.view!=="orbit") CREW.pose[CREW.cur]={x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch};
+  CREW.cur=r; for(const [rr,k] of [["F","filler"],["P","line"]]) FR[k].classList.toggle("off",rr!==r);
+  $("#apps").classList.add("live"); $("#modeChip").textContent=CREW.mode?CREW.mode.nm:"";
+  if(CREW.fp){ setView(r); const q=CREW.pose[r]; if(q) Object.assign(WALK,q); } else setView("orbit");
+  crewHead();
+}
+function crewSwitch(r){ if(!CREW.cur||r===CREW.cur) return; if(!CREW.started[r]) startRoom(r); else show(r); }
+function crewHead(){
+  document.querySelectorAll("#crewSw button").forEach(b=>{ b.classList.toggle("on",b.dataset.r===CREW.cur); b.disabled=!CREW.cur; });
+  $("#fpBtn").textContent=V3P.view!=="orbit"?"🧍 1인칭 → 3인칭 전환":"🎥 3인칭 → 1인칭 전환"; $("#fpBtn").disabled=!CREW.cur;
+}
+function goHome(){
+  for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); }
+  CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent="";
+  if(document.pointerLockElement) document.exitPointerLock(); crewMark(); crewHead();
+}
+
+/* ── 시점 ── */
 function setView(v){
   V3P.view=v==="orbit"?"orbit":"walk";
-  document.querySelectorAll("#views button").forEach(b=>b.classList.toggle("on",b.dataset.v===v));
   if(v!=="orbit") walkSpawn(v); else if(document.pointerLockElement) document.exitPointerLock();
-  $("#cross").style.display=v==="orbit"?"none":"block"; $("#cv").focus(); hud();
+  $("#cross").style.display=v==="orbit"?"none":"block"; hud(); crewHead();
 }
 function hud(){
   $("#hud").innerHTML=V3P.view==="orbit"
-    ?"<b>3인칭 전체</b> · 왼쪽 끌기 = 회전 · 오른쪽(또는 Shift) 끌기 = 이동 · 휠 = 확대 · 위 [🧍 작업자] 를 누르면 그 실 1인칭"
-    :"<b>1인칭 · "+ROOM_NM[WALK.room]+"</b> · W A S D = 걷기 · Shift = 빠르게 · 화면 클릭 후 마우스 = 둘러보기 (Esc = 마우스 풀기) · 설비 · 칸막이 벽은 통과하지 않음";
+    ?"<b>3인칭</b> · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
+    :"<b>1인칭 · "+ROOM_NM[WALK.room]+"</b> · W A S D 걷기 · Shift 빠르게 · 3D 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)";
+}
+/* 셸 3D 화면을 보이는 앱의 3D 영역(#mimic3d 자리) 위에 맞춤 */
+function placeCanvas(){
+  const cv=$("#cv"), st=$("#stage").getBoundingClientRect(); let r={left:0,top:0,width:st.width,height:st.height};
+  if(CREW.cur){ try{ const d=UNI_HUB.win(APPK[CREW.cur]).document, w3=d.getElementById("mimic3dWrap"), el=w3&&w3.offsetParent?w3:d.getElementById("mimic"); if(el){ const q=el.getBoundingClientRect(); if(q.width>40) r=q; } }catch(e){} }
+  const k=[r.left,r.top,r.width,r.height].map(v=>Math.round(v)).join(",");
+  if(k!==placeCanvas.k){ placeCanvas.k=k; Object.assign(cv.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
+    Object.assign($("#cross").style,{left:(r.left+r.width/2)+"px",top:(r.top+r.height/2)+"px"}); Object.assign($("#hud").style,{left:(r.left+10)+"px",top:(r.top+r.height-44)+"px",bottom:"auto"}); }
+}
+/* 앱 화면에 초점이 있어도 걷기 키가 셸로 오게 (입력칸 제외) */
+function forwardKeys(){
+  for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(!w) continue;
+    w.addEventListener("keydown",e=>{ if(e.target&&e.target.closest&&e.target.closest("input,textarea,select")) return; WALK.keys[e.code]=true; });
+    w.addEventListener("keyup",e=>{ WALK.keys[e.code]=false; }); w.addEventListener("blur",()=>{ WALK.keys={}; }); }
 }
 let last=0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.1,last?(now-last)/1000:0); last=now;
-  walkTick(dt); crew3Tick(dt); v3Frame(now);
-  if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps · 형상 "+V3P.t.genMs.toFixed(1)+" ms"; }
+  placeCanvas(); walkTick(dt); crew3Tick(dt); v3Frame(now);
+  if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps"; }
 }
 function boot(){
   if(!appsReady()){ setTimeout(boot,100); return; }
-  v3Init(); v3Orbit(); walkBind(); crew3Init();
+  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys();
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
-  document.querySelectorAll("#views button").forEach(b=>b.onclick=()=>setView(b.dataset.v));
-  $("#load").style.display="none"; setView("F"); requestAnimationFrame(loop);   /* 1인칭이 기본 (11/17 사용자 지시) */
+  document.querySelectorAll("#modes button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
+  $("#chooseF").onclick=()=>pickRoom("F"); $("#chooseP").onclick=()=>pickRoom("P");
+  document.querySelectorAll("#crewSw button").forEach(b=>b.onclick=()=>crewSwitch(b.dataset.r));
+  $("#fpBtn").onclick=()=>{ if(!CREW.cur) return; CREW.fp=V3P.view==="orbit"; if(CREW.fp){ setView(CREW.cur); const q=CREW.pose[CREW.cur]; if(q) Object.assign(WALK,q); } else { CREW.pose[CREW.cur]={x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}; setView("orbit"); } };
+  $("#homeBtn").onclick=goHome;
+  $("#load").style.display="none"; setView("F"); crewMark(); crewHead(); requestAnimationFrame(loop);
 }
 boot();
 
