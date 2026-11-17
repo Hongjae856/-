@@ -57,7 +57,8 @@ function buildCartoner(g){
   /* 아크릴 지붕판 · 흰 프로파일 틀 · 아크릴 문 3짝 · 'Hoonga' · 회색 원통 힌지 인터락 · 표지 */
   bx(g,x0+.03,x1,Hr,Hr+.012,zn,zs,M.acryl); PB.frame(g,x1-.02,x1+.02,.15,Hr,zn,zs,wf);
   const dz=[zs,zs-(zs-zn)/3,zn+(zs-zn)/3,zn];
-  for(let k=0;k<3;k++){ const a=dz[k+1]+.02, b=dz[k]-.02; bx(g,x1+.02,x1+.028,.16,Hr-.02,a,b,M.acryl); if(k) bx(g,x1-.02,x1+.02,.15,Hr,dz[k]-.02,dz[k]+.02,wf);
+  PK2.ctDoors=[];   /* 아크릴 문 3짝 : 남쪽 끝(b) 힌지로 바깥(동쪽)으로 열림 — 카토너 내부 조치 때 열고 닫음 (11/17) */
+  for(let k=0;k<3;k++){ const a=dz[k+1]+.02, b=dz[k]-.02; { const D=new T3.Group(); D.position.set(x1+.024,0,b); g.add(D); bx(D,-.004,.004,.16,Hr-.02,a-b,0,M.acryl); rod(D,[.03,.95,a-b+.05],[.03,1.15,a-b+.05],.008,M.ssMir,8); PK2.ctDoors.push({G:D,a,b,ang:0}); } if(k) bx(g,x1-.02,x1+.02,.15,Hr,dz[k]-.02,dz[k]+.02,wf);
     for(const y of [.4,1.2]){ rod(g,[x1+.06,y-.07,b-.01],[x1+.06,y+.07,b-.01],.022,M.alu,18); bx(g,x1+.028,x1+.06,y-.06,y+.06,b-.06,b-.01,M.alu); bx(g,x1+.028,x1+.06,y-.06,y+.06,b-.01,b+.04,M.alu); }
     PB.sign(g,.12,.06,[["금 지","#fff",50],["장비 운전중에는 문을 열지 마시오.","#111",22]],{w:384,h:190,border:"#c00",bg:"#fff"},[x1+.03,Hr-.12,a+.25],Math.PI/2); }
   decal(g,.58,.12,textTex("Hoonga","#ffffff",512,100,84),[x1+.03,1.08,(dz[1]+dz[2])/2+.15],Math.PI/2);
