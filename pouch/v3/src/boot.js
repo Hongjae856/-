@@ -39,7 +39,7 @@ function bindGfx(){
 }
 function boot(){
   fitApp(); addEventListener("resize",fitApp);
-  bindPanel(); bindHeader(); bindAuto(); $("#apBtn").hidden=true; bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit(); dialInit(); consInit();
+  bindPanel(); bindHeader(); bindAuto(); $("#apBtn").hidden=true; bindVersion(); initSplash(); fpInit(); bindGfx(); oeeInit(); eduInit(); demoInit(); crewInit(); dialInit(); consInit();
   lineInit(); clock();
   window.__IDT={S:()=>S, LN, cam, R3, STEPS, startSession, apStart, apStop, AP, launchIncident, WK, FP, fpSet, V3:()=>V3, GQ, gqSet, camSet};
   requestAnimationFrame(frame);

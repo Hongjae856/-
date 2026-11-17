@@ -75,7 +75,12 @@ function buildFillZone(S){
     rod(g,[x-.3,.77,z],[x+.3,.77,z],.004,M.ssMir,6); const lid=new T3.Mesh(new T3.CylinderGeometry(.31,.31,.02,36),M.ssMir); lid.position.set(x+.36,.6,z-.28); lid.rotation.z=1.2; add(g,lid);
     const B=new T3.Group(); g.add(B); FILLPROP.bagsIn=B; for(const [dx,dz] of [[-.1,-.08],[.1,.09]]) add(B,bagMesh(x+dx,.5,z+dz)); }
   /* ── 출입문 2 (남쪽 벽) : 양개문 · 유리창 ── */
-  for(const x0 of [.7,8.3]){ const z=RM.fill.z1-.03; bx(g,x0-.05,x0+1.05,0,2.15,z-.02,z,M.alu); for(const dx of [0,.5]){ bx(g,x0+dx+.01,x0+dx+.49,.02,2.1,z-.03,z-.02,M.white); bx(g,x0+dx+.1,x0+dx+.4,1.2,1.8,z-.034,z-.03,glass); rod(g,[x0+(dx?.56:.44),1.0,z-.06],[x0+(dx?.56:.44),1.12,z-.06],.01,M.ssMir); } }
+  /* 문짝은 경첩(바깥 끝) 기준 그룹 — 자유모드에서 실내 쪽(북)으로 열림 (11/17 · free.js RDOOR) */
+  const RD=(window.RDOOR=window.RDOOR||[]);
+  for(const [di,x0] of [[0,.7],[1,8.3]]){ const z=RM.fill.z1-.03; bx(g,x0-.05,x0+1.05,0,2.15,z-.02,z,M.alu);
+    for(const s of [1,-1]){ const G=new T3.Group(); G.position.set(s>0?x0+.01:x0+.99,0,z-.025); g.add(G); const X=(a,b)=>[Math.min(s*a,s*b),Math.max(s*a,s*b)];
+      bx(G,...X(0,.48),.02,2.1,-.005,.005,M.white); bx(G,...X(.09,.39),1.2,1.8,-.009,-.005,glass); rod(G,[s*.43,1.0,-.035],[s*.43,1.12,-.035],.01,M.ssMir);
+      RD.push({G, s, key:"f"+di, ang:0}); } }
   /* ── 소화기 (진공청소기는 구현하지 않음 — 사용자 지시 11/11) ── */
   rod(g,[.3,.05,6.5],[.3,.5,6.5],.06,M.red,18); rod(g,[.3,.5,6.5],[.3,.58,6.5],.02,M.dark,10);
   return g;

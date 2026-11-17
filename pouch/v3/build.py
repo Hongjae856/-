@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -30,6 +30,17 @@ PATCH = {
         (r"R3.lo=[-9900,-10,-3300]; R3.hi=[12900,4300,2700];", "", 1),
     ],
     "hmi.js": [
+        ('if(!p.cwProd){ toast("품종을 먼저 전환하세요.","bad"); return; }', 'if(!p.cwProd&&!FREE()){ toast("품종을 먼저 전환하세요.","bad"); return; }', 2),   # 자유모드 인터록 해제 (11/17)
+        ('const run=()=>{ if(f.run){ toast("운전 중에는 할 수 없습니다. 먼저 STOP.","bad"); return true; } return false; };', 'const run=()=>{ if(f.run&&!FREE()){ toast("운전 중에는 할 수 없습니다. 먼저 STOP.","bad"); return true; } return false; };', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!f.link){ toast("후 공정 연동이 OFF 입니다.', 'if(!f.link&&!FREE()){ toast("후 공정 연동이 OFF 입니다.', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(f.heat<f.heatSV-6){ toast("아직 승온 중입니다', 'if(f.heat<f.heatSV-6&&!FREE()){ toast("아직 승온 중입니다', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(p.sfRun){ toast("가동 중입니다. 먼저 STOP.","bad"); return; } p.sfShut=1;', 'if(p.sfRun&&!FREE()){ toast("가동 중입니다. 먼저 STOP.","bad"); return; } p.sfShut=1;', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(p.vsRun){ toast("먼저 정지하세요.","bad"); return; }', 'if(p.vsRun&&!FREE()){ toast("먼저 정지하세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!p.xrKey){ toast("X선 출력 키 스위치를 먼저 ON 하세요.","bad"); return; } if(!p.xrPre){', 'if(!p.xrKey&&!FREE()){ toast("X선 출력 키 스위치를 먼저 ON 하세요.","bad"); return; } if(!p.xrPre&&!FREE()){', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!p.xrX){ toast("X선을 먼저 켜세요.","bad"); return; }', 'if(!p.xrX&&!FREE()){ toast("X선을 먼저 켜세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!p.xrCal){ toast("캘리브레이션을 먼저 하세요.","bad"); return; }', 'if(!p.xrCal&&!FREE()){ toast("캘리브레이션을 먼저 하세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!p.xrConv){ toast("콘베어를 먼저 가동하세요.","bad"); return; }', 'if(!p.xrConv&&!FREE()){ toast("콘베어를 먼저 가동하세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!p.sfUser){ toast("로그인이 필요합니다.","bad"); return; } if(!(p.sfServo&&p.sfFeed)){', 'if(!p.sfUser&&!FREE()){ toast("로그인이 필요합니다.","bad"); return; } if(!(p.sfServo&&p.sfFeed)&&!FREE()){', 1),   # 자유모드 인터록 해제 (11/17)
         ('  if(k==="fl") h=B("swRun",', '  if(k==="fl"||k==="fp") h=B("swRun",', 1),   # 프린터(fp) 탭에서도 충전기 판넬 버튼 유지 (11/17)
         ('const EXPECT={exp:"2028.11.01", lot:"2F010"};', 'const EXPECT={exp:"2029.01.30", lot:"2F001"};   /* 제조번호 · 사용기한 (11/17 사용자 제시 예) */', 1),
         ('  return k==="fl"?S.f.panel:', '  return k==="fl"?S.f.panel:k==="fp"?!!S.f.main:', 1),
@@ -47,6 +58,13 @@ PATCH = {
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
     "ui.js": [
+        ('const runBlock=()=>{ if(S.f.run){', 'const runBlock=()=>{ if(S.f.run&&!FREE()){', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!f.main){ toast("메인 파워를 먼저 켜세요.","bad"); return; }', 'if(!f.main&&!FREE()){ toast("메인 파워를 먼저 켜세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(f.run){ deduct("doorRun"); raise("DOOR"); }', 'if(f.run&&!FREE()){ deduct("doorRun"); raise("DOOR"); }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(!xrReady()){ toast("X-ray 부팅이 끝난 뒤 켭니다.","bad"); return; }', 'if(!xrReady()&&!FREE()){ toast("X-ray 부팅이 끝난 뒤 켭니다.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(p.prRun||p.vsRun){ toast("인쇄 · 비전을 먼저 정지하세요.","bad"); return; }', 'if((p.prRun||p.vsRun)&&!FREE()){ toast("인쇄 · 비전을 먼저 정지하세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(S.p.ctRun){ toast("카토너 가동 중입니다. 먼저 STOP.","bad"); return; }', 'if(S.p.ctRun&&!FREE()){ toast("카토너 가동 중입니다. 먼저 STOP.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
+        ('if(b.dataset.c==="1"){ deduct("oneCarry");', 'if(b.dataset.c==="1"&&!FREE()){ deduct("oneCarry");', 1),   # 자유모드 인터록 해제 (11/17)
         ('$("#"+id).onclick=()=>{ if(!S||!S.session) return; TILE[id].click(); };', '$("#"+id).onclick=e=>{ if(!S||!S.session) return; if(typeof fpActive==="function"&&fpActive()){ toast("1인칭에서는 현장에서 직접 조작합니다 — 노란 화살표 위치로 가서 좌클릭(E)","bad"); return; } TILE[id].click(); };   /* 1인칭 : 왼쪽 타일은 ON/OFF 현황만 (11/16) */', 1),
         ('mLift:{e:"🛗",b:"주성분 STS 용기",s:()=>S.f.mainLift?"2층 데크 도착":"리프터로 올림"', 'mLift:{e:"🛗",b:"주성분 리프터 운반",s:()=>S.f.mainLift?"2층 데크 도착":"봉투 → 적재칸 → 데크"', 1),   # 11/16 : STS 용기의 봉투를 리프터 적재칸으로 옮겨 올림
         ('toast("주성분 STS 용기를 먼저 리프터로 올리세요.","bad")', 'toast("주성분을 먼저 리프터로 2층 데크에 올리세요.","bad")', 1),
@@ -74,6 +92,8 @@ PATCH = {
         ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||(e.code==='KeyF'&&!e.target?.closest?.('input,textarea'))) && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
     ],
     "sim.js": [   # 무작위 소량 불량 (11/17 사용자 선택) : 중량 NG 약 0.15 % · 실링 불량 약 0.15 %
+        ('  if(f.run&&!(f.airV[0]&&f.airV[1])&&f.airP<4.5) raise("AIR");', '  if(f.run&&!(f.airV[0]&&f.airV[1])&&f.airP<4.5&&!FREE()) raise("AIR");', 1),   # 자유모드 인터록 해제 (11/17)
+        ('  if(f.run&&S.f.door!=="closed") raise("DOOR");', '  if(f.run&&S.f.door!=="closed"&&!FREE()) raise("DOOR");', 1),   # 자유모드 인터록 해제 (11/17)
         ('  const printed=f.prn.saved;', '  const printed=f.prn.saved&&f.prn.lot===EXPECT.lot&&f.prn.exp===EXPECT.exp;   /* 포장지시기록서와 다른 값 = 인쇄 불량 (11/17) */', 1),
         ('  const printBad=!printed||f.headDirty||f.ribbon<5;', '  const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }\n  const sealS=Math.random()<.0015;   /* 공포배출 게이트는 10열 일괄 (reject.js) → 실링 불량 판정 시 그 스트로크 10포 모두 배출 */', 1),
         ('c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":"ok"):"none";', 'c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":(p.lbl.lot!==EXPECT.lot||p.lbl.exp!==EXPECT.exp)?"bad":"ok"):"none";', 1),
@@ -102,7 +122,7 @@ PATCH = {
         ("화면 오류를 감시하고 이상사례에 대응합니다.", "화면 오류를 감시합니다.", 1),
         ("  showResult(manual);\n", "  (isDemo()?showDemoResult:isInc()?showIncResult:showResult)(manual);\n", 1),
         ("  S.stepAt=tSim;\n  if(typeof fpSet", "  S.stepAt=tSim; if(typeof propsReset===\"function\") propsReset();\n  if(typeof fpSet", 1),
-        ('  if(typeof fpSet==="function") fpSet(FP.want);', '  if(typeof fpSet==="function") fpSet(mode!=="demo");   /* 교육 시작 = 항상 1인칭 (11/16 사용자 지시) */', 1),   # 새 세션 : 작업자 작업 · 끌던 대차 초기화
+        ('  if(typeof fpSet==="function") fpSet(FP.want);', '  if(typeof fpSet==="function") fpSet(FP.want);   /* 교육 시작 = 1인칭 (11/16) · 작업자 선택(crew.js)이 FP.want=true · 작업자 교체는 지금 시점 유지 (11/17) */', 1),   # 새 세션 : 작업자 작업 · 끌던 대차 초기화
         ('  if(isEasy()) presetEasy();\n', '  if(isEasy()) presetEasy();\n  S.f.hoseC=(mode==="guide"||mode==="exam")&&room==="F"?[false,false]:null;   /* 심화 충전실 : IBC 진공호스 분리 상태에서 시작 (11/16 · [0] 첨가제 · [1] 백당) */\n', 1),
         ('function ipcTake(){\n  const I=S.ipc, h=ipcStep(); if(!h||h.k!=="take") return;\n', 'function ipcTake(){\n  const I=S.ipc, h=ipcStep(); if(!h||h.k!=="take") return;\n  if(!S.flags.ipcGo&&typeof startWork==="function"){ if(S.flags.ipcBusy) return; S.flags.ipcBusy=true;   /* 작업자가 배출 컨베이어에서 시료를 꺼내 저울 작업대로 가서 계량한 뒤 결과 반영 (11/16) */\n    const ok=startWork("ipc",()=>{ S.flags.ipcBusy=false; S.flags.ipcGo=true; try{ ipcTake(); }finally{ S.flags.ipcGo=false; } });\n    if(!ok){ S.flags.ipcBusy=false; toast("작업자가 다른 작업 중입니다."); } else if(!cam.fp) toast("시료 채취 — 배출 컨베이어에서 "+IPC_STD[I.targets[I.cur]].n+"포를 꺼내 저울 작업대에서 계량합니다."); return; }\n', 1),
         ('    A.push(T_("ibc1","이송기 1(첨가제) ON",', '    A.push(T_("hose","IBC 진공호스 연결 · 클램프 체결 (백당 · 첨가제)","IBC 받침 호퍼 배출구에 진공호스를 끼우고 클램프로 체결합니다. 백당 → 첨가제 순으로 연결하고 체결 상태를 확인한 뒤 이송기를 켭니다.",()=>"#lcCheck",()=>!f().hoseC||f().hoseC[0]&&f().hoseC[1],{pts:2,chk:()=>f().hoseC&&!(f().hoseC[0]&&f().hoseC[1])?{job:"hose",t:"IBC 진공호스 연결",set(){ f().hoseC=[true,true]; toast("IBC 진공호스 연결 · 클램프 체결 완료 (백당 · 첨가제)","good"); }}:null}));\n    A.push(T_("ibc1","이송기 1(첨가제) ON",', 1),

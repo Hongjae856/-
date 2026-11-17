@@ -29,7 +29,7 @@ PSCR.fp=()=>{ const f=S.f, D=f.prnD||(f.prnD={lot:f.prn.lot||"",exp:f.prn.exp||"
    '<div class="fpSt">인쇄 중 <b>'+(f.prn.saved?esc(f.prn.lot)+" · "+esc(f.prn.exp):"-")+'</b> · 리본 '+Math.round(f.ribbon)+' % · OCR '+(f.vision?(n?"OK "+(n-ng).toLocaleString()+" / NG "+ng.toLocaleString():"판독 대기"):"OFF")+'</div>'; };   /* 모니터 유리면(600 × 362)에 한 화면으로 들어가게 간결하게 */
 function fpClick(id){
   const f=S.f, D=f.prnD||(f.prnD={lot:"",exp:""});
-  if(id==="fp_save"){ if(!D.lot||!D.exp){ toast("제조번호 · 사용기한을 모두 입력하세요.","bad"); return; } if(f.run){ toast("운전 중에는 인쇄 설정을 바꾸지 않습니다. 먼저 STOP.","bad"); return; }
+  if(id==="fp_save"){ if(!D.lot||!D.exp){ toast("제조번호 · 사용기한을 모두 입력하세요.","bad"); return; } if(f.run&&!FREE()){ toast("운전 중에는 인쇄 설정을 바꾸지 않습니다. 먼저 STOP.","bad"); return; }
     f.prn={lot:D.lot, exp:D.exp, saved:true}; const ok=prnMatch(D.lot,D.exp);
     toast("인쇄 설정 저장 — 제조번호 "+D.lot+" · 사용기한 "+D.exp+(ok?"":(isExam()?"":" (포장지시기록서와 다릅니다!)")),ok||isExam()?"good":"bad"); }
   else if(id==="fp_clr"){ D.lot=""; D.exp=""; }

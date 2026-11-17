@@ -56,7 +56,7 @@ function consDraw(){
   TILE.pMag.warn=()=>S.p.mag>0&&S.p.mag<=100; TILE.pLeaf.warn=()=>S.p.leaf>0&&S.p.leaf<=100;
   const a0=TILE.fAir1.s; TILE.fAir1.s=()=>fmt(airShow(),1)+" kgf/cm²";
   TILE.fRib={e:"🎞️",b:"은박 프린터 리본 교체",s:()=>"리본 "+Math.round(S.f.ribbon)+" %",lv:()=>S.f.ribbon,on:()=>S.f.ribbon>=20,warn:()=>S.f.ribbon<15,
-    click(){ if(S.f.run){ toast("운전 중에는 리본을 교체하지 않습니다. 먼저 STOP.","bad"); return; } act("prn",()=>{ S.f.ribbon=100; toast("은박 프린터 리본 교체 완료","good"); }); }};
+    click(){ if(S.f.run&&!FREE()){ toast("운전 중에는 리본을 교체하지 않습니다. 먼저 STOP.","bad"); return; } act("prn",()=>{ S.f.ribbon=100; toast("은박 프린터 리본 교체 완료","good"); }); }};
   TILE.pInk={e:"🧴",b:"케이스 프린터 잉크 교체",s:()=>"잉크 "+Math.round(S.p.ink)+" %",lv:()=>S.p.ink,on:()=>S.p.ink>=20,warn:()=>S.p.ink<15,
     click(){ act("ink",()=>{ S.p.ink=100; toast("케이스 프린터 잉크 교체 완료","good"); }); }};
   if(!TILESET.F.mat.includes("fRib")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mPrn")+1,0,"fRib");

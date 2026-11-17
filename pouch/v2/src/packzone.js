@@ -13,7 +13,8 @@ function buildPackRoom(S){
   const key=new T3.DirectionalLight(0xffffff,.9); key.position.set(5.5,H+3,-7); key.target.position.set(2.6,0,-8); key.castShadow=true; key.shadow.mapSize.set(2048,2048);
   Object.assign(key.shadow.camera,{left:-7,right:7,top:9.5,bottom:-9.5,near:.5,far:16}); key.shadow.bias=-.0004; key.shadow.normalBias=.02; S.add(key); S.add(key.target);
   /* 북쪽 출입문 · 유리창(충전실 쪽 벽) 포장실 면 · 인터폰 · 에어건 */
-  bx(g,6.4,7.4,0,2.15,R.z0+.03,R.z0+.05,M.white); bx(g,6.7,7.1,1.2,1.8,R.z0+.05,R.z0+.055,M.dark);
+  { const G=new T3.Group(); G.position.set(6.4,0,R.z0+.04); g.add(G); bx(G,0,1.0,0,2.15,-.01,.01,M.white); bx(G,.3,.7,1.2,1.8,.01,.015,M.dark); rod(G,[.9,1.0,.035],[.9,1.12,.035],.01,M.ssMir);   /* 경첩 서쪽 끝 · 자유모드에서 실내(남)로 열림 */
+    (window.RDOOR=window.RDOOR||[]).push({G, s:-1, key:"p0", ang:0}); }
   for(const x0 of [X-1.25,X+.3]) for(const [a,b,c,d] of [[x0-.04,x0+.99,1.01,1.05],[x0-.04,x0+.99,2.15,2.19],[x0-.04,x0,1.01,2.19],[x0+.95,x0+.99,1.01,2.19]]) bx(g,a,b,c,d,-.045,-.02,M.alu);
   bx(g,X+1.4,X+1.5,1.35,1.6,-.06,-.026,M.white);
   const beacon=(x,y,z)=>{ rod(g,[x,y,z],[x,y+.35,z],.012,M.ssMir); for(const [k,m] of [[0,M.green],[1,M.yellow],[2,M.red]]) rod(g,[x,y+.35+k*.06,z],[x,y+.41+k*.06,z],.03,m,18); };

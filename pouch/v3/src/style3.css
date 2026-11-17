@@ -154,3 +154,19 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 .fpSt{margin-top:8px;font:700 12px/1.4 var(--ff);color:#33424f}
 .fpSt b{font-family:"DejaVu Sans Mono",Consolas,monospace}
 #fpMon #hBody{overflow:auto}
+/* ═══ 작업자 선택 · 자유모드 (11/17) ═══ */
+#splash .go{grid-template-columns:repeat(5,1fr);max-width:1380px}
+#splash .go .fr{background:#5b3fa0;color:#fff;border-color:#45307c}
+#splash .go button.sel{outline:4px solid #f5b400;outline-offset:3px}
+#crewHint{max-width:900px;margin:0 auto 12px;text-align:center;font:600 16px/1.5 var(--ff);color:#40566e}
+#crewHint b{color:#142b47} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
+#coursePicker button.main.wait{opacity:.55}
+#coursePicker button.main.sel{outline:4px solid #f5b400;outline-offset:3px}
+#crewSw{display:flex;gap:4px;padding:3px}
+#crewSw button{border:1px solid #b7c4d2;background:#fff;color:#142b47;border-radius:999px;padding:4px 12px;font:700 13px var(--ff);cursor:pointer}
+#crewSw button.on{background:#142b47;color:#fff;border-color:#142b47}
+#coach.free{border-left-color:#5b3fa0;background:#f8f5ff}
+#coach.free #cStep{color:#5b3fa0}
+#freeBar{display:flex;gap:6px;margin-top:8px}
+#freeBar button{flex:1;padding:10px 8px;border:1px solid #5b3fa0;border-radius:10px;background:#fff;color:#45307c;font:800 14px/1.2 var(--ff);cursor:pointer}
+#freeBar button:first-child{background:#5b3fa0;color:#fff}

@@ -83,8 +83,8 @@ function solpacClick(id){
   if(id.startsWith("sp_go_")){ hScr=id.slice(6); drawHMI(); return; }
   if(id==="sp_big") return;
   if(id==="sp_back"){ hScr=SUB[hScr]||"run"; drawHMI(); return; }
-  if(id==="sp_logout"){ if(S.f.run){ toast("운전 중에는 로그아웃하지 않습니다.","bad"); return; } S.f.user=null; toast("로그아웃"); drawHMI(); return; }
-  if(id==="sp_man"){ if(S.f.run){ toast("운전 중에는 수동 점검을 켜지 않습니다.","bad"); return; } S.flags.spMan=!S.flags.spMan; drawHMI(); return; }
+  if(id==="sp_logout"){ if(S.f.run&&!FREE()){ toast("운전 중에는 로그아웃하지 않습니다.","bad"); return; } S.f.user=null; toast("로그아웃"); drawHMI(); return; }
+  if(id==="sp_man"){ if(S.f.run&&!FREE()){ toast("운전 중에는 수동 점검을 켜지 않습니다.","bad"); return; } S.flags.spMan=!S.flags.spMan; drawHMI(); return; }
   if(id==="sp_rst"){ toast("카운터 리셋은 생산 기록과 대조 후 담당자가 합니다 (IDT : 표시만)."); return; }
   if(id==="sp_empty"||id==="sp_mark"){ toast(id==="sp_empty"?"공포 배출 설정 화면 (IDT : 표시만)":"마크 설정 화면 (IDT : 표시만)"); return; }
   toast("교육 범위 밖 기능입니다 (화면 표시만).");

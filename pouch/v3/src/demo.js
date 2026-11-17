@@ -7,7 +7,7 @@ const isDemo=()=>!!S&&S.mode==="demo";
 const DEMO_GOAL=48;   /* 수동 포장 완료 기준 카톤 수 (대케이스 6개 = 대박스 1개 반 · 파렛트 적재까지 보이도록) */
 function stepsDemo(){
   const f=()=>S.f, p=()=>S.p, D=(k,t,d,btn,pos,cam,act,ok)=>T_(k,t,d,()=>"#demoAct",ok,{pts:1,btn,pos,cam,demoAct:act});
-  return [
+  const L=[
     D("dPowF","충전기 전원 ON (일괄)","버튼 한 번으로 메인 파워 · 압축공기 · 집진 · 컨트롤 판넬 · 터치스크린 로그인까지 켭니다. 히터 예열은 시연에서 생략합니다.","충전기 전원 ON",ANC.mainPow,"fill",
       ()=>act("power",()=>{ Object.assign(S.f,{main:true, airV:[true,true], airP:6, dustV:true, panel:true, user:"PK2", heat:S.f.heatSV}); toast("충전기 전원 일괄 ON — 메인 · 에어 · 집진 · 판넬 · 로그인","good"); }),
       ()=>f().panel&&!!f().user),
@@ -24,28 +24,34 @@ function stepsDemo(){
       ()=>{ Object.assign(S.p,{ctRun:true, sfServo:true, sfFeed:true, sfRun:true, vsRun:true, prRun:true, xrConv:true, cwRun:true, align:true}); toast("포장 라인 가동 — 스틱공급 · 카토너 · 프린터 · 비전 · X-ray · 중량선별","good"); },
       ()=>p().ctRun&&p().sfRun),
     D("dRun","충전기 가동 (RESET → RUN → FILLING ON)","후 공정 연동 상태에서 충전기를 가동하고 FILLING 을 켜서 충전을 시작합니다.","충전기 가동",ANC.panel,"front",
-      ()=>{ Object.assign(S.f,{link:true, linkChk:true, door:"closed", run:true, started:true, filling:true}); S.alarms=[]; hMach="fl"; hScr="run"; drawHMI(); toast("충전기 RESET → RUN → FILLING ON — 충전 시작","good"); },
+      ()=>{ Object.assign(S.f,{link:true, linkChk:true, door:"closed", run:true, started:true, filling:true}); S.p.align=true; S.alarms=[]; hMach="fl"; hScr="run"; drawHMI(); toast("충전기 RESET → RUN → FILLING ON — 충전 시작","good"); },
       ()=>f().run&&f().filling),
     D("dWatch","생산 → 수동 포장 (대케이스 · 대박스 · 파렛트)","파우치가 정렬컨베어로 포장실에 넘어가 카톤 → 대케이스 → 대박스 → 파렛트까지 포장됩니다. "+DEMO_GOAL+"카톤이 되고 첫 대박스가 파렛트에 올라가면 시연을 마칩니다.","수동 포장 보기",ANC.boxing,"hand",
       ()=>{ camSet("hand"); toast("수동 포장 구역 — 대케이스 포장 → 대박스 테이핑 → 파렛트 적재","good"); S.flags.demoWatch=true; },
-      ()=>S.flags.demoWatch&&S.cnt.good>=DEMO_GOAL&&(typeof MP=="undefined"||!MP.palB||!R3.gl||MP.palB.count>=1))   /* 3D : 첫 대박스가 파렛트에 올라갈 때까지 (V20 포장실 상태 연동) */
-  ];
+      ()=>S.flags.demoWatch&&S.cnt.good>=DEMO_GOAL&&(typeof MP=="undefined"||!MP.palB||!R3.gl||MP.palB.count>=1)),   /* 3D : 첫 대박스가 파렛트에 올라갈 때까지 (V20 포장실 상태 연동) */
+    D("dWatchF","생산 → 포장실로 이송","충전된 파우치가 슈트 → 배출 컨베이어 → 벽 개구부를 지나 포장실로 넘어갑니다. "+DEMO_GOAL+"카톤 분량("+DEMO_GOAL*6+"포)이 넘어가면 시연을 마칩니다.","생산 보기",ANC.chute,"conv",
+      ()=>{ S.flags.demoWatch=true; toast("배출 컨베이어 → 포장실 이송 — 정렬컨베어 경사 구간","good"); },
+      ()=>S.flags.demoWatch&&S.cnt.toPack>=DEMO_GOAL*6)
+  ], K=k=>L.find(s=>s.k===k);
+  /* 작업자(실)마다 시연 단계 (11/17 사용자 지시) — 다른 실 설비는 자동 운전 상태 */
+  return S.room==="P"?[K("dPowP"),K("dPack"),K("dWatch")]:[K("dPowF"),K("dIbc"),K("dRun"),K("dWatchF")];
 }
 /* 코치 패널의 [시연 실행] 버튼 */
 function demoCoach(st){
   let b=$("#demoAct"); if(!b){ const lc=$("#lcCheck"); if(!lc) return; lc.insertAdjacentHTML("afterend",'<button id="demoAct" style="display:none"></button>'); b=$("#demoAct"); b.onclick=()=>{ const s=curStep(); if(s&&s.demoAct&&isDemo()){ if(s.cam&&!cam.fp) camSet(s.cam); s.demoAct(); setTimeout(stepCheck,50); } }; }
-  const on=isDemo()&&st&&st.demoAct&&!(st.k==="dWatch"&&S.flags.demoWatch);
+  const on=isDemo()&&st&&st.demoAct&&!((st.k==="dWatch"||st.k==="dWatchF")&&S.flags.demoWatch);
   b.style.display=on?"":"none"; if(on) b.textContent="▶ "+st.btn;
+  if(isDemo()&&st&&st.k==="dWatchF"&&S.flags.demoWatch) $("#cStep").textContent="시연 · 포장실로 이송 "+S.cnt.toPack+" / "+DEMO_GOAL*6+" 포";
   if(isDemo()&&st&&st.k==="dWatch"&&S.flags.demoWatch) $("#cStep").textContent="시연 · 생산 "+S.cnt.good+" / "+DEMO_GOAL+" 카톤 · 대케이스 "+S.cnt.cases+" 개";
 }
 function showDemoResult(){
-  $("#endBox").innerHTML='<h2>🎬 시연 완료</h2><p>장비 ON → 진공 이송기 → 포장 라인 · 충전기 가동 → 수동 포장까지 진행했습니다.</p>'+
+  $("#endBox").innerHTML='<h2>🎬 시연 완료 — '+esc(CREW_RNM[S.room])+'</h2><p>'+(S.room==="P"?"포장실 설비 전원 → 포장 라인 가동 → 수동 포장(대케이스 · 대박스 · 파렛트)까지 진행했습니다.":"충전기 전원 → 진공 이송기 → 충전기 가동 → 포장실 이송까지 진행했습니다.")+' 상단 작업자 버튼으로 다른 작업장 시연을 이어서 볼 수 있습니다.</p>'+
     '<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin:10px 0">'+kc(S.cnt.pouch.toLocaleString()+" 포","충전 파우치","hi")+kc(S.cnt.good+" 카톤","양품 카톤")+kc(S.cnt.cases+" 개","대케이스")+'</div>'+
     '<div class="mbtn"><button class="pri" id="endAgain">다시 시연</button><button id="endHome">메인화면</button><button id="endClose">닫기</button></div>';
   $("#mEnd").classList.add("on");
-  $("#endAgain").onclick=()=>{ $("#mEnd").classList.remove("on"); demoStart(); };
+  $("#endAgain").onclick=()=>{ $("#mEnd").classList.remove("on"); demoStart(S.room); };
   $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
   $("#endClose").onclick=()=>$("#mEnd").classList.remove("on");
 }
-function demoStart(){ $("#splash").classList.add("hide"); startSession("demo","F"); if(typeof fpSet==="function") fpSet(false); camSet("fill"); toast("시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요"); }
+function demoStart(room){ room=room||"F"; $("#splash").classList.add("hide"); startSession("demo",room); toast((typeof CREW_RNM!=="undefined"?CREW_RNM[room]:room)+" · 시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요"); }   /* 11/17 : 작업자 선택 · 1인칭 시작 */
 function demoInit(){ const b=$("#spDemo"); if(b) b.onclick=demoStart; }
