@@ -1,3 +1,5 @@
+/* 화면 버전 표시 = 버전 이력 맨 위 항목 */
+const verTxt=()=>{ try{ return "V"+CHANGELOG[0].v+" · "+CHANGELOG[0].d; }catch(e){ return ""; } };
 /* ═══════════════════════════════════════════════════════════════════
    셸 — PTP 두 앱(충전기 · 포장라인)을 iframe 으로 띄워 두고(과정 · HMI · 시뮬레이션 · 형상 생성), 3D 는 셸의 Three.js 가 그림
    · 메인화면 (파우치와 같음) : ① 모드 → ② 작업자(충전실 · 포장실) → 그 작업자 1인칭으로 시작 · 그 실 앱의 과정 단계 적용
@@ -35,7 +37,7 @@ function startRoom(r){
 function show(r){
   if(CREW.cur&&V3P.view!=="orbit") CREW.pose[CREW.cur]={x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch};
   CREW.cur=r; for(const [rr,k] of [["F","filler"],["P","line"]]) FR[k].classList.toggle("off",rr!==r);
-  $("#apps").classList.add("live"); $("#modeChip").textContent=CREW.mode?CREW.mode.nm:"";
+  $("#apps").classList.add("live"); $("#modeChip").textContent=CREW.mode?CREW.mode.nm:verTxt();
   if(CREW.fp){ setView(r); const q=CREW.pose[r]; if(q) Object.assign(WALK,q); } else setView("orbit");
   crewHead();
 }
@@ -47,7 +49,7 @@ function crewHead(){
 function goHome(){
   for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); try{ const w=UNI_HUB.win(k); w.document.body.classList.remove("mode3"); if(w.__sc0){ w.startChecks=w.__sc0; w.deduct=w.__dd0; w.alarm=w.__al0; } if(w.__door0){ w.document.getElementById("uDoor").onclick=w.__door0; w.__door0=null; } w.FREE3=false; }catch(e){} }   /* 자유모드 인터락 해제 원복 */
   MODE3.kind=null; INC3.k=null; $("#incPick").hidden=true; $("#modes").hidden=false;
-  CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent="";
+  CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt();
   if(document.pointerLockElement) document.exitPointerLock(); crewMark(); crewHead();
 }
 
@@ -88,7 +90,7 @@ function loop(now){
   if(now-(loop.m||0)>300){ loop.m=now; inc3Tick(); mode3Coach(); }
   if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps"; }
 }
-function boot(){
+function boot(){ $("#modeChip").textContent=verTxt();
   if(!appsReady()){ setTimeout(boot,100); return; }
   v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }

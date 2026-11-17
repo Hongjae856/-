@@ -2,6 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>PTP 라인 IDT</title>
 <style>
+[hidden]{display:none!important}
 body.appModal #cv,body.appModal #cross,body.appModal #hud,body.appModal #fpTip{visibility:hidden!important}
 /*__OEECSS__*/
 :root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0}
@@ -73,7 +74,7 @@ button{font-family:inherit}
 </style></head><body>
 <div id="bar">
   <div class="brand">PTP 라인 IDT</div>
-  <span class="chip" id="modeChip">개발 중 (P2)</span>
+  <span class="chip" id="modeChip"></span>
   <div class="seg" id="crewSw"><button data-r="F">🧍 충전실 작업자</button><button data-r="P">🧍 포장실 작업자</button></div>
   <button class="gb" id="fpBtn">🧍 1인칭 → 3인칭 전환</button>
   <button class="gb" id="homeBtn">메인화면</button>
