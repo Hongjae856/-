@@ -30,13 +30,14 @@ PATCH = {
         (r"R3.lo=[-9900,-10,-3300]; R3.hi=[12900,4300,2700];", "", 1),
     ],
     "hmi.js": [
+        ('  if(k==="fl") h=B("swRun",', '  if(k==="fl"||k==="fp") h=B("swRun",', 1),   # 프린터(fp) 탭에서도 충전기 판넬 버튼 유지 (11/17)
         ('const EXPECT={exp:"2028.11.01", lot:"2F010"};', 'const EXPECT={exp:"2029.01.30", lot:"2F001"};   /* 제조번호 · 사용기한 (11/17 사용자 제시 예) */', 1),
         ('  return k==="fl"?S.f.panel:', '  return k==="fl"?S.f.panel:k==="fp"?!!S.f.main:', 1),
         ('function machRun(k){ const p=S.p; return k==="fl"?S.f.run:', 'function machRun(k){ const p=S.p; return k==="fl"?S.f.run:k==="fp"?!!(S.f.run&&S.f.prn.saved):', 1),
         ('function drawHMI(){\n  if(!S) return;', 'function drawHMI(){\n  if(!S) return; { const ae=document.activeElement; if(ae&&ae.classList&&ae.classList.contains("hin")&&ae.closest("#hBody")) return; }   /* 직접 입력 중에는 다시 그리지 않음 */', 1),
         ('function bindHB(){ $$("#hBody [data-hb]").forEach(e=>e.onclick=()=>hbClick(e.dataset.hb)); drawPanel(); }', 'function bindHB(){ $$("#hBody [data-hb]").forEach(e=>e.onclick=()=>hbClick(e.dataset.hb)); if(typeof hinBind==="function") hinBind(); drawPanel(); }', 1),
         ('    case "pr_lot": p.lbl.lot=EXPECT.lot; p.lbl.saved=false; toast("LOT : "+EXPECT.lot+" (포장지시기록서)"); break;\n    case "pr_exp": p.lbl.exp=EXPECT.exp; p.lbl.saved=false; toast("EXP : "+EXPECT.exp+" (포장지시기록서)"); break;', '    case "pr_lot": case "pr_exp": return;   /* 입력칸에 직접 입력 (11/17) */', 1),
-        ('row("배치번호 (LOT)","포장지시기록서",\'<div class="hval edit" data-hb="pr_lot">\'+esc(L.lot||"입력")+\'</div>\')+row("사용기한 (EXP)","포장지시기록서",\'<div class="hval edit" data-hb="pr_exp">\'+esc(L.exp||"입력")+\'</div>\')', 'row("제조번호 (LOT)","포장지시기록서",hinBox("pr_lot",L.lot,"예 2F001",EXPECT.lot))+row("사용기한 (EXP)","YYYY.MM.DD",hinBox("pr_exp",L.exp,"예 2029.01.30",EXPECT.exp))', 1),
+        ('row("배치번호 (LOT)","포장지시기록서",\'<div class="hval edit" data-hb="pr_lot">\'+esc(L.lot||"입력")+\'</div>\')+row("사용기한 (EXP)","포장지시기록서",\'<div class="hval edit" data-hb="pr_exp">\'+esc(L.exp||"입력")+\'</div>\')', '\'<div class="fpIn"><label>제조번호 (LOT)<s>포장지시기록서</s>\'+hinBox("pr_lot",L.lot,"예 2F001",EXPECT.lot)+\'</label><label>사용기한 (EXP)<s>YYYY.MM.DD</s>\'+hinBox("pr_exp",L.exp,"예 2029.01.30",EXPECT.exp)+\'</label></div>\'', 1),   # 카톤 프린터 라벨 : 제조번호 · 사용기한 직접 입력 (11/17)
         ('    nav.innerHTML=FNAV.map(', '    if(0) nav.innerHTML=FNAV.map(', 1),          # 충전기 : SOLPAC 화면 (solpac.js)
         ('    body.innerHTML=(FSCR[hScr]||FSCR.run)();', '    solpacDraw(body,nav);', 1),
         ('  const m=machOf(hMach);\n  $("#hMach")', '  const m=machOf(hMach); $("#hmi").classList.toggle("solpac",hMach==="fl"); $("#panel").classList.toggle("solpacP",hMach==="fl"); $("#hmi").classList.toggle("oneTab",tabs.length<2); $("#hmi").classList.toggle("big",hMach==="fl"&&SPBIG&&machPower("fl")&&!(typeof fpActive==="function"&&fpActive()));\n  $("#hMach")', 1),

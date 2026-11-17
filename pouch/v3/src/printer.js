@@ -24,10 +24,9 @@ const hinBox=(id,v,ph,ap)=>'<input class="inp hin" data-hb="'+id+'" data-ap="'+e
 /* 충전실 은박 프린터 설정 화면 */
 PSCR.fp=()=>{ const f=S.f, D=f.prnD||(f.prnD={lot:f.prn.lot||"",exp:f.prn.exp||""}), n=S.cnt.ocrN||0, ng=S.cnt.ocrNG||0;
   return ph("인쇄 설정 · 인쇄 검사","FOIL PRINTER · OCR",f.run&&f.prn.saved)+
-   '<div class="kpis">'+kc(f.prn.saved?esc(f.prn.lot):"-","인쇄 중 제조번호","hi")+kc(f.prn.saved?esc(f.prn.exp):"-","인쇄 중 사용기한")+kc(Math.round(f.ribbon)+" %","리본",f.ribbon<15?"ng":"")+'</div>'+
-   row("제조번호 (LOT)","포장지시기록서",hinBox("fp_lot",D.lot,"예 2F001",EXPECT.lot))+row("사용기한 (EXP)","YYYY.MM.DD",hinBox("fp_exp",D.exp,"예 2029.01.30",EXPECT.exp))+
+   '<div class="fpIn"><label>제조번호 (LOT)<s>포장지시기록서</s>'+hinBox("fp_lot",D.lot,"예 2F001",EXPECT.lot)+'</label><label>사용기한 (EXP)<s>YYYY.MM.DD</s>'+hinBox("fp_exp",D.exp,"예 2029.01.30",EXPECT.exp)+'</label></div>'+
    '<div class="hGrid2">'+btn(f.prn.saved,"저장","SAVE","💾","fp_save")+btn(false,"입력 지우기","CLEAR","⌫","fp_clr")+'</div>'+
-   row("인쇄 검사 (OCR)",f.vision?"판독 중":"검사 OFF",pv(n?("OK "+(n-ng).toLocaleString()+" · NG "+ng.toLocaleString()):"-")); };
+   '<div class="fpSt">인쇄 중 <b>'+(f.prn.saved?esc(f.prn.lot)+" · "+esc(f.prn.exp):"-")+'</b> · 리본 '+Math.round(f.ribbon)+' % · OCR '+(f.vision?(n?"OK "+(n-ng).toLocaleString()+" / NG "+ng.toLocaleString():"판독 대기"):"OFF")+'</div>'; };   /* 모니터 유리면(600 × 362)에 한 화면으로 들어가게 간결하게 */
 function fpClick(id){
   const f=S.f, D=f.prnD||(f.prnD={lot:"",exp:""});
   if(id==="fp_save"){ if(!D.lot||!D.exp){ toast("제조번호 · 사용기한을 모두 입력하세요.","bad"); return; } if(f.run){ toast("운전 중에는 인쇄 설정을 바꾸지 않습니다. 먼저 STOP.","bad"); return; }
