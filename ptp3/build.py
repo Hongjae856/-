@@ -11,6 +11,8 @@ import json
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True   # ptp_one/build.py 를 불러올 때 __pycache__ 가 생기지 않게
+
 HERE = Path(__file__).resolve().parent
 ROOT = HERE.parent
 OUT = ROOT / "PTP라인_IDT.html"
