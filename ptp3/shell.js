@@ -66,6 +66,9 @@ function hud(){
 function placeCanvas(){
   const cv=$("#cv"), st=$("#stage").getBoundingClientRect(); let r={left:0,top:0,width:st.width,height:st.height};
   if(CREW.cur){ try{ const d=UNI_HUB.win(APPK[CREW.cur]).document, w3=d.getElementById("mimic3dWrap"), el=w3&&w3.offsetParent?w3:d.getElementById("mimic"); if(el){ const q=el.getBoundingClientRect(); if(q.width>40) r=q; } }catch(e){} }
+  /* 앱 대화창(숫자 키패드 · 선택 · 결과 등 .modal.on)이 열리면 3D 화면을 내림 — 키패드가 3D 화면 뒤에 가려지던 문제 (P6) */
+  let mo=false; if(CREW.cur){ try{ mo=!!UNI_HUB.win(APPK[CREW.cur]).document.querySelector(".modal.on"); }catch(e){} }
+  if(mo!==document.body.classList.contains("appModal")){ document.body.classList.toggle("appModal",mo); if(mo&&document.pointerLockElement) document.exitPointerLock(); }
   const k=[r.left,r.top,r.width,r.height].map(v=>Math.round(v)).join(",");
   if(k!==placeCanvas.k){ placeCanvas.k=k; Object.assign(cv.style,{left:r.left+"px",top:r.top+"px",width:r.width+"px",height:r.height+"px"});
     Object.assign($("#cross").style,{left:(r.left+r.width/2)+"px",top:(r.top+r.height/2)+"px"}); Object.assign($("#hud").style,{left:(r.left+10)+"px",top:(r.top+r.height-44)+"px",bottom:"auto"});
