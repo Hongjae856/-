@@ -41,5 +41,6 @@ function apTick(now){
   if(now-AP.at<dwell) return;
   if(slow&&now-AP.lastAct<SLOW_MS) return;
   AP.lastAct=now; AP.key=null;
+  if(el.tagName==="INPUT"&&el.dataset.ap!=null){ el.value=el.dataset.ap; el.dispatchEvent(new Event("input",{bubbles:true})); return; }   /* 내부 점검용 : 입력칸 */
   el.click();
 }

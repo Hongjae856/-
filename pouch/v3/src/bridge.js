@@ -122,7 +122,7 @@ function v3Sync(dt){
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
   if(FM.mainSw){ const on=!(S&&S.session&&S.session.active)||!!S.f.main; FM.mainSw.rotation.x+=((on?-Math.PI/2:0)-FM.mainSw.rotation.x)*Math.min(1,dt*10); }   /* 메인스위치 손잡이 : 가로 OFF · 세로 ON */
-  if(typeof dialDraw==="function") dialDraw(); if(typeof consDraw==="function") consDraw(); if(typeof htxTick==="function") htxTick(dt);
+  if(typeof dialDraw==="function") dialDraw(); if(typeof consDraw==="function") consDraw(); if(typeof htxTick==="function") htxTick(dt); if(typeof ocrTick==="function") ocrTick(dt);
   if(FILLPROP.hose){ const act=!!(S&&S.session&&S.session.active), hc=act&&S.f.hoseC; FILLPROP.hose.forEach((h,i)=>h.visible=!hc||!!hc[i]); }   /* IBC 진공호스 연결부 */
   scrPower(); if(typeof guide3D==="function") guide3D(dt); if(typeof lampTick==="function") lampTick(dt);
   if(typeof wkDraw==="function") wkDraw(dt);

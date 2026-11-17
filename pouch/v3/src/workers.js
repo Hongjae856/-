@@ -110,7 +110,7 @@ function wkDraw(dt){
     const P={x:w.x,z:w.z,y0:w.y,yaw:w.yaw,dt,L:null,R:null};
     for(const k in w.cm) w.cm[k].visible=false;
     if(w.carry){ if(!w.cm[w.carry]){ w.cm[w.carry]=wkCarryMesh(w.carry); V3.scene.add(w.cm[w.carry]); }
-      const c=w.cm[w.carry], hw=(w.carry==="roll"||w.carry==="rollP")?.2:w.carry==="sts"?.21:w.carry==="cartons"?.16:.08, cy=w.y+(w.carry==="sts"?.78:1.02);
+      const c=w.cm[w.carry], hw=w.carry==="lid"?.36:(w.carry==="roll"||w.carry==="rollP")?.2:w.carry==="sts"?.21:w.carry==="cartons"?.16:.08, cy=w.y+(w.carry==="sts"?.78:1.02);
       let cp=[w.x+f[0]*.36,cy+(w.carry==="sts"?.21:0),w.z+f[1]*.36];
       if(work&&reachAmt(J)>0){ const r=reachAmt(J), q=LJ.reach; cp=[cp[0]+(q[0]-cp[0])*r*.8,cp[1]+(q[1]-cp[1])*r*.8,cp[2]+(q[2]-cp[2])*r*.8]; }
       c.visible=!cam.fp; c.position.set(cp[0],cp[1]-(w.carry==="sts"?.21:0),cp[2]); c.rotation.y=w.yaw;
@@ -119,7 +119,7 @@ function wkDraw(dt){
     else if(work&&J.t>.12&&J.t<LJ.dur-.35){ P.R=LJ.reach.slice(); P.gR=.3; P.nR="down"; if(LJ.dur>2.2){ P.L=[LJ.reach[0]+lf[0]*.22,LJ.reach[1],LJ.reach[2]+lf[1]*.22]; P.gL=.3; P.nL="down"; } }
     poseHuman(H,P);
   }
-  propsDraw(); if(typeof helpDraw==="function") helpDraw(dt);
+  propsDraw(); if(typeof helpDraw==="function") helpDraw(dt); lidDraw();
 }
 
 /* ═══ 대차 · 드럼리프터 · 예비 은박 롤 · STS 용기 — 평소에는 교육 상태(S.f)에 맞춰 놓고, 작업자가 끌 때는 작업자 앞에서 따라옴 (11/16 사용자 지시) ═══
@@ -262,3 +262,31 @@ function helpDraw(dt){
   poseHuman(H.m,P);
 }
 function helpReset(){ const H=HELP; H.x=H.home[0]; H.z=H.home[1]; H.face=H.yaw=Math.PI/2; H.q=[]; H.route=[]; H.on=false; H.side=null; H.noSide=false; }
+
+/* ═══ 2번 호퍼 주성분 투입 (11/17 사용자 확정 : 뚜껑을 들어냄) ═══
+   남쪽 · 북쪽 토글 클램프 해제 → 뚜껑(필터 · 손잡이 포함)을 들어 남쪽 난간에 세워 둠 → 스쿱으로 투입 → 뚜껑을 다시 덮고 남 · 북 클램프 체결 */
+function seqScoop(){
+  const yt=FL.deckY+1.294, D=.42, zc=FL.zc, lx=XF+1.2, lean=[lx,FL.deckY+.5,4.0];
+  return [
+    {stand:[XF,3.95], deck:true, reach:[XF,yt-.03,zc+D+.02], dur:1.0},
+    {stand:[XF,1.62], deck:true, reach:[XF,yt-.03,zc-D-.02], dur:1.0},
+    {stand:[XF,3.95], deck:true, reach:[XF,yt,zc+.2], dur:.9, on(w){ S.flags.lid2="carry"; w.carry="lid"; }},
+    {stand:[lx,3.75], deck:true, reach:lean, dur:.8, on(w){ S.flags.lid2="off"; w.carry=null; }},
+    {stand:[XF,3.95], deck:true, carry:"scoop", reach:ANC.hop2, dur:3.0},
+    {stand:[lx,3.75], deck:true, carry:null, reach:lean, dur:.8, on(w){ S.flags.lid2="carry"; w.carry="lid"; }},
+    {stand:[XF,3.95], deck:true, reach:[XF,yt,zc+.2], dur:1.0, on(w){ S.flags.lid2="on"; w.carry=null; }},
+    {stand:[XF,3.95], deck:true, reach:[XF,yt-.03,zc+D+.02], dur:.8},
+    {stand:[XF,1.62], deck:true, reach:[XF,yt-.03,zc-D-.02], dur:.8}];
+}
+JOBS.scoop.seqFn=seqScoop;
+{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="lid") return base(kind);       /* 들고 가는 2번 호퍼 뚜껑 */
+    const G=new T3.Group(), p=new T3.Mesh(new T3.BoxGeometry(.86,.014,.44),M.ssMir); G.add(p);
+    const f=new T3.Mesh(new T3.CylinderGeometry(.034,.034,.17,18),M.white); f.position.set(.1,.09,-.05); G.add(f); return G; }; }
+/* 뚜껑 위치 : 호퍼 위(on) · 작업자 손(carry) · 남쪽 난간에 세움(off) */
+function lidDraw(){
+  if(typeof FM==="undefined"||!FM.lid2) return; const L=FM.lid2, st=S&&S.session&&S.session.active?(S.flags.lid2||"on"):"on";
+  L.visible=st!=="carry";
+  if(st==="off"&&L.userData.st!=="off"){ const R=new T3.Matrix4().makeRotationX(-Math.PI/2), cc=new T3.Vector3(...FM.lidC).applyMatrix4(R), tg=new T3.Vector3(XF+1.2,FL.deckY+.47,4.05);
+    L.rotation.set(-Math.PI/2,0,0); L.position.copy(tg.sub(cc)); L.userData.st="off"; }
+  else if(st!=="off"&&L.userData.st!=="on"){ L.rotation.set(0,0,0); L.position.set(0,0,0); L.userData.st="on"; }
+}

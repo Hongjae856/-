@@ -99,6 +99,7 @@ function fpTargetDefs(){
     add("redPal","적색 인쇄 은박 롤 (예비 은박)",A.redPal,1.0,.5,.45,tileRun("mRed"),()=>f.rollCarry!=="red"?["#mRed"]:[],{visible:f.roll!=="red"&&f.rollCarry!=="red"});
     add("plainPal","무지 은박 롤 (예비 은박)",A.plainPal,1.0,.5,.45,tileRun("mPlain"),["#mPlain"],{visible:f.roll!=="plain"});
     add("mPrn","은박 프린터",A.prn,.35,.4,.5,tileRun("mPrn"),["#mPrn"]);
+    { const mg=typeof htxMon==="function"?htxMon("fp"):FP_MON.fp; add("fpCtl","인쇄기 컨트롤러 (제조번호 · 사용기한 입력)",[CVX+.725,1.2,.93],.65,.4,.08,()=>{},[],{mon:"fp",hmiPose:monPose(mg)}); }   /* 누르면 위 모니터 화면으로 (11/17) */
     if(TILE.fRib) add("fRib","은박 프린터 리본 교체",[A.prn[0],A.prn[1]-.22,A.prn[2]],.3,.16,.4,tileRun("fRib"),["#fRib"]);   /* 리본 교체 (11/17) */
     add("tLeak","기밀도 시험대",A.leak,.6,.3,.9,tileRun("tLeak"),["#tLeak"]);
     add("ipc","IPC 저울 (채취 · 계량)",A.ipc,.6,.3,.9,()=>{ const h=S.ipc.open&&ipcStep(); if(!h){ toast("지금은 공정검사 시점이 아닙니다."); return; }

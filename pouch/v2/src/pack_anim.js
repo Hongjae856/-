@@ -29,7 +29,7 @@ function initPackAnim(S){
   const gm=new T3.BoxGeometry(b,C.H-.002,.0012); gm.translate(b/2,0,0);
   PA.fT=im(gT,red,128); PA.fB=im(gB,red,128); PA.fm=im(gm,inner,256);
   PA.glue=im(new T3.SphereGeometry(.0045,8,6),new T3.MeshStandardMaterial({color:0xd9a52a,roughness:.3,metalness:.1}),256);
-  PA.prt=im(new T3.PlaneGeometry(.05,.014),new T3.MeshBasicMaterial({map:tex(cvs(160,48,(c)=>{ c.fillStyle="#fff"; c.fillRect(0,0,160,48); c.fillStyle="#111"; c.font="bold 18px monospace"; c.fillText("LOT 2F010",6,20); c.fillText("EXP 2028.11",6,42); }),1,1,true)}),64);
+  PA.prt=im(new T3.PlaneGeometry(.05,.014),new T3.MeshBasicMaterial({map:tex(cvs(160,48,(c)=>{ c.fillStyle="#fff"; c.fillRect(0,0,160,48); c.fillStyle="#111"; c.font="bold 18px monospace"; c.font="bold 15px monospace"; c.fillText("LOT 2F001",6,20); c.fillText("EXP 2029.01.30",6,42); }),1,1,true)}),64);
   /* X-ray 차폐 커튼 띠 (카톤이 지날 때 들림) */
   PA.curt=PK2.curt||[];
   PA.M4=new T3.Matrix4(); PA.Mc=new T3.Matrix4(); PA.Mf=new T3.Matrix4(); PA.Sh=new T3.Matrix4(); PA.T=new T3.Matrix4(); PA.v=new T3.Vector3(); PA.q=new T3.Quaternion(); PA.e=new T3.Euler(); PA.one=new T3.Vector3(1,1,1);

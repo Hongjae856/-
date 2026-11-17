@@ -1154,8 +1154,9 @@ function buildHoppers(g){
   ext([[-hb+.005,1.28],[hb-.005,1.28],[hb-.005,.62],[.068,.47],[-.068,.47],[-hb+.005,.62]],M.ssMir);
   ext([[hb,1.28],[.645,1.28],[.645,1.0],[.2,.47],[.078,.47],[hb,.62]],M.ssMir);
   const xs=[-.645,-hb,hb,.645];
+  const L2=new T3.Group(); g.add(L2); FM.lid2=L2; FM.lidC=[xc,yt,zc];   /* 2번 호퍼 뚜껑 (필터 · 소음기 · 손잡이 포함) — 주성분 투입 때 들어냄 (11/17 사용자 확정) */
   for(let k=0;k<3;k++){ const x0=xc+xs[k], x1=xc+xs[k+1];
-    bx(g,x0-.012,x1+.012,yt,yt+.014,zc-D-.02,zc+D+.02,M.ssMir);                                                 /* 뚜껑 */
+    bx(k===1?L2:g,x0-.012,x1+.012,yt,yt+.014,zc-D-.02,zc+D+.02,M.ssMir);                                                 /* 뚜껑 */
     for(const s of [-1,1]){ const zf=zc+s*D, za=Math.min(zf,zf+s*.02), zb=Math.max(zf,zf+s*.02);
       for(const x of [x0+.07,x1-.07]) bx(g,x-.014,x+.014,yt-.07,yt+.02,za,zb,M.ss);                              /* 토글 클램프 */
       rod(g,[x0+.13,yt-.2,zf+s*.045],[x1-.13,yt-.2,zf+s*.045],.008,M.ssMir,10); for(const x of [x0+.13,x1-.13]) rod(g,[x,yt-.2,zf],[x,yt-.2,zf+s*.045],.007,M.ssMir,8); }   /* U 손잡이 */
@@ -1170,10 +1171,10 @@ function buildHoppers(g){
     for(const a of [.6,2.2,3.9,5.4]) bx(g,x+Math.cos(a)*.175-.011,x+Math.cos(a)*.175+.011,yt+.03,yt+.1,zc+Math.sin(a)*.175-.011,zc+Math.sin(a)*.175+.011,M.ssD);
     rod(g,[x,F.top,zc],[x,F.top+.05,zc],.026,M.ssMir,16); tube(g,[[x,F.top+.05,zc],[x+.02,F.top+.1,zc-.03],[x+.06,F.top+.11,zc-.1]],.026,M.ssMir);
     tube(g,[[x-.1,F.top-.15,zc+.15],[x-.14,yt+.2,zc+.3],[x-.1,yt-.3,zc+.46],[x-.02,Y+.45,zc+.48]],.006,M.hose); }
-  rod(g,[xc-.05,yt+.014,zc-.1],[xc-.05,yt+.07,zc-.1],.026,M.ssMir,18); rod(g,[xc-.05,yt+.07,zc-.1],[xc-.05,yt+.082,zc-.1],.04,M.ss,18); rod(g,[xc-.05,yt+.082,zc-.1],[xc-.05,yt+.25,zc-.1],.034,M.white,20);
-  for(let k=0;k<6;k++) rod(g,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
-  rod(g,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(g,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(g,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
-  for(const z of [zc-.3,zc+.3]){ rod(g,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(g,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
+  rod(L2,[xc-.05,yt+.014,zc-.1],[xc-.05,yt+.07,zc-.1],.026,M.ssMir,18); rod(L2,[xc-.05,yt+.07,zc-.1],[xc-.05,yt+.082,zc-.1],.04,M.ss,18); rod(L2,[xc-.05,yt+.082,zc-.1],[xc-.05,yt+.25,zc-.1],.034,M.white,20);
+  for(let k=0;k<6;k++) rod(L2,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
+  rod(L2,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(L2,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(L2,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
+  for(const z of [zc-.3,zc+.3]){ rod(L2,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(L2,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
   /* ── 스테인리스 틀 (11/16 사용자 설명) : 호퍼 · 도징박스 · 원료조절부가 모두 한 틀에 달림 · 아래는 막힌 함(데크 바닥에 부품 노출 없음) · 옆은 투명판(도징박스가 보임) ── */
   const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4, fw=.46, fl=.58, ft=Y+.66;
   bx(g,xc-fw,xc+fw,Y,Y+.2,zc-fl,zc+fl,M.ss); bx(g,xc-fw-.006,xc+fw+.006,Y+.2,Y+.215,zc-fl-.006,zc+fl+.006,M.ssMir);   /* 아래 막힌 함 · 윗테 */
@@ -1979,7 +1980,7 @@ function initManual(S){
   const X=CVX, Y=PKZ.y, Yt=Y-.1, d=MP.box;
   MP.red=new T3.MeshStandardMaterial({color:0xa01a14,roughness:.62,side:T3.DoubleSide}); MP.kraft=new T3.MeshStandardMaterial({color:0xb48a5a,roughness:.88,side:T3.DoubleSide});
   MP.blue=new T3.MeshStandardMaterial({color:0x4f9bdc,roughness:.4}); MP.tape=new T3.MeshStandardMaterial({color:0xd8b77c,roughness:.3,transparent:true,opacity:.92});
-  MP.prt=new T3.MeshBasicMaterial({map:tex(cvs(256,64,(c)=>{ c.fillStyle="#a01a14"; c.fillRect(0,0,256,64); c.fillStyle="#141414"; c.font="bold 20px monospace"; c.fillText("LOT 2F010  x8",8,26); c.fillText("EXP 2028.11.01",8,52); }),1,1,true)});
+  MP.prt=new T3.MeshBasicMaterial({map:tex(cvs(256,64,(c)=>{ c.fillStyle="#a01a14"; c.fillRect(0,0,256,64); c.fillStyle="#141414"; c.font="bold 20px monospace"; c.fillText("LOT 2F001  x8",8,26); c.fillText("EXP 2029.01.30",8,52); }),1,1,true)});
   /* 받침대(양옆, 묶음 자리 ~ 케이스 자리) · 봉함스티커 · 접힌 대케이스 자재대(북쪽 옆) */
   for(const s of [-1,1]){ const wx=u=>X+s*u, x0=Math.min(wx(.1),wx(.46)), x1=Math.max(wx(.1),wx(.46)), z0=-10.36, z1=-9.22;
     bx(S,x0,x1,Y-.03,Y,z0,z1,M.ssMir); for(const u of [.14,.42]) for(const z of [z0+.04,(z0+z1)/2,z1-.04]){ bx(S,wx(u)-.015,wx(u)+.015,.03,Y-.03,z-.015,z+.015,M.ss); foot(S,wx(u),z,.03,.02); } bx(S,x0+.02,x1-.02,.3,.32,z0+.04,z1-.04,M.ss);
@@ -2157,7 +2158,7 @@ function initPackAnim(S){
   const gm=new T3.BoxGeometry(b,C.H-.002,.0012); gm.translate(b/2,0,0);
   PA.fT=im(gT,red,128); PA.fB=im(gB,red,128); PA.fm=im(gm,inner,256);
   PA.glue=im(new T3.SphereGeometry(.0045,8,6),new T3.MeshStandardMaterial({color:0xd9a52a,roughness:.3,metalness:.1}),256);
-  PA.prt=im(new T3.PlaneGeometry(.05,.014),new T3.MeshBasicMaterial({map:tex(cvs(160,48,(c)=>{ c.fillStyle="#fff"; c.fillRect(0,0,160,48); c.fillStyle="#111"; c.font="bold 18px monospace"; c.fillText("LOT 2F010",6,20); c.fillText("EXP 2028.11",6,42); }),1,1,true)}),64);
+  PA.prt=im(new T3.PlaneGeometry(.05,.014),new T3.MeshBasicMaterial({map:tex(cvs(160,48,(c)=>{ c.fillStyle="#fff"; c.fillRect(0,0,160,48); c.fillStyle="#111"; c.font="bold 18px monospace"; c.font="bold 15px monospace"; c.fillText("LOT 2F001",6,20); c.fillText("EXP 2029.01.30",6,42); }),1,1,true)}),64);
   /* X-ray 차폐 커튼 띠 (카톤이 지날 때 들림) */
   PA.curt=PK2.curt||[];
   PA.M4=new T3.Matrix4(); PA.Mc=new T3.Matrix4(); PA.Mf=new T3.Matrix4(); PA.Sh=new T3.Matrix4(); PA.T=new T3.Matrix4(); PA.v=new T3.Vector3(); PA.q=new T3.Quaternion(); PA.e=new T3.Euler(); PA.one=new T3.Vector3(1,1,1);
@@ -2625,8 +2626,8 @@ function stroke(){
   const fill=f.filling&&f.dose.every(x=>x);
   if(f.filling&&S.hop.main<1){ raise("FEED"); f.run=false; return; }
   if(fill){ S.hop.main=Math.max(0,S.hop.main-0.045); S.hop.add=Math.max(0,S.hop.add-0.02); S.hop.sug=Math.max(0,S.hop.sug-0.05); }
-  const printed=f.prn.saved;
-  const printBad=!printed||f.headDirty||f.ribbon<5;
+  const printed=f.prn.saved&&f.prn.lot===EXPECT.lot&&f.prn.exp===EXPECT.exp;   /* 포장지시기록서와 다른 값 = 인쇄 불량 (11/17) */
+  const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }
   for(let i=0;i<NOZ.n;i++){
     const empty=!fill;
     const vis=f.vision&&printBad;
@@ -2687,7 +2688,7 @@ function cartonTick(dt){
     for(const k of ["pr","xr","cw"]){ const X=ST[k]-60; if(c.x<=X&&nx>X&&!stationOn(k)) nx=X; }
     if(nx>lead-110) nx=Math.max(c.x,lead-110);
     c.x=nx; lead=c.x;
-    if(!c.seen.pr&&c.x>=ST.pr){ c.seen.pr=1; c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":"ok"):"none"; if(c.print==="ok") p.ink=Math.max(0,p.ink-0.02); }
+    if(!c.seen.pr&&c.x>=ST.pr){ c.seen.pr=1; c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":(p.lbl.lot!==EXPECT.lot||p.lbl.exp!==EXPECT.exp)?"bad":"ok"):"none"; if(c.print==="ok") p.ink=Math.max(0,p.ink-0.02); }
     if(!c.seen.vs&&c.x>=ST.vs){ c.seen.vs=1; if(p.vsRun&&c.print!=="ok"){ c.rej="vs"; S.cnt.rejVs++; LN.rejBox++; continue; } }
     if(!c.seen.xr&&c.x>=ST.xr){ c.seen.xr=1; if(c.foreign){ c.xrNG=true; S.xrLast="NG"; S.flags.xrBlink=tSim; } else S.xrLast="OK"; }
     if(!c.seen.cw&&c.x>=ST.cw){ c.seen.cw=1; S.cwLast=c.w; S.cwSum+=c.w; S.cwN++;
@@ -2899,12 +2900,12 @@ const kc=(v,t,cls)=>'<div class="kcard'+(cls?" "+cls:"")+'"><b>'+v+'</b><s>'+t+'
 const note=t=>'<div class="hrow" style="display:block;font-size:12.5px;line-height:1.55;color:#5d7086">'+t+'</div>';
 const tbl=(head,rows)=>'<table class="ht"><tr>'+head.map(h=>'<th>'+h+'</th>').join("")+'</tr>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join("")+'</tr>').join("")+'</table>';
 const FNAV=[["run","운전데이터"],["cam","캠 포지션"],["splice","이음매"],["manual","수동점검"],["sw1","조작스위치1"],["sw2","조작스위치2"],["temp","온도 설정"],["xfer","이송기 설정"],["vis","비전 Setup"]];
-const EXPECT={exp:"2028.11.01", lot:"2F010"};          /* 현장 영상 판독 값 (IDT 예시) */
+const EXPECT={exp:"2029.01.30", lot:"2F001"};   /* 제조번호 · 사용기한 (11/17 사용자 제시 예) */          /* 현장 영상 판독 값 (IDT 예시) */
 
 function machPower(k){ const p=S.p;
-  return k==="fl"?S.f.panel:k==="sf"?p.ctMain&&p.sfSw:k==="ct"?p.ctMain:k==="pr"?p.prMain&&p.prPow:k==="vs"?p.prMain:k==="xr"?p.xrPow:k==="cw"?p.cwPow:false; }
+  return k==="fl"?S.f.panel:k==="fp"?!!S.f.main:k==="sf"?p.ctMain&&p.sfSw:k==="ct"?p.ctMain:k==="pr"?p.prMain&&p.prPow:k==="vs"?p.prMain:k==="xr"?p.xrPow:k==="cw"?p.cwPow:false; }
 function drawHMI(){
-  if(!S) return;
+  if(!S) return; { const ae=document.activeElement; if(ae&&ae.classList&&ae.classList.contains("hin")&&ae.closest("#hBody")) return; }   /* 직접 입력 중에는 다시 그리지 않음 */
   const tabs=HTABS[S.room].filter(t=>!FPMON||FPMON.includes(t[0]));
   if(!tabs.some(t=>t[0]===hMach)){ hMach=tabs[0][0]; hScr=hMach==="fl"?"run":"main"; }
   const m=machOf(hMach); $("#hmi").classList.toggle("solpac",hMach==="fl"); $("#panel").classList.toggle("solpacP",hMach==="fl"); $("#hmi").classList.toggle("oneTab",tabs.length<2); $("#hmi").classList.toggle("big",hMach==="fl"&&SPBIG&&machPower("fl")&&!(typeof fpActive==="function"&&fpActive()));
@@ -2925,8 +2926,8 @@ function drawHMI(){
 }
 function powerHint(k){ return {fl:"메인 파워 → 압축공기 → 컨트롤 판넬 스위치를 켜면 터치스크린이 켜집니다.",sf:"카토너 메인스위치와 스틱공급장치 스위치(기계 뒤편)를 켜면 켜집니다.",ct:"카토너 메인스위치(기계 뒤편)를 켜면 켜집니다.",
   pr:"메인 전원 → 프린터 전원(하단)을 켜면 켜집니다.",vs:"케이스 프린터 메인 전원을 켜면 비전 PC 가 켜집니다.",xr:"X-ray 주 전원을 켜면 부팅됩니다.",cw:"중량선별기 전원 스위치를 켜면 켜집니다."}[k]||""; }
-function machRun(k){ const p=S.p; return k==="fl"?S.f.run:k==="sf"?p.sfRun:k==="ct"?p.ctRun:k==="pr"?p.prRun:k==="vs"?p.vsRun:k==="xr"?p.xrConv:k==="cw"?p.cwRun:false; }
-function bindHB(){ $$("#hBody [data-hb]").forEach(e=>e.onclick=()=>hbClick(e.dataset.hb)); drawPanel(); }
+function machRun(k){ const p=S.p; return k==="fl"?S.f.run:k==="fp"?!!(S.f.run&&S.f.prn.saved):k==="sf"?p.sfRun:k==="ct"?p.ctRun:k==="pr"?p.prRun:k==="vs"?p.vsRun:k==="xr"?p.xrConv:k==="cw"?p.cwRun:false; }
+function bindHB(){ $$("#hBody [data-hb]").forEach(e=>e.onclick=()=>hbClick(e.dataset.hb)); if(typeof hinBind==="function") hinBind(); drawPanel(); }
 function hmiAfter(){
   const t=$("#hAlarmTick"), al=S.alarms.slice(-2).reverse();
   t.innerHTML=al.map(a=>esc(ALARMS[a.key].t)).join("<br>");
@@ -3001,7 +3002,7 @@ const PSCR={
    '<div class="hNavMini">'+["자동","수동","충전","기계각","시간","알람","주화면"].map(t=>'<span>'+t+'</span>').join("")+'</div>'; },
  pr(){ const p=S.p, L=p.lbl;
   if(hScr==="edit") return ph("현재 라벨 편집","LABEL EDIT",p.prRun)+'<div class="lblPrev">LOT : '+esc(L.lot||"______")+'<br>EXP : '+esc(L.exp||"____.__.__")+'</div>'+
-   row("배치번호 (LOT)","포장지시기록서",'<div class="hval edit" data-hb="pr_lot">'+esc(L.lot||"입력")+'</div>')+row("사용기한 (EXP)","포장지시기록서",'<div class="hval edit" data-hb="pr_exp">'+esc(L.exp||"입력")+'</div>')+
+   row("제조번호 (LOT)","포장지시기록서",hinBox("pr_lot",L.lot,"예 2F001",EXPECT.lot))+row("사용기한 (EXP)","YYYY.MM.DD",hinBox("pr_exp",L.exp,"예 2029.01.30",EXPECT.exp))+
    '<div class="hGrid2">'+btn(L.saved,"저장","SAVE","💾","pr_save")+btn(false,"홈","HOME","🏠","pr_home")+'</div>';
   if(hScr==="search") return ph("라벨 검색 도구","LABEL STORE",p.prRun)+tbl(["라벨","불러오기"],[["EXP-LOT.lbl",'<span class="lk" data-hb="pr_load">불러오기 ▶</span>'],["TESTMESSAGE.lbl","—"]])+'<div class="hGrid2">'+btn(false,"홈","HOME","🏠","pr_home")+'</div>';
   return ph("홈","DOMINO AX150i",p.prRun)+'<div class="kpis">'+kc(p.prRun?"인쇄":"유휴","상태","hi")+kc(Math.round(p.ink)+" %","잉크",p.ink<10?"ng":"")+kc(L.loaded?"EXP-LOT":"TESTMESSAGE","현재 라벨")+'</div>'+
@@ -3038,7 +3039,7 @@ function drawPanel(){
 }
 
 /* ═══ 버튼 동작 ═══ */
-function hbClick(id){ if(id.startsWith("sp_")){ solpacClick(id); return; } if((id==="fl_ibc0"||id==="fl_ibc2")&&S.f.hoseC&&!S.f.hoseC[id==="fl_ibc0"?0:1]&&!S.f.ibc[id==="fl_ibc0"?0:2]){ toast("IBC 진공호스가 연결되지 않았습니다. 먼저 호스를 연결 · 체결하세요.","bad"); return; }
+function hbClick(id){ if(id.startsWith("fp_")){ fpClick(id); return; } if(id.startsWith("sp_")){ solpacClick(id); return; } if((id==="fl_ibc0"||id==="fl_ibc2")&&S.f.hoseC&&!S.f.hoseC[id==="fl_ibc0"?0:1]&&!S.f.ibc[id==="fl_ibc0"?0:2]){ toast("IBC 진공호스가 연결되지 않았습니다. 먼저 호스를 연결 · 체결하세요.","bad"); return; }
   const f=S.f, p=S.p;
   const run=()=>{ if(f.run){ toast("운전 중에는 할 수 없습니다. 먼저 STOP.","bad"); return true; } return false; };
   switch(id){
@@ -3067,8 +3068,7 @@ function hbClick(id){ if(id.startsWith("sp_")){ solpacClick(id); return; } if((i
     case "pr_edit": hScr="edit"; break;
     case "pr_home": hScr="main"; break;
     case "pr_search": hScr="search"; break;
-    case "pr_lot": p.lbl.lot=EXPECT.lot; p.lbl.saved=false; toast("LOT : "+EXPECT.lot+" (포장지시기록서)"); break;
-    case "pr_exp": p.lbl.exp=EXPECT.exp; p.lbl.saved=false; toast("EXP : "+EXPECT.exp+" (포장지시기록서)"); break;
+    case "pr_lot": case "pr_exp": return;   /* 입력칸에 직접 입력 (11/17) */
     case "pr_save": if(!p.lbl.lot||!p.lbl.exp){ toast("LOT · EXP 를 모두 입력하세요.","bad"); return; } p.lbl.saved=true; toast("라벨 저장","good"); hScr="main"; break;
     case "pr_load": if(!p.lbl.saved){ toast("저장된 라벨이 없습니다. 먼저 편집 · 저장하세요.","bad"); return; } p.lbl.loaded=true; toast("EXP-LOT.lbl 불러오기","good"); hScr="main"; break;
     case "pr_start": if(!p.lbl.loaded){ toast("인쇄할 라벨을 먼저 불러오세요.","bad"); return; } p.prRun=true; toast("인쇄 시작","good"); break;
@@ -3297,10 +3297,10 @@ function stepsFill(easy){
     A.push(T_("ibc1","이송기 1(첨가제) ON","이송기 설정 화면에서 이송기 1 을 켭니다. 1번 호퍼는 센서 감지로 자동 보충됩니다.",()=>hmiRoute("fl","xfer",HB("fl_ibc0")),()=>f().ibc[0],{pts:2,hmi:true}));
     A.push(T_("ibc3","이송기 3(백당) ON · 2번은 OFF 유지","이송기 3 을 켭니다. 이송기 2 는 사용하지 않습니다(주성분은 스쿱 수동 공급).",()=>hmiRoute("fl","xfer",HB("fl_ibc2")),()=>f().ibc[2]&&!f().ibc[1],{pts:2,hmi:true}));
     A.push(T_("lift","주성분 봉투를 리프터 적재칸에 옮겨 2층 데크로 올림","[주성분 리프터 운반] 을 눌러 STS 용기의 주성분 봉투를 드럼리프터 적재칸에 옮겨 담고, 원료투입구 아래로 밀고 가서 2층 데크로 올립니다.",()=>"#mLift",()=>f().mainLift,{pts:2}));
-    A.push(T_("scoop","2번 호퍼에 주성분 스쿱 공급","[주성분 스쿱 공급] 을 눌러 2번 호퍼에 주성분을 공급합니다.",()=>"#mScoop",()=>f().mainFed,{pts:2}));
+    A.push(T_("scoop","2번 호퍼에 주성분 스쿱 공급 (뚜껑 들어냄)","[주성분 스쿱 공급] 을 누르면 작업자가 2번 호퍼 뚜껑의 남 · 북 토글 클램프를 풀고 뚜껑을 들어내 남쪽 난간에 세운 뒤 스쿱으로 투입하고, 뚜껑을 다시 덮어 클램프를 체결합니다.",()=>"#mScoop",()=>f().mainFed,{pts:2}));
     A.push(T_("carry","적색 인쇄 은박 롤 2인 1조 운반","[적색 인쇄 은박 롤] 을 눌러 운반 방법을 고릅니다. 은박 롤은 반드시 2인 1조로 옮깁니다.",()=>"#mRed",()=>f().rollCarry==="red"||f().roll==="red",{pts:2}));
     A.push(T_("mount","은박 롤을 롤러에 끼워 고정","[적색 인쇄 은박 롤] 을 다시 눌러 무지 롤을 빼고 롤러에 끼워 고정합니다.",()=>"#mRed",()=>f().roll==="red",{pts:2}));
-    A.push(T_("prn","은박 프린터 사용기한 · 배치번호 입력 · 저장","[은박 프린터] 를 눌러 포장지시기록서의 사용기한 · 배치번호를 입력하고 저장합니다.",()=>"#mPrn",()=>f().prn.saved,{pts:3}));
+    A.push(T_("prn","인쇄기 컨트롤러 — 제조번호 · 사용기한 직접 입력 · 저장","충전기 북쪽 인쇄기 컨트롤러 위 모니터에서 포장지시기록서의 제조번호("+EXPECT.lot+") · 사용기한("+EXPECT.exp+")을 입력하고 저장합니다.",()=>firstOf([[()=>f().prnD&&f().prnD.lot===EXPECT.lot,()=>hmiRoute("fp","main",HB("fp_lot"))],[()=>f().prnD&&f().prnD.exp===EXPECT.exp,()=>hmiRoute("fp","main",HB("fp_exp"))],[()=>f().prn.saved&&f().prn.lot===EXPECT.lot&&f().prn.exp===EXPECT.exp,()=>hmiRoute("fp","main",HB("fp_save"))]]),()=>f().prn.saved&&f().prn.lot===EXPECT.lot&&f().prn.exp===EXPECT.exp,{pts:3,hmi:true}));   /* 11/17 : 직접 입력 */
     A.push(T_("jog","한 스텝 작동 후 은박 인쇄 확인","판넬 [JOG] 로 한 스텝 작동한 뒤, 은박 인쇄가 정상인지 · 포장지시기록서와 일치하는지 · 선명한지 확인합니다.",
       ()=>f().jogDone?"#lcCheck":"#swJog",()=>f().printOk,{pts:3,chk:()=>f().jogDone&&!f().printOk?{job:"prn",t:"은박 인쇄 확인",set(){ f().printOk=true; }}:null}));
     A.push(T_("vis","비전 Setup 값 확인 → 비전 ON","비전 Setup 화면 값(촬영속도 5500 mm/s 등)을 확인하고 비전을 켭니다.",()=>hmiRoute("fl","vis",HB(f().visChk?"fl_vision":"fl_visChk")),()=>f().visChk&&f().vision,{pts:2,hmi:true}));
@@ -3356,7 +3356,7 @@ function stepsPack(easy){
   const sfStart=[[()=>p().sfServo,()=>hmiRoute("sf",null,HB("sf_servo"))],[()=>p().sfFeed,()=>hmiRoute("sf",null,HB("sf_feed"))],[()=>p().sfReset||p().sfRun,()=>panelSel("sf","sfReset")],[()=>p().sfRun,()=>panelSel("sf","sfStart")]];
   const xrRun=[[()=>p().xrPre,()=>hmiRoute("xr",null,HB("xr_pre"))],[()=>p().xrX,()=>hmiRoute("xr",null,HB("xr_x"))],[()=>p().xrCal,()=>hmiRoute("xr",null,HB("xr_cal"))],[()=>p().xrConv,()=>hmiRoute("xr",null,HB("xr_conv"))]];
   const xrTest=[...xrRun,[()=>p().xrTest,()=>hmiRoute("xr",null,HB("xr_test"))]];
-  const prLbl=[[()=>p().lbl.lot,()=>hmiRoute("pr","edit",HB("pr_lot"))],[()=>p().lbl.exp,()=>hmiRoute("pr","edit",HB("pr_exp"))]];
+  const prLbl=[[()=>p().lbl.lot===EXPECT.lot,()=>hmiRoute("pr","edit",HB("pr_lot"))],[()=>p().lbl.exp===EXPECT.exp,()=>hmiRoute("pr","edit",HB("pr_exp"))]];   /* 11/17 : 직접 입력 */
   const prSave=[[()=>p().lbl.saved,()=>hmiRoute("pr","edit",HB("pr_save"))],[()=>p().lbl.loaded,()=>hmiRoute("pr","search",HB("pr_load"))]];
   const vsStart=[[()=>p().vsUser,()=>hmiRoute("vs",null,HB("vs_login"))],[()=>p().vsMode,()=>hmiRoute("vs",null,HB("vs_mode"))],[()=>p().vsRun,()=>hmiRoute("vs",null,HB("vs_start"))]];
   const cwSel=[[()=>p().cwProd,()=>hmiRoute("cw","prod",HB("cw_sel"))],[()=>p().cwChk,()=>hmiRoute("cw","main",HB("cw_chk"))],[()=>p().cwRun,()=>panelSel("cw","cwStart")]];
@@ -4302,7 +4302,7 @@ listen(canvas,'pointerdown',e=>{
   listen(canvas,'contextmenu',e=>{if(ready())e.preventDefault();});
   listen(window,'keydown',e=>{
     if(!active || blocked())return;
-    if((e.code==='Escape'||e.code==='KeyF') && ['approach','hmi'].includes(mode)){
+    if((e.code==='Escape'||(e.code==='KeyF'&&!e.target?.closest?.('input,textarea'))) && ['approach','hmi'].includes(mode)){
       e.preventDefault();closeHMI();return;
     }
     if(e.target?.closest?.('input,textarea,select,[contenteditable=true]'))return;
@@ -4481,7 +4481,7 @@ function v3Sync(dt){
   if(V3.k<=.002) xrDraw();
   if(FM.roll){ const v=!(S&&S.session&&S.session.active)||S.f.roll!=="none"; for(const o of FM.roll) o.visible=v; }      /* 은박 롤 : 소진(필름 단절) 시 비어 있음 */
   if(FM.mainSw){ const on=!(S&&S.session&&S.session.active)||!!S.f.main; FM.mainSw.rotation.x+=((on?-Math.PI/2:0)-FM.mainSw.rotation.x)*Math.min(1,dt*10); }   /* 메인스위치 손잡이 : 가로 OFF · 세로 ON */
-  if(typeof dialDraw==="function") dialDraw(); if(typeof consDraw==="function") consDraw(); if(typeof htxTick==="function") htxTick(dt);
+  if(typeof dialDraw==="function") dialDraw(); if(typeof consDraw==="function") consDraw(); if(typeof htxTick==="function") htxTick(dt); if(typeof ocrTick==="function") ocrTick(dt);
   if(FILLPROP.hose){ const act=!!(S&&S.session&&S.session.active), hc=act&&S.f.hoseC; FILLPROP.hose.forEach((h,i)=>h.visible=!hc||!!hc[i]); }   /* IBC 진공호스 연결부 */
   scrPower(); if(typeof guide3D==="function") guide3D(dt); if(typeof lampTick==="function") lampTick(dt);
   if(typeof wkDraw==="function") wkDraw(dt);
@@ -4685,7 +4685,7 @@ function wkDraw(dt){
     const P={x:w.x,z:w.z,y0:w.y,yaw:w.yaw,dt,L:null,R:null};
     for(const k in w.cm) w.cm[k].visible=false;
     if(w.carry){ if(!w.cm[w.carry]){ w.cm[w.carry]=wkCarryMesh(w.carry); V3.scene.add(w.cm[w.carry]); }
-      const c=w.cm[w.carry], hw=(w.carry==="roll"||w.carry==="rollP")?.2:w.carry==="sts"?.21:w.carry==="cartons"?.16:.08, cy=w.y+(w.carry==="sts"?.78:1.02);
+      const c=w.cm[w.carry], hw=w.carry==="lid"?.36:(w.carry==="roll"||w.carry==="rollP")?.2:w.carry==="sts"?.21:w.carry==="cartons"?.16:.08, cy=w.y+(w.carry==="sts"?.78:1.02);
       let cp=[w.x+f[0]*.36,cy+(w.carry==="sts"?.21:0),w.z+f[1]*.36];
       if(work&&reachAmt(J)>0){ const r=reachAmt(J), q=LJ.reach; cp=[cp[0]+(q[0]-cp[0])*r*.8,cp[1]+(q[1]-cp[1])*r*.8,cp[2]+(q[2]-cp[2])*r*.8]; }
       c.visible=!cam.fp; c.position.set(cp[0],cp[1]-(w.carry==="sts"?.21:0),cp[2]); c.rotation.y=w.yaw;
@@ -4694,7 +4694,7 @@ function wkDraw(dt){
     else if(work&&J.t>.12&&J.t<LJ.dur-.35){ P.R=LJ.reach.slice(); P.gR=.3; P.nR="down"; if(LJ.dur>2.2){ P.L=[LJ.reach[0]+lf[0]*.22,LJ.reach[1],LJ.reach[2]+lf[1]*.22]; P.gL=.3; P.nL="down"; } }
     poseHuman(H,P);
   }
-  propsDraw(); if(typeof helpDraw==="function") helpDraw(dt);
+  propsDraw(); if(typeof helpDraw==="function") helpDraw(dt); lidDraw();
 }
 
 /* ═══ 대차 · 드럼리프터 · 예비 은박 롤 · STS 용기 — 평소에는 교육 상태(S.f)에 맞춰 놓고, 작업자가 끌 때는 작업자 앞에서 따라옴 (11/16 사용자 지시) ═══
@@ -4838,6 +4838,34 @@ function helpDraw(dt){
 }
 function helpReset(){ const H=HELP; H.x=H.home[0]; H.z=H.home[1]; H.face=H.yaw=Math.PI/2; H.q=[]; H.route=[]; H.on=false; H.side=null; H.noSide=false; }
 
+/* ═══ 2번 호퍼 주성분 투입 (11/17 사용자 확정 : 뚜껑을 들어냄) ═══
+   남쪽 · 북쪽 토글 클램프 해제 → 뚜껑(필터 · 손잡이 포함)을 들어 남쪽 난간에 세워 둠 → 스쿱으로 투입 → 뚜껑을 다시 덮고 남 · 북 클램프 체결 */
+function seqScoop(){
+  const yt=FL.deckY+1.294, D=.42, zc=FL.zc, lx=XF+1.2, lean=[lx,FL.deckY+.5,4.0];
+  return [
+    {stand:[XF,3.95], deck:true, reach:[XF,yt-.03,zc+D+.02], dur:1.0},
+    {stand:[XF,1.62], deck:true, reach:[XF,yt-.03,zc-D-.02], dur:1.0},
+    {stand:[XF,3.95], deck:true, reach:[XF,yt,zc+.2], dur:.9, on(w){ S.flags.lid2="carry"; w.carry="lid"; }},
+    {stand:[lx,3.75], deck:true, reach:lean, dur:.8, on(w){ S.flags.lid2="off"; w.carry=null; }},
+    {stand:[XF,3.95], deck:true, carry:"scoop", reach:ANC.hop2, dur:3.0},
+    {stand:[lx,3.75], deck:true, carry:null, reach:lean, dur:.8, on(w){ S.flags.lid2="carry"; w.carry="lid"; }},
+    {stand:[XF,3.95], deck:true, reach:[XF,yt,zc+.2], dur:1.0, on(w){ S.flags.lid2="on"; w.carry=null; }},
+    {stand:[XF,3.95], deck:true, reach:[XF,yt-.03,zc+D+.02], dur:.8},
+    {stand:[XF,1.62], deck:true, reach:[XF,yt-.03,zc-D-.02], dur:.8}];
+}
+JOBS.scoop.seqFn=seqScoop;
+{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="lid") return base(kind);       /* 들고 가는 2번 호퍼 뚜껑 */
+    const G=new T3.Group(), p=new T3.Mesh(new T3.BoxGeometry(.86,.014,.44),M.ssMir); G.add(p);
+    const f=new T3.Mesh(new T3.CylinderGeometry(.034,.034,.17,18),M.white); f.position.set(.1,.09,-.05); G.add(f); return G; }; }
+/* 뚜껑 위치 : 호퍼 위(on) · 작업자 손(carry) · 남쪽 난간에 세움(off) */
+function lidDraw(){
+  if(typeof FM==="undefined"||!FM.lid2) return; const L=FM.lid2, st=S&&S.session&&S.session.active?(S.flags.lid2||"on"):"on";
+  L.visible=st!=="carry";
+  if(st==="off"&&L.userData.st!=="off"){ const R=new T3.Matrix4().makeRotationX(-Math.PI/2), cc=new T3.Vector3(...FM.lidC).applyMatrix4(R), tg=new T3.Vector3(XF+1.2,FL.deckY+.47,4.05);
+    L.rotation.set(-Math.PI/2,0,0); L.position.copy(tg.sub(cc)); L.userData.st="off"; }
+  else if(st!=="off"&&L.userData.st!=="on"){ L.rotation.set(0,0,0); L.position.set(0,0,0); L.userData.st="on"; }
+}
+
 /* ── v3/fp.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 연결 (새 3D · 단위 m) — 교육 시작 시 1인칭, 상단 버튼으로 3인칭 전환
@@ -4940,6 +4968,7 @@ function fpTargetDefs(){
     add("redPal","적색 인쇄 은박 롤 (예비 은박)",A.redPal,1.0,.5,.45,tileRun("mRed"),()=>f.rollCarry!=="red"?["#mRed"]:[],{visible:f.roll!=="red"&&f.rollCarry!=="red"});
     add("plainPal","무지 은박 롤 (예비 은박)",A.plainPal,1.0,.5,.45,tileRun("mPlain"),["#mPlain"],{visible:f.roll!=="plain"});
     add("mPrn","은박 프린터",A.prn,.35,.4,.5,tileRun("mPrn"),["#mPrn"]);
+    { const mg=typeof htxMon==="function"?htxMon("fp"):FP_MON.fp; add("fpCtl","인쇄기 컨트롤러 (제조번호 · 사용기한 입력)",[CVX+.725,1.2,.93],.65,.4,.08,()=>{},[],{mon:"fp",hmiPose:monPose(mg)}); }   /* 누르면 위 모니터 화면으로 (11/17) */
     if(TILE.fRib) add("fRib","은박 프린터 리본 교체",[A.prn[0],A.prn[1]-.22,A.prn[2]],.3,.16,.4,tileRun("fRib"),["#fRib"]);   /* 리본 교체 (11/17) */
     add("tLeak","기밀도 시험대",A.leak,.6,.3,.9,tileRun("tLeak"),["#tLeak"]);
     add("ipc","IPC 저울 (채취 · 계량)",A.ipc,.6,.3,.9,()=>{ const h=S.ipc.open&&ipcStep(); if(!h){ toast("지금은 공정검사 시점이 아닙니다."); return; }
@@ -5159,6 +5188,7 @@ function apTick(now){
   if(now-AP.at<dwell) return;
   if(slow&&now-AP.lastAct<SLOW_MS) return;
   AP.lastAct=now; AP.key=null;
+  if(el.tagName==="INPUT"&&el.dataset.ap!=null){ el.value=el.dataset.ap; el.dispatchEvent(new Event("input",{bubbles:true})); return; }   /* 내부 점검용 : 입력칸 */
   el.click();
 }
 
@@ -5167,6 +5197,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:27, d:"2026-11-17", t:"제조번호 2F001 · 사용기한 2029.01.30 으로 변경, 충전실 인쇄기 컨트롤러 위 모니터에 인쇄 검사(OCR) 화면 · 포장실 카톤 프린터 모니터에 인쇄 검사(비전) 화면 표시(X-ray 화면처럼), 인쇄기 컨트롤러 · 카톤 프린터에서 제조번호 · 사용기한 직접 입력(시연 · 기본은 미리 설정, 심화는 직접 입력 단계 · 값이 다르면 인쇄 불량으로 검사에서 배출), 2번 호퍼 주성분 투입 시 토글 클램프 해제 → 뚜껑을 들어내 난간에 세움 → 투입 → 뚜껑 덮고 체결"},
  {v:26, d:"2026-11-17", t:"자연 변동 · 자재 소모 추가(사용자 선택) : 실링 히터 온도(영역별 ±2 ℃) · 압축공기 압력(±0.2) 흔들림, 무작위 소량 불량(중량 NG · 실링 불량 각 약 0.15 %), 은박 롤 잔량 감소(3D 지름 · 소진 시 필름 알람) · 2번 호퍼 주성분 재공급 안내 · 카톤 · 설명서 보충 안내 · 은박 프린터 리본 · 케이스 프린터 잉크 잔량과 교체 작업"},
  {v:25, d:"2026-11-17", t:"운전(RUN · FILLING ON) 중 시간이 지나면 노즐별 실제 충전량이 다이얼 설정에서 ±1~2 % 내외로 랜덤하게 변하도록 추가(원료 공통 + 노즐별 변동 · 최대 ±2 %), 예상 충전량 · 판정 · IPC 계량값에 반영"},
  {v:24, d:"2026-11-16", t:"동쪽 함량조절부를 한 줄로 정정(노즐마다 왼쪽 은색 소켓 = 백당 · 오른쪽 주황 카운터 다이얼 = 주성분), 주황 다이얼은 숫자 창 아래 가운데에 큰 크롬 육각 소켓, 육각 렌치 구멍 크게(3D · 미니게임), 백당 미니게임은 카운터 없이 둘레 눈금으로 표시"},
@@ -5843,7 +5874,7 @@ async function htxDraw(s){
 function htxTick(dt){
   if(HTX.fail||!V3||!V3.scr||!S||!S.session||!S.session.active||HTX.busy) return;
   HTX.t+=dt; if(HTX.t<.5) return; HTX.t=0;
-  const L=V3.scr.filter(s=>s.k!=="xr"&&(S.room==="F"?FP_MON[s.k].c[2]>0:FP_MON[s.k].c[2]<0)); if(!L.length) return;
+  const L=V3.scr.filter(s=>s.k!=="xr"&&s.k!=="fp"&&s.k!=="pr"&&(S.room==="F"?FP_MON[s.k].c[2]>0:FP_MON[s.k].c[2]<0)); if(!L.length) return;
   const s=L[HTX.i++%L.length]; if((s.fail||0)>2) return; HTX.busy=true;
   htxDraw(s).catch(e=>{ s.fail=(s.fail||0)+1; if(e&&e.name==="SecurityError") HTX.fail=true; console.warn("설비 화면 그림 표시 실패 — 기존 표시 유지",e); }).finally(()=>{ HTX.busy=false; });
 }
@@ -6062,6 +6093,100 @@ function consDraw(){
   if(!TILESET.F.mat.includes("fRib")) TILESET.F.mat.splice(TILESET.F.mat.indexOf("mPrn")+1,0,"fRib");
   if(!TILESET.P.mat.includes("pInk")) TILESET.P.mat.splice(TILESET.P.mat.indexOf("pLeaf")+1,0,"pInk"); }
 function consInit(){ setInterval(consTick,250); }
+
+/* ── v3/printer.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   제조번호 · 사용기한 인쇄 설정 · 인쇄 검사 화면 (11/17 사용자 지시)
+   · 값 : 제조번호(LOT) 2F001 · 사용기한(EXP) 2029.01.30 (사용자 제시 예 — hmi.js EXPECT)
+   · 충전실 : 북쪽 인쇄기 컨트롤러 위 모니터 = 은박 프린터 설정(직접 입력 · 저장) + 인쇄 검사(OCR) 화면 — 새 설비 화면 "fp"
+   · 포장실 : 케이스(카톤) 프린터 라벨 편집에서 직접 입력 · 그 위 모니터 = 카톤 인쇄 검사(비전) 화면
+   · 모니터는 X-ray 처럼 검사 영상을 그림으로 표시(걸어 다닐 때) · 누르면 다가가서 설정 화면 조작
+   · 시연 · 기본 = 미리 설정 / 심화 = 직접 입력 단계 · 값이 포장지시기록서와 다르면 인쇄 불량 → 검사에서 배출
+   ═══════════════════════════════════════════════════════════════════ */
+MACH.push({k:"fp", room:"F", md:"은박 프린터", nm:"은박 프린터 · 인쇄 검사", en:"Foil Printer · OCR",
+  d:"충전기 북쪽 인쇄기 컨트롤러 위 모니터입니다. 포장지시기록서의 제조번호 · 사용기한을 입력 · 저장하면 은박에 인쇄되고, 카메라가 인쇄 문자를 판독(OCR)해 불량은 충전기 불량 배출로 보냅니다."});
+HTABS.F.push(["fp","프린터","은박 인쇄 · 검사"]);
+FP_MON.fp={k:["fp"], nm:"인쇄기 컨트롤러 · 인쇄 검사 화면", c:[CVX+.725,1.80,.556], n:[0,0,1], h:.32, w:.53, dom:{w:600,h:362}};
+{ const ph0=powerHint; powerHint=k=>k==="fp"?"메인 파워를 켜면 인쇄기 컨트롤러 화면이 켜집니다.":ph0(k); }
+const prnMatch=(lot,exp)=>lot===EXPECT.lot&&exp===EXPECT.exp;
+/* 직접 입력 (화면의 입력칸) */
+function hinSet(id,v){
+  v=String(v||"").trim().toUpperCase();
+  if(id==="pr_lot"||id==="pr_exp"){ const L=S.p.lbl; L[id==="pr_lot"?"lot":"exp"]=v; L.saved=false; L.loaded=false; }
+  else if(id==="fp_lot"||id==="fp_exp"){ const D=S.f.prnD||(S.f.prnD={lot:"",exp:""}); D[id==="fp_lot"?"lot":"exp"]=v; }
+  if(typeof stepCheck==="function") stepCheck();
+}
+function hinBind(){ $$("#hBody input.hin").forEach(e=>{ e.oninput=()=>hinSet(e.dataset.hb,e.value); e.onkeydown=ev=>{ if(ev.key==="Enter") e.blur(); }; e.onclick=ev=>ev.stopPropagation(); }); }
+const hinBox=(id,v,ph,ap)=>'<input class="inp hin" data-hb="'+id+'" data-ap="'+esc(ap)+'" value="'+esc(v||"")+'" placeholder="'+ph+'" maxlength="12" autocomplete="off" spellcheck="false">';
+/* 충전실 은박 프린터 설정 화면 */
+PSCR.fp=()=>{ const f=S.f, D=f.prnD||(f.prnD={lot:f.prn.lot||"",exp:f.prn.exp||""}), n=S.cnt.ocrN||0, ng=S.cnt.ocrNG||0;
+  return ph("인쇄 설정 · 인쇄 검사","FOIL PRINTER · OCR",f.run&&f.prn.saved)+
+   '<div class="kpis">'+kc(f.prn.saved?esc(f.prn.lot):"-","인쇄 중 제조번호","hi")+kc(f.prn.saved?esc(f.prn.exp):"-","인쇄 중 사용기한")+kc(Math.round(f.ribbon)+" %","리본",f.ribbon<15?"ng":"")+'</div>'+
+   row("제조번호 (LOT)","포장지시기록서",hinBox("fp_lot",D.lot,"예 2F001",EXPECT.lot))+row("사용기한 (EXP)","YYYY.MM.DD",hinBox("fp_exp",D.exp,"예 2029.01.30",EXPECT.exp))+
+   '<div class="hGrid2">'+btn(f.prn.saved,"저장","SAVE","💾","fp_save")+btn(false,"입력 지우기","CLEAR","⌫","fp_clr")+'</div>'+
+   row("인쇄 검사 (OCR)",f.vision?"판독 중":"검사 OFF",pv(n?("OK "+(n-ng).toLocaleString()+" · NG "+ng.toLocaleString()):"-")); };
+function fpClick(id){
+  const f=S.f, D=f.prnD||(f.prnD={lot:"",exp:""});
+  if(id==="fp_save"){ if(!D.lot||!D.exp){ toast("제조번호 · 사용기한을 모두 입력하세요.","bad"); return; } if(f.run){ toast("운전 중에는 인쇄 설정을 바꾸지 않습니다. 먼저 STOP.","bad"); return; }
+    f.prn={lot:D.lot, exp:D.exp, saved:true}; const ok=prnMatch(D.lot,D.exp);
+    toast("인쇄 설정 저장 — 제조번호 "+D.lot+" · 사용기한 "+D.exp+(ok?"":(isExam()?"":" (포장지시기록서와 다릅니다!)")),ok||isExam()?"good":"bad"); }
+  else if(id==="fp_clr"){ D.lot=""; D.exp=""; }
+  drawHMI(); if(typeof stepCheck==="function") stepCheck();
+}
+/* 은박 프린터 타일 : 인쇄기 컨트롤러 화면으로 이동 */
+TILE.mPrn.click=()=>{ hMach="fp"; hScr="main"; drawHMI(); toast("인쇄기 컨트롤러 화면(설비 화면 · 프린터 탭)에서 제조번호 · 사용기한을 입력합니다."); };
+
+/* ── 검사 화면 그림 (X-ray 화면처럼) : 충전실 OCR · 포장실 카톤 인쇄 비전 ── */
+const OCR={t:0, cv:{}, tex:{}};
+function ocrCanvas(k,W,H){ if(!OCR.cv[k]){ const c=document.createElement("canvas"); c.width=W; c.height=H; OCR.cv[k]=c; OCR.tex[k]=new T3.CanvasTexture(c); OCR.tex[k].encoding=T3.sRGBEncoding; OCR.tex[k].anisotropy=4; } return OCR.cv[k].getContext("2d"); }
+const OCRF='"Malgun Gothic","Noto Sans KR",sans-serif';
+function ocrDrawF(){
+  const W=800, H=483, g=ocrCanvas("fp",W,H), f=S.f, on=machPower("fp");
+  if(!on){ g.fillStyle="#050607"; g.fillRect(0,0,W,H); return; }
+  g.fillStyle="#1d2b3a"; g.fillRect(0,0,W,52); g.fillStyle="#fff"; g.font="bold 24px "+OCRF; g.textAlign="left"; g.fillText("인쇄 검사 (OCR) · 은박 프린터",18,35);
+  g.fillStyle=f.vision?"#3ddc84":"#8a949d"; g.font="bold 18px "+OCRF; g.fillText(f.vision?(f.run?"● 판독 중":"● 대기"):"검사 OFF",W-150,34);
+  const y0=52, y1=372; g.fillStyle="#2a2d30"; g.fillRect(0,y0,W,y1-y0);
+  const saved=f.prn.saved, bad=!saved||!prnMatch(f.prn.lot,f.prn.exp)||f.headDirty||f.ribbon<5, off=((typeof AN!=="undefined"?AN.cyc+AN.ph:0)%1)*110;
+  g.save(); g.beginPath(); g.rect(0,y0,W,y1-y0); g.clip();
+  for(let i=0;i<10;i++){ const x=22+i*77, w=58;
+    const gr=g.createLinearGradient(x,0,x+w,0); gr.addColorStop(0,"#9aa0a6"); gr.addColorStop(.5,"#e9ecef"); gr.addColorStop(1,"#9aa0a6"); g.fillStyle=gr; g.fillRect(x,y0,w,y1-y0);
+    for(let y=y0-110+off;y<y1;y+=110){ g.fillStyle="#c8302a"; g.fillRect(x,y+6,w,26);
+      if(saved&&f.ribbon>=5){ g.save(); g.translate(x+w/2,y+70); g.rotate(-Math.PI/2); g.fillStyle=f.headDirty?"rgba(20,20,20,.35)":"#151515"; g.font="bold 13px monospace"; g.textAlign="center"; g.fillText(f.prn.lot,0,-6); g.fillText(f.prn.exp,0,10); g.restore(); } }
+    const ok=f.vision&&!bad; g.strokeStyle=f.vision?(ok?"#22c04a":"#e23b2e"):"#6b7782"; g.lineWidth=3; g.strokeRect(x-3,y0+130,w+6,90);
+    if(f.vision){ g.fillStyle=ok?"#22c04a":"#e23b2e"; g.font="bold 14px "+OCRF; g.textAlign="center"; g.fillText(ok?"OK":"NG",x+w/2,y0+124); } }
+  g.restore();
+  const n=S.cnt.ocrN||0, ng=S.cnt.ocrNG||0, ok=f.vision&&!bad;
+  g.fillStyle="#f4f6f7"; g.fillRect(0,y1,W,H-y1); g.fillStyle=f.vision?(ok?"#19a03c":"#c0392b"):"#8a949d"; g.fillRect(16,y1+14,170,H-y1-28);
+  g.fillStyle="#fff"; g.font="bold 50px "+OCRF; g.textAlign="center"; g.fillText(f.vision?(ok?"OK":"NG"):"OFF",101,y1+74); g.textAlign="left";
+  g.fillStyle="#25313d"; g.font="bold 19px "+OCRF; g.fillText("제조번호  "+(saved?f.prn.lot:"-"),210,y1+36); g.fillText("사용기한  "+(saved?f.prn.exp:"-"),210,y1+68);
+  g.fillText("검사 "+n.toLocaleString(),520,y1+36); g.fillStyle="#c0392b"; g.fillText("NG "+ng.toLocaleString(),520,y1+68);
+}
+function ocrDrawP(){
+  const W=640, H=592, g=ocrCanvas("pr",W,H), p=S.p, on=machPower("vs")||machPower("pr");
+  if(!on){ g.fillStyle="#050607"; g.fillRect(0,0,W,H); return; }
+  const L=p.lbl, printing=p.prRun&&L.loaded, blur=p.nozzleBad||p.ink<5, bad=!printing||blur||!prnMatch(L.lot,L.exp), run=p.vsRun;
+  g.fillStyle="#1d2b3a"; g.fillRect(0,0,W,52); g.fillStyle="#fff"; g.font="bold 22px "+OCRF; g.textAlign="left"; g.fillText("카톤 인쇄 검사 (비전) · DOMINO",16,34);
+  g.fillStyle=run?"#3ddc84":"#8a949d"; g.font="bold 17px "+OCRF; g.fillText(run?"● 실행 중":"정지",W-110,34);
+  const y0=52, y1=432; g.fillStyle="#3a3f44"; g.fillRect(0,y0,W,y1-y0);
+  const sh=((performance.now()/1000)*.6%1)*W*.0;                                  /* 카톤은 멈춘 순간 촬영 */
+  g.fillStyle="#9b1610"; g.fillRect(70+sh,y0+40,W-140,y1-y0-80); g.fillStyle="#7a100c"; g.fillRect(70,y1-60,W-140,20);
+  g.fillStyle="#f2efe8"; g.fillRect(150,y0+110,W-300,150);
+  if(printing){ g.save(); if(blur) g.filter="blur(2.2px)"; g.fillStyle="#111"; g.font="bold 30px monospace"; g.fillText("LOT "+(L.lot||""),180,y0+170); g.fillText("EXP "+(L.exp||""),180,y0+222); g.restore(); }
+  g.strokeStyle=run?(bad?"#e23b2e":"#22c04a"):"#6b7782"; g.lineWidth=3; g.strokeRect(166,y0+134,W-332,104);
+  if(run){ g.fillStyle=bad?"#e23b2e":"#22c04a"; g.font="bold 18px "+OCRF; g.fillText(bad?"NG":"OK",166,y0+128); }
+  const n=S.cnt.carton||0, ng=S.cnt.rejVs||0;
+  g.fillStyle="#f4f6f7"; g.fillRect(0,y1,W,H-y1); g.fillStyle=run?(bad?"#c0392b":"#19a03c"):"#8a949d"; g.fillRect(16,y1+16,170,H-y1-32);
+  g.fillStyle="#fff"; g.font="bold 54px "+OCRF; g.textAlign="center"; g.fillText(run?(bad?"NG":"OK"):"OFF",101,y1+98); g.textAlign="left";
+  g.fillStyle="#25313d"; g.font="bold 20px "+OCRF; g.fillText("LOT  "+(L.loaded?L.lot:"-"),210,y1+46); g.fillText("EXP  "+(L.loaded?L.exp:"-"),210,y1+80);
+  g.fillText("검사 "+n.toLocaleString(),210,y1+122); g.fillStyle="#c0392b"; g.fillText("NG "+ng.toLocaleString(),400,y1+122);
+}
+function ocrTick(dt){
+  if(!V3||!V3.scr||!S||!S.session||!S.session.active) return;
+  OCR.t+=dt; if(OCR.t<.15) return; OCR.t=0;
+  for(const s of V3.scr){ if(s.k!=="fp"&&s.k!=="pr") continue; const near=S.room==="F"?s.k==="fp":s.k==="pr"; if(!near) continue;
+    if(s.k==="fp") ocrDrawF(); else ocrDrawP(); const tx=OCR.tex[s.k]; tx.needsUpdate=true;
+    if(s.mat.map!==tx){ s.mat.map=tx; s.mat.emissiveMap=tx; s.mat.color.setHex(0x0a0a0a); s.mat.emissive.setHex(0xffffff); s.mat.emissiveIntensity=.92; s.mat.needsUpdate=true; } }
+}
 
 /* ── v3/demo.js ── */
 /* ═══════════════════════════════════════════════════════════════════

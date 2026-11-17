@@ -45,7 +45,7 @@ function initManual(S){
   const X=CVX, Y=PKZ.y, Yt=Y-.1, d=MP.box;
   MP.red=new T3.MeshStandardMaterial({color:0xa01a14,roughness:.62,side:T3.DoubleSide}); MP.kraft=new T3.MeshStandardMaterial({color:0xb48a5a,roughness:.88,side:T3.DoubleSide});
   MP.blue=new T3.MeshStandardMaterial({color:0x4f9bdc,roughness:.4}); MP.tape=new T3.MeshStandardMaterial({color:0xd8b77c,roughness:.3,transparent:true,opacity:.92});
-  MP.prt=new T3.MeshBasicMaterial({map:tex(cvs(256,64,(c)=>{ c.fillStyle="#a01a14"; c.fillRect(0,0,256,64); c.fillStyle="#141414"; c.font="bold 20px monospace"; c.fillText("LOT 2F010  x8",8,26); c.fillText("EXP 2028.11.01",8,52); }),1,1,true)});
+  MP.prt=new T3.MeshBasicMaterial({map:tex(cvs(256,64,(c)=>{ c.fillStyle="#a01a14"; c.fillRect(0,0,256,64); c.fillStyle="#141414"; c.font="bold 20px monospace"; c.fillText("LOT 2F001  x8",8,26); c.fillText("EXP 2029.01.30",8,52); }),1,1,true)});
   /* 받침대(양옆, 묶음 자리 ~ 케이스 자리) · 봉함스티커 · 접힌 대케이스 자재대(북쪽 옆) */
   for(const s of [-1,1]){ const wx=u=>X+s*u, x0=Math.min(wx(.1),wx(.46)), x1=Math.max(wx(.1),wx(.46)), z0=-10.36, z1=-9.22;
     bx(S,x0,x1,Y-.03,Y,z0,z1,M.ssMir); for(const u of [.14,.42]) for(const z of [z0+.04,(z0+z1)/2,z1-.04]){ bx(S,wx(u)-.015,wx(u)+.015,.03,Y-.03,z-.015,z+.015,M.ss); foot(S,wx(u),z,.03,.02); } bx(S,x0+.02,x1-.02,.3,.32,z0+.04,z1-.04,M.ss);

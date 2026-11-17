@@ -45,7 +45,7 @@ async function htxDraw(s){
 function htxTick(dt){
   if(HTX.fail||!V3||!V3.scr||!S||!S.session||!S.session.active||HTX.busy) return;
   HTX.t+=dt; if(HTX.t<.5) return; HTX.t=0;
-  const L=V3.scr.filter(s=>s.k!=="xr"&&(S.room==="F"?FP_MON[s.k].c[2]>0:FP_MON[s.k].c[2]<0)); if(!L.length) return;
+  const L=V3.scr.filter(s=>s.k!=="xr"&&s.k!=="fp"&&s.k!=="pr"&&(S.room==="F"?FP_MON[s.k].c[2]>0:FP_MON[s.k].c[2]<0)); if(!L.length) return;
   const s=L[HTX.i++%L.length]; if((s.fail||0)>2) return; HTX.busy=true;
   htxDraw(s).catch(e=>{ s.fail=(s.fail||0)+1; if(e&&e.name==="SecurityError") HTX.fail=true; console.warn("설비 화면 그림 표시 실패 — 기존 표시 유지",e); }).finally(()=>{ HTX.busy=false; });
 }

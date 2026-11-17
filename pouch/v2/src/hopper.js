@@ -10,8 +10,9 @@ function buildHoppers(g){
   ext([[-hb+.005,1.28],[hb-.005,1.28],[hb-.005,.62],[.068,.47],[-.068,.47],[-hb+.005,.62]],M.ssMir);
   ext([[hb,1.28],[.645,1.28],[.645,1.0],[.2,.47],[.078,.47],[hb,.62]],M.ssMir);
   const xs=[-.645,-hb,hb,.645];
+  const L2=new T3.Group(); g.add(L2); FM.lid2=L2; FM.lidC=[xc,yt,zc];   /* 2번 호퍼 뚜껑 (필터 · 소음기 · 손잡이 포함) — 주성분 투입 때 들어냄 (11/17 사용자 확정) */
   for(let k=0;k<3;k++){ const x0=xc+xs[k], x1=xc+xs[k+1];
-    bx(g,x0-.012,x1+.012,yt,yt+.014,zc-D-.02,zc+D+.02,M.ssMir);                                                 /* 뚜껑 */
+    bx(k===1?L2:g,x0-.012,x1+.012,yt,yt+.014,zc-D-.02,zc+D+.02,M.ssMir);                                                 /* 뚜껑 */
     for(const s of [-1,1]){ const zf=zc+s*D, za=Math.min(zf,zf+s*.02), zb=Math.max(zf,zf+s*.02);
       for(const x of [x0+.07,x1-.07]) bx(g,x-.014,x+.014,yt-.07,yt+.02,za,zb,M.ss);                              /* 토글 클램프 */
       rod(g,[x0+.13,yt-.2,zf+s*.045],[x1-.13,yt-.2,zf+s*.045],.008,M.ssMir,10); for(const x of [x0+.13,x1-.13]) rod(g,[x,yt-.2,zf],[x,yt-.2,zf+s*.045],.007,M.ssMir,8); }   /* U 손잡이 */
@@ -26,10 +27,10 @@ function buildHoppers(g){
     for(const a of [.6,2.2,3.9,5.4]) bx(g,x+Math.cos(a)*.175-.011,x+Math.cos(a)*.175+.011,yt+.03,yt+.1,zc+Math.sin(a)*.175-.011,zc+Math.sin(a)*.175+.011,M.ssD);
     rod(g,[x,F.top,zc],[x,F.top+.05,zc],.026,M.ssMir,16); tube(g,[[x,F.top+.05,zc],[x+.02,F.top+.1,zc-.03],[x+.06,F.top+.11,zc-.1]],.026,M.ssMir);
     tube(g,[[x-.1,F.top-.15,zc+.15],[x-.14,yt+.2,zc+.3],[x-.1,yt-.3,zc+.46],[x-.02,Y+.45,zc+.48]],.006,M.hose); }
-  rod(g,[xc-.05,yt+.014,zc-.1],[xc-.05,yt+.07,zc-.1],.026,M.ssMir,18); rod(g,[xc-.05,yt+.07,zc-.1],[xc-.05,yt+.082,zc-.1],.04,M.ss,18); rod(g,[xc-.05,yt+.082,zc-.1],[xc-.05,yt+.25,zc-.1],.034,M.white,20);
-  for(let k=0;k<6;k++) rod(g,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
-  rod(g,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(g,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(g,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
-  for(const z of [zc-.3,zc+.3]){ rod(g,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(g,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
+  rod(L2,[xc-.05,yt+.014,zc-.1],[xc-.05,yt+.07,zc-.1],.026,M.ssMir,18); rod(L2,[xc-.05,yt+.07,zc-.1],[xc-.05,yt+.082,zc-.1],.04,M.ss,18); rod(L2,[xc-.05,yt+.082,zc-.1],[xc-.05,yt+.25,zc-.1],.034,M.white,20);
+  for(let k=0;k<6;k++) rod(L2,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
+  rod(L2,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(L2,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(L2,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
+  for(const z of [zc-.3,zc+.3]){ rod(L2,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(L2,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
   /* ── 스테인리스 틀 (11/16 사용자 설명) : 호퍼 · 도징박스 · 원료조절부가 모두 한 틀에 달림 · 아래는 막힌 함(데크 바닥에 부품 노출 없음) · 옆은 투명판(도징박스가 보임) ── */
   const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4, fw=.46, fl=.58, ft=Y+.66;
   bx(g,xc-fw,xc+fw,Y,Y+.2,zc-fl,zc+fl,M.ss); bx(g,xc-fw-.006,xc+fw+.006,Y+.2,Y+.215,zc-fl-.006,zc+fl+.006,M.ssMir);   /* 아래 막힌 함 · 윗테 */

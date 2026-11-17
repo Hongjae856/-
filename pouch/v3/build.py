@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "demo.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "demo.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -30,11 +30,18 @@ PATCH = {
         (r"R3.lo=[-9900,-10,-3300]; R3.hi=[12900,4300,2700];", "", 1),
     ],
     "hmi.js": [
+        ('const EXPECT={exp:"2028.11.01", lot:"2F010"};', 'const EXPECT={exp:"2029.01.30", lot:"2F001"};   /* 제조번호 · 사용기한 (11/17 사용자 제시 예) */', 1),
+        ('  return k==="fl"?S.f.panel:', '  return k==="fl"?S.f.panel:k==="fp"?!!S.f.main:', 1),
+        ('function machRun(k){ const p=S.p; return k==="fl"?S.f.run:', 'function machRun(k){ const p=S.p; return k==="fl"?S.f.run:k==="fp"?!!(S.f.run&&S.f.prn.saved):', 1),
+        ('function drawHMI(){\n  if(!S) return;', 'function drawHMI(){\n  if(!S) return; { const ae=document.activeElement; if(ae&&ae.classList&&ae.classList.contains("hin")&&ae.closest("#hBody")) return; }   /* 직접 입력 중에는 다시 그리지 않음 */', 1),
+        ('function bindHB(){ $$("#hBody [data-hb]").forEach(e=>e.onclick=()=>hbClick(e.dataset.hb)); drawPanel(); }', 'function bindHB(){ $$("#hBody [data-hb]").forEach(e=>e.onclick=()=>hbClick(e.dataset.hb)); if(typeof hinBind==="function") hinBind(); drawPanel(); }', 1),
+        ('    case "pr_lot": p.lbl.lot=EXPECT.lot; p.lbl.saved=false; toast("LOT : "+EXPECT.lot+" (포장지시기록서)"); break;\n    case "pr_exp": p.lbl.exp=EXPECT.exp; p.lbl.saved=false; toast("EXP : "+EXPECT.exp+" (포장지시기록서)"); break;', '    case "pr_lot": case "pr_exp": return;   /* 입력칸에 직접 입력 (11/17) */', 1),
+        ('row("배치번호 (LOT)","포장지시기록서",\'<div class="hval edit" data-hb="pr_lot">\'+esc(L.lot||"입력")+\'</div>\')+row("사용기한 (EXP)","포장지시기록서",\'<div class="hval edit" data-hb="pr_exp">\'+esc(L.exp||"입력")+\'</div>\')', 'row("제조번호 (LOT)","포장지시기록서",hinBox("pr_lot",L.lot,"예 2F001",EXPECT.lot))+row("사용기한 (EXP)","YYYY.MM.DD",hinBox("pr_exp",L.exp,"예 2029.01.30",EXPECT.exp))', 1),
         ('    nav.innerHTML=FNAV.map(', '    if(0) nav.innerHTML=FNAV.map(', 1),          # 충전기 : SOLPAC 화면 (solpac.js)
         ('    body.innerHTML=(FSCR[hScr]||FSCR.run)();', '    solpacDraw(body,nav);', 1),
         ('  const m=machOf(hMach);\n  $("#hMach")', '  const m=machOf(hMach); $("#hmi").classList.toggle("solpac",hMach==="fl"); $("#panel").classList.toggle("solpacP",hMach==="fl"); $("#hmi").classList.toggle("oneTab",tabs.length<2); $("#hmi").classList.toggle("big",hMach==="fl"&&SPBIG&&machPower("fl")&&!(typeof fpActive==="function"&&fpActive()));\n  $("#hMach")', 1),
         ('body.innerHTML=loginScreen(hMach);', 'body.innerHTML=hMach==="fl"?solpacLogin():loginScreen(hMach);', 1),
-        ('function hbClick(id){', 'function hbClick(id){ if(id.startsWith("sp_")){ solpacClick(id); return; } if((id==="fl_ibc0"||id==="fl_ibc2")&&S.f.hoseC&&!S.f.hoseC[id==="fl_ibc0"?0:1]&&!S.f.ibc[id==="fl_ibc0"?0:2]){ toast("IBC 진공호스가 연결되지 않았습니다. 먼저 호스를 연결 · 체결하세요.","bad"); return; }', 1),
+        ('function hbClick(id){', 'function hbClick(id){ if(id.startsWith("fp_")){ fpClick(id); return; } if(id.startsWith("sp_")){ solpacClick(id); return; } if((id==="fl_ibc0"||id==="fl_ibc2")&&S.f.hoseC&&!S.f.hoseC[id==="fl_ibc0"?0:1]&&!S.f.ibc[id==="fl_ibc0"?0:2]){ toast("IBC 진공호스가 연결되지 않았습니다. 먼저 호스를 연결 · 체결하세요.","bad"); return; }', 1),
         ('if(mk==="fl") return HNV(scr);', 'if(mk==="fl") return flRoute(scr);', 1),
         ('return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div class="kpis">\'', 'return ph("홈","ISHIDA IX-EN · pancold-h",p.xrConv)+\'<div id="xrView" class="\'+(p.xrX?"on":"")+\'"></div><div class="kpis">\'', 1),
     ],
@@ -63,9 +70,12 @@ PATCH = {
     ],
     "fps.js": [
         ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
-        ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||e.code==='KeyF') && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
+        ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||(e.code==='KeyF'&&!e.target?.closest?.('input,textarea'))) && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
     ],
     "sim.js": [   # 무작위 소량 불량 (11/17 사용자 선택) : 중량 NG 약 0.15 % · 실링 불량 약 0.15 %
+        ('  const printed=f.prn.saved;', '  const printed=f.prn.saved&&f.prn.lot===EXPECT.lot&&f.prn.exp===EXPECT.exp;   /* 포장지시기록서와 다른 값 = 인쇄 불량 (11/17) */', 1),
+        ('  const printBad=!printed||f.headDirty||f.ribbon<5;', '  const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }', 1),
+        ('c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":"ok"):"none";', 'c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":(p.lbl.lot!==EXPECT.lot||p.lbl.exp!==EXPECT.exp)?"bad":"ok"):"none";', 1),
         ('const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35;', 'const w=PROD.cartonTare+(p.leafBad?-4.2:0)+cartonNet()+gauss()*0.35+(Math.random()<.0015?(Math.random()<.5?-1:1)*(PROD.cw.hi+1.5):0);', 1),
         ('    const toEmpty=empty||vis||!S.p.align;', '    const sealNG=!empty&&!vis&&Math.random()<.0015; if(sealNG) S.cnt.sealNG=(S.cnt.sealNG||0)+1;\n    const toEmpty=empty||vis||sealNG||!S.p.align;', 1),
     ],
@@ -74,6 +84,9 @@ PATCH = {
         ('d:"주성분 STS 용기를 2층 데크로 올립니다. 은박 · STS 용기는 반드시 2인 1조로 옮깁니다."', 'd:"STS 용기(맨 동쪽 중앙 파렛트)에 담긴 주성분 봉투를 리프터 적재칸으로 옮겨 원료투입구 아래에서 2층 데크로 올립니다. 리프터는 3인 1조(1명 운전 · 2명 하역)."', 1),
     ],
     "course.js": [
+        ('A.push(T_("scoop","2번 호퍼에 주성분 스쿱 공급","[주성분 스쿱 공급] 을 눌러 2번 호퍼에 주성분을 공급합니다.",', 'A.push(T_("scoop","2번 호퍼에 주성분 스쿱 공급 (뚜껑 들어냄)","[주성분 스쿱 공급] 을 누르면 작업자가 2번 호퍼 뚜껑의 남 · 북 토글 클램프를 풀고 뚜껑을 들어내 남쪽 난간에 세운 뒤 스쿱으로 투입하고, 뚜껑을 다시 덮어 클램프를 체결합니다.",', 1),
+        ('    A.push(T_("prn","은박 프린터 사용기한 · 배치번호 입력 · 저장","[은박 프린터] 를 눌러 포장지시기록서의 사용기한 · 배치번호를 입력하고 저장합니다.",()=>"#mPrn",()=>f().prn.saved,{pts:3}));', '    A.push(T_("prn","인쇄기 컨트롤러 — 제조번호 · 사용기한 직접 입력 · 저장","충전기 북쪽 인쇄기 컨트롤러 위 모니터에서 포장지시기록서의 제조번호("+EXPECT.lot+") · 사용기한("+EXPECT.exp+")을 입력하고 저장합니다.",()=>firstOf([[()=>f().prnD&&f().prnD.lot===EXPECT.lot,()=>hmiRoute("fp","main",HB("fp_lot"))],[()=>f().prnD&&f().prnD.exp===EXPECT.exp,()=>hmiRoute("fp","main",HB("fp_exp"))],[()=>f().prn.saved&&f().prn.lot===EXPECT.lot&&f().prn.exp===EXPECT.exp,()=>hmiRoute("fp","main",HB("fp_save"))]]),()=>f().prn.saved&&f().prn.lot===EXPECT.lot&&f().prn.exp===EXPECT.exp,{pts:3,hmi:true}));   /* 11/17 : 직접 입력 */', 1),
+        ('  const prLbl=[[()=>p().lbl.lot,()=>hmiRoute("pr","edit",HB("pr_lot"))],[()=>p().lbl.exp,()=>hmiRoute("pr","edit",HB("pr_exp"))]];', '  const prLbl=[[()=>p().lbl.lot===EXPECT.lot,()=>hmiRoute("pr","edit",HB("pr_lot"))],[()=>p().lbl.exp===EXPECT.exp,()=>hmiRoute("pr","edit",HB("pr_exp"))]];   /* 11/17 : 직접 입력 */', 1),
         ('  const d=S.f.dial, one=q=>IPC_STD[q].std*(1+(d[q]||0));\n  const m=k==="all"?one("add")+one("main")+one("sug"):one(k);\n  const list=[]; for(let i=0;i<IPC_STD[k].n;i++) list.push(Math.round((m+gauss()*IPC_STD[k].std*0.011)*1000)/1000);',
          '  const d=S.f.dial, one=(q,i)=>IPC_STD[q].std*(1+(typeof dialOff==="function"?dialOff(q,i):(d[q]||0)));   /* 노즐별 조절 다이얼 반영 (11/16 dial.js) */\n  const mm=i=>k==="all"?one("add",i)+one("main",i)+one("sug",i):one(k,i);\n  const list=[]; for(let i=0;i<IPC_STD[k].n;i++) list.push(Math.round((mm(i%10)+gauss()*IPC_STD[k].std*0.008)*1000)/1000);', 1),
         ('done:()=>S.f.dial.main>=0,\n      act(){ return startWork("dialF",()=>{ S.f.dial.main=0; const r=S.ipc.res.main; if(r) r.stale=true; renderIpc(); toast("주성분 다이얼 조정 완료 — 재측정합니다","good"); }); }', 'done:()=>dialOK("main"),\n      act(){ return startWork("dialB",()=>dialOpen("B",()=>{ if(!dialOK("main")) toast("주성분 노즐 중 기준 ±2 % 를 벗어난 노즐이 있습니다. 다시 조절하세요.","bad"); else toast("주성분 충전량 조절 완료 — 재측정합니다","good"); })); }', 1),
