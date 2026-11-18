@@ -11,8 +11,10 @@ let PK_OBS=null;                              /* 포장실 설비 (pack.js) */
 function gridBuild(){
   Object.assign(GRID,{x0:ROOM.x0,z0:ROOM.z0,nx:Math.ceil((ROOM.x1-ROOM.x0)/GRID.c),nz:Math.ceil((ROOM.z1-ROOM.z0)/GRID.c)}); GRID.a=new Uint8Array(GRID.nx*GRID.nz);
   const o=V3B.objs.statOp, n=o.g.drawRange.count, P=o.P; if(!P) return;
+  let ST=[]; try{ ST=appWin().eval("STAIRS")||[]; }catch(e){}                       /* 계단 발판 위는 걸어 올라감 */
+  const onStair=(x,z)=>ST.some(t=>x>t.x0-10&&x<t.x1+10&&z>t.zs-10&&z<t.zp1+10);
   for(let t=0;t+2<n;t+=3){ const a=t*3, ys=[P[a+1],P[a+4],P[a+7]], y0=Math.min(...ys), y1=Math.max(...ys); if(y1<80||y0>1900) continue;
-    const xs=[P[a],P[a+3],P[a+6]], zs=[P[a+2],P[a+5],P[a+8]];
+    const xs=[P[a],P[a+3],P[a+6]], zs=[P[a+2],P[a+5],P[a+8]]; if(onStair((xs[0]+xs[1]+xs[2])/3,(zs[0]+zs[1]+zs[2])/3)) continue;
     const i0=Math.floor((Math.min(...xs)-GRID.x0)/GRID.c), i1=Math.floor((Math.max(...xs)-GRID.x0)/GRID.c), k0=Math.floor((Math.min(...zs)-GRID.z0)/GRID.c), k1=Math.floor((Math.max(...zs)-GRID.z0)/GRID.c);
     if((i1-i0)*(k1-k0)>4000) continue;
     for(let i=Math.max(0,i0);i<=Math.min(GRID.nx-1,i1);i++) for(let k=Math.max(0,k0);k<=Math.min(GRID.nz-1,k1);k++) GRID.a[k*GRID.nx+i]=1; }
@@ -44,7 +46,7 @@ function walkBind(){
   addEventListener("keydown",e=>{ WALK.keys[e.code]=true; if(V3B.view!=="orbit"&&/^(Arrow|Space)/.test(e.code)) e.preventDefault(); });
   addEventListener("keyup",e=>{ WALK.keys[e.code]=false; });
   addEventListener("blur",()=>{ WALK.keys={}; });
-  cv.addEventListener("click",()=>{ if(V3B.view!=="orbit"&&typeof PF!=="undefined"&&document.body.classList.contains("pkfp")&&PF.aim&&pfAct()) return; if(V3B.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
+  cv.addEventListener("click",()=>{ if(V3B.view!=="orbit"&&typeof FF!=="undefined"&&CREW.cur==="F"&&(FF.hmi||(FF.aim&&ffAct()))) return; if(V3B.view!=="orbit"&&typeof PF!=="undefined"&&document.body.classList.contains("pkfp")&&PF.aim&&pfAct()) return; if(V3B.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
   cv.addEventListener("mousedown",e=>{ if(V3B.view!=="orbit") drag={x:e.clientX,y:e.clientY}; });
   addEventListener("mouseup",()=>drag=null);
   addEventListener("mousemove",e=>{ if(V3B.view==="orbit") return; let dx=0,dy=0;

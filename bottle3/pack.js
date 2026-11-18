@@ -163,6 +163,6 @@ const PK_END=()=>(PK.pass[1]-PK.pass[0])+pkArc().L+(PK.acc[1]-200-PK.line[0]);
 function pkObstacles(){ const L=[], t=PK.tt;
   L.push([PK.pass[0],PK.pass[1],-120,120],[t.x-t.r,t.x+t.r,t.z-t.r,t.z+t.r],[PK.line[0],PK.cw.x1,-200,200],[PK.lab[0],PK.lab[1],-480,420],[PK.leaf[0],PK.leaf[1],-400,380],[14150,14350,300,480],[12200,12400,400,500],[10950,11150,380,460],
     [PK.cw.x0,PK.cw.x1,-540,220],[15750,16150,140,480],[12350,12650,160,460],[PK.acc[0],PK.acc[1],-350,450],[PK.scan[0],PK.scan[1],-420,470],[PK.box[0],PK.box[1],-450,450],
-    [PK.pallet.x-550,PK.pallet.x+550,PK.pallet.z-550,PK.pallet.z+550],[19400,20200,1200,1800],[9950,10550,800,1300]);
+    [PK.pallet.x-550,PK.pallet.x+550,PK.pallet.z-550,PK.pallet.z+550],[-3440,-2960,620,730],[19400,20200,1200,1800],[9950,10550,800,1300]);
   return L; }
 /* 흐름 · 시뮬레이션 · 설비 화면 : packsim.js (B3) */
