@@ -32,7 +32,7 @@ APP_PATCH = [
     # 작업자는 셸이 파우치 인체 모델로 그림 (원본 작업자 형상 생략)
     ("function drawWorkers(){ for(const w of WK){", "function drawWorkers(){ if(window.B3_EXT) return; for(const w of WK){", 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 

@@ -95,7 +95,7 @@ function psWorkers(dt,queue){
 }
 /* 판독 (전문의약품) · 바로 담기 (일반의약품) */
 function psScan(q){
-  if(!PS.box.open) return false;
+  if(!PS.box.open||(!PS.auto.w2&&!PS.box.ready&&PS.box.n===0)) return false;   /* 수동 박스 작업 : 박스 조립 전에는 담을 수 없음 */
   if(PS.rx){
     if(!PS.ag.on){ psMsg("집합 포장 작업이 시작되지 않았습니다."); return false; }
     const bad=Math.random()<PS_RATE.unread?"판독 불가":Math.random()<PS_RATE.dup?"중복 판독":null;

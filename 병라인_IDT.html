@@ -20,12 +20,51 @@ button{font-family:inherit}
 #cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
 body.fp #cross{display:block}
 #hud{position:absolute;z-index:3;font-size:12.5px;background:#ffffffe0;border-radius:8px;padding:5px 10px;pointer-events:none;color:#33475e}
+
+.seg{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden}
+.seg button{border:0;background:#fff;color:var(--ink);font:800 13.5px "Malgun Gothic",Arial,sans-serif;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid #b7c4d2}.seg button.on{background:var(--ink);color:#fff}.seg button:disabled{color:#aab;cursor:default}
+#splash{position:absolute;inset:0;z-index:8;background:linear-gradient(180deg,#f5f7f9,#e8edf1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:24px}
+#splash.hide{display:none}
+#splash h1{margin:0;font:800 44px "Malgun Gothic",Arial,sans-serif;letter-spacing:-1px}
+#splash .sub{margin:-6px 0 0;font:700 14px "Malgun Gothic",Arial,sans-serif;color:var(--sub);letter-spacing:1px}
+#spHint{font:600 16px/1.5 "Malgun Gothic",Arial,sans-serif;color:#40566e;text-align:center}
+#rxSel{display:flex;gap:8px;align-items:center;font:700 14px "Malgun Gothic",Arial,sans-serif}
+#rxSel button{border:1px solid #b7c4d2;border-radius:10px;background:#fff;padding:7px 14px;font:800 14px "Malgun Gothic",Arial,sans-serif;cursor:pointer}#rxSel button.on{background:#1f5fb8;color:#fff;border-color:#1f5fb8}
+#workers{display:grid;grid-template-columns:repeat(3,minmax(220px,300px));gap:14px}
+#workers button{border:0;border-radius:20px;background:#7b8a9c;color:#fff;text-align:left;padding:18px 20px;cursor:pointer;font-family:inherit;opacity:.75}
+#workers.ready button{opacity:1;background:#173a63}#workers button:disabled{background:#c3cad2!important;cursor:default}
+#workers small{display:block;font:600 12px "Malgun Gothic";letter-spacing:1px;opacity:.85}#workers strong{display:block;font:800 22px "Malgun Gothic";margin:6px 0}#workers span{font:500 13.5px/1.4 "Malgun Gothic"}
+#modes{display:grid;grid-template-columns:repeat(4,200px);gap:12px}
+.mcol h4{margin:0 0 6px;text-align:center;font:800 16px "Malgun Gothic";color:var(--sub);letter-spacing:3px}
+.mcol button{display:block;width:100%;margin:0 0 8px;border:2px solid #173a63;border-radius:12px;background:#173a63;color:#fff;font:800 17px "Malgun Gothic",Arial,sans-serif;padding:10px;cursor:pointer;word-break:keep-all}
+.mcol button.e{background:#fff;color:#173a63}.mcol button small{display:block;font:600 12px "Malgun Gothic";opacity:.85}
+.mcol button.sel{outline:4px solid #f2b705}
+.mcol.demo button{background:#2b8a4b;border-color:#2b8a4b}
+body.pk #app{visibility:hidden}
+#pkTiles{position:absolute;z-index:4;left:10px;top:10px;bottom:10px;width:250px;overflow:auto;display:none;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
+body.pk #pkTiles{display:grid}
+.pt{border:1px solid #c9d4e0;border-radius:10px;background:#ffffffee;text-align:left;padding:7px 8px;cursor:pointer;font-family:inherit;min-height:52px}
+.pt b{display:block;font:800 13px "Malgun Gothic"}.pt s{display:block;text-decoration:none;font:500 11px/1.3 "Malgun Gothic";color:#5d7086}
+.pt.on{background:#e3f6e8;border-color:#2b8a4b}.pt.hint{outline:3px solid #f2b705}
+#pkCoach{position:absolute;z-index:4;left:270px;right:270px;top:10px;display:none;background:#fff;border-left:6px solid #2b6fd0;border-radius:12px;padding:9px 14px;box-shadow:0 2px 10px #142b4718}
+body.pk #pkCoach{display:block}#pkCoach small{display:block;color:#2b6fd0;font:700 12.5px "Malgun Gothic"}#pkCoach b{display:block;font:800 18px "Malgun Gothic";margin:2px 0}#pkCoach span{font:500 13.5px/1.45 "Malgun Gothic";color:#33475e}
+#pkStat{position:absolute;z-index:4;right:10px;top:10px;width:250px;display:none;background:#ffffffee;border-radius:12px;padding:10px 12px;font:500 13px/1.7 "Malgun Gothic";border:1px solid #c9d4e0}
+body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:#173a63}#pkStat .msg{margin-top:6px;color:#b03a00;font-weight:700;line-height:1.4}
+#pDlg{position:absolute;inset:0;z-index:9;background:#0006;display:flex;align-items:center;justify-content:center}
+#pDlg .box{background:#fff;border-radius:14px;padding:18px 22px;min-width:380px;font:500 14px "Malgun Gothic"}#pDlg h3{margin:0 0 10px}
+#pDlg label{display:block;margin:6px 0}#pDlg input{width:110px;font:700 15px monospace;padding:4px 6px;margin-left:8px}
+#pDlg table.cmp{border-collapse:collapse}#pDlg td,#pDlg th{border:1px solid #ccd;padding:5px 10px}
+#pDlg .bt{margin-top:14px;display:flex;gap:8px;justify-content:flex-end}#pDlg .bt button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:8px 14px;font:700 14px "Malgun Gothic";cursor:pointer}
+#pToast{position:absolute;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#142b47ee;color:#fff;border-radius:999px;padding:8px 18px;font:700 14px "Malgun Gothic"}
 #load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
 </style></head><body>
 <div id="bar">
   <div class="brand">병 라인 IDT</div>
   <span class="chip" id="modeChip"></span>
+  <div class="seg" id="crewSw"><button data-r="F">🧍 충전실</button><button data-r="P1">🧍 포장실 1</button><button data-r="P2">🧍 포장실 2</button></div>
   <button class="gb" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>
+  <button class="gb" id="homeBtn">메인화면</button>
   <div class="sp"></div>
   <span id="info"></span>
 </div>
@@ -34,6 +73,24 @@ body.fp #cross{display:block}
   <canvas id="cv" tabindex="0"></canvas>
   <div id="cross"></div>
   <div id="hud"></div>
+  <div id="pkTiles"></div><div id="pkCoach"></div><div id="pkStat"></div>
+  <div id="pDlg" hidden></div><div id="pToast" hidden></div>
+  <div id="splash">
+    <h1>병 라인 IDT</h1><p class="sub">Bottle Line · Interactive Digital Tutor · 병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장</p>
+    <div id="spHint">① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다</div>
+    <div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div>
+    <div id="workers">
+      <button id="chooseF"><small>FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑</span></button>
+      <button id="chooseP1"><small>PACKING ROOM · 작업자 1</small><strong>🧍 포장실 작업자 1</strong><span>설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독</span></button>
+      <button id="chooseP2"><small>PACKING ROOM · 작업자 2</small><strong>🧍 포장실 작업자 2</strong><span>박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)</span></button>
+    </div>
+    <div id="modes">
+      <div class="mcol"><h4>기본</h4><button data-m="easy">기본 · 학습<small>핵심 절차</small></button><button class="e" data-m="examEasy">기본 · 평가</button></div>
+      <div class="mcol"><h4>심화</h4><button data-m="guide">심화 · 학습<small>전체 절차</small></button><button class="e" data-m="exam">심화 · 평가</button></div>
+      <div class="mcol demo"><h4>시연</h4><button data-m="demo">시연모드<small>작업자별 자동 가동</small></button></div>
+      <div class="mcol"><h4>자유 · OEE</h4><button class="e" disabled>자유모드<small>준비 중 (B5)</small></button><button class="e" disabled>OEE · 이상사례<small>준비 중 (B5)</small></button></div>
+    </div>
+  </div>
   <div id="load">설비 불러오는 중…</div>
 </div>
 <script>/**
@@ -48,6 +105,7 @@ body.fp #cross{display:block}
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:4,d:'2026-11-18',t:'메인화면 · 작업자 · 과정 (B4) — 파우치처럼 ① 모드(기본 · 심화 학습/평가 · 시연) → ② 작업자(충전실 · 포장실 1 · 포장실 2) 선택, 포장 품목 전문의약품(판독 · AG · 2명) / 일반의약품(판독 없음 · 1명), 상단 작업자 교체, 포장실 과정 — 작업자 1 : 리젝트 함 확인 · 턴테이블 · 라벨 인쇄기 · 비전 · 라벨러 · 첫 인쇄 대조 · 설명서 부착기 · 중량 세팅 · 시료 시험 · 중량선별기 · 집합 포장 시작 · 판독(박스 1 · 3) · 작업완료 · 설비 정지 / 작업자 2 : 박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 × 3 / 일반의약품 : 설비 운전 + 박스 조립 · 담기 · 봉함 · 적재, 선택하지 않은 포장 작업자는 자동, 평가는 순서가 다른 조작 −3 점 · 지시서와 다른 중량 세팅 −5 점, 작업자 인체 모델(충전실 흰 방진복 · 포장실 파란 작업복)'},
  {v:3,d:'2026-11-18',t:'포장 시뮬레이션 · 설비 화면 (B3) — 충전실 양품 + 턴테이블 임시 보관분이 라인으로, 라벨 인쇄 · 부착(라벨 롤 · 리본 소모) → 비전 판정(NG 는 후단 리젝터로 리젝트 함) → 설명서 부착(누락 발생) → 중량선별(설명서 누락 −NG · 과량 +NG 플리퍼 리젝트) → 집적 → 작업자 1 판독(판독 불가 · 중복 = 리젝트 후 라벨만 떼고 턴테이블로 재투입) → 40병마다 박스 AG 라벨 발행 → 작업자 2 봉함 · 라벨 · 파렛트 적재, 멈춘 설비 앞에서 병이 대기, 설비 화면 6종(라벨 인쇄기 · 비전 PC · 라벨러 판넬 · 설명서 부착기 LCD · 중량선별기 표시창 · 집합 포장 PC)을 현장 사진 구성대로 · 화면 값은 가상'},
  {v:2,d:'2026-11-18',t:'포장실 설비 (B2) — 현장 영상 · 사진 기준으로 칸막이 벽 통과구 컨베이어 · 턴테이블(버퍼) · 라벨 인쇄(열전사 · 화면) · 라벨러(감싸기 벨트 · 2D 코드 비전 · 후단 리젝터 · 리젝트 함) · 이동식 PC 스탠드 · 부착형 설명서 부착기(대형 롤 · 컨트롤러 · 경광등) · 중량선별기(계량 컨베이어 · 표시부 · 플리퍼 · 「기준 중량 이상」 함) · 집적 벨트 작업대 · 바코드 판독대(거치형 판독기 · 집합 포장 PC · AG 라벨 프린터) · 박스 작업대 · 파렛트 · 대차 · 의자, 병 흐름(라벨 · 설명서 부착 표시), 1인칭 충돌, 실제 장면 반사'},
  {v:1,d:'2026-11-18',t:'병 라인 IDT 파우치 방식 전환 착수 (B1) — 기존 병 충전 설비 형상(UA-120 · SG-120 · 로드셀 · DMC-60T · HPE-100 · RCS-120 · 집적 테이블)을 파우치 엔진(Three.js)으로 그림(치수 · 색 · 동작은 원본 그대로), 충전실 · 포장실(설비는 B2) 방 · 칸막이 벽 통과구, 3인칭 전체 보기 · 1인칭 걷기(설비 충돌)'}
@@ -721,7 +779,7 @@ function psWorkers(dt,queue){
 }
 /* 판독 (전문의약품) · 바로 담기 (일반의약품) */
 function psScan(q){
-  if(!PS.box.open) return false;
+  if(!PS.box.open||(!PS.auto.w2&&!PS.box.ready&&PS.box.n===0)) return false;   /* 수동 박스 작업 : 박스 조립 전에는 담을 수 없음 */
   if(PS.rx){
     if(!PS.ag.on){ psMsg("집합 포장 작업이 시작되지 않았습니다."); return false; }
     const bad=Math.random()<PS_RATE.unread?"판독 불가":Math.random()<PS_RATE.dup?"중복 판독":null;
@@ -827,6 +885,177 @@ function psScreens(dt){
   if(PS.scanFlash>0) PS.scanFlash-=.4;
 }
 
+/* ── pcourse.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   포장실 과정 (B4 · 11/18) — 작업자 : 포장실 1 (전문 : 판독 + 설비 운전 / 일반 : 설비 운전 + 박스 포장) · 포장실 2 (전문만 : 박스 포장 · AG 라벨 · 파렛트)
+   · 기동 전 점검 (사용자 선택 11/18) : 첫 인쇄 내용 대조 · 중량선별기 중량 세팅 → 시료 시험
+   · 선택하지 않은 포장 작업자는 자동 (작업자 2 자동 = 봉함 · 라벨 · 적재 / 작업자 1 자동 = 설비 일괄 가동 · 판독)
+   · 학습 = 단계 설명 · 안내 / 평가 = 설명 없음 · 순서가 틀린 조작은 감점 (−3) · 80 점 합격
+   · 조작은 왼쪽 타일(3인칭) — 1인칭 조작 대상은 B5
+   ═══════════════════════════════════════════════════════════════════ */
+const PC={on:false, role:null, mode:"learn", deep:true, i:0, steps:[], score:100, ded:[], t0:0, done:false, boxes0:0, firstOk:false, sample:null};
+const STD={std:22.20, lo:21.80, hi:22.60};               /* 작업 지시서 중량 기준 (가상 값) */
+const isExamP=()=>PC.mode==="exam";
+/* ── 조작 타일 ── */
+const PT={
+  rej:{nm:"리젝트 함 확인", sub:"라벨러 후단 · 중량선별기", run:()=>{ PKG.rejLabN=0; PKG.rejCwN=0; PC.rejOk=true; return "리젝트 함 2곳 비움 확인"; }},
+  tt:{nm:"턴테이블", sub:()=>PS.tt.on?"운전 · 보관 "+PS.tt.buf+" 병":"정지 · 보관 "+PS.tt.buf+" 병", st:()=>PS.tt.on, run:()=>PS_ACT.tt()},
+  pr:{nm:"라벨 인쇄기", sub:()=>(PS.pr.on?"실행":"꺼짐")+" · 리본 "+Math.round(PS.pr.ribbon)+" %", st:()=>PS.pr.on, run:()=>PS_ACT.pr()},
+  vis:{nm:"비전 PC", sub:()=>(PS.vis.on?"검사 중":"중지")+" · NG "+PS.vis.ng, st:()=>PS.vis.on, run:()=>PS_ACT.vis()},
+  lab:{nm:"라벨러", sub:()=>(PS.lab.run?"RUN":"STOP")+" · 라벨 롤 "+Math.round(PS.lab.roll)+" %", st:()=>PS.lab.run, run:()=>PS_ACT.lab()},
+  first:{nm:"첫 인쇄 대조", sub:()=>PC.firstOk?"대조 완료":"첫 라벨 확인", st:()=>PC.firstOk, run:()=>pcFirst()},
+  leaf:{nm:"설명서 부착기", sub:()=>(PS.leaf.on?"ON":"OFF")+" · 롤 "+Math.round(PS.leaf.roll)+" %", st:()=>PS.leaf.on, run:()=>PS_ACT.leaf()},
+  cwSet:{nm:"중량 세팅", sub:()=>PS.cw.set?PS.cw.std.toFixed(2)+" g ("+PS.cw.lo.toFixed(2)+"~"+PS.cw.hi.toFixed(2)+")":"미설정", st:()=>PS.cw.set, run:()=>pcCwSet()},
+  sample:{nm:"시료 시험", sub:()=>PC.sample||"정상 · 설명서 없는 병", st:()=>!!PC.sampleOk, run:()=>pcSample()},
+  cw:{nm:"중량선별기", sub:()=>(PS.cw.run?"가동":"정지")+" · −NG "+PS.cw.nNG+" · +NG "+PS.cw.pNG, st:()=>PS.cw.run, run:()=>{ if(!PS_ACT.cw()) return "중량 세팅을 먼저 하세요"; }},
+  agStart:{nm:"집합 포장 작업 시작", sub:()=>PS.ag.on?"진행 중":"작업지시 선택", st:()=>PS.ag.on, run:()=>PS_ACT.agStart(), rx:true},
+  scan:{nm:"판독", sub:()=>"단품 "+PS.ag.n+" / "+PS.boxN, run:()=>pcScan(), rx:true},
+  agClear:{nm:"클리어", sub:"잘못 판독한 박스", run:()=>PS_ACT.agClear(), rx:true},
+  agPack:{nm:"포장완료", sub:"수량 미달 박스 마감", run:()=>PS_ACT.agPack(), rx:true},
+  agEnd:{nm:"작업완료", sub:()=>"박스 "+PS.ag.boxes, st:()=>PS.ag.msg==="작업 완료", run:()=>PS_ACT.agEnd(), rx:true},
+  boxMk:{nm:"박스 조립", sub:()=>PS.box.ready?"조립됨":"접힌 박스 "+PS.box.flat+" 장", st:()=>!!PS.box.ready, run:()=>pcBoxMake()},
+  put:{nm:"병 담기", sub:()=>PS.box.n+" / "+PS.boxN, run:()=>pcPut(), otc:true},
+  seal:{nm:"봉함 (테이프)", sub:()=>PS.box.sealed?"봉함됨":"박스 닫고 테이프", st:()=>!!PS.box.sealed, run:()=>pcSeal()},
+  agLab:{nm:"AG 라벨 부착", sub:()=>PS.box.labeled?"부착됨":"프린터에서 라벨", st:()=>!!PS.box.labeled, run:()=>pcLabel(), rx:true},
+  pal:{nm:"파렛트 적재", sub:()=>"적재 "+PS.pallet+" 박스", run:()=>pcPallet()},
+  stop:{nm:"설비 정지", sub:"작업 후 전원 OFF", run:()=>PS_ACT.allOff()}
+};
+/* 역할별 타일 */
+function pcTiles(){
+  const rx=PS.rx, r=PC.role;
+  const eq=["rej","tt","pr","vis","lab","first","leaf","cwSet","sample","cw"];
+  if(r==="P2") return ["boxMk","seal","agLab","pal"];
+  if(!rx) return eq.concat(["boxMk","put","seal","pal","stop"]);
+  return eq.concat(["agStart","scan","agClear","agPack","agEnd","stop"]);
+}
+/* ── 과정 단계 ── */
+function pcSteps(){
+  const rx=PS.rx, deep=PC.deep, nBox=deep?3:1, S=[];
+  const st=(k,t,d,ok,o)=>S.push(Object.assign({k,t,d,ok},o||{}));
+  if(PC.role==="P2"){
+    for(let b=1;b<=nBox;b++){
+      st("boxMk","박스 "+b+" 조립","접힌 골판지 박스를 펴서 바닥을 테이프로 막고 작업대에 놓습니다.",()=>PS.box.ready||PS.box.n>0||PS.box.done>=b);
+      st("seal","박스 "+b+" 봉함","작업자 1이 판독한 병 "+PS.boxN+" 개가 다 담기면(박스 라벨 발행) 박스를 닫고 테이프로 봉합니다.",()=>PS.box.sealed||PS.box.done>=b,{wait:()=>PS.box.full});
+      st("agLab","박스 "+b+" AG 라벨 부착","라벨 프린터에서 나온 박스 AG 라벨을 박스 옆면에 붙입니다.",()=>PS.box.labeled||PS.box.done>=b);
+      st("pal","박스 "+b+" 파렛트 적재","완성 박스를 파렛트에 정해진 배열로 적재합니다.",()=>PS.box.done>=b); }
+    return S; }
+  st("rej","라인 클리어런스 — 리젝트 함 확인","라벨러 후단 · 중량선별기 리젝트 함 2곳이 비어 있는지 확인합니다 (이전 작업 병 혼입 방지).",()=>PC.rejOk);
+  st("tt","턴테이블 가동","턴테이블 전원을 켭니다. 충전실에서 넘어와 보관 중인 병이 라인으로 나갑니다.",()=>PS.tt.on);
+  st("pr","라벨 인쇄기 ON","라벨 인쇄기를 켭니다 (인쇄 내용은 작업 데이터로 들어옴 · 조작은 ON/OFF 만).",()=>PS.pr.on);
+  st("vis","비전 PC 시작","비전 검사 화면에서 [시작] (조작은 ON/OFF 만).",()=>PS.vis.on);
+  st("lab","라벨러 RUN","라벨러 판넬에서 자동운전 RUN.",()=>PS.lab.run);
+  st("first","첫 인쇄 내용 대조","첫 라벨의 제조번호 · 사용기한 · 2D 코드를 작업 지시서와 대조하고 확인합니다.",()=>PC.firstOk,{wait:()=>PS.lab.cnt>0});
+  st("leaf","설명서 부착기 ON","설명서 부착기 전원 ON (화면 없음 · 버튼만).",()=>PS.leaf.on);
+  st("cwSet","중량선별기 중량 세팅","지시서 기준 중량 "+STD.std.toFixed(2)+" g · 하한 "+STD.lo.toFixed(2)+" · 상한 "+STD.hi.toFixed(2)+" g 을 입력합니다.",()=>PS.cw.set&&Math.abs(PS.cw.std-STD.std)<.005&&Math.abs(PS.cw.lo-STD.lo)<.005&&Math.abs(PS.cw.hi-STD.hi)<.005);
+  st("sample","중량선별기 시료 시험","정상 병은 통과(PASS), 설명서 없는 병은 리젝트(−NG)되는지 확인합니다.",()=>PC.sampleOk);
+  st("cw","중량선별기 가동","중량선별기 RUN.",()=>PS.cw.run);
+  if(rx){ st("agStart","집합 포장 작업 시작","집합 포장(AG) PC 에서 작업지시를 선택해 작업을 시작합니다.",()=>PS.ag.on);
+    st("scan","판독 — 박스 1 ("+PS.boxN+" 병)","작업대로 온 병을 하나씩 거치형 판독기에 대고 판독합니다. "+PS.boxN+" 병이 되면 박스 AG 라벨이 자동 발행됩니다.",()=>PS.ag.boxes>=1);
+    if(nBox>1) st("scan","판독 — 박스 "+nBox+" 까지","계속 판독합니다. 판독 불가 · 중복이면 리젝트 → 라벨만 떼고 턴테이블로 재투입됩니다.",()=>PS.ag.boxes>=nBox);
+    st("agEnd","작업완료","지시 수량을 마쳤으면 AG PC 에서 [작업완료].",()=>PS.ag.msg==="작업 완료"); }
+  else for(let b=1;b<=nBox;b++){
+    st("boxMk","박스 "+b+" 조립","접힌 박스를 펴서 바닥 테이프.",()=>PS.box.ready||PS.box.n>0||PS.box.done>=b);
+    st("put","박스 "+b+" — 병 "+PS.boxN+" 개 담기","작업대 병을 박스에 담습니다 (일반의약품 : 판독 없음).",()=>PS.box.n>=PS.boxN||PS.box.done>=b);
+    st("seal","박스 "+b+" 봉함","박스를 닫고 테이프.",()=>PS.box.sealed||PS.box.done>=b);
+    st("pal","박스 "+b+" 파렛트 적재","파렛트에 적재.",()=>PS.box.done>=b); }
+  st("stop","작업 후 설비 정지","턴테이블 · 라벨 인쇄기 · 비전 · 라벨러 · 설명서 부착기 · 중량선별기를 정지합니다.",()=>!PS.tt.on&&!PS.lab.run&&!PS.cw.run&&!PS.leaf.on);
+  return S;
+}
+/* ── 조작 함수 ── */
+function pcFirst(){ if(PS.lab.cnt<1) return "아직 인쇄된 라벨이 없습니다 — 라벨러 RUN 후 첫 병이 지나가야 합니다";
+  pcDlg('<h3>첫 인쇄 내용 대조</h3><table class="cmp"><tr><th></th><th>작업 지시서</th><th>첫 라벨</th></tr><tr><td>제조번호</td><td>'+PS.job.lot+'</td><td>'+PS.job.lot+'</td></tr><tr><td>사용기한</td><td>'+PS.job.exp+'</td><td>'+PS.job.exp+'</td></tr><tr><td>2D 코드</td><td>(01)'+PS.job.gtin+'</td><td>판독 OK</td></tr></table>',
+    [["일치 — 확인",()=>{ PC.firstOk=true; }],["닫기",null]]); }
+function pcCwSet(){ pcDlg('<h3>중량선별기 중량 세팅</h3><p>작업 지시서 : 기준 '+STD.std.toFixed(2)+' g · 하한 '+STD.lo.toFixed(2)+' g · 상한 '+STD.hi.toFixed(2)+' g</p>'+
+    '<label>기준 <input id="cwStd" value="'+(PS.cw.set?PS.cw.std.toFixed(2):"")+'"></label><label>하한 <input id="cwLo" value="'+(PS.cw.set?PS.cw.lo.toFixed(2):"")+'"></label><label>상한 <input id="cwHi" value="'+(PS.cw.set?PS.cw.hi.toFixed(2):"")+'"></label>',
+    [["입력",()=>{ const v=id=>parseFloat(document.getElementById(id).value); const a=v("cwStd"), b=v("cwLo"), c=v("cwHi");
+      if(!(b<a&&a<c)){ pcToast("하한 < 기준 < 상한 이어야 합니다"); return false; } PS_ACT.cwSet(a,b,c);
+      if(Math.abs(a-STD.std)>.005||Math.abs(b-STD.lo)>.005||Math.abs(c-STD.hi)>.005){ pcToast("지시서와 다른 값입니다"); if(isExamP()) pcDed(5,"중량 세팅 값 불일치"); } }],["닫기",null]]); }
+function pcSample(){ if(!PS.cw.set) return "중량 세팅을 먼저 하세요"; if(PS.cw.run) return "시료 시험은 정지 상태에서 시료를 흘려 확인합니다 (가동 전에)";
+  const a=STD.std+.02, b=STD.std-PS_RATE.leafG+.01, ra=a>=PS.cw.lo&&a<=PS.cw.hi?"PASS":"NG", rb=b<PS.cw.lo?"−NG (리젝트)":"PASS";
+  PC.sample="정상 "+a.toFixed(2)+" g "+ra+" · 설명서 없음 "+b.toFixed(2)+" g "+rb; PC.sampleOk=ra==="PASS"&&rb!=="PASS"; PKG.rejCwN=(PKG.rejCwN||0)+(rb!=="PASS"?1:0);
+  return PC.sampleOk?"시료 시험 적합":"시료 시험 부적합 — 중량 세팅을 확인하세요"; }
+function pcScan(){ const end=PK_END(), at=PKG.list.filter(q=>q.s>=end-(PK.bottle.r*2+8)*25).sort((a,b)=>b.s-a.s);
+  if(!PS.ag.on) return "집합 포장 작업을 먼저 시작하세요"; if(!PS.box.open||PS.box.full) return "박스가 아직 교체되지 않았습니다 (작업자 2)"; if(!at.length) return "작업대에 판독할 병이 없습니다"; psScan(at[0]); }
+function pcPut(){ const end=PK_END(), at=PKG.list.filter(q=>q.s>=end-(PK.bottle.r*2+8)*25).sort((a,b)=>b.s-a.s);
+  if(!PS.box.ready&&PS.box.n===0) return "박스를 먼저 조립하세요"; if(!at.length) return "작업대에 병이 없습니다"; for(let k=0;k<Math.min(8,at.length)&&PS.box.n<PS.boxN;k++) psScan(at[k]); }
+function pcBoxMake(){ if(PS.box.ready||PS.box.n>0) return "이미 조립된 박스가 있습니다"; PS.box.ready=true; PS.box.flat=Math.max(0,PS.box.flat-1); }
+function pcSeal(){ if(!PS.box.full) return "박스가 아직 다 차지 않았습니다"; PS.box.sealed=true; }
+function pcLabel(){ if(!PS.box.sealed) return "봉함한 뒤 라벨을 붙입니다"; PS.box.labeled=true; }
+function pcPallet(){ if(!PS.box.sealed||(PS.rx&&!PS.box.labeled)) return PS.rx?"봉함 · AG 라벨 부착 후 적재합니다":"봉함 후 적재합니다"; psBoxAway(); PS.box.ready=false; PS.box.sealed=false; PS.box.labeled=false; PS.box.full=false; }
+/* ── 화면 : 타일 · 안내판 · 대화창 ── */
+function pcDlg(html,btns){ const d=$("#pDlg"); d.innerHTML='<div class="box">'+html+'<div class="bt">'+btns.map((b,i)=>'<button data-i="'+i+'">'+b[0]+'</button>').join("")+'</div></div>'; d.hidden=false;
+  d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{ const f=btns[+b.dataset.i][1]; if(f&&f()===false) return; d.hidden=true; }); }
+function pcToast(t){ const e=$("#pToast"); e.textContent=t; e.hidden=false; clearTimeout(pcToast.h); pcToast.h=setTimeout(()=>e.hidden=true,2600); }
+function pcDed(n,why){ PC.score=Math.max(0,PC.score-n); PC.ded.push(why+" −"+n); }
+function pcAct(k){ const T=PT[k]; if(!T) return; const st=PC.steps[PC.i];
+  if(isExamP()&&st&&st.k!==k&&!["scan","put","agClear","rej"].includes(k)&&PC.on&&!PC.done){ pcDed(3,"순서가 다른 조작 : "+T.nm); }
+  const r=T.run(); if(typeof r==="string") pcToast(r); pcRender(); }
+function pcRender(){
+  const t=$("#pkTiles"); if(!PC.on){ t.innerHTML=""; return; } const L=pcTiles(), st=PC.steps[PC.i], hint=!isExamP()&&st?st.k:null;
+  const html=L.map(k=>{ const T=PT[k], sub=typeof T.sub==="function"?T.sub():T.sub, on=T.st&&T.st(); return '<button class="pt'+(on?" on":"")+(hint===k?" hint":"")+'" data-k="'+k+'"><b>'+T.nm+'</b><s>'+(sub||"")+'</s></button>'; }).join("");
+  if(t.dataset.h!==html){ t.dataset.h=html; t.innerHTML=html; t.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>pcAct(b.dataset.k)); }
+  const c=$("#pkCoach"), n=PC.steps.length, done=PC.done;
+  const role=PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1", md=(PC.deep?"심화":"기본")+" · "+(PC.mode==="exam"?"평가":PC.mode==="demo"?"시연":"학습");
+  const k='<small>'+md+' · '+role+' · '+(PS.rx?"전문의약품":"일반의약품")+' · STEP '+Math.min(PC.i+1,n)+' / '+n+'</small><b>'+(done?"모든 단계를 마쳤습니다":st.t)+'</b><span>'+
+    (done?(isExamP()?"점수 "+PC.score+" 점 · "+(PC.score>=80?"합격":"불합격")+(PC.ded.length?" · "+PC.ded.join(", "):""):"수고하셨습니다 — 상단 [메인화면]")
+      :(isExamP()?"평가 진행 중 — 절차에 따라 수행하세요.":(st.wait&&!st.wait()?"대기 — ":"")+st.d))+'</span>';
+  if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; }
+  $("#pkStat").innerHTML='<b>포장 현황</b><div>보관(턴테이블) <i>'+PS.tt.buf+'</i></div><div>라벨 <i>'+PS.lab.cnt+'</i> · 비전 NG <i>'+PS.vis.ng+'</i></div><div>설명서 <i>'+PS.leaf.cnt+'</i></div><div>중량 PASS <i>'+PS.cw.pass+'</i> · −NG <i>'+PS.cw.nNG+'</i> · +NG <i>'+PS.cw.pNG+'</i></div>'+
+    '<div>박스 안 <i>'+PS.box.n+' / '+PS.boxN+'</i></div><div>완성 박스 <i>'+PS.pallet+'</i> · 재투입 <i>'+(PS.reworkN||0)+'</i></div>'+(PS.toast&&performance.now()-PS.toastT<4000?'<div class="msg">'+PS.toast+'</div>':'');
+}
+/* 단계 진행 (0.25 초마다) */
+function pcTick(){
+  if(!PC.on) return; const st=PC.steps[PC.i];
+  if(st&&(!st.wait||st.wait())&&st.ok()){ PC.i++; if(PC.i>=PC.steps.length) PC.done=true; }
+  /* 작업자 2 자동 : 박스가 차면 봉함 · 라벨 · 적재 (약 6 초) / 플레이어가 작업자 2 이면 수동 */
+  if(PC.mode==="demo"){ PS.auto.w1=true; PS.auto.w2=true; } else { PS.auto.w2=PC.role!=="P2"&&PS.rx; PS.auto.w1=PC.role==="P2"; }
+  pcRender();
+}
+/* 박스가 차면 : 자동이면 psBoxDone 이 닫음 / 수동(작업자 2 · 일반)이면 대기 */
+const _psBoxDone=psBoxDone;
+psBoxDone=function(manual){ _psBoxDone(manual); PS.box.full=true; if(!PS.auto.w2) PS.box.closing=0; };
+const _psBoxAway=psBoxAway;
+psBoxAway=function(){ _psBoxAway(); PS.box.full=false; if(PS.auto.w2){ PS.box.ready=false; PS.box.sealed=false; PS.box.labeled=false; } };
+/* 세션 시작 */
+function pcStart(role,mode,deep,rx){
+  PS.rx=rx; Object.assign(PC,{on:true, role, mode, deep, i:0, score:100, ded:[], done:false, firstOk:false, sample:null, sampleOk:false, rejOk:false, t0:performance.now()});
+  PS_ACT.allOff(); Object.assign(PS.cw,{set:false,pass:0,nNG:0,pNG:0}); PS.ag.on=false; PS.ag.n=0; PS.ag.list=[]; PS.ag.boxes=0; PS.ag.msg=""; PS.box.n=0; PS.box.done=0; PS.box.closing=0; PS.box.sealed=false; PS.box.labeled=false; PS.box.open=true; PS.box.ready=false; PS.box.full=false; PS.pallet=0; PS.reworkN=0; PS.ag.issued=[]; PS.lab.cnt=0; PS.lab.rej=0; PS.leaf.cnt=0; PS.pr.batch=0; Object.assign(PS.vis,{total:0,good:0,ng:0,log:[],last:"OK"}); PS.tt.buf=deep?140:60; PKG.list=[]; PKG.rejLabN=3; PKG.rejCwN=2;
+  if(role==="P2"||mode==="demo"){ PS_ACT.allOn(); PC.firstOk=true; PC.sampleOk=true; PC.rejOk=true; PS.auto.w1=true; }
+  PC.steps=pcSteps(); if(mode==="demo"){ PS.auto.w1=true; PS.auto.w2=true; }
+  pcRender();
+}
+function pcStop(){ PC.on=false; pcRender(); }
+
+/* ── crew.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   작업자 (파우치 인체 모델 human.js) — 충전실 = 흰 방진복(suit) · 포장실 = 파란 작업복(wear, 현장 사진)
+   · 충전실 작업자 : 원본 앱 작업자 위치(WK)를 받아 그림 · 포장실 작업자 1 = 판독대 앞 · 2 = 박스 작업대 앞
+   · 1인칭으로 그 작업자가 되면 그 작업자는 숨김 (내가 그 작업자) · 걷는 동안 진행 방향을 보고, 멈추면 설비 쪽으로
+   ═══════════════════════════════════════════════════════════════════ */
+const CREW={F:[], P1:null, P2:null, cur:null, mode:null, rx:true, started:{F:false,P:false}};
+function crewInit(){
+  for(let i=0;i<2;i++){ const H=makeHuman(V3B.sc,"suit"); H.G.visible=false; CREW.F.push(H); }
+  CREW.P1=makeHuman(V3B.sc,"wear"); CREW.P2=makeHuman(V3B.sc,"wear");
+}
+function crewStep(H,x,z,dt,face){
+  if(H.dx==null||Math.hypot(x-H.dx,z-H.dz)>6){ H.dx=x; H.dz=z; H.yw=face; H.vx=0; H.vz=0; }
+  const ex=x-H.dx, ez=z-H.dz, k=Math.min(1,dt*10); H.dx=x; H.dz=z;
+  if(dt>1e-4){ H.vx+=(ex/dt-H.vx)*k; H.vz+=(ez/dt-H.vz)*k; }
+  const mv=Math.hypot(H.vx,H.vz)>.12, yt=mv?Math.atan2(H.vx,H.vz):face; let dy=yt-H.yw; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); H.yw+=dy*Math.min(1,dt*7);
+  return {yaw:H.yw,moving:mv};
+}
+function crewTick(dt){
+  const fp=V3B.view!=="orbit", w=appWin(); let W=[]; try{ W=(w.B3&&w.B3.WK())||[]; }catch(e){}
+  CREW.F.forEach((H,i)=>{ const q=W[i], me=fp&&CREW.cur==="F"&&i===0; H.G.visible=!!q&&!me; if(!H.G.visible){ H.dx=null; return; }
+    const x=q.x*MM, z=(q.z||1100)*MM, s=crewStep(H,x,z,dt,Math.PI); poseHuman(H,{x,z,yaw:s.yaw,dt,gL:.3,gR:.3,nL:"down",nR:"down"}); });
+  /* 포장실 1 : 판독대 앞 (판독할 때 병을 판독기에 댐) */
+  { const H=CREW.P1, me=fp&&CREW.cur==="P1"; H.G.visible=!me; if(!me){ const x=PK.scanX*MM, z=.62, s=crewStep(H,x,z,dt,Math.PI), sc=PS.scanFlash>0;
+      poseHuman(H,{x,z,yaw:s.yaw,dt,L:[x-.12,.98,.3],R:sc?[x+.02,1.0,-.1]:[x+.1,.95,.3],gL:.3,gR:.3,nL:"down",nR:"down"}); } }
+  /* 포장실 2 : 박스 작업대 (일반의약품이면 작업자 1 혼자 → 2 는 없음) */
+  { const H=CREW.P2, me=fp&&CREW.cur==="P2"; H.G.visible=!me&&PS.rx; if(H.G.visible){ const busy=!PS.box.open||PS.box.full, x=(busy?19950:20300)*MM, z=.7, s=crewStep(H,x,z,dt,Math.PI);
+      poseHuman(H,{x,z,yaw:s.yaw,dt,L:busy?[x-.12,.98,.05]:null,R:busy?[x+.12,.98,.05]:null,gL:.3,gR:.3,nL:"down",nR:"down"}); } }
+}
+
 /* ── walk.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 이동 (B1) — 눈높이 1.6 m · WASD 걷기 · 마우스로 둘러보기(클릭하면 시점 고정, Esc 해제) · Shift 빠르게
@@ -895,6 +1124,9 @@ const verTxt=()=>{ try{ return "V"+CHANGELOG[0].v+" · "+CHANGELOG[0].d; }catch(
 /* 3D 화면 자리 : 앱의 #view3d 위에 겹침 */
 function placeCanvas(){
   const cv=$("#cv"); let r=null;
+  if(document.body.classList.contains("pk")){ const st=$("#stage").getBoundingClientRect(); r={left:0,top:0,width:st.width,height:st.height}; cv.style.display="block";
+    const k="pk"+[r.width,r.height].map(Math.round).join(","); if(k!==placeCanvas.k){ placeCanvas.k=k; Object.assign(cv.style,{left:"0px",top:"0px",width:r.width+"px",height:r.height+"px"});
+      Object.assign($("#cross").style,{left:(r.width/2)+"px",top:(r.height/2)+"px"}); Object.assign($("#hud").style,{left:"270px",top:(r.height-40)+"px"}); } return true; }
   try{ const d=appWin().document, v=d.getElementById("view3d"); if(v&&v.offsetParent){ const q=v.getBoundingClientRect(); if(q.width>40) r=q; } }catch(e){}
   const fr=APP_FR.getBoundingClientRect(), st=$("#stage").getBoundingClientRect();
   if(!r){ cv.style.display="none"; return false; } cv.style.display="block";
@@ -905,26 +1137,57 @@ function placeCanvas(){
 }
 function setView(v){
   V3B.view=v; document.body.classList.toggle("fp",v!=="orbit");
-  if(v!=="orbit"){ if(!GRID.a) gridBuild(); walkSpawn(WALK.room||"F"); }
+  if(v!=="orbit"){ if(!GRID.a) gridBuild(); }
   else if(document.pointerLockElement) document.exitPointerLock();
   $("#fpBtn").textContent=v==="orbit"?"🎥 3인칭 → 1인칭 전환":"🧍 1인칭 → 3인칭 전환";
 }
 function hud(){ const h=$("#hud"); h.textContent=V3B.view==="orbit"?"3인칭 · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
   :"1인칭 · "+(WALK.room==="F"?"충전실":"포장실")+" · W A S D 걷기 · Shift 빠르게 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)"; }
+/* ── 메인화면 : ① 모드 → ② 작업자 (파우치 방식) ── */
+const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연"};
+function spMark(){ $("#workers").classList.toggle("ready",!!CREW.mode); $("#chooseP2").disabled=!CREW.rx;
+  document.querySelectorAll("#modes [data-m]").forEach(b=>b.classList.toggle("sel",b.dataset.m===CREW.mode));
+  document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.classList.toggle("on",(b.dataset.rx==="1")===CREW.rx));
+  $("#spHint").textContent=CREW.mode?"② "+MODE_NM[CREW.mode]+" — 작업자를 고르세요":"① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다"; }
+function crewMark(){ document.querySelectorAll("#crewSw [data-r]").forEach(b=>{ const r=b.dataset.r; b.classList.toggle("on",CREW.cur===r);
+  b.disabled=!CREW.cur||(r==="P2"&&!CREW.rx)||(r!=="F"&&CREW.pRole&&r!==CREW.pRole); }); }
+function startRoom(r){
+  const m=CREW.mode, w=appWin();
+  if(r==="F"){ if(!CREW.started.F){ CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession(m); }catch(e){ console.error("충전실 과정",e); } } }
+  else if(!CREW.started.P){ CREW.started.P=true; CREW.pRole=r; pcStart(r,m==="demo"?"demo":/exam/i.test(m)?"exam":"learn",!/Easy|easy/.test(m),CREW.rx); }
+}
+function show(r){
+  CREW.cur=r; document.body.classList.toggle("pk",r!=="F"); placeCanvas.k=null;
+  setView("fp"); walkSpawnAt(r); crewMark(); $("#modeChip").textContent=MODE_NM[CREW.mode]+" · "+(r==="F"?"충전실":r==="P1"?"포장실 1":"포장실 2");
+}
+function crewGo(r){ if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
+function goHome(){ try{ const w=appWin(); if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
+  pcStop(); PS_ACT.allOff(); Object.assign(CREW,{cur:null,mode:null,pRole:null,started:{F:false,P:false}}); document.body.classList.remove("pk"); setView("orbit");
+  $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
+function walkSpawnAt(r){ if(r==="F") walkSpawn("F"); else { PK_OBS=PK_OBS||pkObstacles(); const p=r==="P1"?[PK.scanX,900]:[19950,1000];
+  Object.assign(WALK,{x:p[0],z:p[1],y:1600,yaw:0,pitch:-.35,room:"P"}); } }
+function bindSplash(){
+  document.querySelectorAll("#modes [data-m]").forEach(b=>b.onclick=()=>{ CREW.mode=b.dataset.m; spMark(); });
+  document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.onclick=()=>{ CREW.rx=b.dataset.rx==="1"; spMark(); });
+  $("#chooseF").onclick=()=>crewGo("F"); $("#chooseP1").onclick=()=>crewGo("P1"); $("#chooseP2").onclick=()=>crewGo("P2");
+  document.querySelectorAll("#crewSw [data-r]").forEach(b=>b.onclick=()=>{ if(!CREW.cur) return; startRoom(b.dataset.r); show(b.dataset.r); });
+  $("#homeBtn").onclick=goHome; spMark(); crewMark();
+}
 let last=performance.now();
 function loop(now){
   requestAnimationFrame(loop); const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
-  walkTick(dt); pkTick(dt); v3bFrame(now);
+  walkTick(dt); pkTick(dt); crewTick(dt); v3bFrame(now);
+  if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); }
   if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
   WALK.room=WALK.x<ROOM.wallX?"F":"P";
   if((loop.k=(loop.k||0)+1)%20===0){ hud(); $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
 }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); pkBuild(V3B.sc); v3bOrbit(); walkBind();
-  $("#fpBtn").onclick=()=>setView(V3B.view==="orbit"?"fp":"orbit");
+  v3bInit(); pkBuild(V3B.sc); crewInit(); v3bOrbit(); walkBind(); bindSplash();
+  $("#fpBtn").onclick=()=>{ if(V3B.view==="orbit"){ setView("fp"); if(CREW.cur) walkSpawnAt(CREW.cur); } else setView("orbit"); };
   requestAnimationFrame(loop);
 }
 boot();

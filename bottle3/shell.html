@@ -20,12 +20,51 @@ button{font-family:inherit}
 #cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
 body.fp #cross{display:block}
 #hud{position:absolute;z-index:3;font-size:12.5px;background:#ffffffe0;border-radius:8px;padding:5px 10px;pointer-events:none;color:#33475e}
+
+.seg{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden}
+.seg button{border:0;background:#fff;color:var(--ink);font:800 13.5px "Malgun Gothic",Arial,sans-serif;padding:8px 12px;cursor:pointer}
+.seg button+button{border-left:1px solid #b7c4d2}.seg button.on{background:var(--ink);color:#fff}.seg button:disabled{color:#aab;cursor:default}
+#splash{position:absolute;inset:0;z-index:8;background:linear-gradient(180deg,#f5f7f9,#e8edf1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:24px}
+#splash.hide{display:none}
+#splash h1{margin:0;font:800 44px "Malgun Gothic",Arial,sans-serif;letter-spacing:-1px}
+#splash .sub{margin:-6px 0 0;font:700 14px "Malgun Gothic",Arial,sans-serif;color:var(--sub);letter-spacing:1px}
+#spHint{font:600 16px/1.5 "Malgun Gothic",Arial,sans-serif;color:#40566e;text-align:center}
+#rxSel{display:flex;gap:8px;align-items:center;font:700 14px "Malgun Gothic",Arial,sans-serif}
+#rxSel button{border:1px solid #b7c4d2;border-radius:10px;background:#fff;padding:7px 14px;font:800 14px "Malgun Gothic",Arial,sans-serif;cursor:pointer}#rxSel button.on{background:#1f5fb8;color:#fff;border-color:#1f5fb8}
+#workers{display:grid;grid-template-columns:repeat(3,minmax(220px,300px));gap:14px}
+#workers button{border:0;border-radius:20px;background:#7b8a9c;color:#fff;text-align:left;padding:18px 20px;cursor:pointer;font-family:inherit;opacity:.75}
+#workers.ready button{opacity:1;background:#173a63}#workers button:disabled{background:#c3cad2!important;cursor:default}
+#workers small{display:block;font:600 12px "Malgun Gothic";letter-spacing:1px;opacity:.85}#workers strong{display:block;font:800 22px "Malgun Gothic";margin:6px 0}#workers span{font:500 13.5px/1.4 "Malgun Gothic"}
+#modes{display:grid;grid-template-columns:repeat(4,200px);gap:12px}
+.mcol h4{margin:0 0 6px;text-align:center;font:800 16px "Malgun Gothic";color:var(--sub);letter-spacing:3px}
+.mcol button{display:block;width:100%;margin:0 0 8px;border:2px solid #173a63;border-radius:12px;background:#173a63;color:#fff;font:800 17px "Malgun Gothic",Arial,sans-serif;padding:10px;cursor:pointer;word-break:keep-all}
+.mcol button.e{background:#fff;color:#173a63}.mcol button small{display:block;font:600 12px "Malgun Gothic";opacity:.85}
+.mcol button.sel{outline:4px solid #f2b705}
+.mcol.demo button{background:#2b8a4b;border-color:#2b8a4b}
+body.pk #app{visibility:hidden}
+#pkTiles{position:absolute;z-index:4;left:10px;top:10px;bottom:10px;width:250px;overflow:auto;display:none;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
+body.pk #pkTiles{display:grid}
+.pt{border:1px solid #c9d4e0;border-radius:10px;background:#ffffffee;text-align:left;padding:7px 8px;cursor:pointer;font-family:inherit;min-height:52px}
+.pt b{display:block;font:800 13px "Malgun Gothic"}.pt s{display:block;text-decoration:none;font:500 11px/1.3 "Malgun Gothic";color:#5d7086}
+.pt.on{background:#e3f6e8;border-color:#2b8a4b}.pt.hint{outline:3px solid #f2b705}
+#pkCoach{position:absolute;z-index:4;left:270px;right:270px;top:10px;display:none;background:#fff;border-left:6px solid #2b6fd0;border-radius:12px;padding:9px 14px;box-shadow:0 2px 10px #142b4718}
+body.pk #pkCoach{display:block}#pkCoach small{display:block;color:#2b6fd0;font:700 12.5px "Malgun Gothic"}#pkCoach b{display:block;font:800 18px "Malgun Gothic";margin:2px 0}#pkCoach span{font:500 13.5px/1.45 "Malgun Gothic";color:#33475e}
+#pkStat{position:absolute;z-index:4;right:10px;top:10px;width:250px;display:none;background:#ffffffee;border-radius:12px;padding:10px 12px;font:500 13px/1.7 "Malgun Gothic";border:1px solid #c9d4e0}
+body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:#173a63}#pkStat .msg{margin-top:6px;color:#b03a00;font-weight:700;line-height:1.4}
+#pDlg{position:absolute;inset:0;z-index:9;background:#0006;display:flex;align-items:center;justify-content:center}
+#pDlg .box{background:#fff;border-radius:14px;padding:18px 22px;min-width:380px;font:500 14px "Malgun Gothic"}#pDlg h3{margin:0 0 10px}
+#pDlg label{display:block;margin:6px 0}#pDlg input{width:110px;font:700 15px monospace;padding:4px 6px;margin-left:8px}
+#pDlg table.cmp{border-collapse:collapse}#pDlg td,#pDlg th{border:1px solid #ccd;padding:5px 10px}
+#pDlg .bt{margin-top:14px;display:flex;gap:8px;justify-content:flex-end}#pDlg .bt button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:8px 14px;font:700 14px "Malgun Gothic";cursor:pointer}
+#pToast{position:absolute;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#142b47ee;color:#fff;border-radius:999px;padding:8px 18px;font:700 14px "Malgun Gothic"}
 #load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
 </style></head><body>
 <div id="bar">
   <div class="brand">병 라인 IDT</div>
   <span class="chip" id="modeChip"></span>
+  <div class="seg" id="crewSw"><button data-r="F">🧍 충전실</button><button data-r="P1">🧍 포장실 1</button><button data-r="P2">🧍 포장실 2</button></div>
   <button class="gb" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>
+  <button class="gb" id="homeBtn">메인화면</button>
   <div class="sp"></div>
   <span id="info"></span>
 </div>
@@ -34,6 +73,24 @@ body.fp #cross{display:block}
   <canvas id="cv" tabindex="0"></canvas>
   <div id="cross"></div>
   <div id="hud"></div>
+  <div id="pkTiles"></div><div id="pkCoach"></div><div id="pkStat"></div>
+  <div id="pDlg" hidden></div><div id="pToast" hidden></div>
+  <div id="splash">
+    <h1>병 라인 IDT</h1><p class="sub">Bottle Line · Interactive Digital Tutor · 병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장</p>
+    <div id="spHint">① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다</div>
+    <div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div>
+    <div id="workers">
+      <button id="chooseF"><small>FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑</span></button>
+      <button id="chooseP1"><small>PACKING ROOM · 작업자 1</small><strong>🧍 포장실 작업자 1</strong><span>설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독</span></button>
+      <button id="chooseP2"><small>PACKING ROOM · 작업자 2</small><strong>🧍 포장실 작업자 2</strong><span>박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)</span></button>
+    </div>
+    <div id="modes">
+      <div class="mcol"><h4>기본</h4><button data-m="easy">기본 · 학습<small>핵심 절차</small></button><button class="e" data-m="examEasy">기본 · 평가</button></div>
+      <div class="mcol"><h4>심화</h4><button data-m="guide">심화 · 학습<small>전체 절차</small></button><button class="e" data-m="exam">심화 · 평가</button></div>
+      <div class="mcol demo"><h4>시연</h4><button data-m="demo">시연모드<small>작업자별 자동 가동</small></button></div>
+      <div class="mcol"><h4>자유 · OEE</h4><button class="e" disabled>자유모드<small>준비 중 (B5)</small></button><button class="e" disabled>OEE · 이상사례<small>준비 중 (B5)</small></button></div>
+    </div>
+  </div>
   <div id="load">설비 불러오는 중…</div>
 </div>
 <script>/*__THREE__*/</script>
