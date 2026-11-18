@@ -66,7 +66,7 @@ function v3bRoom(sc){
 function v3bInit(){
   const cv=document.getElementById("cv");
   const R=new T3.WebGLRenderer({canvas:cv, antialias:true, preserveDrawingBuffer:true});
-  R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.85;
+  R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.76;
   R.shadowMap.enabled=true; R.shadowMap.type=T3.PCFSoftShadowMap;
   const sc=new T3.Scene(); sc.background=new T3.Color(0xe7ebee);
   const W=(ROOM.x1-ROOM.x0)*MM, D=(ROOM.z1-ROOM.z0)*MM, cx=(ROOM.x0+ROOM.x1)/2*MM, cz=(ROOM.z0+ROOM.z1)/2*MM;

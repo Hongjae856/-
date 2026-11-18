@@ -107,6 +107,8 @@ function pcRender(){
   const html=L.map(k=>{ const T=PT[k], sub=typeof T.sub==="function"?T.sub():T.sub, on=T.st&&T.st(); return '<button class="pt'+(on?" on":"")+(hint===k?" hint":"")+'" data-k="'+k+'"><b>'+T.nm+'</b><s>'+(sub||"")+'</s></button>'; }).join("");
   if(t.dataset.h!==html){ t.dataset.h=html; t.innerHTML=html; t.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>pcAct(b.dataset.k)); }
   const c=$("#pkCoach"), n=PC.steps.length, done=PC.done, ih=typeof incbCoach==="function"&&incbCoach();
+  if(PC.mode==="demo"&&!ih){ const k='<small>시연모드 · 포장실 · '+(PS.rx?"전문의약품 (작업자 2명 자동)":"일반의약품 (작업자 1명 자동)")+'</small><b>포장라인 자동 가동 — 완성 박스 '+PS.pallet+'</b><span>턴테이블 → 라벨 인쇄 · 부착 · 비전 → 설명서 부착 → 중량선별 → '+(PS.rx?"판독 · 박스 AG 라벨 → ":"")+'박스 포장 → 파렛트 적재. 걸어 다니며 설비를 살펴보세요.</span>';
+    if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
   if(ih||PC.mode==="free"){ const k=ih||'<small>자유모드 · '+(PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+' · '+(PS.rx?"전문의약품":"일반의약품")+'</small><b>순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요</b><span>기동 조건이 해제되어 있습니다 (실제와 다름 · 중량 세팅 없이도 가동). 상단 작업자 버튼으로 다른 작업장으로 바꿉니다.</span>';
     if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
   const role=PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1", md=(PC.deep?"심화":"기본")+" · "+(PC.mode==="exam"?"평가":PC.mode==="demo"?"시연":"학습");

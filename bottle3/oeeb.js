@@ -63,7 +63,7 @@ function incbPick(){
   $("#incBack").onclick=()=>{ el.hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; CREW.mode=null; spMark(); };
 }
 function incbStart(k,m){
-  const c=OEE_B_CODES.find(x=>x.k===k); Object.assign(INCB,{k,mode:m,room:c.room,t0:performance.now(),fired:false,done:false,at:0,fi:0});
+  const c=OEE_B_CODES.find(x=>x.k===k); Object.assign(INCB,{k,mode:m,room:c.room,t0:performance.now(),fired:false,launched:false,done:false,at:0,fi:0});
   $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; $("#splash").classList.add("hide");
   CREW.mode=m==="exam"?"exam":"guide";
   if(c.room==="F"){ const w=appWin(); CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession("guide"); w.demoSetup(); }catch(e){ console.error(e); } show("F"); }   /* 라인을 바로 운전 상태로 (시연 준비와 같은 설정) */
@@ -73,7 +73,8 @@ function incbStart(k,m){
 function incbTick(){
   if(!CREW.inc||!INCB.k||INCB.done) return; const now=performance.now();
   if(INCB.room==="F"){ const w=appWin(); let S=null; try{ S=w.__IDT.S(); }catch(e){} if(!S) return;
-    if(!INCB.fired){ if(S.running&&now-INCB.t0>6000){ try{ w.launchIncident(INCB.k); }catch(e){ console.error(e); } if(S.activeTrouble){ INCB.fired=true; INCB.at=now; } } return; }
+    if(!INCB.fired){ if(!INCB.launched&&S.running&&now-INCB.t0>6000){ INCB.launched=true; INCB.at=now; try{ w.launchIncident(INCB.k); }catch(e){ console.error(e); } }   /* 한 번만 발생 (증상 뒤 알람이 뜨는 사례 포함) */
+      if(INCB.launched&&S.activeTrouble){ INCB.fired=true; INCB.at=now; } return; }
     if(!S.activeTrouble&&S.running&&now-INCB.at>3000) incbDone(now); return; }
   if(!INCB.fired){ if(psOn()&&now-INCB.t0>5000){ PK_INC[INCB.k].fire(); INCB.fired=true; INCB.at=now; } return; }
   const F=PK_INC[INCB.k].fix; while(INCB.fi<F.length&&F[INCB.fi].done()) INCB.fi++;

@@ -37,6 +37,7 @@ function screen(g,w,h,pos,rotY,lines){ const t=labelTex(lines||["",""],{w:256,h:
 function gearMotor(g,x,y,z){ bx(g,x-.05,x+.05,y,y+.16,z-.05,z+.05,new T3.MeshStandardMaterial({color:0x1f3b2c,roughness:.5})); rod(g,[x,y+.16,z],[x,y+.19,z],.035,M.dark,16); }
 function pkBuild(sc){
   const g=new T3.Group(); PKG.G=g; sc.add(g); const y=pm(PK.CH);
+  M.ss.envMapIntensity=1.15; M.ssMir.envMapIntensity=1.25; M.ssD.envMapIntensity=1.05;   /* 실제 장면 반사(흰 벽)에서 스테인리스가 하얗게 뜨지 않게 (B6) */
   /* 통과구 컨베이어 (벽 양쪽 투명 덮개) */
   pkConv(g,PK.pass[0],PK.pass[1],0,110);
   acrylBox(g,pm(8960),pm(9300),y,y+.22,-.09,.09);
@@ -97,7 +98,12 @@ function pkBuild(sc){
     /* 라벨 컨트롤러 (LCD · 전원 · 비상정지) · 경광등 */
     rod(g,[pm(14250),pm(840),pm(330)],[pm(14250),pm(1500),pm(330)],.025,M.ss,14);                   /* 설명서 부착기 컨트롤러 : 앞쪽 기둥 (사진 : 컨트롤러 + 아래 전원함) */
     bx(g,pm(13950),pm(14550),pm(1500),pm(1640),pm(300),pm(480),new T3.MeshStandardMaterial({color:0xd8d2d0,roughness:.5})); bx(g,pm(14120),pm(14380),pm(1350),pm(1460),pm(330),pm(420),M.white);
-    PKG.leafScr=screen(g,.14,.06,[pm(14120),pm(1575),pm(483)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14330),pm(1405),pm(425)); e.rotation.x=Math.PI/2; }
+    /* 사진 기준 세부 : 카운터(7세그) · 2줄 LCD · OPERATOR F1 F2 I O · EDIT 방향키 · 로커 스위치 2(적색 점등) · 아래 전원함(키 · 램프 · 비상정지) */
+    { const fz=pm(481); bx(g,pm(13980),pm(14080),pm(1555),pm(1600),fz,fz+.004,M.black); [[M.yellow,0],[M.yellow,1],[M.green,2],[M.red,3]].forEach(([m,i])=>{ const b=add(g,new T3.Mesh(new T3.CylinderGeometry(.011,.011,.008,14),m)); b.rotation.x=Math.PI/2; b.position.set(pm(14080+i*28),pm(1528),fz+.004); });
+      for(let i=0;i<6;i++){ const b=add(g,new T3.Mesh(new T3.BoxGeometry(.016,.016,.008),i===4?M.blue:M.yellow)); b.position.set(pm(14260+(i%2)*24),pm(1590-Math.floor(i/2)*22),fz+.004); }
+      for(const x of [14400,14480]){ bx(g,pm(x-25),pm(x+25),pm(1540),pm(1600),fz,fz+.006,M.dark); bx(g,pm(x-14),pm(x+14),pm(1552),pm(1588),fz+.006,fz+.012,new T3.MeshStandardMaterial({color:0xff2a20,emissive:0xff1010,emissiveIntensity:.8})); }
+      const ky=pm(1405), kz=pm(422); add(g,new T3.Mesh(new T3.CylinderGeometry(.02,.02,.02,16),M.dark)).position.set(pm(14170),ky,kz); add(g,new T3.Mesh(new T3.SphereGeometry(.014,12,8),new T3.MeshStandardMaterial({color:0x801010,emissive:0xff2020,emissiveIntensity:.6}))).position.set(pm(14250),ky,kz); }
+    PKG.leafScr=screen(g,.14,.06,[pm(14200),pm(1585),pm(483)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14330),pm(1405),pm(425)); e.rotation.x=Math.PI/2; }
     add(g,new T3.Mesh(new T3.CylinderGeometry(.045,.05,.11,20),new T3.MeshStandardMaterial({color:0xd01818,emissive:0x400000,roughness:.3,transparent:true,opacity:.85}))).position.set(pm(14600),pm(1600),pm(390));
     for(const x of [12950,14250]) gearMotor(g,pm(x),y+.1,pm(170)); acrylBox(g,pm(12850),pm(13200),y,y+.25,-.15,.15); }
   /* ⑤ 중량선별기 */

@@ -32,7 +32,7 @@ function pfTargets(){
 const pfBoxKey=()=>PS.box.full?"seal":"put";
 const pfKeyOf=t=>t.k==="box"?pfBoxKey():t.k;
 const PF_AG=["agStart","agClear","agPack","agEnd"];
-function pfGoal(){ if(CREW.inc&&INCB.room==="P"&&INCB.mode!=="exam"&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
+function pfGoal(){ if(PC.mode==="demo") return null; if(CREW.inc&&INCB.room==="P"&&INCB.mode!=="exam"&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
   if(!PC.on||PC.done||PC.mode==="exam"||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
   return PF.T.find(t=>pfKeyOf(t)===k||(t.k==="ag"&&PF_AG.includes(k))||(k==="stop"&&t.k==="tt"&&PS.tt.on))||null; }
 const pfT=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s};

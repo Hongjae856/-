@@ -174,6 +174,7 @@ body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:8,d:'2026-11-18',t:'현실성 점검 · 보정 (B6) — 스테인리스 반사 · 노출을 낮춰 설비가 하얗게 뜨지 않게, 설명서 부착기 컨트롤러를 사진처럼(카운터 · 2줄 LCD · F1 F2 I O 버튼 · EDIT 키 · 로커 스위치 2 · 아래 전원함 키 · 램프 · 비상정지), 포장실 시연모드는 학습 단계 대신 자동 가동 안내 · 다음 작업 표시 없음'},
  {v:7,d:'2026-11-18',t:'충전실 1인칭 직접 조작 (B5-3) — 원본 앱 타일 · 판넬 버튼 · 설비 화면을 실제 위치에서 조준하고 E / 클릭 (공통 마커 · 손 닿는 거리 1.2 m) : 자재 7곳(원본 작업 위치) · 라인 클리어런스 점검 위치 · 안전문 · 원본 3D 에 없던 전기판넬(메인 스위치) · 압축공기 밸브 · 집진기 스위치 · 라인 조작 판넬(START · STOP · RESET · 비상정지 · 1병 시험 · 설비 화면) 모형 추가(위치 추정), 설비 화면은 다가가서 조작(F/Esc 뒤로), 계단 발판(정제 호퍼 · 캡 볼 피더) 위로 올라서면 눈높이 상승, 1인칭 중 앱 타일 · 판넬은 현황만'},
  {v:6,d:'2026-11-18',t:'자유모드 · OEE · 이상사례 (B5-2) — 자유모드(충전실 : 기동 조건 해제 · 동력과 공압은 필요 · 감점 없음 / 포장실 : 순서 없음 · 중량 세팅 없이 가동), OEE 관리 대시보드(병 라인 · 공통 모듈), 이상사례 대처 교육(사용자 제공 부동사유 분류 기준 — 충전실 : 실리카겔 이송위치 · 비닐 커팅 · 정제계수기 · 중량선별 병 쓰러짐 · 기밀도 / 포장실 신규 : 설명서 부착기 에러(전원 차단 · LOTO → 벨트 점검 → 재가동) · 비전 프로그램 이상(중지 → 재시작) · 라벨 인쇄 흐림(라벨러 정지 → 장력 조정 → RUN)), 학습은 다음 조치 안내 · 평가는 안내 없음, 결과를 OEE 교육 효과에 기록'},
  {v:5,d:'2026-11-18',t:'포장실 1인칭 직접 조작 (B5-1) — 리젝트 함 2곳 · 턴테이블 · 라벨 인쇄기 화면 · 비전 PC · 라벨러 판넬 · 첫 라벨 · 설명서 부착기 컨트롤러 · 중량선별기 키패드 · 가동 버튼 · 시료 투입구 · 집합 포장 PC · 거치형 판독기 · AG 라벨 프린터 · 접힌 박스 · 작업대 박스 · 파렛트에 다가가 조준하고 E / 클릭 (공통 조작 지점 마커 · 손 닿는 거리 1.2 m), 1인칭 중 타일은 현황만, 라벨 인쇄기 화면 · 라벨러 판넬 · 설명서 부착기 컨트롤러를 사진처럼 작업자 쪽(앞)으로 옮김'},
@@ -530,7 +531,7 @@ function v3bRoom(sc){
 function v3bInit(){
   const cv=document.getElementById("cv");
   const R=new T3.WebGLRenderer({canvas:cv, antialias:true, preserveDrawingBuffer:true});
-  R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.85;
+  R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.76;
   R.shadowMap.enabled=true; R.shadowMap.type=T3.PCFSoftShadowMap;
   const sc=new T3.Scene(); sc.background=new T3.Color(0xe7ebee);
   const W=(ROOM.x1-ROOM.x0)*MM, D=(ROOM.z1-ROOM.z0)*MM, cx=(ROOM.x0+ROOM.x1)/2*MM, cz=(ROOM.z0+ROOM.z1)/2*MM;
@@ -624,6 +625,7 @@ function screen(g,w,h,pos,rotY,lines){ const t=labelTex(lines||["",""],{w:256,h:
 function gearMotor(g,x,y,z){ bx(g,x-.05,x+.05,y,y+.16,z-.05,z+.05,new T3.MeshStandardMaterial({color:0x1f3b2c,roughness:.5})); rod(g,[x,y+.16,z],[x,y+.19,z],.035,M.dark,16); }
 function pkBuild(sc){
   const g=new T3.Group(); PKG.G=g; sc.add(g); const y=pm(PK.CH);
+  M.ss.envMapIntensity=1.15; M.ssMir.envMapIntensity=1.25; M.ssD.envMapIntensity=1.05;   /* 실제 장면 반사(흰 벽)에서 스테인리스가 하얗게 뜨지 않게 (B6) */
   /* 통과구 컨베이어 (벽 양쪽 투명 덮개) */
   pkConv(g,PK.pass[0],PK.pass[1],0,110);
   acrylBox(g,pm(8960),pm(9300),y,y+.22,-.09,.09);
@@ -684,7 +686,12 @@ function pkBuild(sc){
     /* 라벨 컨트롤러 (LCD · 전원 · 비상정지) · 경광등 */
     rod(g,[pm(14250),pm(840),pm(330)],[pm(14250),pm(1500),pm(330)],.025,M.ss,14);                   /* 설명서 부착기 컨트롤러 : 앞쪽 기둥 (사진 : 컨트롤러 + 아래 전원함) */
     bx(g,pm(13950),pm(14550),pm(1500),pm(1640),pm(300),pm(480),new T3.MeshStandardMaterial({color:0xd8d2d0,roughness:.5})); bx(g,pm(14120),pm(14380),pm(1350),pm(1460),pm(330),pm(420),M.white);
-    PKG.leafScr=screen(g,.14,.06,[pm(14120),pm(1575),pm(483)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14330),pm(1405),pm(425)); e.rotation.x=Math.PI/2; }
+    /* 사진 기준 세부 : 카운터(7세그) · 2줄 LCD · OPERATOR F1 F2 I O · EDIT 방향키 · 로커 스위치 2(적색 점등) · 아래 전원함(키 · 램프 · 비상정지) */
+    { const fz=pm(481); bx(g,pm(13980),pm(14080),pm(1555),pm(1600),fz,fz+.004,M.black); [[M.yellow,0],[M.yellow,1],[M.green,2],[M.red,3]].forEach(([m,i])=>{ const b=add(g,new T3.Mesh(new T3.CylinderGeometry(.011,.011,.008,14),m)); b.rotation.x=Math.PI/2; b.position.set(pm(14080+i*28),pm(1528),fz+.004); });
+      for(let i=0;i<6;i++){ const b=add(g,new T3.Mesh(new T3.BoxGeometry(.016,.016,.008),i===4?M.blue:M.yellow)); b.position.set(pm(14260+(i%2)*24),pm(1590-Math.floor(i/2)*22),fz+.004); }
+      for(const x of [14400,14480]){ bx(g,pm(x-25),pm(x+25),pm(1540),pm(1600),fz,fz+.006,M.dark); bx(g,pm(x-14),pm(x+14),pm(1552),pm(1588),fz+.006,fz+.012,new T3.MeshStandardMaterial({color:0xff2a20,emissive:0xff1010,emissiveIntensity:.8})); }
+      const ky=pm(1405), kz=pm(422); add(g,new T3.Mesh(new T3.CylinderGeometry(.02,.02,.02,16),M.dark)).position.set(pm(14170),ky,kz); add(g,new T3.Mesh(new T3.SphereGeometry(.014,12,8),new T3.MeshStandardMaterial({color:0x801010,emissive:0xff2020,emissiveIntensity:.6}))).position.set(pm(14250),ky,kz); }
+    PKG.leafScr=screen(g,.14,.06,[pm(14200),pm(1585),pm(483)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14330),pm(1405),pm(425)); e.rotation.x=Math.PI/2; }
     add(g,new T3.Mesh(new T3.CylinderGeometry(.045,.05,.11,20),new T3.MeshStandardMaterial({color:0xd01818,emissive:0x400000,roughness:.3,transparent:true,opacity:.85}))).position.set(pm(14600),pm(1600),pm(390));
     for(const x of [12950,14250]) gearMotor(g,pm(x),y+.1,pm(170)); acrylBox(g,pm(12850),pm(13200),y,y+.25,-.15,.15); }
   /* ⑤ 중량선별기 */
@@ -1068,6 +1075,8 @@ function pcRender(){
   const html=L.map(k=>{ const T=PT[k], sub=typeof T.sub==="function"?T.sub():T.sub, on=T.st&&T.st(); return '<button class="pt'+(on?" on":"")+(hint===k?" hint":"")+'" data-k="'+k+'"><b>'+T.nm+'</b><s>'+(sub||"")+'</s></button>'; }).join("");
   if(t.dataset.h!==html){ t.dataset.h=html; t.innerHTML=html; t.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>pcAct(b.dataset.k)); }
   const c=$("#pkCoach"), n=PC.steps.length, done=PC.done, ih=typeof incbCoach==="function"&&incbCoach();
+  if(PC.mode==="demo"&&!ih){ const k='<small>시연모드 · 포장실 · '+(PS.rx?"전문의약품 (작업자 2명 자동)":"일반의약품 (작업자 1명 자동)")+'</small><b>포장라인 자동 가동 — 완성 박스 '+PS.pallet+'</b><span>턴테이블 → 라벨 인쇄 · 부착 · 비전 → 설명서 부착 → 중량선별 → '+(PS.rx?"판독 · 박스 AG 라벨 → ":"")+'박스 포장 → 파렛트 적재. 걸어 다니며 설비를 살펴보세요.</span>';
+    if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
   if(ih||PC.mode==="free"){ const k=ih||'<small>자유모드 · '+(PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+' · '+(PS.rx?"전문의약품":"일반의약품")+'</small><b>순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요</b><span>기동 조건이 해제되어 있습니다 (실제와 다름 · 중량 세팅 없이도 가동). 상단 작업자 버튼으로 다른 작업장으로 바꿉니다.</span>';
     if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
   const role=PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1", md=(PC.deep?"심화":"기본")+" · "+(PC.mode==="exam"?"평가":PC.mode==="demo"?"시연":"학습");
@@ -1244,7 +1253,7 @@ function pfTargets(){
 const pfBoxKey=()=>PS.box.full?"seal":"put";
 const pfKeyOf=t=>t.k==="box"?pfBoxKey():t.k;
 const PF_AG=["agStart","agClear","agPack","agEnd"];
-function pfGoal(){ if(CREW.inc&&INCB.room==="P"&&INCB.mode!=="exam"&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
+function pfGoal(){ if(PC.mode==="demo") return null; if(CREW.inc&&INCB.room==="P"&&INCB.mode!=="exam"&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
   if(!PC.on||PC.done||PC.mode==="exam"||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
   return PF.T.find(t=>pfKeyOf(t)===k||(t.k==="ag"&&PF_AG.includes(k))||(k==="stop"&&t.k==="tt"&&PS.tt.on))||null; }
 const pfT=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s};
@@ -1710,7 +1719,7 @@ function incbPick(){
   $("#incBack").onclick=()=>{ el.hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; CREW.mode=null; spMark(); };
 }
 function incbStart(k,m){
-  const c=OEE_B_CODES.find(x=>x.k===k); Object.assign(INCB,{k,mode:m,room:c.room,t0:performance.now(),fired:false,done:false,at:0,fi:0});
+  const c=OEE_B_CODES.find(x=>x.k===k); Object.assign(INCB,{k,mode:m,room:c.room,t0:performance.now(),fired:false,launched:false,done:false,at:0,fi:0});
   $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; $("#splash").classList.add("hide");
   CREW.mode=m==="exam"?"exam":"guide";
   if(c.room==="F"){ const w=appWin(); CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession("guide"); w.demoSetup(); }catch(e){ console.error(e); } show("F"); }   /* 라인을 바로 운전 상태로 (시연 준비와 같은 설정) */
@@ -1720,7 +1729,8 @@ function incbStart(k,m){
 function incbTick(){
   if(!CREW.inc||!INCB.k||INCB.done) return; const now=performance.now();
   if(INCB.room==="F"){ const w=appWin(); let S=null; try{ S=w.__IDT.S(); }catch(e){} if(!S) return;
-    if(!INCB.fired){ if(S.running&&now-INCB.t0>6000){ try{ w.launchIncident(INCB.k); }catch(e){ console.error(e); } if(S.activeTrouble){ INCB.fired=true; INCB.at=now; } } return; }
+    if(!INCB.fired){ if(!INCB.launched&&S.running&&now-INCB.t0>6000){ INCB.launched=true; INCB.at=now; try{ w.launchIncident(INCB.k); }catch(e){ console.error(e); } }   /* 한 번만 발생 (증상 뒤 알람이 뜨는 사례 포함) */
+      if(INCB.launched&&S.activeTrouble){ INCB.fired=true; INCB.at=now; } return; }
     if(!S.activeTrouble&&S.running&&now-INCB.at>3000) incbDone(now); return; }
   if(!INCB.fired){ if(psOn()&&now-INCB.t0>5000){ PK_INC[INCB.k].fire(); INCB.fired=true; INCB.at=now; } return; }
   const F=PK_INC[INCB.k].fix; while(INCB.fi<F.length&&F[INCB.fi].done()) INCB.fi++;
