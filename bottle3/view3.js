@@ -83,6 +83,12 @@ function v3bInit(){
   for(const s of ["stat","dyn"]){ v3bPart(s+"Op",false); v3bPart(s+"Tr",true); }
   V3B.ready=true;
 }
+/* 실제 장면을 찍어 반사에 사용 (파우치 · PTP 와 같은 방식) — 정적 형상을 처음 받은 뒤 한 번 · 포장실 쪽도 한 번 */
+function v3bEnvCapture(){
+  const pm=new T3.PMREMGenerator(V3B.R), sc=V3B.sc, c=[(ROOM.x0+ROOM.x1)/2*MM,1.7,1.2]; sc.position.set(-c[0],-c[1],-c[2]); sc.updateMatrixWorld(true);
+  const keep=V3B.inner.visible; V3B.inner.visible=true; const rt=pm.fromScene(sc,.02,.05,60); sc.position.set(0,0,0); sc.updateMatrixWorld(true); V3B.inner.visible=keep;
+  sc.environment=rt.texture;
+}
 /* 앱 형상 받기 : 정적은 판이 바뀔 때만 · 동적은 앱이 새로 만들었을 때만 */
 function v3bGen(){
   const w=appWin(); if(!w||!w.B3) return false; const G=w.B3.GEO;

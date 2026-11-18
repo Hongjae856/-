@@ -31,13 +31,14 @@ function loop(now){
   requestAnimationFrame(loop); const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
-  walkTick(dt); v3bFrame(now);
-  if(V3B.statNew){ V3B.statNew=false; gridBuild(); $("#load").hidden=true; }
+  walkTick(dt); pkTick(dt); v3bFrame(now);
+  if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
+  WALK.room=WALK.x<ROOM.wallX?"F":"P";
   if((loop.k=(loop.k||0)+1)%20===0){ hud(); $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
 }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); v3bOrbit(); walkBind();
+  v3bInit(); pkBuild(V3B.sc); v3bOrbit(); walkBind();
   $("#fpBtn").onclick=()=>setView(V3B.view==="orbit"?"fp":"orbit");
   requestAnimationFrame(loop);
 }
