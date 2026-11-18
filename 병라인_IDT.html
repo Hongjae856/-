@@ -57,6 +57,8 @@ body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:
 #pDlg table.cmp{border-collapse:collapse}#pDlg td,#pDlg th{border:1px solid #ccd;padding:5px 10px}
 #pDlg .bt{margin-top:14px;display:flex;gap:8px;justify-content:flex-end}#pDlg .bt button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:8px 14px;font:700 14px "Malgun Gothic";cursor:pointer}
 #pToast{position:absolute;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#142b47ee;color:#fff;border-radius:999px;padding:8px 18px;font:700 14px "Malgun Gothic"}
+body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before{content:"1인칭 — 설비에 다가가 조준하고 E / 클릭 (타일은 현황만)";grid-column:1/3;font:700 12px 'Malgun Gothic';color:#fff;background:#173a63cc;border-radius:8px;padding:5px 8px}
+#hud .far{color:#b04a00;font-weight:800}#hud .nx{background:#ffd22e;border-radius:99px;padding:0 6px;font-weight:800}
 #load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
 </style></head><body>
 <div id="bar">
@@ -105,6 +107,7 @@ body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:5,d:'2026-11-18',t:'포장실 1인칭 직접 조작 (B5-1) — 리젝트 함 2곳 · 턴테이블 · 라벨 인쇄기 화면 · 비전 PC · 라벨러 판넬 · 첫 라벨 · 설명서 부착기 컨트롤러 · 중량선별기 키패드 · 가동 버튼 · 시료 투입구 · 집합 포장 PC · 거치형 판독기 · AG 라벨 프린터 · 접힌 박스 · 작업대 박스 · 파렛트에 다가가 조준하고 E / 클릭 (공통 조작 지점 마커 · 손 닿는 거리 1.2 m), 1인칭 중 타일은 현황만, 라벨 인쇄기 화면 · 라벨러 판넬 · 설명서 부착기 컨트롤러를 사진처럼 작업자 쪽(앞)으로 옮김'},
  {v:4,d:'2026-11-18',t:'메인화면 · 작업자 · 과정 (B4) — 파우치처럼 ① 모드(기본 · 심화 학습/평가 · 시연) → ② 작업자(충전실 · 포장실 1 · 포장실 2) 선택, 포장 품목 전문의약품(판독 · AG · 2명) / 일반의약품(판독 없음 · 1명), 상단 작업자 교체, 포장실 과정 — 작업자 1 : 리젝트 함 확인 · 턴테이블 · 라벨 인쇄기 · 비전 · 라벨러 · 첫 인쇄 대조 · 설명서 부착기 · 중량 세팅 · 시료 시험 · 중량선별기 · 집합 포장 시작 · 판독(박스 1 · 3) · 작업완료 · 설비 정지 / 작업자 2 : 박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 × 3 / 일반의약품 : 설비 운전 + 박스 조립 · 담기 · 봉함 · 적재, 선택하지 않은 포장 작업자는 자동, 평가는 순서가 다른 조작 −3 점 · 지시서와 다른 중량 세팅 −5 점, 작업자 인체 모델(충전실 흰 방진복 · 포장실 파란 작업복)'},
  {v:3,d:'2026-11-18',t:'포장 시뮬레이션 · 설비 화면 (B3) — 충전실 양품 + 턴테이블 임시 보관분이 라인으로, 라벨 인쇄 · 부착(라벨 롤 · 리본 소모) → 비전 판정(NG 는 후단 리젝터로 리젝트 함) → 설명서 부착(누락 발생) → 중량선별(설명서 누락 −NG · 과량 +NG 플리퍼 리젝트) → 집적 → 작업자 1 판독(판독 불가 · 중복 = 리젝트 후 라벨만 떼고 턴테이블로 재투입) → 40병마다 박스 AG 라벨 발행 → 작업자 2 봉함 · 라벨 · 파렛트 적재, 멈춘 설비 앞에서 병이 대기, 설비 화면 6종(라벨 인쇄기 · 비전 PC · 라벨러 판넬 · 설명서 부착기 LCD · 중량선별기 표시창 · 집합 포장 PC)을 현장 사진 구성대로 · 화면 값은 가상'},
  {v:2,d:'2026-11-18',t:'포장실 설비 (B2) — 현장 영상 · 사진 기준으로 칸막이 벽 통과구 컨베이어 · 턴테이블(버퍼) · 라벨 인쇄(열전사 · 화면) · 라벨러(감싸기 벨트 · 2D 코드 비전 · 후단 리젝터 · 리젝트 함) · 이동식 PC 스탠드 · 부착형 설명서 부착기(대형 롤 · 컨트롤러 · 경광등) · 중량선별기(계량 컨베이어 · 표시부 · 플리퍼 · 「기준 중량 이상」 함) · 집적 벨트 작업대 · 바코드 판독대(거치형 판독기 · 집합 포장 PC · AG 라벨 프린터) · 박스 작업대 · 파렛트 · 대차 · 의자, 병 흐름(라벨 · 설명서 부착 표시), 1인칭 충돌, 실제 장면 반사'},
@@ -579,17 +582,17 @@ function pkBuild(sc){
     /* 열전사 인쇄기 (핸들로 높이 조정) · 화면 */
     bx(g,pm(11080),pm(11320),pm(1080),pm(1260),pm(-300),pm(-90),M.dark); rod(g,[pm(11200),pm(1260),pm(-200)],[pm(11200),pm(1330),pm(-200)],.01,M.ss,10);
     add(g,new T3.Mesh(new T3.TorusGeometry(.05,.008,8,24),M.black)).position.set(pm(11200),pm(1340),pm(-200));
-    rod(g,[pm(11050),pm(840),pm(-420)],[pm(11050),pm(1500),pm(-420)],.02,M.ss,12);
-    bx(g,pm(10900),pm(11260),pm(1500),pm(1730),pm(-440),pm(-400),M.black); PKG.prScr=screen(g,.33,.2,[pm(11080),pm(1615),pm(-397)],0,["인쇄 대기","LOT · EXP"]);
+    rod(g,[pm(11050),pm(840),pm(430)],[pm(11050),pm(1500),pm(430)],.02,M.ss,12);                    /* 인쇄기 화면 : 작업자 쪽(앞) 기둥 (사진) */
+    bx(g,pm(10900),pm(11260),pm(1500),pm(1730),pm(400),pm(440),M.black); PKG.prScr=screen(g,.33,.2,[pm(11080),pm(1615),pm(443)],0,["인쇄 대기","LOT · EXP"]);
     /* 비전 카메라 (노란색) */
     bx(g,pm(11760),pm(11850),pm(1060),pm(1130),pm(-200),pm(-130),M.yellow); rod(g,[pm(11805),pm(1095),pm(-130)],[pm(11805),pm(1095),pm(-110)],.012,M.dark,12);
     /* 감싸기 벨트 (녹색) */
     bx(g,pm(11650),pm(12150),pm(905),pm(985),pm(85),pm(115),M.green); for(const x of [11650,12150]) rod(g,[pm(x),pm(900),pm(100)],[pm(x),pm(990),pm(100)],.03,M.alu,20);
     gearMotor(g,pm(11900),y+.1,pm(180));
     /* 조작 판넬 (터치 · 비상정지 · 키) */
-    rod(g,[pm(12300),pm(840),pm(-450)],[pm(12300),pm(1500),pm(-450)],.025,M.ss,14);
-    bx(g,pm(12150),pm(12450),pm(1500),pm(1720),pm(-470),pm(-420),M.ss); PKG.labScr=screen(g,.17,.12,[pm(12270),pm(1620),pm(-418)],0,["라벨러","대기"]);
-    add(g,new T3.Mesh(new T3.CylinderGeometry(.022,.022,.02,20),M.red)).position.set(pm(12400),pm(1560),pm(-410)); PKG.labEmg=[pm(12400),pm(1560),pm(-410)];
+    rod(g,[pm(12300),pm(840),pm(450)],[pm(12300),pm(1500),pm(450)],.025,M.ss,14);                   /* 라벨러 판넬 : 앞쪽 기둥 */
+    bx(g,pm(12150),pm(12450),pm(1500),pm(1720),pm(420),pm(470),M.ss); PKG.labScr=screen(g,.17,.12,[pm(12270),pm(1620),pm(473)],0,["라벨러","대기"]);
+    add(g,new T3.Mesh(new T3.CylinderGeometry(.022,.022,.02,20),M.red)).position.set(pm(12400),pm(1560),pm(480)); PKG.labEmg=[pm(12400),pm(1560),pm(480)];
     /* 후단 리젝터 (공압 실린더 → 리젝트 함) */
     rod(g,[pm(PK.labX.rej),pm(960),pm(-260)],[pm(PK.labX.rej),pm(960),pm(-90)],.016,M.alu,16); PKG.rejPusher=bx(g,pm(PK.labX.rej)-.03,pm(PK.labX.rej)+.03,pm(925),pm(995),-.09,-.075,M.white);
     acrylBox(g,pm(12350),pm(12650),pm(560),pm(860),pm(160),pm(460)); bx(g,pm(12350),pm(12650),pm(540),pm(560),pm(160),pm(460),M.ss);
@@ -610,9 +613,10 @@ function pkBuild(sc){
     bx(g,pm(13650),pm(13780),pm(1000),pm(1060),pm(-200),pm(-20),M.alu); PKG.leafHead=bx(g,pm(13680),pm(13760),pm(990),pm(1005),pm(-60),pm(20),M.white);   /* 부착 헤드 */
     bx(g,pm(13780),pm(13840),pm(1080),pm(1130),pm(-180),pm(-120),M.yellow);                    /* 라벨 감지 센서 */
     /* 라벨 컨트롤러 (LCD · 전원 · 비상정지) · 경광등 */
-    bx(g,pm(13650),pm(14250),pm(1900),pm(2040),pm(-380),pm(-200),new T3.MeshStandardMaterial({color:0xd8d2d0,roughness:.5}));
-    PKG.leafScr=screen(g,.14,.06,[pm(13820),pm(1975),pm(-198)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14150),pm(1960),pm(-196)); e.rotation.x=Math.PI/2; }
-    add(g,new T3.Mesh(new T3.CylinderGeometry(.045,.05,.11,20),new T3.MeshStandardMaterial({color:0xd01818,emissive:0x400000,roughness:.3,transparent:true,opacity:.85}))).position.set(pm(14320),pm(2000),pm(-290));
+    rod(g,[pm(14250),pm(840),pm(330)],[pm(14250),pm(1500),pm(330)],.025,M.ss,14);                   /* 설명서 부착기 컨트롤러 : 앞쪽 기둥 (사진 : 컨트롤러 + 아래 전원함) */
+    bx(g,pm(13950),pm(14550),pm(1500),pm(1640),pm(300),pm(480),new T3.MeshStandardMaterial({color:0xd8d2d0,roughness:.5})); bx(g,pm(14120),pm(14380),pm(1350),pm(1460),pm(330),pm(420),M.white);
+    PKG.leafScr=screen(g,.14,.06,[pm(14120),pm(1575),pm(483)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14330),pm(1405),pm(425)); e.rotation.x=Math.PI/2; }
+    add(g,new T3.Mesh(new T3.CylinderGeometry(.045,.05,.11,20),new T3.MeshStandardMaterial({color:0xd01818,emissive:0x400000,roughness:.3,transparent:true,opacity:.85}))).position.set(pm(14600),pm(1600),pm(390));
     for(const x of [12950,14250]) gearMotor(g,pm(x),y+.1,pm(170)); acrylBox(g,pm(12850),pm(13200),y,y+.25,-.15,.15); }
   /* ⑤ 중량선별기 */
   { const c=PK.cw; bx(g,pm(c.x0),pm(c.x1),pm(820),pm(880),-.16,.16,M.ss); for(const x of [c.x0+80,c.x1-80]) for(const z of [-120,120]) foot(g,pm(x),pm(z),pm(820),.025);
@@ -675,7 +679,7 @@ function pkPath(s){
 const PK_END=()=>(PK.pass[1]-PK.pass[0])+pkArc().L+(PK.acc[1]-200-PK.line[0]);
 /* 바닥 장애물 [x0,x1,z0,z1] (mm) — 1인칭 충돌 */
 function pkObstacles(){ const L=[], t=PK.tt;
-  L.push([PK.pass[0],PK.pass[1],-120,120],[t.x-t.r,t.x+t.r,t.z-t.r,t.z+t.r],[PK.line[0],PK.cw.x1,-200,200],[PK.lab[0],PK.lab[1],-480,420],[PK.leaf[0],PK.leaf[1],-400,380],
+  L.push([PK.pass[0],PK.pass[1],-120,120],[t.x-t.r,t.x+t.r,t.z-t.r,t.z+t.r],[PK.line[0],PK.cw.x1,-200,200],[PK.lab[0],PK.lab[1],-480,420],[PK.leaf[0],PK.leaf[1],-400,380],[14150,14350,300,480],[12200,12400,400,500],[10950,11150,380,460],
     [PK.cw.x0,PK.cw.x1,-540,220],[15750,16150,140,480],[12350,12650,160,460],[PK.acc[0],PK.acc[1],-350,450],[PK.scan[0],PK.scan[1],-420,470],[PK.box[0],PK.box[1],-450,450],
     [PK.pallet.x-550,PK.pallet.x+550,PK.pallet.z-550,PK.pallet.z+550],[19400,20200,1200,1800],[9950,10550,800,1300]);
   return L; }
@@ -1056,6 +1060,151 @@ function crewTick(dt){
       poseHuman(H,{x,z,yaw:s.yaw,dt,L:busy?[x-.12,.98,.05]:null,R:busy?[x+.12,.98,.05]:null,gL:.3,gR:.3,nL:"down",nR:"down"}); } }
 }
 
+/* ── aimmark.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   조작 대상 표시 — 모든 IDT 공통 (파우치 · 블리스터(PTP) · 병, 11/17 사용자 결정)
+   · 큰 가상 상자 테두리 · 설비를 투시하는 노란 화살표를 쓰지 않음 (거리감이 없어 헷갈림)
+   · 조작 지점 마커 : 실제로 누르는 지점(대상 면 중 눈에 가장 가까운 점 또는 지정 지점 pt)에 작은 원형 마커
+       - 다음 작업 = 노란 점 + 고리 (깜박임) · 조준 중 = 초록 고리(손 닿음) / 회색 고리(멂)
+       - 깊이 반영 : 설비에 가려지면 마커도 가려짐 (투시 안 함)
+       - 화면 밖 : 화면 가장자리에 노란 화살표 + 이름 · 거리
+   · 조작 거리 : 손 닿는 거리(가슴 높이에서 대상까지 1.2 m) 안에서만 조작 — 밖이면 '가까이 가세요 (거리)'
+   · 사용 : const AM=createAimMark({T3, scene, camera:()=>cam, canvas:()=>canvasEl, unit:1 (m)});
+            AM.update({eye:[x,y,z], goal:{c,s,pt,name}|null, aim:{...}|null, now}) → {aimIn, aimDist, goalDist, goalDir}
+            대상 형식 : c = 중심 [x,y,z], s = 크기 [w,h,d] (m), pt = 조작 지점(선택), name
+   ═══════════════════════════════════════════════════════════════════ */
+const AIM_REACH=1.2, AIM_LOOK=6, AIM_CHEST=.3;
+function aimNearest(t,p){ return [0,1,2].map(i=>Math.max(t.c[i]-t.s[i]/2,Math.min(t.c[i]+t.s[i]/2,p[i]))); }
+/* 손 닿는 거리 : 가슴(눈 - 0.3 m)에서 대상 상자의 가장 가까운 점까지 */
+function aimReachDist(t,eye){ const ch=[eye[0],eye[1]-AIM_CHEST,eye[2]], q=t.pt||aimNearest(t,ch); return Math.hypot(q[0]-ch[0],q[1]-ch[1],q[2]-ch[2]); }
+function aimInReach(t,eye){ return aimReachDist(t,eye)<=(t.reachMax||AIM_REACH); }
+function createAimMark(o){
+  const T3=o.T3, sc=o.scene, mat=(c,op)=>new T3.MeshBasicMaterial({color:c,transparent:true,opacity:op,depthTest:true,depthWrite:false,side:T3.DoubleSide});
+  const ring=(ri,ro,m)=>{ const x=new T3.Mesh(new T3.RingGeometry(ri,ro,40),m); x.renderOrder=20; return x; };
+  const dot=(r,m)=>{ const x=new T3.Mesh(new T3.CircleGeometry(r,28),m); x.renderOrder=21; return x; };
+  /* 다음 작업 : 노란 점 + 고리 (테두리 짙은 노랑으로 밝은 배경에서도 보임) */
+  const G=new T3.Group(); const gm=mat(0xffd22e,.95), gk=mat(0x7a5600,.9);
+  G.add(ring(.62,.8,gk)); G.add(ring(.66,.76,gm)); G.add(dot(.3,gm)); const gd=G.children[2];
+  /* 조준 : 초록(손 닿음) · 회색(멂) 고리 */
+  const A=new T3.Group(); const am=mat(0x3ddc84,.98), ak=mat(0x0d3b22,.85);
+  A.add(ring(.92,1.14,ak)); A.add(ring(.96,1.1,am));
+  G.visible=A.visible=false; sc.add(G); sc.add(A);
+  /* 화면 가장자리 화살표 */
+  const E=document.createElement("div"); E.className="aimEdge"; E.hidden=true;
+  E.innerHTML='<i></i><span></span>'; document.body.appendChild(E);
+  if(!document.getElementById("aimEdgeCss")){ const st=document.createElement("style"); st.id="aimEdgeCss";
+    st.textContent=".aimEdge{position:fixed;z-index:60;pointer-events:none;display:flex;align-items:center;gap:6px;font:800 12.5px 'Malgun Gothic',sans-serif;color:#1d2a36}"+
+      ".aimEdge i{width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:20px solid #ffd22e;filter:drop-shadow(0 0 1px #7a5600) drop-shadow(0 1px 2px #0006)}"+
+      ".aimEdge span{background:#ffd22ef0;border:1px solid #7a5600;border-radius:8px;padding:2px 7px;white-space:nowrap}.aimEdge[hidden]{display:none}";
+    document.head.appendChild(st); }
+  const v=new T3.Vector3(), U=o.unit||1, occ={};
+  /* 조작 지점 : 지정 지점 또는 상자에서 눈에 가장 가까운 점 → 눈 쪽으로 조금 당김(자기 면에 묻히지 않게, 다른 설비에는 가려짐) */
+  function pointOf(t,eye){ const p=t.pt||aimNearest(t,eye), d=Math.hypot(eye[0]-p[0],eye[1]-p[1],eye[2]-p[2])||1, k=Math.min(.05,d*.04)/d; return {p:[p[0]+(eye[0]-p[0])*k,p[1]+(eye[1]-p[1])*k,p[2]+(eye[2]-p[2])*k], d}; }
+  function place(M,q,cam,size){ M.visible=true; M.position.set(q[0]*U,q[1]*U,q[2]*U); M.quaternion.copy(cam.quaternion); M.scale.setScalar(size*U); }
+  const sizeAt=d=>Math.max(.022,Math.min(.13,d*.02));
+  /* 가림 판정(선택 · 0.25 초마다) : o.occluded(eye, point) */
+  function hidden(t,eye,q,now){ if(!o.occluded) return false; const k=t.id||t.name||"?"; const c=occ[k];
+    if(c&&now-c.t<250) return c.v; let r=false; try{ r=!!o.occluded(eye,q); }catch(e){} occ[k]={t:now,v:r}; return r; }
+  function dirOf(cam,q){ cam.updateMatrixWorld(); v.set(q[0]*U,q[1]*U,q[2]*U).applyMatrix4(cam.matrixWorldInverse); const a=Math.atan2(v.x,-v.z);
+    return {a, behind:v.z>0, txt:Math.abs(a)<.35?"↑ 앞":Math.abs(a)>2.4?"↓ 뒤":a<0?"← 왼쪽":"→ 오른쪽"}; }
+  function edge(cam,q,name,dist){
+    const cv=o.canvas&&o.canvas(); if(!cv){ E.hidden=true; return false; } const R=cv.getBoundingClientRect(); if(R.width<50){ E.hidden=true; return false; }
+    v.set(q[0]*U,q[1]*U,q[2]*U).project(cam); const dz=dirOf(cam,q); let x=v.x, y=v.y;
+    if(!dz.behind&&Math.abs(x)<=.96&&Math.abs(y)<=.92){ E.hidden=true; return false; }   /* 화면 안 : 화살표 없음 */
+    if(dz.behind){ x=-x; y=-y; if(Math.hypot(x,y)<1e-3){ x=0; y=-1; } }
+    const s=1/Math.max(Math.abs(x)/.9,Math.abs(y)/.82,1e-6); x*=s; y*=s;
+    const px=R.left+(x*.5+.5)*R.width, py=R.top+(1-(y*.5+.5))*R.height, ang=Math.atan2(-y*R.height,x*R.width);
+    E.hidden=false; E.style.flexDirection=Math.cos(ang)<0?"row":"row-reverse"; E.firstChild.style.transform="rotate("+ang+"rad)";
+    const w=E.offsetWidth||120, h=E.offsetHeight||24;   /* 화살표 · 이름이 3D 화면 안에 머물게 */
+    E.style.left=Math.max(R.left+6,Math.min(R.right-w-6,px-w/2))+"px"; E.style.top=Math.max(R.top+6,Math.min(R.bottom-h-6,py-h/2))+"px";
+    E.lastChild.textContent=name+" · "+dist.toFixed(1)+" m"; return true; }
+  return {
+    update(a){
+      const cam=o.camera(), eye=a.eye, now=a.now||performance.now(), out={aimIn:false,aimDist:null,goalDist:null,goalDir:"",aimHidden:false};
+      if(!cam||!eye||a.off){ G.visible=A.visible=false; E.hidden=true; return out; }
+      if(a.goal){ const {p,d}=pointOf(a.goal,eye); out.goalDist=aimReachDist(a.goal,eye); out.goalDir=dirOf(cam,p).txt;
+        place(G,p,cam,sizeAt(d)); const pu=.72+.28*Math.sin(now/180); G.children[1].material.opacity=.95*pu; gd.material.opacity=.95*pu;
+        if(!a.hideEdge) edge(cam,p,a.goal.name||"다음 작업",out.goalDist); else E.hidden=true;
+      } else { G.visible=false; E.hidden=true; }
+      if(a.aim){ const {p,d}=pointOf(a.aim,eye); out.aimDist=aimReachDist(a.aim,eye); out.aimIn=out.aimDist<=(a.aim.reachMax||AIM_REACH);
+        out.aimHidden=!out.aimIn&&hidden(a.aim,eye,p,now);
+        if(out.aimHidden) A.visible=false; else { place(A,p,cam,sizeAt(d)); const c=out.aimIn?0x3ddc84:0xb8c0c8; A.children[1].material.color.setHex(c); A.children[0].material.color.setHex(out.aimIn?0x0d3b22:0x39424b); }
+      } else A.visible=false;
+      return out; },
+    hide(){ G.visible=A.visible=false; E.hidden=true; },
+    pointOf, reachDist:aimReachDist, inReach:aimInReach
+  };
+}
+
+/* ── pfp.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   1인칭 직접 조작 (B5) — 다가가서 조준하고 E 또는 클릭 (파우치 · PTP 와 같은 방식)
+   · 대상 표시 : 공통 모듈 idt_common/aimmark.js (조작 지점 마커 · 손 닿는 거리 1.2 m · 가려지면 안 보임 · 화면 밖은 가장자리 화살표)
+   · 포장실 : 각 설비의 실제 조작부(화면 · 판넬 · 판독기 · 박스 · 파렛트) 위치 — 누르면 포장실 타일과 같은 동작
+   · 1인칭 중에는 왼쪽 타일은 현황만 (직접 클릭 막음) — 파우치와 같음
+   ═══════════════════════════════════════════════════════════════════ */
+const PF={T:[], aim:null, aimIn:false, goal:null, res:{}};
+/* 조작 대상 (mm · 크기 m) — k : 동작(타일 키) · 여러 동작을 한 곳에서 하면 fn 으로 고름 */
+function pfTargets(){
+  const T=[], add=(id,nm,p,s,k)=>T.push({id,nm,p,s,k});
+  add("rejL","리젝트 함 (라벨러 후단)",[12500,700,330],[.3,.3,.3],"rej");
+  add("rejC","리젝트 함 (중량선별기)",[15950,700,330],[.4,.3,.3],"rej");
+  add("tt","턴테이블 속도 조절기 · 전원",[10150,410,-28],[.18,.14,.04],"tt");
+  add("pr","라벨 인쇄기 화면 (ON/OFF)",[11080,1615,447],[.33,.2,.03],"pr");
+  add("vis","비전 PC 화면 (시작 · 중지)",[10250,1460,1075],[.36,.27,.03],"vis");
+  add("lab","라벨러 판넬 (RUN · STOP)",[12300,1610,475],[.3,.22,.04],"lab");
+  add("first","첫 라벨 (라벨러 출구)",[12300,990,0],[.15,.12,.15],"first");
+  add("leaf","설명서 부착기 컨트롤러 · 전원함",[14250,1500,450],[.6,.3,.06],"leaf");
+  add("cwSet","중량선별기 키패드 (중량 세팅)",[15150,1600,-416],[.28,.17,.03],"cwSet");
+  add("cw","중량선별기 가동 · 정지 버튼",[15150,1460,-416],[.28,.06,.03],"cw");
+  add("sample","중량선별기 입구 (시료 투입)",[14750,960,0],[.3,.15,.2],"sample");
+  if(PS.rx){ add("ag","집합 포장 PC 화면",[PK.scanX,1495,-328],[.56,.36,.04],"ag"); add("scan","거치형 판독기",[PK.scanX,1000,-118],[.26,.16,.05],"scan");
+    add("agLab","AG 라벨 프린터 (발행된 라벨)",[19175,1010,-40],[.25,.12,.06],"agLab"); }
+  add("flat","접힌 박스 더미",[21000,960,-150],[.6,.12,.46],"boxMk");
+  add("box","작업대 박스",[19950,960,0],[.36,.14,.25],"box");
+  add("pal","파렛트",[PK.pallet.x,300,PK.pallet.z],[1.1,.4,1.1],"pal");
+  PF.T=T; return T;
+}
+/* 작업대 박스 : 상태에 따라 담기 · 봉함 */
+const pfBoxKey=()=>PS.box.full?"seal":"put";
+const pfKeyOf=t=>t.k==="box"?pfBoxKey():t.k;
+const PF_AG=["agStart","agClear","agPack","agEnd"];
+function pfGoal(){ if(!PC.on||PC.done||PC.mode==="exam"||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
+  return PF.T.find(t=>pfKeyOf(t)===k||(t.k==="ag"&&PF_AG.includes(k))||(k==="stop"&&t.k==="tt"&&PS.tt.on))||null; }
+const pfT=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s};
+const pfEye=()=>[WALK.x*MM,WALK.y*MM,WALK.z*MM];
+function pfAim(){
+  PF.aim=null; PF.aimIn=false; if(V3B.view==="orbit"||!document.body.classList.contains("pk")) return; const f=walkFwd(); let best=1e9;
+  for(const t of PF.T){ const dx=t.p[0]-WALK.x, dy=t.p[1]-WALK.y, dz=t.p[2]-WALK.z, L=Math.hypot(dx,dy,dz); if(L>AIM_LOOK*1000) continue;
+    const c=(dx*f[0]+dy*f[1]+dz*f[2])/L, r=Math.max(t.s[0],t.s[1])*1000, ang=Math.acos(Math.min(1,c)), tol=Math.atan2(r*.5+40,L), sc=ang/tol+L/20000;
+    if(ang<tol&&sc<best){ best=sc; PF.aim=t; } }
+  if(PF.aim) PF.aimIn=aimInReach(pfT(PF.aim),pfEye());
+}
+function pfAct(){
+  const t=PF.aim; if(!t) return false; if(!PF.aimIn){ pcToast("가까이 가세요 — "+t.nm+" ("+(PF.res.aimDist||0).toFixed(1)+" m · 손 닿는 거리 1.2 m)"); return true; }
+  if(t.k==="ag"){ pcDlg('<h3>집합 포장 PC</h3><p>단품 '+PS.ag.n+' / '+PS.boxN+' · 박스 '+PS.ag.boxes+' · '+(PS.ag.msg||"")+'</p>',
+      [["작업 시작",()=>pcAct("agStart")],["클리어",()=>pcAct("agClear")],["재발급",()=>{ PS_ACT.agReissue(); }],["포장완료",()=>pcAct("agPack")],["작업완료",()=>pcAct("agEnd")],["닫기",null]]); return true; }
+  pcAct(pfKeyOf(t)); return true;
+}
+function pfHud(){ const h=$("#hud"); if(!document.body.classList.contains("pk")||V3B.view==="orbit") return false;
+  const a=PF.aim, g=PF.goal, R=PF.res||{}, m=x=>x==null?"":" · "+x.toFixed(1)+" m";
+  h.innerHTML=a&&PF.aimIn?"<b>E</b> / 클릭 · <b>"+a.nm+"</b>"+(g===a?" <span class='nx'>다음 작업</span>":"")
+    :a&&!R.aimHidden?"<span class='far'>가까이 가세요"+m(R.aimDist)+"</span> · "+a.nm
+    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 포장실 · W A S D 걷기 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)";
+  return true; }
+function pfInit(){
+  PF.am=createAimMark({T3, scene:V3B.sc, camera:()=>V3B.cam, canvas:()=>$("#cv"), unit:1});
+  addEventListener("keydown",e=>{ if(e.code==="KeyE"&&$("#pDlg").hidden&&document.body.classList.contains("pk")&&V3B.view!=="orbit"){ if(pfAct()) e.preventDefault(); } });
+}
+function pfTick(now){
+  const on=document.body.classList.contains("pk")&&V3B.view!=="orbit"&&PC.on;
+  document.body.classList.toggle("pkfp",on);
+  if(!on){ PF.am&&PF.am.hide(); PF.aim=null; return; }
+  if(now-(PF.t||0)>300){ PF.t=now; pfTargets(); }
+  pfAim(); PF.goal=pfGoal();
+  PF.res=PF.am.update({eye:pfEye(), goal:pfT(PF.goal), aim:pfT(PF.aim), now, off:!$("#pDlg").hidden});
+}
+
 /* ── walk.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 이동 (B1) — 눈높이 1.6 m · WASD 걷기 · 마우스로 둘러보기(클릭하면 시점 고정, Esc 해제) · Shift 빠르게
@@ -1103,7 +1252,7 @@ function walkBind(){
   addEventListener("keydown",e=>{ WALK.keys[e.code]=true; if(V3B.view!=="orbit"&&/^(Arrow|Space)/.test(e.code)) e.preventDefault(); });
   addEventListener("keyup",e=>{ WALK.keys[e.code]=false; });
   addEventListener("blur",()=>{ WALK.keys={}; });
-  cv.addEventListener("click",()=>{ if(V3B.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
+  cv.addEventListener("click",()=>{ if(V3B.view!=="orbit"&&typeof PF!=="undefined"&&document.body.classList.contains("pkfp")&&PF.aim&&pfAct()) return; if(V3B.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
   cv.addEventListener("mousedown",e=>{ if(V3B.view!=="orbit") drag={x:e.clientX,y:e.clientY}; });
   addEventListener("mouseup",()=>drag=null);
   addEventListener("mousemove",e=>{ if(V3B.view==="orbit") return; let dx=0,dy=0;
@@ -1141,7 +1290,7 @@ function setView(v){
   else if(document.pointerLockElement) document.exitPointerLock();
   $("#fpBtn").textContent=v==="orbit"?"🎥 3인칭 → 1인칭 전환":"🧍 1인칭 → 3인칭 전환";
 }
-function hud(){ const h=$("#hud"); h.textContent=V3B.view==="orbit"?"3인칭 · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
+function hud(){ const h=$("#hud"); if(typeof pfHud==="function"&&pfHud()) return; h.textContent=V3B.view==="orbit"?"3인칭 · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
   :"1인칭 · "+(WALK.room==="F"?"충전실":"포장실")+" · W A S D 걷기 · Shift 빠르게 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)"; }
 /* ── 메인화면 : ① 모드 → ② 작업자 (파우치 방식) ── */
 const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연"};
@@ -1178,15 +1327,16 @@ function loop(now){
   requestAnimationFrame(loop); const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
-  walkTick(dt); pkTick(dt); crewTick(dt); v3bFrame(now);
+  walkTick(dt); pkTick(dt); crewTick(dt); pfTick(now); v3bFrame(now);
   if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); }
   if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
   WALK.room=WALK.x<ROOM.wallX?"F":"P";
-  if((loop.k=(loop.k||0)+1)%20===0){ hud(); $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
+  if((loop.k=(loop.k||0)+1)%4===0) hud();
+  if(loop.k%20===0){ $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
 }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); pkBuild(V3B.sc); crewInit(); v3bOrbit(); walkBind(); bindSplash();
+  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); v3bOrbit(); walkBind(); bindSplash();
   $("#fpBtn").onclick=()=>{ if(V3B.view==="orbit"){ setView("fp"); if(CREW.cur) walkSpawnAt(CREW.cur); } else setView("orbit"); };
   requestAnimationFrame(loop);
 }

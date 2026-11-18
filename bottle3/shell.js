@@ -27,7 +27,7 @@ function setView(v){
   else if(document.pointerLockElement) document.exitPointerLock();
   $("#fpBtn").textContent=v==="orbit"?"🎥 3인칭 → 1인칭 전환":"🧍 1인칭 → 3인칭 전환";
 }
-function hud(){ const h=$("#hud"); h.textContent=V3B.view==="orbit"?"3인칭 · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
+function hud(){ const h=$("#hud"); if(typeof pfHud==="function"&&pfHud()) return; h.textContent=V3B.view==="orbit"?"3인칭 · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
   :"1인칭 · "+(WALK.room==="F"?"충전실":"포장실")+" · W A S D 걷기 · Shift 빠르게 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)"; }
 /* ── 메인화면 : ① 모드 → ② 작업자 (파우치 방식) ── */
 const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연"};
@@ -64,15 +64,16 @@ function loop(now){
   requestAnimationFrame(loop); const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
-  walkTick(dt); pkTick(dt); crewTick(dt); v3bFrame(now);
+  walkTick(dt); pkTick(dt); crewTick(dt); pfTick(now); v3bFrame(now);
   if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); }
   if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
   WALK.room=WALK.x<ROOM.wallX?"F":"P";
-  if((loop.k=(loop.k||0)+1)%20===0){ hud(); $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
+  if((loop.k=(loop.k||0)+1)%4===0) hud();
+  if(loop.k%20===0){ $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
 }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); pkBuild(V3B.sc); crewInit(); v3bOrbit(); walkBind(); bindSplash();
+  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); v3bOrbit(); walkBind(); bindSplash();
   $("#fpBtn").onclick=()=>{ if(V3B.view==="orbit"){ setView("fp"); if(CREW.cur) walkSpawnAt(CREW.cur); } else setView("orbit"); };
   requestAnimationFrame(loop);
 }

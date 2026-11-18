@@ -44,7 +44,7 @@ function walkBind(){
   addEventListener("keydown",e=>{ WALK.keys[e.code]=true; if(V3B.view!=="orbit"&&/^(Arrow|Space)/.test(e.code)) e.preventDefault(); });
   addEventListener("keyup",e=>{ WALK.keys[e.code]=false; });
   addEventListener("blur",()=>{ WALK.keys={}; });
-  cv.addEventListener("click",()=>{ if(V3B.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
+  cv.addEventListener("click",()=>{ if(V3B.view!=="orbit"&&typeof PF!=="undefined"&&document.body.classList.contains("pkfp")&&PF.aim&&pfAct()) return; if(V3B.view!=="orbit"&&document.pointerLockElement!==cv&&cv.requestPointerLock) try{ cv.requestPointerLock(); }catch(e){} });
   cv.addEventListener("mousedown",e=>{ if(V3B.view!=="orbit") drag={x:e.clientX,y:e.clientY}; });
   addEventListener("mouseup",()=>drag=null);
   addEventListener("mousemove",e=>{ if(V3B.view==="orbit") return; let dx=0,dy=0;
