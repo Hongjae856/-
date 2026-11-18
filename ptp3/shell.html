@@ -73,6 +73,12 @@ body.appModal .aimEdge{display:none!important}
 #cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
 #cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
 #load{position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center;background:#eef1f4;font-size:18px;font-weight:700;color:var(--sub)}
+
+/* 메인화면 — 파우치 기준 (11/18) : 상단 바 없는 전체 화면 · OEE 연동 표시(왼쪽 아래) · 버전(오른쪽 아래) */
+#splash{position:fixed!important;inset:0!important;z-index:40!important}
+#spVer{position:absolute;right:22px;bottom:16px;border:1px solid #d5dee8;border-radius:16px;background:#fff;padding:6px 12px;font:800 13px "Malgun Gothic","Noto Sans KR",sans-serif;color:#5d7086}
+#splash,#splash *{font-family:"Malgun Gothic","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif}
+.mcol.oee button{background:#e0714a!important;border-color:#c85d38!important;color:#fff!important}.mcol.oee button.e{background:#fff!important;color:#c2502b!important;border:2px solid #e0714a!important}
 </style></head><body>
 <div id="bar">
   <div class="brand">PTP 라인 IDT</div>
@@ -101,10 +107,11 @@ body.appModal .aimEdge{display:none!important}
       <div class="mcol"><h4>가동</h4><button data-c="operation" data-m="easy">기본 · 학습<small>가동 핵심 절차</small></button><button class="e" data-c="operation" data-m="examEasy">기본 · 평가</button><button data-c="operation" data-m="guide">심화 · 학습<small>가동 전체 절차</small></button><button class="e" data-c="operation" data-m="exam">심화 · 평가</button></div>
       <div class="mcol ch"><h4>체인지파트</h4><button data-c="change" data-m="easy">기본 · 학습<small>교체부품 6묶음</small></button><button class="e" data-c="change" data-m="examEasy">기본 · 평가</button><button data-c="change" data-m="guide">심화 · 학습<small>교체부품 18종</small></button><button class="e" data-c="change" data-m="exam">심화 · 평가</button></div>
       <div class="mcol demo"><h4>시연</h4><button data-c="operation" data-m="demo">시연모드<small>작업자별 장비 준비 → 가동 → 생산까지 간단히</small></button></div>
-      <div class="mcol free"><h4>자유</h4><button data-c="operation" data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 인터락 해제</small></button></div>
+      <div class="mcol free"><h4>자유</h4><button data-c="operation" data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제</small></button></div>
       <div class="mcol oee"><h4>OEE</h4><button id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="e" data-c="inc" data-m="inc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div>
     </div>
     <div id="incPick" hidden></div>
+    <div id="spVer"></div>
   </div>
   <div id="load">설비 불러오는 중…</div>
 </div>

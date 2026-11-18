@@ -104,7 +104,7 @@ function pkBuild(sc){
       for(const x of [14400,14480]){ bx(g,pm(x-25),pm(x+25),pm(1540),pm(1600),fz,fz+.006,M.dark); bx(g,pm(x-14),pm(x+14),pm(1552),pm(1588),fz+.006,fz+.012,new T3.MeshStandardMaterial({color:0xff2a20,emissive:0xff1010,emissiveIntensity:.8})); }
       const ky=pm(1405), kz=pm(422); add(g,new T3.Mesh(new T3.CylinderGeometry(.02,.02,.02,16),M.dark)).position.set(pm(14170),ky,kz); add(g,new T3.Mesh(new T3.SphereGeometry(.014,12,8),new T3.MeshStandardMaterial({color:0x801010,emissive:0xff2020,emissiveIntensity:.6}))).position.set(pm(14250),ky,kz); }
     PKG.leafScr=screen(g,.14,.06,[pm(14200),pm(1585),pm(483)],0,["RUN MODE","LABEL"]); { const e=add(g,new T3.Mesh(new T3.CylinderGeometry(.018,.018,.02,16),M.red)); e.position.set(pm(14330),pm(1405),pm(425)); e.rotation.x=Math.PI/2; }
-    add(g,new T3.Mesh(new T3.CylinderGeometry(.045,.05,.11,20),new T3.MeshStandardMaterial({color:0xd01818,emissive:0x400000,roughness:.3,transparent:true,opacity:.85}))).position.set(pm(14600),pm(1600),pm(390));
+    (PKG.leafLamp=add(g,new T3.Mesh(new T3.CylinderGeometry(.045,.05,.11,20),new T3.MeshStandardMaterial({color:0xd01818,emissive:0x400000,roughness:.3,transparent:true,opacity:.85})))).position.set(pm(14600),pm(1600),pm(390));
     for(const x of [12950,14250]) gearMotor(g,pm(x),y+.1,pm(170)); acrylBox(g,pm(12850),pm(13200),y,y+.25,-.15,.15); }
   /* ⑤ 중량선별기 */
   { const c=PK.cw; bx(g,pm(c.x0),pm(c.x1),pm(820),pm(880),-.16,.16,M.ss); for(const x of [c.x0+80,c.x1-80]) for(const z of [-120,120]) foot(g,pm(x),pm(z),pm(820),.025);
@@ -141,7 +141,7 @@ function pkBuild(sc){
     for(const dx of [-480,0,480]) bx(g,pm(P.x+dx-50),pm(P.x+dx+50),.02,.12,pm(P.z-550),pm(P.z+550),pal); bx(g,pm(P.x-550),pm(P.x+550),.12,.14,pm(P.z-550),pm(P.z+550),pal);
     PKG.palG=new T3.Group(); g.add(PKG.palG);
     /* 대차 */ { const cx=pm(19800), cz=pm(1500); bx(g,cx-.4,cx+.4,.42,.45,cz-.3,cz+.3,M.ss); bx(g,cx-.4,cx+.4,.12,.14,cz-.3,cz+.3,M.ss); for(const [dx,dz] of [[-.36,-.26],[.36,-.26],[-.36,.26],[.36,.26]]){ rod(g,[cx+dx,.06,cz+dz],[cx+dx,.45,cz+dz],.018,M.ss,10); add(g,new T3.Mesh(new T3.SphereGeometry(.04,10,8),M.dark)).position.set(cx+dx,.04,cz+dz); } }
-    /* 의자 */ for(const [x,z] of [[18750,780],[16900,780]]){ const cx=pm(x), cz=pm(z); add(g,new T3.Mesh(new T3.CylinderGeometry(.17,.17,.06,24),M.black)).position.set(cx,.66,cz); rod(g,[cx,.1,cz],[cx,.63,cz],.025,M.ssMir,12); for(let k=0;k<5;k++){ const q=k/5*Math.PI*2; rod(g,[cx,.1,cz],[cx+Math.cos(q)*.25,.03,cz+Math.sin(q)*.25],.012,M.ssMir,8); } } }
+    /* 의자 (판독 작업자 뒤로 밀어 둠 · 작업자는 서서 판독) */ for(const [x,z] of [[18750,1250],[16900,780]]){ const cx=pm(x), cz=pm(z); add(g,new T3.Mesh(new T3.CylinderGeometry(.17,.17,.06,24),M.black)).position.set(cx,.66,cz); rod(g,[cx,.1,cz],[cx,.63,cz],.025,M.ssMir,12); for(let k=0;k<5;k++){ const q=k/5*Math.PI*2; rod(g,[cx,.1,cz],[cx+Math.cos(q)*.25,.03,cz+Math.sin(q)*.25],.012,M.ssMir,8); } } }
   pkBottles(g);
 }
 /* ── 병 (인스턴스) : 몸통 · 캡 · 라벨 띠 · 설명서 탭 ── */

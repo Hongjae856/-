@@ -98,7 +98,7 @@ function v3bGen(){
 }
 const v3bEye=c=>{ const cp=Math.cos(c.pitch), sp=Math.sin(c.pitch); return [c.tx+c.dist*cp*Math.sin(c.yaw), c.ty+c.dist*sp, c.tz+c.dist*cp*Math.cos(c.yaw)]; };
 function v3bFrame(now){
-  const R=V3B.R, cv=R.domElement, w=cv.clientWidth, h=cv.clientHeight, pr=Math.min(1.5,devicePixelRatio||1);
+  const R=V3B.R, cv=R.domElement, w=cv.clientWidth, h=cv.clientHeight, pr=tbPR();
   if(w<10||h<10) return;
   if(cv.width!==Math.round(w*pr)||cv.height!==Math.round(h*pr)){ R.setPixelRatio(pr); R.setSize(w,h,false); V3B.cam.aspect=w/Math.max(1,h); V3B.cam.updateProjectionMatrix(); }
   const cam=V3B.cam; V3B.inner.visible=V3B.view!=="orbit";

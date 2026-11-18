@@ -24,8 +24,8 @@ function crewMark(){
   $("#crewHint").innerHTML=CREW.mode?'<b>② 작업자 선택</b> — 위의 충전실 · 포장실 작업자를 누르면 그 작업장 1인칭으로 시작합니다 <s>모드 : '+CREW.mode.nm+'</s>'
     :'<b>① 모드 선택</b> — 아래에서 모드를 고른 뒤 <b>② 작업자</b>를 누르면 그 작업장 작업자 1인칭으로 시작합니다';
 }
-function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:b.closest(".mcol").querySelector("h4").textContent+" · "+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room) crewGo(); }
-function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode) crewGo(); }
+function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:b.closest(".mcol").querySelector("h4").textContent+" · "+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r:CREW.room}; crewGo(); } }
+function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r}; crewGo(); } }
 function crewGo(){ if(CREW.mode&&CREW.mode.c==="inc"){ inc3Pick(CREW.room); return; } CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
 function startRoom(r){
   const k=APPK[r], c=crs(k), M=CREW.mode;
@@ -86,7 +86,7 @@ let last=0;
 function loop(now){
   requestAnimationFrame(loop);
   const dt=Math.min(.1,last?(now-last)/1000:0); last=now;
-  placeCanvas(); walkTick(dt); crew3Tick(dt); fp3Tick(now); v3Frame(now);
+  placeCanvas(); tbTick(dt); walkTick(dt); crew3Tick(dt); fp3Tick(now); v3Frame(now);
   if(now-(loop.m||0)>300){ loop.m=now; inc3Tick(); mode3Coach(); }
   if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps"; }
 }
@@ -101,9 +101,20 @@ function ptpHint(){
     if(!act){ fpcToast("평가가 시작된 뒤 힌트를 쓸 수 있습니다"); return; }
     if(b&&!b.disabled&&b.style.display!=="none"){ b.click(); fpcToast("힌트 사용 −5 점 — 다음 작업 표시"); } else fpcToast("힌트 표시 중"); return; }
   const c=$("#shCoach .t b"); fpcToast(FP3.goal?"다음 작업 : "+FP3.goal.nm:(c?c.textContent:"안내 없음")); }
+/* 배속 : 두 앱의 SPD (원본 ×1 ×2 ×5 + 파우치처럼 ×10) */
+function tbPtpSpd(v){ for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(!w) continue; try{ if(w.eval("SPD")!==v&&!(w.eval("typeof AP!=='undefined'&&AP.on"))) w.eval("SPD="+v); }catch(e){} } }
+let LAST3=null;
 function boot(){ $("#modeChip").textContent=verTxt();
   if(!appsReady()){ setTimeout(boot,100); return; }
-  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); fpcInit({isFP:()=>V3P.view!=="orbit"&&!FP3.hmi, hint:ptpHint}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
+  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); fpcInit({isFP:()=>V3P.view!=="orbit"&&!FP3.hmi, hint:ptpHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});
+  tbViews({orbit:()=>V3P.orbit, isOrbit:()=>V3P.view==="orbit"&&$("#splash").classList.contains("hide"), rect:()=>{ const c=document.getElementById("cv").getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect(); return {left:c.left-s.left,top:c.top-s.top,width:c.width}; },
+    presets:[["전체",{yaw:-.42,pitch:.42,dist:12500,tx:2600,ty:700,tz:200}],["충전실",{yaw:-.4,pitch:.36,dist:7000,tx:-4600,ty:900,tz:0}],["포장실",{yaw:-.4,pitch:.38,dist:9000,tx:8000,ty:800,tz:300}],
+      ["전면",{yaw:0,pitch:.12,dist:12500,tx:2600,ty:1000,tz:0}],["평면",{yaw:0,pitch:1.45,dist:17000,tx:2600,ty:0,tz:500}]]});
+  /* 상단 바 (파우치 기준 · idt_common/topbar.js) */
+  tbInit({wins:()=>["filler","line"].map(k=>UNI_HUB.win(k)).filter(Boolean), cur:()=>CREW.cur?UNI_HUB.win(APPK[CREW.cur]):null, ids:{snd:"sndBtn",end:"testEnd"},
+    speed:s=>tbPtpSpd(s), sync:()=>tbPtpSpd(TBQ.spd), R:()=>V3P.R, scene:()=>V3P.sc, lights:()=>V3P.key?[V3P.key]:[],
+    end:()=>{ if(!CREW.cur){ return true; } if(MODE3.kind==="free"||MODE3.kind==="demo"||MODE3.kind==="inc"){ goHome(); return true; } return false; },
+    restart:()=>{ const L=LAST3; goHome(); if(!L) return; setTimeout(()=>{ const b=document.querySelector('#modes button[data-m="'+L.m+'"][data-c="'+L.c+'"]')||document.querySelector('#modes button[data-m="'+L.m+'"]'); if(b) b.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
   document.querySelectorAll("#modes button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
   $("#chooseF").onclick=()=>pickRoom("F"); $("#chooseP").onclick=()=>pickRoom("P");

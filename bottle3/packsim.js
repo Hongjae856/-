@@ -110,12 +110,12 @@ function psScan(q){
 function psBoxDone(manual){
   if(PS.rx){ const sn="(01)1"+PS.job.gtin.slice(1)+"(21)"+PS.job.lot+"S"+String(PS.boxSer).padStart(7,"0"); PS.ag.issued.unshift({no:PS.boxSer,sn}); PS.ag.issued.length=Math.min(PS.ag.issued.length,12); PS.boxSer++; if(PS.ag.paper>0){ PS.ag.paper--; PS.agFeed=1; } else { PS.ag.pending=true; psMsg("AG 라벨지 없음 — 라벨지를 교체하면 대기 중인 박스 라벨이 발행됩니다"); } }
   PS.ag.boxes++; PS.ag.msg=manual?"포장완료 (수량 미달 박스 마감)":"포장 완료 — 박스 라벨 발행"; PS.ag.list=[]; PS.ag.n=0;
-  PS.box.open=false; PS.box.closing=PS.auto.w2?6:1e9;           /* 작업자 2 : 봉함 · 라벨 · 파렛트 (약 6 초) */
+  PS.box.open=false; PS.box.closing=PS.auto.w2?12:1e9;          /* 자동 작업자 2 : 봉함 · AG 라벨 · 파렛트 적재 · 새 박스 (약 12 초 · 3D 작업자 동작이 있으면 그 동작이 끝낼 때) */
 }
 function psBoxAway(){ PS.box.closing=0; PS.box.done++; PS.pallet++; PS.box.n=0; PS.box.open=true; PS.box.flat=Math.max(0,PS.box.flat-1); if(PS.box.flat<3) PS.box.flat=14; PS.agFeed=0; }
 /* ── 그리기 : 병 · 박스 안 병 · 파렛트 박스 · 리젝트 함 ── */
 function pkTick(dt){
-  psTick(dt); const B=PKG.B, m=new T3.Matrix4(), z=new T3.Matrix4().makeScale(0,0,0); let n=0; const MAX=240;
+  psTick(dt*((typeof TBQ!=="undefined"&&TBQ.spd)||1)); const B=PKG.B, m=new T3.Matrix4(), z=new T3.Matrix4().makeScale(0,0,0); let n=0; const MAX=240;
   const put=(x,y,zz,lab,leaf,rot)=>{ if(n>=MAX) return; m.makeRotationZ(rot||0).setPosition(x,y,zz); B.body.setMatrixAt(n,m); B.cap.setMatrixAt(n,m); B.lab.setMatrixAt(n,lab?m:z); B.tab.setMatrixAt(n,leaf?m:z); n++; };
   for(const q of PKG.list){ const p=pkPath(q.s); put(pm(p[0]),pm(PK.CH),pm(p[2]),q.lab,q.leaf); }
   /* 턴테이블 보관 병 (최대 60 개 · 원판 위 고리 모양) */
@@ -134,6 +134,8 @@ function pkTick(dt){
     for(let i=0;i<Math.min(PS.pallet,PS.perLayer*PS.layers);i++){ const L=Math.floor(i/PS.perLayer), j=i%PS.perLayer, c=j%3, r=Math.floor(j/3);
       const x0=pm(P.x)-.55+c*(bxW+.01), z0=pm(P.z)-.45+r*(bxD+.04); bx(G,x0,x0+bxW,.14+L*bxH,.14+L*bxH+bxH-.004,z0,z0+bxD,PKG.kraft); } }
   if(PKG.rejPusher) PKG.rejPusher.position.z=PKG.push>0?.06:-.0825;
+  /* 경광등 (파우치 기준) : 에러 = 적색 깜빡임 · 조치 중(LOTO) = 적색 점등 · 평상시 꺼짐 */
+  if(PKG.leafLamp){ const m=PKG.leafLamp.material, t=performance.now()/1000, on=PS.leaf.fault?(PS.leaf.lock?1:(Math.sin(t*9)>0?1:0)):0; m.emissive.setHex(on?0xff2020:0x200000); m.emissiveIntensity=on?1.4:.4; }
   if(PKG.flip) PKG.flip.rotation.y=PKG.flipT>0?-.9:0;
   psScreens(dt);
 }

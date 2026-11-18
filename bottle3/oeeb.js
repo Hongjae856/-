@@ -48,6 +48,8 @@ function freeStop(){ FREEB.on=false; const w=appWin(); try{ if(w.__sb0){ w.start
 const _cwAct=PS_ACT.cw; PS_ACT.cw=()=>{ if(FREEB.on&&!PS.cw.set){ PS_ACT.cwSet(STD.std,STD.lo,STD.hi); } return _cwAct(); };
 /* ── OEE · 이상사례 ── */
 function oeebInit(){
+  if(!document.getElementById("oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');   /* 파우치와 같은 OEE 연동 표시 */
+  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ $("#spVer").textContent="V"+CHANGELOG[0].v; }catch(e){}
   if(typeof OEEEDU==="undefined") return;
   OEEEDU.init({line:"계수기", title:"병 라인(계수기) · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); incbPick(); }});
 }

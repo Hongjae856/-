@@ -58,7 +58,7 @@ function pfHud(){ const h=$("#hud"); if(!document.body.classList.contains("pk")|
   const a=PF.aim, g=PF.goal, R=PF.res||{}, m=x=>x==null?"":" · "+x.toFixed(1)+" m";
   h.innerHTML=a&&PF.aimIn?"<b>E</b> / 클릭 · <b>"+a.nm+"</b>"+(g===a?" <span class='nx'>다음 작업</span>":"")
     :a&&!R.aimHidden?"<span class='far'>가까이 가세요"+m(R.aimDist)+"</span> · "+a.nm
-    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 포장실"+(FPC.crouch?" · 앉음":"")+" · WASD 걷기 (Shift 빠르게) · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기) · C 앉기 · F1 힌트 · H 도움말";
+    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 포장실"+(FPC.crouch?" · 앉음":"")+" · WASD 걷기 (Shift 빠르게) · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기) · C 앉기 · F1 힌트 · Tab 메뉴 · H 도움말";
   return true; }
 function pfInit(){
   PF.am=createAimMark({T3, scene:V3B.sc, camera:()=>V3B.cam, canvas:()=>$("#cv"), unit:1});

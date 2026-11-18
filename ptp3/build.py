@@ -33,7 +33,15 @@ APP_PATCH = [
     ("worker3=function(){ WK.forEach(drawWorker); };",
      "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
     ("worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});",
-     "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
+     "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target,key:j&&j.key,ph:phase}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
+    # 충전실 작업자 : 원본이 drawTrainingWorker 를 다시 정의(교체부품 과정)해 위 패치가 쓰이지 않던 문제 (11/18 발견) — 실제 쓰이는 정의에서 위치 · 작업을 셸로 넘김
+    ("worker3(workerX,z+110,{reach:j?Math.sin(Math.PI*phase):0,",
+     "window.PTP_WKF={x:X3(workerX),z:z+110,walk:j?+(j.elapsed<j.walkTime):+workerWalkingAside(),reach:j?Math.sin(Math.PI*phase):0,both:!!j,target:{x:X3(contact.x),y:Y3(contact.y),z},key:j&&j.key,ph:phase}; if(!window.NO_PTP_WORKER) worker3(workerX,z+110,{reach:j?Math.sin(Math.PI*phase):0,", 1, ("filler",)),
+    # 작업자가 들고 가는 자재 (11/18 파우치 기준) : 작업 종류를 작업자에 기록 → 셸이 손에 든 물건을 그림
+    ("startWorkerAction=function(key,cb,sec){movingWorkerAction(key,cb,sec);lastWK.workPhase=0;workerJob='work';};",
+     "startWorkerAction=function(key,cb,sec){movingWorkerAction(key,cb,sec);lastWK.workPhase=0;lastWK.key=key;workerJob='work';};", 1, ("line",)),
+    ("actorVisit=function(x,job,sec){movingActorVisit(x,job,sec);lastWK.workPhase=0;workerJob='work';};",
+     "actorVisit=function(x,job,sec){movingActorVisit(x,job,sec);lastWK.workPhase=0;lastWK.key=job;workerJob='work';};", 1, ("line",)),
     # 자유모드 중간안 (11/18 사용자 결정) : 운전 중에도 안전문을 열 수 있음(도어 잠금 해제) — 열면 인터락으로 설비 정지(E020) · 닫고 RESET
     ('if(S.running||oneShot){ toast("운전 중에는 안전문을 열 수 없습니다.","bad"); return; }',
      'if((S.running||oneShot)&&window.FREE3&&S.door==="closed"){ S.door="open"; S.doorOpens=(S.doorOpens||0)+1; alarm("E020"); toast("안전문 열림 — 인터락 정지 (E020)","bad"); return; }\nif(S.running||oneShot){ toast("운전 중에는 안전문을 열 수 없습니다.","bad"); return; }', 1, ("filler",)),
@@ -44,7 +52,7 @@ APP_PATCH = [
     ("function examGate(kind,key){\n  if(!isExam()", "function examGate(kind,key){\n  if(window.FREE3) return true;\n  if(!isExam()", 1, ("line",)),
     # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fpctl.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
@@ -85,7 +93,7 @@ def free_runops(key: str, text: str) -> str:
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

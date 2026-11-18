@@ -46,7 +46,7 @@ function show(r){
   CREW.cur=r; document.body.classList.toggle("pk",r!=="F"); placeCanvas.k=null;
   setView("fp"); walkSpawnAt(r); crewMark(); $("#modeChip").textContent=MODE_NM[CREW.mode]+" · "+(r==="F"?"충전실":r==="P1"?"포장실 1":"포장실 2");
 }
-function crewGo(r){ if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
+function crewGo(r){ if(CREW.mode&&CREW.mode!=="inc") LASTB={m:CREW.mode,r,rx:CREW.rx}; if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
 function goHome(){ try{ const w=appWin(); w.B3_DEMO_STEP=false; if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
   pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; document.body.classList.remove("pk"); setView("orbit");
   $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
@@ -66,7 +66,7 @@ function loop(now){
   requestAnimationFrame(loop); const dt=Math.min(.1,(now-last)/1000); last=now;
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
-  walkTick(dt); pkTick(dt); crewTick(dt); pfTick(now); ffTick(now); v3bFrame(now);
+  tbTick(dt); walkTick(dt); pkTick(dt); crewTick(dt); pfTick(now); ffTick(now); v3bFrame(now);
   if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); incbTick(); demobTick(); }
   if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
   WALK.room=WALK.x<ROOM.wallX?"F":"P";
@@ -81,9 +81,28 @@ function bHint(){
     if(ex){ const b=w.document.getElementById("examHint"); if(b&&!b.disabled){ b.click(); fpcToast("힌트 사용 −5 점 — 다음 작업 표시"); } else fpcToast("힌트 표시 중"); return; }
     let t=""; try{ t=w.document.getElementById("cTitle").textContent; }catch(e){} fpcToast(FF.goal?"다음 작업 : "+FF.goal.nm:(t||"안내 없음")); return; }
   pcHint(); }
+/* 배속 : 충전실 앱 SPD · 포장실 시뮬레이션 (×1 ×2 ×5 ×10) */
+function tbBSpd(v){ try{ const w=appWin(); if(w.eval("SPD")!==v) w.eval("SPD="+v); }catch(e){} }
+/* 학습 종료 : 충전실 = 원본 앱 결과 화면 / 포장실 = 포장 과정 결과 / 자유 · 시연 · 이상사례 = 메인화면 */
+function bEnd(){ if(!CREW.cur) return true; if(CREW.mode==="free"||CREW.mode==="demo"||CREW.inc){ goHome(); return true; }
+  if(CREW.cur==="F") return false; if(PC.on&&!PC.done){ PC.done=true; pcResult(); } else if(PC.done) pcResult(); return true; }
+function bRubric(){ if(CREW.cur==="F") return false;
+  pcDlg('<h3>채점 관리 — 포장실</h3><table class="cmp"><tr><th>항목</th><th>감점</th></tr><tr><td>순서가 다른 조작</td><td>−3</td></tr><tr><td>작업 지시서와 다른 중량 세팅</td><td>−5</td></tr><tr><td>힌트 사용 (단계마다 1 회)</td><td>−5</td></tr></table><p>합격 기준 80 점 (충전실 · 파우치 · 블리스터와 같음)</p>',[["닫기",null]]); return true; }
+let LASTB=null;
+function bRestart(){ const L=LASTB; goHome(); if(!L) return; setTimeout(()=>{ CREW.rx=L.rx; spMark(); const m=document.querySelector('#modes [data-m="'+L.m+'"]'); if(m) m.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash(); fpcInit({isFP:()=>V3B.view!=="orbit"&&!(typeof FF!=="undefined"&&FF.hmi), hint:bHint});
+  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash(); fpcInit({isFP:()=>V3B.view!=="orbit"&&!(typeof FF!=="undefined"&&FF.hmi), hint:bHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});
+  tbViews({orbit:()=>V3B.orbit, isOrbit:()=>V3B.view==="orbit"&&$("#splash").classList.contains("hide"), rect:()=>{ const c=document.getElementById("cv").getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect(); return {left:c.left-s.left,top:c.top-s.top,width:c.width}; },
+    presets:[["전체",{yaw:-.45,pitch:.38,dist:9500,tx:1400,ty:700,tz:200}],["충전실",{yaw:-.4,pitch:.36,dist:8500,tx:-1000,ty:800,tz:0}],["포장실",{yaw:-.4,pitch:.38,dist:9000,tx:15500,ty:800,tz:300}],
+      ["전면",{yaw:0,pitch:.12,dist:17000,tx:7500,ty:1100,tz:0}],["평면",{yaw:0,pitch:1.45,dist:23000,tx:7500,ty:0,tz:1200}]]});
+  /* 상단 바 (파우치 기준 · idt_common/topbar.js) — 라인 속도는 원본 앱 값(병/분)을 그대로 조절 */
+  tbInit({wins:()=>[appWin()].filter(Boolean), cur:()=>CREW.cur==="F"?appWin():null, ids:{snd:"soundBtn",end:"endBtn"},
+    extra:'<span class="pill" title="충전 라인 속도 (병/분)">속도<button id="tbBpmDn">−</button><b class="v" id="tbBpm">28</b><button id="tbBpmUp">+</button></span>',
+    speed:s=>tbBSpd(s), sync:()=>{ tbBSpd(TBQ.spd); try{ $("#tbBpm").textContent=appWin().document.getElementById("bpmV").textContent; }catch(e){} },
+    R:()=>V3B.R, scene:()=>V3B.sc, lights:()=>{ const L=[]; V3B.sc.traverse(o=>{ if(o.isDirectionalLight&&o.castShadow!==undefined&&o.shadow) L.push(o); }); return L; },
+    end:()=>bEnd(), rubric:()=>bRubric(), restart:()=>bRestart()});
+  $("#tbBpmDn").onclick=()=>{ tbClick(appWin(),"bpmDn"); tbSync(); }; $("#tbBpmUp").onclick=()=>{ tbClick(appWin(),"bpmUp"); tbSync(); };
   $("#fpBtn").onclick=()=>{ if(V3B.view==="orbit"){ setView("fp"); if(CREW.cur) walkSpawnAt(CREW.cur); } else setView("orbit"); };
   requestAnimationFrame(loop);
 }

@@ -19,7 +19,7 @@ function crewInit(){
   $("#chooseF").innerHTML='<small>작업자 1 · FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>파우치 충전기 SP303 · 2층 데크 · IPC</span>';
   $("#chooseP").innerHTML='<small>작업자 2 · PACKING ROOM</small><strong>🧍 포장실 작업자</strong><span>스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기</span>';
   { const d=$("#spDemo small"); if(d) d.textContent="작업자별 장비 ON → 가동 → 생산까지 간단히"; }
-  go.insertAdjacentHTML("beforeend",'<div class="modeColumn free"><h4>자유</h4><button class="fr" id="spFree">자유모드<small>순서 · 감점 · 평가 없음 · 인터록 해제 · 문 · 덮개 자유 개폐</small></button></div>');
+  go.insertAdjacentHTML("beforeend",'<div class="modeColumn free"><h4>자유</h4><button class="fr" id="spFree">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제 · 문 · 덮개 자유 개폐</small></button></div>');
   const oee=go.querySelector(".modeColumn.oee"); if(oee) go.appendChild(oee);                 /* 순서 : 기본 · 심화 · 시연 · 자유 · OEE */
   for(const [id,m] of Object.entries(CREW_MODES)){ const b=$("#"+id); if(b) b.onclick=()=>crewPickMode(m); }
   $("#chooseF").onclick=()=>crewPickRoom("F"); $("#chooseP").onclick=()=>crewPickRoom("P");

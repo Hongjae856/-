@@ -174,7 +174,7 @@ function pcMatTick(){
   for(const k in PC_MAT){ const m=PC_MAT[k]; if(k==="ag"&&!PS.rx) continue; const v=m.lvl();
     if(v<20&&!PC.warn[k]){ PC.warn[k]=true; psMsg(m.nm+" 잔량 "+Math.round(v)+" % — 교체 준비 ("+(m.devNm?m.devNm+" 한 뒤 교체":"프린터에서 교체")+")"); }
     const auto=k==="ag"?(PS.auto.w2||PS.auto.w1):PS.auto.w1;
-    if(auto&&(v<3||(k==="ag"&&PS.ag.pending))){ m.set(); PC.warn[k]=false; psMsg("자동 작업자 — "+m.nm+" 교체"); } } }
+    if(auto&&(v<3||(k==="ag"&&PS.ag.pending))){ m.set(); PC.warn[k]=false; psMsg("자동 작업자 — "+m.nm+" 교체"); if(typeof crewMat==="function") crewMat(k); } } }
 /* 박스가 차면 : 자동이면 psBoxDone 이 닫음 / 수동(작업자 2 · 일반)이면 대기 */
 const _psBoxDone=psBoxDone;
 psBoxDone=function(manual){ _psBoxDone(manual); PS.box.full=true; if(!PS.auto.w2) PS.box.closing=0; };

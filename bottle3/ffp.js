@@ -58,10 +58,10 @@ function ffHmi(on){ const d=ffDoc(); FF.hmi=on; if(d) d.body.classList.toggle("h
 function ffHud(){ if(CREW.cur!=="F"||V3B.view==="orbit") return false; const h=$("#hud"), a=FF.aim, g=FF.goal, R=FF.res||{}, m=x=>x==null?"":" · "+x.toFixed(1)+" m";
   h.innerHTML=FF.hmi?"<b>설비 화면 조작 중</b> · 오른쪽 설비 화면을 누르세요 · <b>F</b> 또는 <b>Esc</b> 뒤로"
     :a&&FF.aimIn?"<b>E</b> / 클릭 · <b>"+a.nm+"</b>"+(g===a?" <span class='nx'>다음 작업</span>":""):a&&!R.aimHidden?"<span class='far'>가까이 가세요"+m(R.aimDist)+"</span> · "+a.nm
-    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 충전실"+(FPC.crouch?" · 앉음":"")+" · WASD 걷기 (Shift 빠르게) · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기) · C 앉기 · F1 힌트 · H 도움말"; return true; }
+    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 충전실"+(FPC.crouch?" · 앉음":"")+" · WASD 걷기 (Shift 빠르게) · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기) · C 앉기 · F1 힌트 · Tab 메뉴 · H 도움말"; return true; }
 function ffInit(){
   ffBuild(V3B.sc); FF.am=createAimMark({T3, scene:V3B.sc, camera:()=>V3B.cam, canvas:()=>$("#cv"), unit:1});
-  const css="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}";
+  const css="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}body.fpLock:not(.hmiOn) #hmiWrap{position:relative}body.fpLock:not(.hmiOn) #hmiWrap>*{visibility:hidden!important}body.fpLock:not(.hmiOn) #hmiWrap::before{content:\"🧍 1인칭 진행 중\\A\\A설비 화면은 현장 모니터 앞에서 조준하고 E 로 엽니다. F · Esc 로 닫습니다.\\A\\A상단 [3인칭 전환] 으로 이 자리에 다시 표시할 수 있습니다.\";white-space:pre-wrap;position:absolute;left:12px;right:12px;top:12px;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid #c9d4e0;color:#173a63;font:600 14px/1.55 \"Malgun Gothic\",\"Noto Sans KR\",sans-serif;visibility:visible;z-index:5}";
   const inj=()=>{ const d=ffDoc(); if(d&&d.head&&!d.getElementById("ffCss")){ const s=d.createElement("style"); s.id="ffCss"; s.textContent=css; d.head.appendChild(s); } };
   APP_FR.addEventListener("load",()=>{ inj(); const w=appWin(); w.addEventListener("keydown",e=>{ if(e.target&&e.target.closest&&e.target.closest("input,textarea,select")) return; ffKey(e); WALK.keys[e.code]=true; }); w.addEventListener("keyup",e=>{ WALK.keys[e.code]=false; }); });
   inj(); addEventListener("keydown",ffKey);
