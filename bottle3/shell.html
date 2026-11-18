@@ -2,6 +2,7 @@
 <html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>병 라인 IDT</title>
 <style>
+/*__OEECSS__*/
 [hidden]{display:none!important}
 :root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#dfe4e1;color:var(--ink);font-family:"Malgun Gothic",Arial,sans-serif;overflow:hidden}
@@ -59,6 +60,10 @@ body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:
 #pToast{position:absolute;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#142b47ee;color:#fff;border-radius:999px;padding:8px 18px;font:700 14px "Malgun Gothic"}
 body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before{content:"1인칭 — 설비에 다가가 조준하고 E / 클릭 (타일은 현황만)";grid-column:1/3;font:700 12px 'Malgun Gothic';color:#fff;background:#173a63cc;border-radius:8px;padding:5px 8px}
 #hud .far{color:#b04a00;font-weight:800}#hud .nx{background:#ffd22e;border-radius:99px;padding:0 6px;font-weight:800}
+.mcol.free button[data-m]{background:#5b3fa8;border-color:#5b3fa8}
+#incPick{background:#fff;border-radius:16px;padding:16px 20px;max-width:760px;width:100%;box-shadow:0 4px 18px #0002;font:500 14px "Malgun Gothic"}#incPick h3{margin:0 0 6px}
+#incPick .ip{display:flex;align-items:center;gap:10px;border-top:1px solid #e3e8ee;padding:8px 0}#incPick .ip>span{width:24px;font-weight:800;color:#5d7086}#incPick .ip b{flex:1}#incPick .ip s{display:block;text-decoration:none;font:500 12px "Malgun Gothic";color:#5d7086}
+#incPick button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:7px 12px;font:700 13px "Malgun Gothic";cursor:pointer}#incPick button.e{background:#fff;color:#173a63;border:1px solid #173a63}#incBack{margin-top:10px}
 #load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
 </style></head><body>
 <div id="bar">
@@ -90,8 +95,9 @@ body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before
       <div class="mcol"><h4>기본</h4><button data-m="easy">기본 · 학습<small>핵심 절차</small></button><button class="e" data-m="examEasy">기본 · 평가</button></div>
       <div class="mcol"><h4>심화</h4><button data-m="guide">심화 · 학습<small>전체 절차</small></button><button class="e" data-m="exam">심화 · 평가</button></div>
       <div class="mcol demo"><h4>시연</h4><button data-m="demo">시연모드<small>작업자별 자동 가동</small></button></div>
-      <div class="mcol"><h4>자유 · OEE</h4><button class="e" disabled>자유모드<small>준비 중 (B5)</small></button><button class="e" disabled>OEE · 이상사례<small>준비 중 (B5)</small></button></div>
+      <div class="mcol free"><h4>자유 · OEE</h4><button data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제</small></button><button id="spOee" class="e">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="e" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div>
     </div>
+    <div id="incPick" hidden></div>
   </div>
   <div id="load">설비 불러오는 중…</div>
 </div>

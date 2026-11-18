@@ -30,7 +30,7 @@ function setView(v){
 function hud(){ const h=$("#hud"); if(typeof pfHud==="function"&&pfHud()) return; h.textContent=V3B.view==="orbit"?"3인칭 · 왼쪽 끌기 = 회전 · 오른쪽(Shift) 끌기 = 이동 · 휠 = 확대"
   :"1인칭 · "+(WALK.room==="F"?"충전실":"포장실")+" · W A S D 걷기 · Shift 빠르게 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)"; }
 /* ── 메인화면 : ① 모드 → ② 작업자 (파우치 방식) ── */
-const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연"};
+const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연",free:"자유",inc:"이상사례"};
 function spMark(){ $("#workers").classList.toggle("ready",!!CREW.mode); $("#chooseP2").disabled=!CREW.rx;
   document.querySelectorAll("#modes [data-m]").forEach(b=>b.classList.toggle("sel",b.dataset.m===CREW.mode));
   document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.classList.toggle("on",(b.dataset.rx==="1")===CREW.rx));
@@ -39,8 +39,8 @@ function crewMark(){ document.querySelectorAll("#crewSw [data-r]").forEach(b=>{ 
   b.disabled=!CREW.cur||(r==="P2"&&!CREW.rx)||(r!=="F"&&CREW.pRole&&r!==CREW.pRole); }); }
 function startRoom(r){
   const m=CREW.mode, w=appWin();
-  if(r==="F"){ if(!CREW.started.F){ CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession(m); }catch(e){ console.error("충전실 과정",e); } } }
-  else if(!CREW.started.P){ CREW.started.P=true; CREW.pRole=r; pcStart(r,m==="demo"?"demo":/exam/i.test(m)?"exam":"learn",!/Easy|easy/.test(m),CREW.rx); }
+  if(r==="F"){ if(!CREW.started.F){ CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession(m==="free"?"guide":m); if(m==="free") freeStart("F"); }catch(e){ console.error("충전실 과정",e); } } }
+  else if(!CREW.started.P){ CREW.started.P=true; CREW.pRole=r; pcStart(r,m==="demo"?"demo":m==="free"?"free":/exam/i.test(m)?"exam":"learn",!/Easy|easy/.test(m),CREW.rx); if(m==="free") freeStart("P"); }
 }
 function show(r){
   CREW.cur=r; document.body.classList.toggle("pk",r!=="F"); placeCanvas.k=null;
@@ -48,7 +48,7 @@ function show(r){
 }
 function crewGo(r){ if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
 function goHome(){ try{ const w=appWin(); if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
-  pcStop(); PS_ACT.allOff(); Object.assign(CREW,{cur:null,mode:null,pRole:null,started:{F:false,P:false}}); document.body.classList.remove("pk"); setView("orbit");
+  pcStop(); freeStop(); PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; document.body.classList.remove("pk"); setView("orbit");
   $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
 function walkSpawnAt(r){ if(r==="F") walkSpawn("F"); else { PK_OBS=PK_OBS||pkObstacles(); const p=r==="P1"?[PK.scanX,900]:[19950,1000];
   Object.assign(WALK,{x:p[0],z:p[1],y:1600,yaw:0,pitch:-.35,room:"P"}); } }
@@ -58,6 +58,8 @@ function bindSplash(){
   $("#chooseF").onclick=()=>crewGo("F"); $("#chooseP1").onclick=()=>crewGo("P1"); $("#chooseP2").onclick=()=>crewGo("P2");
   document.querySelectorAll("#crewSw [data-r]").forEach(b=>b.onclick=()=>{ if(!CREW.cur) return; startRoom(b.dataset.r); show(b.dataset.r); });
   $("#homeBtn").onclick=goHome; spMark(); crewMark();
+  $("#spOee").onclick=()=>{ if(typeof OEEEDU!=="undefined") OEEEDU.open(); };
+  $("#spInc").onclick=()=>{ CREW.mode="inc"; spMark(); incbPick(); };
 }
 let last=performance.now();
 function loop(now){
@@ -65,7 +67,7 @@ function loop(now){
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
   walkTick(dt); pkTick(dt); crewTick(dt); pfTick(now); v3bFrame(now);
-  if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); }
+  if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); incbTick(); }
   if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
   WALK.room=WALK.x<ROOM.wallX?"F":"P";
   if((loop.k=(loop.k||0)+1)%4===0) hud();
@@ -73,7 +75,7 @@ function loop(now){
 }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); v3bOrbit(); walkBind(); bindSplash();
+  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash();
   $("#fpBtn").onclick=()=>{ if(V3B.view==="orbit"){ setView("fp"); if(CREW.cur) walkSpawnAt(CREW.cur); } else setView("orbit"); };
   requestAnimationFrame(loop);
 }

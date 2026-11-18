@@ -21,6 +21,8 @@ function pfTargets(){
   add("sample","중량선별기 입구 (시료 투입)",[14750,960,0],[.3,.15,.2],"sample");
   if(PS.rx){ add("ag","집합 포장 PC 화면",[PK.scanX,1495,-328],[.56,.36,.04],"ag"); add("scan","거치형 판독기",[PK.scanX,1000,-118],[.26,.16,.05],"scan");
     add("agLab","AG 라벨 프린터 (발행된 라벨)",[19175,1010,-40],[.25,.12,.06],"agLab"); }
+  add("leafBelt","설명서 부착기 벨트 · 부착 헤드",[13720,1000,-40],[.2,.12,.2],"leafBelt");
+  add("tension","라벨 롤 · 장력 조정",[10900,1070,-470],[.36,.12,.36],"tension");
   add("flat","접힌 박스 더미",[21000,960,-150],[.6,.12,.46],"boxMk");
   add("box","작업대 박스",[19950,960,0],[.36,.14,.25],"box");
   add("pal","파렛트",[PK.pallet.x,300,PK.pallet.z],[1.1,.4,1.1],"pal");
@@ -30,7 +32,8 @@ function pfTargets(){
 const pfBoxKey=()=>PS.box.full?"seal":"put";
 const pfKeyOf=t=>t.k==="box"?pfBoxKey():t.k;
 const PF_AG=["agStart","agClear","agPack","agEnd"];
-function pfGoal(){ if(!PC.on||PC.done||PC.mode==="exam"||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
+function pfGoal(){ if(CREW.inc&&INCB.room==="P"&&INCB.mode!=="exam"&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
+  if(!PC.on||PC.done||PC.mode==="exam"||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
   return PF.T.find(t=>pfKeyOf(t)===k||(t.k==="ag"&&PF_AG.includes(k))||(k==="stop"&&t.k==="tt"&&PS.tt.on))||null; }
 const pfT=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s};
 const pfEye=()=>[WALK.x*MM,WALK.y*MM,WALK.z*MM];

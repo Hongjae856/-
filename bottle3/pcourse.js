@@ -37,8 +37,8 @@ function pcTiles(){
   const rx=PS.rx, r=PC.role;
   const eq=["rej","tt","pr","vis","lab","first","leaf","cwSet","sample","cw"];
   if(r==="P2") return ["boxMk","seal","agLab","pal"];
-  if(!rx) return eq.concat(["boxMk","put","seal","pal","stop"]);
-  return eq.concat(["agStart","scan","agClear","agPack","agEnd","stop"]);
+  if(!rx) return eq.concat(["boxMk","put","seal","pal","leafBelt","tension","stop"]);
+  return eq.concat(["agStart","scan","agClear","agPack","agEnd","leafBelt","tension","stop"]);
 }
 /* ── 과정 단계 ── */
 function pcSteps(){
@@ -100,18 +100,22 @@ function pcDlg(html,btns){ const d=$("#pDlg"); d.innerHTML='<div class="box">'+h
 function pcToast(t){ const e=$("#pToast"); e.textContent=t; e.hidden=false; clearTimeout(pcToast.h); pcToast.h=setTimeout(()=>e.hidden=true,2600); }
 function pcDed(n,why){ PC.score=Math.max(0,PC.score-n); PC.ded.push(why+" −"+n); }
 function pcAct(k){ const T=PT[k]; if(!T) return; const st=PC.steps[PC.i];
-  if(isExamP()&&st&&st.k!==k&&!["scan","put","agClear","rej"].includes(k)&&PC.on&&!PC.done){ pcDed(3,"순서가 다른 조작 : "+T.nm); }
+  if(isExamP()&&!CREW.inc&&st&&st.k!==k&&!["scan","put","agClear","rej"].includes(k)&&PC.on&&!PC.done){ pcDed(3,"순서가 다른 조작 : "+T.nm); }
   const r=T.run(); if(typeof r==="string") pcToast(r); pcRender(); }
 function pcRender(){
   const t=$("#pkTiles"); if(!PC.on){ t.innerHTML=""; return; } const L=pcTiles(), st=PC.steps[PC.i], hint=!isExamP()&&st?st.k:null;
   const html=L.map(k=>{ const T=PT[k], sub=typeof T.sub==="function"?T.sub():T.sub, on=T.st&&T.st(); return '<button class="pt'+(on?" on":"")+(hint===k?" hint":"")+'" data-k="'+k+'"><b>'+T.nm+'</b><s>'+(sub||"")+'</s></button>'; }).join("");
   if(t.dataset.h!==html){ t.dataset.h=html; t.innerHTML=html; t.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>pcAct(b.dataset.k)); }
-  const c=$("#pkCoach"), n=PC.steps.length, done=PC.done;
+  const c=$("#pkCoach"), n=PC.steps.length, done=PC.done, ih=typeof incbCoach==="function"&&incbCoach();
+  if(ih||PC.mode==="free"){ const k=ih||'<small>자유모드 · '+(PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+' · '+(PS.rx?"전문의약품":"일반의약품")+'</small><b>순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요</b><span>기동 조건이 해제되어 있습니다 (실제와 다름 · 중량 세팅 없이도 가동). 상단 작업자 버튼으로 다른 작업장으로 바꿉니다.</span>';
+    if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
   const role=PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1", md=(PC.deep?"심화":"기본")+" · "+(PC.mode==="exam"?"평가":PC.mode==="demo"?"시연":"학습");
   const k='<small>'+md+' · '+role+' · '+(PS.rx?"전문의약품":"일반의약품")+' · STEP '+Math.min(PC.i+1,n)+' / '+n+'</small><b>'+(done?"모든 단계를 마쳤습니다":st.t)+'</b><span>'+
     (done?(isExamP()?"점수 "+PC.score+" 점 · "+(PC.score>=80?"합격":"불합격")+(PC.ded.length?" · "+PC.ded.join(", "):""):"수고하셨습니다 — 상단 [메인화면]")
       :(isExamP()?"평가 진행 중 — 절차에 따라 수행하세요.":(st.wait&&!st.wait()?"대기 — ":"")+st.d))+'</span>';
   if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; }
+  pcStat(); }
+function pcStat(){
   $("#pkStat").innerHTML='<b>포장 현황</b><div>보관(턴테이블) <i>'+PS.tt.buf+'</i></div><div>라벨 <i>'+PS.lab.cnt+'</i> · 비전 NG <i>'+PS.vis.ng+'</i></div><div>설명서 <i>'+PS.leaf.cnt+'</i></div><div>중량 PASS <i>'+PS.cw.pass+'</i> · −NG <i>'+PS.cw.nNG+'</i> · +NG <i>'+PS.cw.pNG+'</i></div>'+
     '<div>박스 안 <i>'+PS.box.n+' / '+PS.boxN+'</i></div><div>완성 박스 <i>'+PS.pallet+'</i> · 재투입 <i>'+(PS.reworkN||0)+'</i></div>'+(PS.toast&&performance.now()-PS.toastT<4000?'<div class="msg">'+PS.toast+'</div>':'');
 }
@@ -133,7 +137,7 @@ function pcStart(role,mode,deep,rx){
   PS.rx=rx; Object.assign(PC,{on:true, role, mode, deep, i:0, score:100, ded:[], done:false, firstOk:false, sample:null, sampleOk:false, rejOk:false, t0:performance.now()});
   PS_ACT.allOff(); Object.assign(PS.cw,{set:false,pass:0,nNG:0,pNG:0}); PS.ag.on=false; PS.ag.n=0; PS.ag.list=[]; PS.ag.boxes=0; PS.ag.msg=""; PS.box.n=0; PS.box.done=0; PS.box.closing=0; PS.box.sealed=false; PS.box.labeled=false; PS.box.open=true; PS.box.ready=false; PS.box.full=false; PS.pallet=0; PS.reworkN=0; PS.ag.issued=[]; PS.lab.cnt=0; PS.lab.rej=0; PS.leaf.cnt=0; PS.pr.batch=0; Object.assign(PS.vis,{total:0,good:0,ng:0,log:[],last:"OK"}); PS.tt.buf=deep?140:60; PKG.list=[]; PKG.rejLabN=3; PKG.rejCwN=2;
   if(role==="P2"||mode==="demo"){ PS_ACT.allOn(); PC.firstOk=true; PC.sampleOk=true; PC.rejOk=true; PS.auto.w1=true; }
-  PC.steps=pcSteps(); if(mode==="demo"){ PS.auto.w1=true; PS.auto.w2=true; }
+  PC.steps=mode==="free"?[]:pcSteps(); if(mode==="demo"){ PS.auto.w1=true; PS.auto.w2=true; }
   pcRender();
 }
 function pcStop(){ PC.on=false; pcRender(); }

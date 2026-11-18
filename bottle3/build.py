@@ -32,7 +32,7 @@ APP_PATCH = [
     # 작업자는 셸이 파우치 인체 모델로 그림 (원본 작업자 형상 생략)
     ("function drawWorkers(){ for(const w of WK){", "function drawWorkers(){ if(window.B3_EXT) return; for(const w of WK){", 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "pfp.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "pfp.js", "oee.js", "oeeb.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -48,14 +48,14 @@ def app() -> str:
 
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
-    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n == "aimmark.js" else (HERE / n)
+    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n == "aimmark.js" else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
         if "</script" in t.lower():
             sys.exit("script text must not contain </script")
     a = base64.b64encode(app().encode("utf-8")).decode("ascii")
-    for key, val in (("/*__THREE__*/", three), ("__APP__", json.dumps(a)), ("/*__SHELL_JS__*/", js)):
+    for key, val in (("/*__OEECSS__*/", (ROOT / "oee" / "oee.css").read_text(encoding="utf-8")), ("/*__THREE__*/", three), ("__APP__", json.dumps(a)), ("/*__SHELL_JS__*/", js)):
         if shell.count(key) != 1:
             sys.exit(f"shell.html must contain {key} exactly once")
         shell = shell.replace(key, val)
