@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>병 라인 IDT</title>
+<style>
+[hidden]{display:none!important}
+:root{--ink:#142b47;--sub:#5d7086;--line:#c9d4e0}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:#dfe4e1;color:var(--ink);font-family:"Malgun Gothic",Arial,sans-serif;overflow:hidden}
+button{font-family:inherit}
+#bar{position:fixed;left:0;right:0;top:0;height:52px;display:flex;align-items:center;gap:8px;padding:0 12px;background:#fff;border-bottom:1px solid var(--line);z-index:20;white-space:nowrap}
+.brand{font-weight:800;font-size:16px;letter-spacing:-.5px}
+.chip{font-size:12.5px;color:#6b4e00;background:#fff4cc;border-radius:999px;padding:4px 10px;font-weight:700}
+.sp{flex:1}
+#info{font-size:12.5px;color:var(--sub)}
+.gb{border:1px solid #b7c4d2;border-radius:10px;background:#fff;color:var(--ink);font:700 13.5px "Malgun Gothic",Arial,sans-serif;padding:7px 12px;cursor:pointer}
+#stage{position:fixed;left:0;right:0;top:52px;bottom:0}
+#app{position:absolute;inset:0;width:100%;height:100%;border:0}
+#cv{position:absolute;z-index:2;outline:none;border-radius:9px}
+#cross{position:absolute;z-index:3;width:14px;height:14px;margin:-7px 0 0 -7px;pointer-events:none;display:none}
+#cross:before,#cross:after{content:"";position:absolute;background:#fff;box-shadow:0 0 2px #000}
+#cross:before{left:6px;top:0;width:2px;height:14px}#cross:after{left:0;top:6px;width:14px;height:2px}
+body.fp #cross{display:block}
+#hud{position:absolute;z-index:3;font-size:12.5px;background:#ffffffe0;border-radius:8px;padding:5px 10px;pointer-events:none;color:#33475e}
+#load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
+</style></head><body>
+<div id="bar">
+  <div class="brand">병 라인 IDT</div>
+  <span class="chip" id="modeChip"></span>
+  <button class="gb" id="fpBtn">🎥 3인칭 → 1인칭 전환</button>
+  <div class="sp"></div>
+  <span id="info"></span>
+</div>
+<div id="stage">
+  <iframe id="app" title="병 라인 조작 화면"></iframe>
+  <canvas id="cv" tabindex="0"></canvas>
+  <div id="cross"></div>
+  <div id="hud"></div>
+  <div id="load">설비 불러오는 중…</div>
+</div>
+<script>/*__THREE__*/</script>
+<script id="app-data" type="application/json">__APP__</script>
+<script>
+/*__SHELL_JS__*/
+</script>
+</body></html>
