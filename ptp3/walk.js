@@ -1,8 +1,8 @@
 /* ═══════════════════════════════════════════════════════════════════
-   1인칭 이동 (P1) — 작업자 눈높이 1.6 m · WASD 걷기 · 마우스로 둘러보기(클릭하면 시점 고정, Esc 해제) · Shift 빠르게
+   1인칭 이동 (P1) — 눈높이 1.55 m(11/18 세 IDT 통일 · idt_common/fpctl.js) · WASD 걷기 · 마우스로 둘러보기(클릭하면 시점 고정, Esc 해제) · Shift 빠르게
    충돌 : 설비 · 칸막이 벽 형상에서 만든 바닥 점유 격자(50 mm) — 높이 0.08~1.9 m 에 걸친 면이 차지하는 칸은 못 지나감
    ═══════════════════════════════════════════════════════════════════ */
-const WALK={x:0,y:1600,z:0,yaw:0,pitch:0,keys:{},room:"F",grid:null,R:250};
+const WALK={x:0,y:1550,z:0,yaw:0,pitch:0,keys:{},room:"F",grid:null,R:250};
 const walkFwd=()=>[-Math.sin(WALK.yaw)*Math.cos(WALK.pitch),Math.sin(WALK.pitch),-Math.cos(WALK.yaw)*Math.cos(WALK.pitch)];
 const GRID={c:50,x0:0,z0:0,nx:0,nz:0,a:null};
 /* 점유 격자 : 형상 삼각형의 xz 범위를 칠함 (단위 → mm 변환 포함) */
@@ -32,11 +32,12 @@ function walkSpawn(room){
   const want=bx[0]<bx[1]?[room==="F"?(bx[0]+bx[1])/2:bx[0]+2600, Math.min(L.frontZ-700,bz+1400)]:[room==="F"?-4600:4000,2600];
   let best=null, bd=1e18; for(let r=0;r<6000&&!best;r+=100) for(let a=0;a<24;a++){ const q=a/24*Math.PI*2, x=want[0]+Math.cos(q)*r, z=want[1]+Math.sin(q)*r;
     if(room==="F"?x>-400:x<400) continue; if(walkFree(x,z)){ const d=r; if(d<bd){ bd=d; best=[x,z]; } } }
-  best=best||want; Object.assign(WALK,{x:best[0],z:best[1],y:1600,yaw:0,pitch:-.1,room});
+  best=best||want; Object.assign(WALK,{x:best[0],z:best[1],y:fpcEye(0),yaw:0,pitch:-.1,room});
 }
 function walkTick(dt){
+  fpcTick(dt); WALK.y=fpcEye(0);                                   /* 눈높이 · 앉기 (C) */
   if(V3P.view==="orbit"||(typeof FP3!=="undefined"&&FP3.hmi)) return;
-  const k=WALK.keys, sp=(k.ShiftLeft||k.ShiftRight?2.6:1.4)*1000*dt; let mx=0,mz=0;
+  const k=WALK.keys, sp=fpcSpeed(k)*1000*dt; let mx=0,mz=0;
   if(k.KeyW||k.ArrowUp) mz-=1; if(k.KeyS||k.ArrowDown) mz+=1; if(k.KeyA||k.ArrowLeft) mx-=1; if(k.KeyD||k.ArrowRight) mx+=1;
   if(!mx&&!mz) return; const l=Math.hypot(mx,mz); mx/=l; mz/=l;
   const s=Math.sin(WALK.yaw), c=Math.cos(WALK.yaw), dx=(mx*c+mz*s)*sp, dz=(-mx*s+mz*c)*sp;

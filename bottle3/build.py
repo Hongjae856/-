@@ -8,6 +8,7 @@
 import base64
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -31,8 +32,14 @@ APP_PATCH = [
      '  if($("#splash").classList.contains("hide")){\n    if(!R3.ready)', 1),
     # 작업자는 셸이 파우치 인체 모델로 그림 (원본 작업자 형상 생략)
     ("function drawWorkers(){ for(const w of WK){", "function drawWorkers(){ if(window.B3_EXT) return; for(const w of WK){", 1),
+    # 시연모드 단계 버튼식 (11/18 사용자 결정) : 셸이 단계마다 준비 · 가동 — 앱 시연 설정은 건너뛰고, 가동 전에는 자동 보충 · 복구 안 함
+    ("function demoSetup(){\n", "function demoSetup(){\n  if(window.B3_DEMO_STEP&&S.mode===\"demo\"){ S.cnt.target=1e9; DEMO.tour=false; return; }\n", 1),
+    ("  if(!isDemo()||!S.session||!S.session.active) return;\n  autoSupply();", "  if(!isDemo()||!S.session||!S.session.active||(window.B3_DEMO_STEP&&!S.started)) return;\n  autoSupply();", 1),
+    # 자유모드 중간안 (11/18) : 운전 중 자재 조작 허용 (안전문은 그대로 — 운전 중 열면 인터락 E001 정지)
+    ('    if(S.running&&k!=="table"){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }',
+     '    if(S.running&&k!=="table"&&!window.FREEB){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }', 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "fpctl.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -43,12 +50,24 @@ def app() -> str:
         if c != n:
             sys.exit(f"app: '{old[:50]}' 가 {c} 번 (기대 {n})")
         text = text.replace(old, new)
+    # 자유모드 중간안 (11/18) : "운전 중에는 …" 차단 해제 (안전문 제외)
+    n = 0
+    def sub(m):
+        nonlocal n
+        if "안전문" in m.group(2) or not re.search(r"운전 중|STOP|정지", m.group(2)):
+            return m.group(0)
+        n += 1
+        return m.group(0).replace("if(S.running)", "if(S.running&&!window.FREEB)", 1)
+    text = re.sub(r"if\(S\.running\)\{(\s*)toast\(\"([^\"]*)\"", sub, text)
+    if n < 4:
+        sys.exit(f"app: 운전 중 조작 금지 패턴이 {n} 곳뿐")
+    print(f"app: 자유모드 운전 중 조작 금지 해제 {n} 곳")
     return text
 
 
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
-    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n == "aimmark.js" else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
+    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

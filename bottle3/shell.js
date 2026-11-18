@@ -39,19 +39,19 @@ function crewMark(){ document.querySelectorAll("#crewSw [data-r]").forEach(b=>{ 
   b.disabled=!CREW.cur||(r==="P2"&&!CREW.rx)||(r!=="F"&&CREW.pRole&&r!==CREW.pRole); }); }
 function startRoom(r){
   const m=CREW.mode, w=appWin();
-  if(r==="F"){ if(!CREW.started.F){ CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession(m==="free"?"guide":m); if(m==="free") freeStart("F"); }catch(e){ console.error("충전실 과정",e); } } }
-  else if(!CREW.started.P){ CREW.started.P=true; CREW.pRole=r; pcStart(r,m==="demo"?"demo":m==="free"?"free":/exam/i.test(m)?"exam":"learn",!/Easy|easy/.test(m),CREW.rx); if(m==="free") freeStart("P"); }
+  if(r==="F"){ if(!CREW.started.F){ CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.B3_DEMO_STEP=m==="demo"; w.startSession(m==="free"?"guide":m); if(m==="demo") demobStart("F"); if(m==="free") freeStart("F"); }catch(e){ console.error("충전실 과정",e); } } }
+  else if(!CREW.started.P){ CREW.started.P=true; CREW.pRole=r; pcStart(r,m==="demo"?"demo":m==="free"?"free":/exam/i.test(m)?"exam":"learn",!/Easy|easy/.test(m),CREW.rx); if(m==="free") freeStart("P"); if(m==="demo") demobStart("P"); }
 }
 function show(r){
   CREW.cur=r; document.body.classList.toggle("pk",r!=="F"); placeCanvas.k=null;
   setView("fp"); walkSpawnAt(r); crewMark(); $("#modeChip").textContent=MODE_NM[CREW.mode]+" · "+(r==="F"?"충전실":r==="P1"?"포장실 1":"포장실 2");
 }
 function crewGo(r){ if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
-function goHome(){ try{ const w=appWin(); if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
-  pcStop(); freeStop(); PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; document.body.classList.remove("pk"); setView("orbit");
+function goHome(){ try{ const w=appWin(); w.B3_DEMO_STEP=false; if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
+  pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; document.body.classList.remove("pk"); setView("orbit");
   $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
 function walkSpawnAt(r){ if(r==="F") walkSpawn("F"); else { PK_OBS=PK_OBS||pkObstacles(); const p=r==="P1"?[PK.scanX,900]:[19950,1000];
-  Object.assign(WALK,{x:p[0],z:p[1],y:1600,yaw:0,pitch:-.35,room:"P"}); } }
+  Object.assign(WALK,{x:p[0],z:p[1],y:fpcEye(0),yaw:0,pitch:-.35,room:"P"}); } }
 function bindSplash(){
   document.querySelectorAll("#modes [data-m]").forEach(b=>b.onclick=()=>{ CREW.mode=b.dataset.m; spMark(); });
   document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.onclick=()=>{ CREW.rx=b.dataset.rx==="1"; spMark(); });
@@ -67,15 +67,23 @@ function loop(now){
   if(!V3B.ready) return;
   if(!placeCanvas()) return;
   walkTick(dt); pkTick(dt); crewTick(dt); pfTick(now); ffTick(now); v3bFrame(now);
-  if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); incbTick(); }
+  if((loop.p=(loop.p||0)+dt)>.25){ loop.p=0; pcTick(); incbTick(); demobTick(); }
   if(V3B.statNew){ V3B.statNew=false; gridBuild(); v3bEnvCapture(); $("#load").hidden=true; }
   WALK.room=WALK.x<ROOM.wallX?"F":"P";
   if((loop.k=(loop.k||0)+1)%4===0) hud();
   if(loop.k%20===0){ $("#info").textContent=V3B.t.fps.toFixed(0)+" fps"; }
 }
+/* F1 힌트 (세 IDT 공통) : 충전실 = 원본 앱 (평가 −5 점) · 포장실 = 포장 과정 (평가 −5 점) · 자유 = 없음 */
+function bHint(){
+  if(CREW.mode==="free"){ fpcToast("자유모드 — 순서 · 힌트 없음"); return; }
+  if(CREW.cur==="F"&&CREW.inc&&INCB.room==="F"){ if(INCB.mode==="exam") incbHintF(); else fpcToast(FF.goal?"다음 작업 : "+FF.goal.nm:"알람 · 이상 안내에 따라 조치하세요"); return; }
+  if(CREW.cur==="F"){ const w=appWin(); let ex=false; try{ ex=!!w.eval("isExam()"); }catch(e){}
+    if(ex){ const b=w.document.getElementById("examHint"); if(b&&!b.disabled){ b.click(); fpcToast("힌트 사용 −5 점 — 다음 작업 표시"); } else fpcToast("힌트 표시 중"); return; }
+    let t=""; try{ t=w.document.getElementById("cTitle").textContent; }catch(e){} fpcToast(FF.goal?"다음 작업 : "+FF.goal.nm:(t||"안내 없음")); return; }
+  pcHint(); }
 function boot(){
   $("#modeChip").textContent=verTxt();
-  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash();
+  v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash(); fpcInit({isFP:()=>V3B.view!=="orbit"&&!(typeof FF!=="undefined"&&FF.hmi), hint:bHint});
   $("#fpBtn").onclick=()=>{ if(V3B.view==="orbit"){ setView("fp"); if(CREW.cur) walkSpawnAt(CREW.cur); } else setView("orbit"); };
   requestAnimationFrame(loop);
 }

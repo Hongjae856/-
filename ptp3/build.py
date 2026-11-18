@@ -8,6 +8,7 @@
 import base64
 import importlib.util
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -33,9 +34,17 @@ APP_PATCH = [
      "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
     ("worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});",
      "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
+    # 자유모드 중간안 (11/18 사용자 결정) : 운전 중에도 안전문을 열 수 있음(도어 잠금 해제) — 열면 인터락으로 설비 정지(E020) · 닫고 RESET
+    ('if(S.running||oneShot){ toast("운전 중에는 안전문을 열 수 없습니다.","bad"); return; }',
+     'if((S.running||oneShot)&&window.FREE3&&S.door==="closed"){ S.door="open"; S.doorOpens=(S.doorOpens||0)+1; alarm("E020"); toast("안전문 열림 — 인터락 정지 (E020)","bad"); return; }\nif(S.running||oneShot){ toast("운전 중에는 안전문을 열 수 없습니다.","bad"); return; }', 1, ("filler",)),
+    ('if(S.running||oneShot){toast("운전 중에는 안전문을 열 수 없습니다.","bad");return;}',
+     'if((S.running||oneShot)&&window.FREE3&&S.door==="closed"){ S.door="open"; S.doorOpens++; alarm("E020"); toast("안전문 열림 — 인터락 정지 (E020)","bad"); return; }\n   if(S.running||oneShot){toast("운전 중에는 안전문을 열 수 없습니다.","bad");return;}', 1, ("line",)),
+    # 자유모드 : 순서 없음 — 이상 대응 · 평가 단계 제한(examGate) 해제
+    ("function examGate(kind,key){const ok=", "function examGate(kind,key){if(window.FREE3)return true;const ok=", 1, ("filler",)),
+    ("function examGate(kind,key){\n  if(!isExam()", "function examGate(kind,key){\n  if(window.FREE3) return true;\n  if(!isExam()", 1, ("line",)),
     # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fpctl.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
@@ -49,13 +58,34 @@ def app(key: str) -> str:
         if c != n:
             sys.exit(f"{key}: '{old[:50]}' 가 {c} 번 (기대 {n})")
         text = text.replace(old, new)
+    return free_runops(key, text)
+
+
+# 자유모드 중간안 (11/18 사용자 결정 · 세 IDT 통일) : 운전 중 조작 금지 해제 — 앱의 "운전 중에는 … 할 수 없습니다" 류 차단에 !window.FREE3 를 붙임
+# (안전문 관련 차단은 제외 : 운전 중 안전문은 셸이 열고 인터락 정지 E020 을 일으킴 · modes3.js)
+RUNBAN = re.compile(r"if\(S\.running(\|\|oneShot)?\)\{(\s*)toast\((['\"])((?:(?!\3).)*?)\3")
+
+
+def free_runops(key: str, text: str) -> str:
+    n = 0
+    def sub(m):
+        nonlocal n
+        msg = m.group(4)
+        if "안전문" in msg or not re.search(r"운전 중|STOP|정지", msg):
+            return m.group(0)
+        n += 1
+        return m.group(0).replace("if(S.running" + (m.group(1) or "") + ")", "if((S.running" + (m.group(1) or "") + ")&&!window.FREE3)", 1)
+    text = RUNBAN.sub(sub, text)
+    if n < 5:
+        sys.exit(f"{key}: 운전 중 조작 금지 패턴이 {n} 곳뿐 (원본 변경 확인)")
+    print(f"{key}: 자유모드 운전 중 조작 금지 해제 {n} 곳")
     return text
 
 
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n == "aimmark.js" else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

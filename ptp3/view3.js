@@ -128,7 +128,7 @@ function v3Frame(now){
   if(cv.width!==Math.round(w*pr)||cv.height!==Math.round(h*pr)){ R.setPixelRatio(pr); R.setSize(w,h,false); V3P.cam.aspect=w/Math.max(1,h); V3P.cam.updateProjectionMatrix(); }
   const cam=V3P.cam; if(V3P.inner) V3P.inner.visible=V3P.view!=="orbit";
   if(V3P.view==="orbit"){ const o=V3P.orbit, e=v3Eye(o); cam.position.set(e[0]*MM,e[1]*MM,e[2]*MM); cam.lookAt(o.tx*MM,o.ty*MM,o.tz*MM); cam.fov=50; }
-  else { cam.position.set(WALK.x*MM,WALK.y*MM,WALK.z*MM); const f=walkFwd(); cam.lookAt((WALK.x+f[0]*1000)*MM,(WALK.y+f[1]*1000)*MM,(WALK.z+f[2]*1000)*MM); cam.fov=62; }
+  else { cam.position.set(WALK.x*MM,WALK.y*MM,WALK.z*MM); const f=walkFwd(); cam.lookAt((WALK.x+f[0]*1000)*MM,(WALK.y+f[1]*1000)*MM,(WALK.z+f[2]*1000)*MM); cam.fov=FPC.FOV; }
   cam.updateProjectionMatrix();
   if(now-(V3P.t.lg||0)>33){ V3P.t.lg=now; v3Gen(); }
   R.render(V3P.sc,cam);

@@ -65,7 +65,7 @@ function fpCanStand(x,z){ return fpPick(x,z)!=null; }
 function fpEyeY(pose,moved,dt){
   const y=fpPick(pose.x,pose.z); if(y!=null) FP.feet=y;
   if(moved>0){ FP.bob+=moved/.62*Math.PI; FP.bobA=Math.min(1,FP.bobA+dt*6); } else FP.bobA=Math.max(0,FP.bobA-dt*4);
-  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.65 → 1.10 m */
+  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.55 → 1.00 m */
   return FP.feet+EYE-CROUCH*FP.ck+Math.sin(FP.bob*2)*.011*FP.bobA*(1-FP.ck*.6);
 }
 
@@ -218,7 +218,7 @@ function fpReturnPart(){
 const fpBusy=()=>!S||!S.session||!S.session.active||!$("#splash").classList.contains("hide")||$$(".modal.on").length>0;
 
 function fpInit(){
-  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH, look:AIM_LOOK,
+  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:1.4, reach:FP_REACH, look:AIM_LOOK,
     inReach:(t,p)=>aimInReach(fpAM(t),[p.x,p.y,p.z]), goalDist:(t,p)=>aimReachDist(fpAM(t),[p.x,p.y,p.z]),
     farText:(t,p)=>"가까이 가세요 · "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m)",
     tooFar:(t,p)=>toast("가까이 가세요 — "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m · 손 닿는 거리 1.2 m)"),
@@ -260,7 +260,7 @@ function fpOverlay(g,K){
   const f=S.f, carry=f.rollCarry==="red"?"적색 인쇄 은박 롤 운반 중 (2인 1조) · R 반납":"";
   const lv=FP.feet>=FL.deckY-.05?"2층 데크":FP.feet>.05?"계단":"1층";
   g.textAlign="left"; g.textBaseline="alphabetic"; g.font="800 "+(12*K).toFixed(0)+"px sans-serif";
-  const t="🧍 1인칭 · "+lv+(FP.crouch?" · 앉음":"")+(carry?" · "+carry:"")+"   WASD 이동 · 마우스 시선 · 좌클릭/E 조작 · C 앉기 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
+  const t="🧍 1인칭 · "+lv+(FP.crouch?" · 앉음":"")+(carry?" · "+carry:"")+"   WASD · 방향키 이동 (Shift 빠르게) · 마우스 시선 · 좌클릭/E 조작 · C 앉기 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
   const w=g.measureText(t).width+18*K; g.fillStyle="rgba(10,20,32,.62)"; rr(g,10*K,10*K,w,24*K,7*K); g.fill(); g.fillStyle="#fff"; g.fillText(t,19*K,27*K);
 }
 

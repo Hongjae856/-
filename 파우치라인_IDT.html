@@ -2616,8 +2616,8 @@ function utilTick(dt){
   /* 1 · 3 번 호퍼 : 이송기 ON 이면 센서 감지로 자동 보충 */
   if(f.panel&&f.ibc[0]&&S.hop.add<92) S.hop.add=Math.min(100,S.hop.add+dt*18);
   if(f.panel&&f.ibc[2]&&S.hop.sug<92) S.hop.sug=Math.min(100,S.hop.sug+dt*18);
-  if(f.run&&!(f.airV[0]&&f.airV[1])&&f.airP<4.5&&!FREE()) raise("AIR");
-  if(f.run&&S.f.door!=="closed"&&!FREE()) raise("DOOR");
+  if(f.run&&!(f.airV[0]&&f.airV[1])&&f.airP<4.5) raise("AIR");
+  if(f.run&&S.f.door!=="closed") raise("DOOR");
 }
 /* 포장실 과정 : 충전기는 자동 (카토너 · 스틱공급장치가 가동하면 함께 가동) */
 function autoFiller(){
@@ -3872,9 +3872,9 @@ const TILE={
   fDust:{e:"🌪️",b:"집진 밸브",s:()=>"2층 상부 · "+(S.f.dustV?"열림":"닫힘"),on:()=>S.f.dustV,
     click(){ act("dust",()=>{ S.f.dustV=!S.f.dustV; toast("집진 밸브 "+(S.f.dustV?"열림":"닫힘")); }); }},
   fPanel:{e:"🖥️",b:"컨트롤 판넬",s:()=>S.f.panel?"터치스크린 ON":"OFF",on:()=>S.f.panel,
-    click(){ const f=S.f; if(!f.main&&!FREE()){ toast("메인 파워를 먼저 켜세요.","bad"); return; } act("panel",()=>{ if(f.panel){ fillerStop(); f.panel=false; f.user=null; toast("컨트롤 판넬 OFF"); } else { f.panel=true; toast("컨트롤 판넬 ON — 터치스크린 켜짐","good"); } }); }},
+    click(){ const f=S.f; if(!f.main){ toast("메인 파워를 먼저 켜세요.","bad"); return; } act("panel",()=>{ if(f.panel){ fillerStop(); f.panel=false; f.user=null; toast("컨트롤 판넬 OFF"); } else { f.panel=true; toast("컨트롤 판넬 ON — 터치스크린 켜짐","good"); } }); }},
   fDoor:{e:"🚪",b:"안전도어",s:()=>S.f.door==="closed"?"닫힘 · 인터락 정상":"열림",on:()=>S.f.door==="closed",warn:()=>S.f.door!=="closed",
-    click(){ const f=S.f; act("door",()=>{ if(f.door==="closed"){ f.door="open"; if(f.run&&!FREE()){ deduct("doorRun"); raise("DOOR"); } toast("안전도어 열림"); } else { f.door="closed"; toast("안전도어 닫힘"); } buildStatic(); }); }},
+    click(){ const f=S.f; act("door",()=>{ if(f.door==="closed"){ f.door="open"; if(f.run){ deduct("doorRun"); raise("DOOR"); } toast("안전도어 열림"); } else { f.door="closed"; toast("안전도어 닫힘"); } buildStatic(); }); }},
   tAlign:{e:"🔀",b:"정렬컨베어 스위치",s:()=>"포장실 · "+(S.p.align?"ON":"OFF"),on:()=>S.p.align,
     click(){ act("align",()=>{ S.p.align=!S.p.align; toast("정렬컨베어 가동스위치 "+(S.p.align?"ON — 파우치가 포장실로 이송":"OFF — 공포배출 쪽으로 배출")); }); }},
   /* 충전실 · 자재 · 원료 */
@@ -4290,12 +4290,12 @@ function use(){
     host.hmiInteractive?.(false,monitor);mode='return';clear();travel(returnPose,260,'walk');
   }
   function advance(dt){
-    const f=Number(keys.has('KeyW'))-Number(keys.has('KeyS'));
-    const r=Number(keys.has('KeyD'))-Number(keys.has('KeyA'));
+    const f=Number(keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));
+    const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft'));
     const length=Math.hypot(f,r); if(!length)return 0;
     const x0=pose.x, z0=pose.z;
     for(let left=dt;left>0;left-=.012){
-      const step=host.speed*Math.min(left,.012)/length;
+      const step=host.speed*(keys.has('ShiftLeft')||keys.has('ShiftRight')?2.6/1.4:1)*Math.min(left,.012)/length;
       const x=pose.x+step*(-Math.sin(pose.yaw)*f+Math.cos(pose.yaw)*r);
       const z=pose.z+step*(-Math.cos(pose.yaw)*f-Math.sin(pose.yaw)*r);
       if(host.canStand(x,pose.z))pose.x=x;
@@ -4363,7 +4363,7 @@ listen(canvas,'pointerdown',e=>{
     if(e.target?.closest?.('input,textarea,select,[contenteditable=true]'))return;
     if(mode!=='walk')return;
     const actions={KeyE:use,F1:host.hint,KeyR:host.returnPart,KeyH:host.help,KeyC:host.crouch||(()=>{}),Tab:host.menu};
-    if(!['KeyW','KeyA','KeyS','KeyD'].includes(e.code) && !actions[e.code])return;
+    if(!['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code) && !actions[e.code])return;
     e.preventDefault();
     if(actions[e.code]){if(!e.repeat)actions[e.code]();}else keys.add(e.code);
   },{capture:true});
@@ -4680,7 +4680,7 @@ function startWork(key,cb,opt){
 /* 여러 단계 작업 (대차 · 리프터 끌기 등) : leg = {stand, path?, deck?, reach?, dur, carry?, grab?, release?, on?} */
 function legRoute(w,L){ if(L.path) return L.path.map(q=>[q[0],q[1],0]).concat([[L.stand[0],L.stand[1],0]]); return navPath(w,L.stand,L.deck?1:0); }
 const curLeg=J=>J.legs?J.legs[J.li]:J.j;
-const WK_SPD=1.6;                               /* 보행 속도 m/s */
+const WK_SPD=1.4;                               /* 보행 속도 m/s (11/18 세 IDT 통일 1.4) */
 function wkTick(dt){
   if(typeof helpTick==="function") helpTick(dt);
   if(CAMRET){ CAMRET.t-=dt; if(CAMRET.t<=0){ if(cam.view==="work"&&!WK.some(w=>w.job&&w.job.hasView)) camSet(CAMRET.view); CAMRET=null; } }
@@ -4989,7 +4989,7 @@ function fpCanStand(x,z){ return fpPick(x,z)!=null; }
 function fpEyeY(pose,moved,dt){
   const y=fpPick(pose.x,pose.z); if(y!=null) FP.feet=y;
   if(moved>0){ FP.bob+=moved/.62*Math.PI; FP.bobA=Math.min(1,FP.bobA+dt*6); } else FP.bobA=Math.max(0,FP.bobA-dt*4);
-  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.65 → 1.10 m */
+  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.55 → 1.00 m */
   return FP.feet+EYE-CROUCH*FP.ck+Math.sin(FP.bob*2)*.011*FP.bobA*(1-FP.ck*.6);
 }
 
@@ -5142,7 +5142,7 @@ function fpReturnPart(){
 const fpBusy=()=>!S||!S.session||!S.session.active||!$("#splash").classList.contains("hide")||$$(".modal.on").length>0;
 
 function fpInit(){
-  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:3.8, reach:FP_REACH, look:AIM_LOOK,
+  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:1.4, reach:FP_REACH, look:AIM_LOOK,
     inReach:(t,p)=>aimInReach(fpAM(t),[p.x,p.y,p.z]), goalDist:(t,p)=>aimReachDist(fpAM(t),[p.x,p.y,p.z]),
     farText:(t,p)=>"가까이 가세요 · "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m)",
     tooFar:(t,p)=>toast("가까이 가세요 — "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m · 손 닿는 거리 1.2 m)"),
@@ -5184,7 +5184,7 @@ function fpOverlay(g,K){
   const f=S.f, carry=f.rollCarry==="red"?"적색 인쇄 은박 롤 운반 중 (2인 1조) · R 반납":"";
   const lv=FP.feet>=FL.deckY-.05?"2층 데크":FP.feet>.05?"계단":"1층";
   g.textAlign="left"; g.textBaseline="alphabetic"; g.font="800 "+(12*K).toFixed(0)+"px sans-serif";
-  const t="🧍 1인칭 · "+lv+(FP.crouch?" · 앉음":"")+(carry?" · "+carry:"")+"   WASD 이동 · 마우스 시선 · 좌클릭/E 조작 · C 앉기 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
+  const t="🧍 1인칭 · "+lv+(FP.crouch?" · 앉음":"")+(carry?" · "+carry:"")+"   WASD · 방향키 이동 (Shift 빠르게) · 마우스 시선 · 좌클릭/E 조작 · C 앉기 · Esc 화면 닫기 · F1 힌트 · Tab 메뉴 · H 도움말";
   const w=g.measureText(t).width+18*K; g.fillStyle="rgba(10,20,32,.62)"; rr(g,10*K,10*K,w,24*K,7*K); g.fill(); g.fillStyle="#fff"; g.fillText(t,19*K,27*K);
 }
 
@@ -5251,6 +5251,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:32,d:'2026-11-18',t:'세 IDT 교차 검증 · 통일 (11/18 사용자 결정) — 1인칭 걷기 3.8 → 1.4 m/s · Shift 2.6 m/s · 방향키 이동(블리스터 · 병과 같게), 자동 작업자 보행 1.6 → 1.4 m/s, 자유모드 중간안 : 기동 조건 · 운전 중 조작 금지는 해제하되 메인 파워 · 컨트롤 판넬 · 압축공기 · 안전도어 · 비상정지 · 알람 RESET 은 실제처럼(운전 중 안전도어 · 카토너 아크릴 문을 열면 인터락 정지)'},
  {v:31,d:'2026-11-17',t:'조작 대상 표시 방식 변경 (세 IDT 공통 모듈 idt_common/aimmark.js · 11/17 사용자 결정) — 설비를 투시하던 큰 상자 테두리 · 노란 화살표를 없애고, 실제 누르는 지점에 작은 원형 마커(다음 작업 = 노란 점 + 고리, 조준 = 초록 고리 · 멀면 회색 고리)를 붙임. 설비에 가려지면 마커도 가려지고, 다음 작업이 화면 밖이면 화면 가장자리에 노란 화살표 + 이름 · 거리. 손 닿는 거리(가슴 높이에서 1.2 m) 안에서만 조작되고 밖이면 「가까이 가세요 (거리)」 표시'},
  {v:30, d:"2026-11-17", t:"메인화면 모드 버튼 글자가 단어 중간에서 끊기지 않도록 줄바꿈 정리(OEE 관리 / 대시보드 · 이상사례 대처 / 교육 등), 버튼 글자 크기 조정"},
  {v:29, d:"2026-11-17", t:"메인화면을 모드 → 작업자 선택으로 변경(① 기본 · 심화 · 시연 · 자유 · OEE 중 모드 선택 → ② 상단 충전실 작업자 / 포장실 작업자를 누르면 그 작업장 1인칭으로 시작, 작업자마다 그 실의 단계 적용 · 시연모드도 작업자별 단계), 교육 중 상단 [충전실 작업자 · 포장실 작업자] 버튼으로 작업자 교체(기본 · 심화 · 시연은 작업장마다 진행 상태를 따로 보관하고 이어서 진행, 자유 · 이상사례는 같은 라인 공유), 자유모드 신설(순서 · 감점 · 평가 없음, 설비 인터록 해제 — 실제와 다름, 문 · 덮개 자유 개폐 : 충전기 안전도어 · 2번 호퍼 뚜껑 · 충전실 남쪽 출입문 2 · 카토너 아크릴 문 3 · 포장실 북쪽 출입문, [정상 운전 상태로] · [전체 OFF 초기화] 버튼, 두 실 모두 전원 OFF 에서 시작)"},
@@ -6684,14 +6685,15 @@ function crewRefresh(fpOn){
 /* ═══════════════════════════════════════════════════════════════════
    자유모드 (11/17 사용자 지시 · 선택)
    · 순서 · 감점 · 평가 없음 : 단계 목록 없음 · 정기 공정검사(IPC) 자동 시작 없음 · 채점 관리 숨김
-   · 설비 인터록 해제 (사용자 선택 — 실제와 다름) : 운전 중 조작 금지 · 전원 순서 · RUN / START / JOG 조건 · 안전도어 · 공기압 알람 등
-     (build.py PATCH 의 !FREE() 조건). 재료가 없어 생기는 상황(은박 없음 · 주성분 없음 · 라벨 없음)과 비상정지 버튼은 그대로
+   · 설비 인터록 — 중간안 (11/18 사용자 결정 · 세 IDT 통일) : 기동 조건 · 운전 중 조작 금지는 해제(실제와 다름 · build.py PATCH 의 !FREE() 조건),
+     메인 파워 · 컨트롤 판넬 · 압축공기 · 안전도어 · 비상정지 · 알람 RESET 은 실제처럼. 운전 중 안전도어 · 카토너 아크릴 문을 열면 인터락 정지.
+     재료가 없어 생기는 상황(은박 없음 · 주성분 없음 · 라벨 없음)은 그대로
    · 문 · 덮개 자유 개폐 : 충전기 안전도어 · 2번 호퍼 뚜껑 · 충전실 남쪽 양개문 2 · 카토너 아크릴 문 3 · 포장실 북쪽 출입문
    · 한 라인 공유 · 상단 작업자 교체(crew.js) · 시작은 두 실 모두 전원 OFF
    ═══════════════════════════════════════════════════════════════════ */
 const FREE=()=>!!S&&S.mode==="free";
 MODE_NM.free="자유모드";
-function freeStart(r){ $("#splash").classList.add("hide"); startSession("free",r); toast(CREW_RNM[r]+" · 자유모드 — 순서 · 감점 없음 · 인터록 해제 · 문 · 덮개 자유 개폐","good"); }
+function freeStart(r){ $("#splash").classList.add("hide"); startSession("free",r); toast(CREW_RNM[r]+" · 자유모드 — 순서 · 감점 없음 · 기동 조건 해제 (전원 · 공압 · 안전문은 실제처럼)","good"); }
 /* 두 실 모두 전원 OFF (과정 모드의 '다른 실 자동 운전' 설정을 되돌림) */
 function freeBlank(){ const keep=S; initState(); const z=S; S=keep; S.f=z.f; S.p=z.p; S.hop=z.hop; S.cnt=z.cnt; S.alarms=[]; S.activeTrouble=null; S.recovery=null;
   Object.assign(S.flags,{ctDoor:[0,0,0], rdoor:{}, lid2:"on", bagsEmpty:false}); if(typeof lineInit==="function") lineInit(); }
@@ -6718,20 +6720,21 @@ function freeCoach(){
   c.className="free";
   $("#cStep").textContent="자유모드 · "+CREW_RNM[S.room];
   $("#cTitle").textContent="순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요";
-  $("#cDesc").textContent="설비 인터록이 해제되어 있습니다 (실제와 다름). 문 · 덮개는 누르면 열리고 닫힙니다. 상단 [🧍 충전실 작업자 · 🧍 포장실 작업자] 로 같은 라인의 다른 작업장으로 바꿉니다.";
+  $("#cDesc").textContent="기동 조건 · 운전 중 조작 금지가 해제되어 있습니다 (실제와 다름). 메인 파워 · 압축공기는 실제처럼 켜야 하고, 운전 중 안전도어 · 카토너 문을 열면 인터락으로 정지합니다. 문 · 덮개는 누르면 열리고 닫힙니다. 상단 [🧍 충전실 작업자 · 🧍 포장실 작업자] 로 같은 라인의 다른 작업장으로 바꿉니다.";
   $("#stepCur").textContent="자유"; $("#endBtn").textContent="자유모드 종료";
 }
 
 /* ── 설비 인터록 해제 ── */
-{ const f0=fillerBlockers; fillerBlockers=function(){ return FREE()?[]:f0(); }; }
-{ const f0=ctBlockers; ctBlockers=function(){ return FREE()?[]:f0(); }; }
+const FREE_KEEP_F=/메인 파워|컨트롤 판넬 OFF|압축공기|안전도어|비상정지|알람 미해제/, FREE_KEEP_P=/카토너 메인/;
+{ const f0=fillerBlockers; fillerBlockers=function(){ return FREE()?f0().filter(t=>FREE_KEEP_F.test(t)):f0(); }; }
+{ const f0=ctBlockers; ctBlockers=function(){ return FREE()?f0().filter(t=>FREE_KEEP_P.test(t)):f0(); }; }
 
 /* ── 문 · 덮개 ── */
 const FREE_DOOR={
   F:[["frLid","🫙","2번 호퍼 뚜껑",()=>S.flags.lid2==="off"?"들어내 난간에 세움":"덮음 · 클램프 체결",()=>{ S.flags.lid2=S.flags.lid2==="off"?"on":"off"; }],
      ["frDF0","🚪","충전실 남쪽 출입문 (서)",()=>freeDoorOpen("f0")?"열림":"닫힘",()=>freeDoorTog("f0")],
      ["frDF1","🚪","충전실 남쪽 출입문 (동)",()=>freeDoorOpen("f1")?"열림":"닫힘",()=>freeDoorTog("f1")]],
-  P:[0,1,2].map(k=>["frCt"+k,"🚪","카토너 아크릴 문 "+(k+1),()=>(S.flags.ctDoor||[])[k]?"열림":"닫힘",()=>{ if(!S.flags.ctDoor) S.flags.ctDoor=[0,0,0]; S.flags.ctDoor[k]=S.flags.ctDoor[k]?0:1; }])
+  P:[0,1,2].map(k=>["frCt"+k,"🚪","카토너 아크릴 문 "+(k+1),()=>(S.flags.ctDoor||[])[k]?"열림":"닫힘",()=>{ if(!S.flags.ctDoor) S.flags.ctDoor=[0,0,0]; S.flags.ctDoor[k]=S.flags.ctDoor[k]?0:1; if(S.flags.ctDoor[k]&&S.p.ctRun){ S.p.ctRun=false; toast("카토너 아크릴 문 열림 — 인터락 정지 (문을 닫고 다시 가동)","bad"); } }])
      .concat([["frDP0","🚪","포장실 북쪽 출입문",()=>freeDoorOpen("p0")?"열림":"닫힘",()=>freeDoorTog("p0")]])
 };
 const freeDoorOpen=k=>!!(S.flags.rdoor&&S.flags.rdoor[k]);

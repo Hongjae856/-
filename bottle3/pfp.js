@@ -22,7 +22,9 @@ function pfTargets(){
   if(PS.rx){ add("ag","집합 포장 PC 화면",[PK.scanX,1495,-328],[.56,.36,.04],"ag"); add("scan","거치형 판독기",[PK.scanX,1000,-118],[.26,.16,.05],"scan");
     add("agLab","AG 라벨 프린터 (발행된 라벨)",[19175,1010,-40],[.25,.12,.06],"agLab"); }
   add("leafBelt","설명서 부착기 벨트 · 부착 헤드",[13720,1000,-40],[.2,.12,.2],"leafBelt");
-  add("tension","라벨 롤 · 장력 조정",[10900,1070,-470],[.36,.12,.36],"tension");
+  add("tension","라벨 롤 (교체 · 장력 조정)",[10900,1070,-470],[.36,.12,.36],"tension");
+  add("matRib","라벨 인쇄기 리본 (열전사 헤드)",[11200,1170,-90],[.24,.18,.04],"matRib");
+  add("matLeaf","설명서 롤 (릴)",[13400,1560,-200],[.54,.54,.07],"matLeaf");
   add("flat","접힌 박스 더미",[21000,960,-150],[.6,.12,.46],"boxMk");
   add("box","작업대 박스",[19950,960,0],[.36,.14,.25],"box");
   add("pal","파렛트",[PK.pallet.x,300,PK.pallet.z],[1.1,.4,1.1],"pal");
@@ -32,9 +34,9 @@ function pfTargets(){
 const pfBoxKey=()=>PS.box.full?"seal":"put";
 const pfKeyOf=t=>t.k==="box"?pfBoxKey():t.k;
 const PF_AG=["agStart","agClear","agPack","agEnd"];
-function pfGoal(){ if(PC.mode==="demo") return null; if(CREW.inc&&INCB.room==="P"&&INCB.mode!=="exam"&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
-  if(!PC.on||PC.done||PC.mode==="exam"||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
-  return PF.T.find(t=>pfKeyOf(t)===k||(t.k==="ag"&&PF_AG.includes(k))||(k==="stop"&&t.k==="tt"&&PS.tt.on))||null; }
+function pfGoal(){ if(PC.mode==="demo") return null; if(CREW.inc&&INCB.room==="P"&&(INCB.mode!=="exam"||INCB.hintFi===INCB.fi)&&INCB.fired&&!INCB.done){ const f=PK_INC[INCB.k].fix[INCB.fi]; return f?PF.T.find(t=>t.k===f.k)||null:null; }
+  if(!PC.on||PC.done||(PC.mode==="exam"&&PC.hintI!==PC.i)||PC.mode==="free") return null; const st=PC.steps[PC.i]; if(!st) return null; const k=st.k;
+  return PF.T.find(t=>pfKeyOf(t)===k||(t.k==="ag"&&PF_AG.includes(k))||(k==="stop"&&t.k==="tt"&&PS.tt.on)||(k==="matLab"&&t.k==="tension")||(k==="matAg"&&t.k==="agLab"))||null; }
 const pfT=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s};
 const pfEye=()=>[WALK.x*MM,WALK.y*MM,WALK.z*MM];
 function pfAim(){
@@ -48,13 +50,15 @@ function pfAct(){
   const t=PF.aim; if(!t) return false; if(!PF.aimIn){ pcToast("가까이 가세요 — "+t.nm+" ("+(PF.res.aimDist||0).toFixed(1)+" m · 손 닿는 거리 1.2 m)"); return true; }
   if(t.k==="ag"){ pcDlg('<h3>집합 포장 PC</h3><p>단품 '+PS.ag.n+' / '+PS.boxN+' · 박스 '+PS.ag.boxes+' · '+(PS.ag.msg||"")+'</p>',
       [["작업 시작",()=>pcAct("agStart")],["클리어",()=>pcAct("agClear")],["재발급",()=>{ PS_ACT.agReissue(); }],["포장완료",()=>pcAct("agPack")],["작업완료",()=>pcAct("agEnd")],["닫기",null]]); return true; }
+  if(t.k==="tension"){ pcDlg('<h3>라벨 롤</h3><p>잔량 '+Math.round(PS.lab.roll)+' % · '+(PS.pr.faint?"인쇄 흐림 — 장력 확인":"장력 정상")+' · 라벨러 '+(PS.lab.run?"RUN":"STOP")+'</p>',[["라벨 롤 교체",()=>pcAct("matLab")],["장력 조정",()=>pcAct("tension")],["닫기",null]]); return true; }
+  if(t.k==="agLab"&&(PS.ag.paper<60||PS.ag.pending)){ pcDlg('<h3>AG 라벨 프린터</h3><p>라벨지 '+(PS.ag.pending?"없음 · 발행 대기":"잔량 "+PS.ag.paper+" 장")+'</p>',[["AG 라벨지 교체",()=>pcAct("matAg")],["발행된 라벨 부착",()=>pcAct("agLab")],["닫기",null]]); return true; }
   pcAct(pfKeyOf(t)); return true;
 }
 function pfHud(){ const h=$("#hud"); if(!document.body.classList.contains("pk")||V3B.view==="orbit") return false;
   const a=PF.aim, g=PF.goal, R=PF.res||{}, m=x=>x==null?"":" · "+x.toFixed(1)+" m";
   h.innerHTML=a&&PF.aimIn?"<b>E</b> / 클릭 · <b>"+a.nm+"</b>"+(g===a?" <span class='nx'>다음 작업</span>":"")
     :a&&!R.aimHidden?"<span class='far'>가까이 가세요"+m(R.aimDist)+"</span> · "+a.nm
-    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 포장실 · W A S D 걷기 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)";
+    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" "+(R.goalDir||""):"1인칭 · 포장실"+(FPC.crouch?" · 앉음":"")+" · WASD 걷기 (Shift 빠르게) · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기) · C 앉기 · F1 힌트 · H 도움말";
   return true; }
 function pfInit(){
   PF.am=createAimMark({T3, scene:V3B.sc, camera:()=>V3B.cam, canvas:()=>$("#cv"), unit:1});

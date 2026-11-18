@@ -47,7 +47,11 @@ body.pk #app{visibility:hidden}
 body.pk #pkTiles{display:grid}
 .pt{border:1px solid #c9d4e0;border-radius:10px;background:#ffffffee;text-align:left;padding:7px 8px;cursor:pointer;font-family:inherit;min-height:52px}
 .pt b{display:block;font:800 13px "Malgun Gothic"}.pt s{display:block;text-decoration:none;font:500 11px/1.3 "Malgun Gothic";color:#5d7086}
-.pt.on{background:#e3f6e8;border-color:#2b8a4b}.pt.hint{outline:3px solid #f2b705}
+.pt.on{background:#e3f6e8;border-color:#2b8a4b}.pt.hint{outline:3px solid #f2b705}.pt.low{border-color:#d0453a;background:#fff1ef}.pt.low s{color:#b3261e;font-weight:700}
+.hintBtn{margin-left:8px;padding:3px 10px;border:1px solid #e0b100;border-radius:8px;background:#fff6d6;font:700 12px "Malgun Gothic";cursor:pointer}.hintBtn:disabled{opacity:.6}
+#pDlg .score b{font-size:30px;color:#173a63}
+#dmCoach{position:absolute;z-index:5;background:#fff;border-left:6px solid #2b8a4b;border-radius:10px;padding:9px 14px;box-shadow:0 2px 10px #142b4718;box-sizing:border-box}#dmCoach small{display:block;color:#2b8a4b;font:700 12.5px "Malgun Gothic"}#dmCoach b{display:block;font:800 17px "Malgun Gothic";margin:2px 0}#dmCoach span{font:500 13px/1.45 "Malgun Gothic";color:#33475e}
+.dmAct{display:block;margin-top:8px;border:0;border-radius:9px;background:#f2b705;color:#1d2a36;padding:8px 16px;font:800 14px "Malgun Gothic";cursor:pointer}.dmWait{display:block;margin-top:6px;color:#2b8a4b;font:700 12.5px "Malgun Gothic"}
 #pkCoach{position:absolute;z-index:4;left:270px;right:270px;top:10px;display:none;background:#fff;border-left:6px solid #2b6fd0;border-radius:12px;padding:9px 14px;box-shadow:0 2px 10px #142b4718}
 body.pk #pkCoach{display:block}#pkCoach small{display:block;color:#2b6fd0;font:700 12.5px "Malgun Gothic"}#pkCoach b{display:block;font:800 18px "Malgun Gothic";margin:2px 0}#pkCoach span{font:500 13.5px/1.45 "Malgun Gothic";color:#33475e}
 #pkStat{position:absolute;z-index:4;right:10px;top:10px;width:250px;display:none;background:#ffffffee;border-radius:12px;padding:10px 12px;font:500 13px/1.7 "Malgun Gothic";border:1px solid #c9d4e0}
@@ -80,7 +84,7 @@ body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before
   <canvas id="cv" tabindex="0"></canvas>
   <div id="cross"></div>
   <div id="hud"></div>
-  <div id="pkTiles"></div><div id="pkCoach"></div><div id="pkStat"></div>
+  <div id="pkTiles"></div><div id="pkCoach"></div><div id="pkStat"></div><div id="dmCoach" hidden></div>
   <div id="pDlg" hidden></div><div id="pToast" hidden></div>
   <div id="splash">
     <h1>병 라인 IDT</h1><p class="sub">Bottle Line · Interactive Digital Tutor · 병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장</p>

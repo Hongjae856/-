@@ -1,9 +1,9 @@
 /* ═══════════════════════════════════════════════════════════════════
-   1인칭 이동 (B1) — 눈높이 1.6 m · WASD 걷기 · 마우스로 둘러보기(클릭하면 시점 고정, Esc 해제) · Shift 빠르게
+   1인칭 이동 (B1) — 눈높이 1.55 m(11/18 세 IDT 통일 · idt_common/fpctl.js) · WASD 걷기 · 마우스로 둘러보기(클릭하면 시점 고정, Esc 해제) · Shift 빠르게
    충돌 : 앱 형상(정적 · 불투명)에서 만든 바닥 점유 격자(50 mm) — 높이 0.08~1.9 m 에 걸친 면이 차지하는 칸은 못 지나감
           + 방 벽 · 칸막이 벽(통과구는 사람이 못 지나감 · 실 사이 출입은 앞쪽 문 자리 z > 3600)
    ═══════════════════════════════════════════════════════════════════ */
-const WALK={x:0,y:1600,z:2600,yaw:0,pitch:-.1,keys:{},room:"F",R:250};
+const WALK={x:0,y:1550,fl:0,z:2600,yaw:0,pitch:-.1,keys:{},room:"F",R:250};
 const DOORZ=[3600,4900];                     /* 칸막이 벽 출입문 자리 (앞쪽) */
 const walkFwd=()=>[-Math.sin(WALK.yaw)*Math.cos(WALK.pitch),Math.sin(WALK.pitch),-Math.cos(WALK.yaw)*Math.cos(WALK.pitch)];
 const GRID={c:50,x0:0,z0:0,nx:0,nz:0,a:null};
@@ -30,11 +30,13 @@ function walkSpawn(room){
   PK_OBS=PK_OBS||(typeof pkObstacles==="function"?pkObstacles():[]);
   const want=room==="F"?[-1500,1300]:[ROOM.wallX+2500,1300];
   let best=null; for(let r=0;r<5000&&!best;r+=100) for(let a=0;a<24;a++){ const q=a/24*Math.PI*2, x=want[0]+Math.cos(q)*r, z=want[1]+Math.sin(q)*r; if(walkFree(x,z)){ best=[x,z]; break; } }
-  best=best||want; Object.assign(WALK,{x:best[0],z:best[1],y:1600,yaw:0,pitch:-.12,room});
+  best=best||want; Object.assign(WALK,{x:best[0],z:best[1],y:fpcEye(0),yaw:0,pitch:-.12,room});
 }
 function walkTick(dt){
+  fpcTick(dt); try{ const fy=appWin().floorY(WALK.x,WALK.z)||0; WALK.fl+=(fy-WALK.fl)*Math.min(1,dt*10); }catch(e){}   /* 계단 발판 높이 */
+  WALK.y=fpcEye(WALK.fl);                                            /* 눈높이 1.55 m · 앉기 (C) */
   if(V3B.view==="orbit") return;
-  const k=WALK.keys, sp=(k.ShiftLeft||k.ShiftRight?2.6:1.4)*1000*dt; let mx=0,mz=0;
+  const k=WALK.keys, sp=fpcSpeed(k)*1000*dt; let mx=0,mz=0;
   if(k.KeyW||k.ArrowUp) mz-=1; if(k.KeyS||k.ArrowDown) mz+=1; if(k.KeyA||k.ArrowLeft) mx-=1; if(k.KeyD||k.ArrowRight) mx+=1;
   if(!mx&&!mz) return; const l=Math.hypot(mx,mz); mx/=l; mz/=l;
   const s=Math.sin(WALK.yaw), c=Math.cos(WALK.yaw), dx=(mx*c+mz*s)*sp, dz=(-mx*s+mz*c)*sp;

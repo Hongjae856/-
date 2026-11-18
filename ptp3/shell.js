@@ -90,9 +90,20 @@ function loop(now){
   if(now-(loop.m||0)>300){ loop.m=now; inc3Tick(); mode3Coach(); }
   if(now-(loop.i||0)>500){ loop.i=now; $("#info").textContent=Math.round(V3P.t.fps)+" fps"; }
 }
+/* F1 힌트 (세 IDT 공통) : 평가 = 원본 앱 힌트 버튼(−5 점 · 15 초 표시) / 학습 = 다음 작업 / 자유 = 없음 */
+function ptpHint(){
+  if(!CREW.cur) return; if(MODE3.kind==="free"){ fpcToast("자유모드 — 순서 · 힌트 없음"); return; }
+  if(MODE3.kind==="inc"){ if(!INC3.fired||INC3.done){ fpcToast("이상 상황이 아직 없습니다"); return; }
+    if(INC3.mode==="exam"){ if(performance.now()<INC3.hintUntil){ fpcToast("힌트 표시 중"); return; } INC3.hint++; INC3.hintUntil=performance.now()+15000; fpcToast("힌트 사용 −5 점 — 15 초 동안 다음 작업 표시"); return; }
+    fpcToast(FP3.goal?"다음 작업 : "+FP3.goal.nm:"알람 안내에 따라 조치하세요"); return; }
+  const w=UNI_HUB.win(APPK[CREW.cur]); let ex=false; try{ ex=!!w.eval("isExam()"); }catch(e){}
+  if(ex){ const b=w.document.getElementById("examHint"); let act=false; try{ act=!!w.eval("S.session&&S.session.active"); }catch(e){}
+    if(!act){ fpcToast("평가가 시작된 뒤 힌트를 쓸 수 있습니다"); return; }
+    if(b&&!b.disabled&&b.style.display!=="none"){ b.click(); fpcToast("힌트 사용 −5 점 — 다음 작업 표시"); } else fpcToast("힌트 표시 중"); return; }
+  const c=$("#shCoach .t b"); fpcToast(FP3.goal?"다음 작업 : "+FP3.goal.nm:(c?c.textContent:"안내 없음")); }
 function boot(){ $("#modeChip").textContent=verTxt();
   if(!appsReady()){ setTimeout(boot,100); return; }
-  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
+  v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); fpcInit({isFP:()=>V3P.view!=="orbit"&&!FP3.hmi, hint:ptpHint}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
   document.querySelectorAll("#modes button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
   $("#chooseF").onclick=()=>pickRoom("F"); $("#chooseP").onclick=()=>pickRoom("P");

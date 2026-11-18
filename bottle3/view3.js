@@ -103,7 +103,7 @@ function v3bFrame(now){
   if(cv.width!==Math.round(w*pr)||cv.height!==Math.round(h*pr)){ R.setPixelRatio(pr); R.setSize(w,h,false); V3B.cam.aspect=w/Math.max(1,h); V3B.cam.updateProjectionMatrix(); }
   const cam=V3B.cam; V3B.inner.visible=V3B.view!=="orbit";
   if(V3B.view==="orbit"){ const o=V3B.orbit, e=v3bEye(o); cam.position.set(e[0]*MM,e[1]*MM,e[2]*MM); cam.lookAt(o.tx*MM,o.ty*MM,o.tz*MM); cam.fov=50; }
-  else { cam.position.set(WALK.x*MM,WALK.y*MM,WALK.z*MM); const f=walkFwd(); cam.lookAt((WALK.x+f[0]*1000)*MM,(WALK.y+f[1]*1000)*MM,(WALK.z+f[2]*1000)*MM); cam.fov=62; }
+  else { cam.position.set(WALK.x*MM,WALK.y*MM,WALK.z*MM); const f=walkFwd(); cam.lookAt((WALK.x+f[0]*1000)*MM,(WALK.y+f[1]*1000)*MM,(WALK.z+f[2]*1000)*MM); cam.fov=FPC.FOV; }
   cam.updateProjectionMatrix();
   v3bGen();
   R.render(V3B.sc,cam);

@@ -2,7 +2,7 @@
    자유모드 · 시연모드 (P4 · 파우치 방식)
    · 공통 : 앱 과정은 가동(operation) · 심화 학습으로 열어 두고, 앱의 단계 안내 자리를 셸 안내판으로 덮음
    · 시연 : 작업자(실)마다 3단계 — ① 설비 준비 일괄 ② 가동 START ③ 생산 보기 (평가 없음)
-   · 자유 : 순서 · 감점 · 평가 없음, 기동 조건(인터락) 해제(실제와 다름 · 앱 startChecks 비움 · 안전문 열림 정지(E020) 없음).
+   · 자유 : 순서 · 감점 · 평가 없음, 기동 조건 해제(실제와 다름) — 단 전원 · 공압 · 안전문 · 비상정지 · 알람 RESET 은 실제처럼(11/18 중간안), 운전 중 안전문을 열면 인터락 정지(E020).
             단 메인 전원 · 압축공기 · 진공 같은 동력은 실제처럼 필요(P6 현실성 점검 — 전원 없이 운전되던 것 삭제), [정상 운전 상태로] · [정지]
    ═══════════════════════════════════════════════════════════════════ */
 const MODE3={kind:null};
@@ -20,14 +20,14 @@ function mode3Start(r){
   const c=crs(APPK[r]); try{ c.begin("operation","guide"); if(r==="F") setTimeout(()=>{ try{ c.quickStart(); }catch(e){} },150); }catch(e){ console.error(e); }
   setTimeout(()=>mode3Apply(r),700);
 }
+/* 자유모드 중간안 (11/18 사용자 결정 · 세 IDT 통일) : 비상정지 · 전원과 공압(서보 파워) · 안전문 · 진공 펌프 · 미해제 알람은 실제처럼 확인, 나머지 기동 조건 해제 */
+const FREE3_KEEP=["E000","E013","E020","E021"];
 function mode3Apply(r){
   const w=UNI_HUB.win(APPK[r]); if(!w) return; const d=w.document;
   if(!d.getElementById("mode3css")){ const st=d.createElement("style"); st.id="mode3css"; st.textContent="body.mode3 #coach>*{visibility:hidden}body.mode3 .hint,body.mode3 .hintNow{outline:none!important}body.mode3 #guideArrow{display:none!important}"; d.head.appendChild(st); }
   d.body.classList.add("mode3");
-  if(MODE3.kind==="free"){ try{ if(!w.__sc0){ w.__sc0=w.startChecks; w.__dd0=w.deduct; w.__al0=w.alarm; } w.startChecks=function(){ return []; }; w.deduct=function(){}; w.alarm=function(k){ if(k==="E020") return; return w.__al0.apply(this,arguments); }; w.FREE3=true;
-      const dr=d.getElementById("uDoor"); if(dr&&!w.__door0){ w.__door0=dr.onclick; dr.onclick=function(){   /* 운전 중에도 안전문 개폐 (도어 잠금 해제 · 실제와 다름) */
-        if(w.FREE3&&w.eval("(S.running||oneShot)&&!workerJob")){ w.eval("S.door=S.door==='closed'?'open':'closed'; if(S.door==='open') S.doorOpens=(S.doorOpens||0)+1; try{ drawHMI(); }catch(e){}"); return; }
-        return w.__door0.apply(this,arguments); }; } }catch(e){ console.error("인터락 해제",e); } }   /* 자유 : 기동 조건 · 감점 없음 */
+  if(MODE3.kind==="free"){ try{ if(!w.__sc0){ w.__sc0=w.startChecks; w.__dd0=w.deduct; w.__al0=w.alarm; } w.startChecks=function(){ return w.__sc0().filter(c=>FREE3_KEEP.includes(c.k)); }; w.deduct=function(){}; w.alarm=w.__al0; w.FREE3=true;
+      }catch(e){ console.error("인터락 해제",e); } }   /* 자유 : 기동 조건 · 감점 없음 */
 }
 /* 셸 안내판 : 앱 단계 안내 자리에 겹침 */
 function mode3Coach(){
@@ -39,7 +39,7 @@ function mode3Coach(){
   Object.assign(el.style,{left:rc.left+"px",top:rc.top+"px",width:rc.width+"px",minHeight:rc.height+"px"});
   const r=CREW.cur;
   if(MODE3.kind==="free"){
-    el.className="free"; const k='<div class="t"><small>자유모드 · '+ROOM_NM[r]+'</small><b>순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요</b><span>기동 조건 · 안전문 인터락이 해제되어 있습니다 (실제와 다름). 메인 전원 · 공압 · 진공 같은 동력은 실제처럼 켜야 움직입니다. 상단 작업자 버튼으로 다른 작업장으로 바꿉니다.</span></div>'+
+    el.className="free"; const k='<div class="t"><small>자유모드 · '+ROOM_NM[r]+'</small><b>순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요</b><span>기동 조건 · 운전 중 조작 금지가 해제되어 있습니다 (실제와 다름). 메인 전원 · 공압 · 진공은 실제처럼 켜야 하고, 운전 중 안전문을 열면 인터락으로 정지합니다 (닫고 RESET). 상단 작업자 버튼으로 다른 작업장으로 바꿉니다.</span></div>'+
       '<div class="b"><button data-f="run">▶ 정상 운전 상태로</button><button data-f="stop">■ 정지</button></div>';
     if(el.dataset.k!==k+r){ el.dataset.k=k+r; el.innerHTML=k; el.querySelector('[data-f="run"]').onclick=()=>{ try{ api3(r).ready(); setTimeout(()=>crs(APPK[r]).start(),300); }catch(e){ console.error(e); } };
       el.querySelector('[data-f="stop"]').onclick=()=>{ try{ api3(r).stop(); }catch(e){ console.error(e); } }; }

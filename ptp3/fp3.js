@@ -31,7 +31,7 @@ function fp3Build(){
         if(e) q=[4*(e[1]-620)-3680, 4*(380-e[2])+1128, 560]; }catch(x){} }
     q=q||(CREW.cur==="F"?[-3300,1200,560]:[4000,1200,650]);
     FP3.T.push({id:"lcCheck", nm:"점검 : "+(((d.getElementById("cTitle")||{}).textContent)||"확인"), p:q, s:[.6,.6,.6], el:lc}); }
-  FP3.goal=h&&MODE3.kind!=="free"?(FP3.T.find(t=>t.el&&(t.el===h||t.el.contains(h)))||null):null;   /* 자유모드 : 다음 작업 안내 없음 */
+  FP3.goal=h&&MODE3.kind!=="free"&&!(MODE3.kind==="inc"&&INC3.mode==="exam"&&!(performance.now()<INC3.hintUntil))?(FP3.T.find(t=>t.el&&(t.el===h||t.el.contains(h)))||null):null;   /* 자유모드 : 다음 작업 안내 없음 */
 }
 /* 조준 : 화면 가운데 방향과 가장 가까운 대상 (보이는 거리 6 m 안 · 조작은 손 닿는 거리 1.2 m 안만) */
 const fp3T=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s, pt:fp3Snap(t), reachMax:t.reachMax};
@@ -77,7 +77,8 @@ function fp3Hud(){ const h=$("#fpTip"); if(!h) return;
   h.innerHTML=FP3.hmi?"<b>설비 화면 조작 중</b> · 오른쪽 설비 화면을 누르세요 · <kbd>F</kbd> 또는 <kbd>Esc</kbd> 뒤로"
     :a&&FP3.aimIn?"<kbd>E</kbd> / 클릭 · <b>"+a.nm+"</b>"+(g===a?" <s>다음 작업</s>":"")
     :a&&!R.aimHidden?"<span class='far'>가까이 가세요"+m(R.aimDist)+"</span> · <b>"+a.nm+"</b>"+(g===a?" <s>다음 작업</s>":"")
-    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" <em>"+(R.goalDir||"")+"</em>":""; }
+    :g?"다음 작업 : <b>"+g.nm+"</b>"+m(R.goalDist)+" <em>"+(R.goalDir||"")+"</em>"
+    :"1인칭"+(FPC.crouch?" · 앉음":"")+" · WASD 걷기 (Shift 빠르게) · E / 클릭 조작 · C 앉기 · F1 힌트 · H 도움말"; }
 /* 3D : 조작 지점 마커 (공통 모듈) */
 function fp3Init(){
   FP3.am=createAimMark({T3, scene:V3P.sc, camera:()=>V3P.cam, canvas:()=>$("#cv"), unit:1, occluded:fp3Occ});

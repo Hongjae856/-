@@ -59,8 +59,6 @@ PATCH = {
     ],
     "ui.js": [
         ('const runBlock=()=>{ if(S.f.run){', 'const runBlock=()=>{ if(S.f.run&&!FREE()){', 1),   # 자유모드 인터록 해제 (11/17)
-        ('if(!f.main){ toast("메인 파워를 먼저 켜세요.","bad"); return; }', 'if(!f.main&&!FREE()){ toast("메인 파워를 먼저 켜세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
-        ('if(f.run){ deduct("doorRun"); raise("DOOR"); }', 'if(f.run&&!FREE()){ deduct("doorRun"); raise("DOOR"); }', 1),   # 자유모드 인터록 해제 (11/17)
         ('if(!xrReady()){ toast("X-ray 부팅이 끝난 뒤 켭니다.","bad"); return; }', 'if(!xrReady()&&!FREE()){ toast("X-ray 부팅이 끝난 뒤 켭니다.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
         ('if(p.prRun||p.vsRun){ toast("인쇄 · 비전을 먼저 정지하세요.","bad"); return; }', 'if((p.prRun||p.vsRun)&&!FREE()){ toast("인쇄 · 비전을 먼저 정지하세요.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
         ('if(S.p.ctRun){ toast("카토너 가동 중입니다. 먼저 STOP.","bad"); return; }', 'if(S.p.ctRun&&!FREE()){ toast("카토너 가동 중입니다. 먼저 STOP.","bad"); return; }', 1),   # 자유모드 인터록 해제 (11/17)
@@ -89,11 +87,13 @@ PATCH = {
     ],
     "fps.js": [
         ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
+        ("if(!['KeyW','KeyA','KeyS','KeyD'].includes(e.code) && !actions[e.code])return;", "if(!['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code) && !actions[e.code])return;", 1),   # 방향키 · Shift (11/18 세 IDT 통일)
+        ("const f=Number(keys.has('KeyW'))-Number(keys.has('KeyS'));", "const f=Number(keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));", 1),
+        ("const r=Number(keys.has('KeyD'))-Number(keys.has('KeyA'));", "const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft'));", 1),
+        ("const step=host.speed*Math.min(left,.012)/length;", "const step=host.speed*(keys.has('ShiftLeft')||keys.has('ShiftRight')?2.6/1.4:1)*Math.min(left,.012)/length;", 1),   # 걷기 1.4 m/s · Shift 2.6 m/s (11/18)
         ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||(e.code==='KeyF'&&!e.target?.closest?.('input,textarea'))) && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
     ],
     "sim.js": [   # 무작위 소량 불량 (11/17 사용자 선택) : 중량 NG 약 0.15 % · 실링 불량 약 0.15 %
-        ('  if(f.run&&!(f.airV[0]&&f.airV[1])&&f.airP<4.5) raise("AIR");', '  if(f.run&&!(f.airV[0]&&f.airV[1])&&f.airP<4.5&&!FREE()) raise("AIR");', 1),   # 자유모드 인터록 해제 (11/17)
-        ('  if(f.run&&S.f.door!=="closed") raise("DOOR");', '  if(f.run&&S.f.door!=="closed"&&!FREE()) raise("DOOR");', 1),   # 자유모드 인터록 해제 (11/17)
         ('  const printed=f.prn.saved;', '  const printed=f.prn.saved&&f.prn.lot===EXPECT.lot&&f.prn.exp===EXPECT.exp;   /* 포장지시기록서와 다른 값 = 인쇄 불량 (11/17) */', 1),
         ('  const printBad=!printed||f.headDirty||f.ribbon<5;', '  const printBad=!printed||f.headDirty||f.ribbon<5; if(f.vision){ S.cnt.ocrN=(S.cnt.ocrN||0)+NOZ.n; if(printBad) S.cnt.ocrNG=(S.cnt.ocrNG||0)+NOZ.n; }\n  const sealS=Math.random()<.0015;   /* 공포배출 게이트는 10열 일괄 (reject.js) → 실링 불량 판정 시 그 스트로크 10포 모두 배출 */', 1),
         ('c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":"ok"):"none";', 'c.print=p.prRun&&p.lbl.loaded?(p.nozzleBad||p.ink<5?"blur":(p.lbl.lot!==EXPECT.lot||p.lbl.exp!==EXPECT.exp)?"bad":"ok"):"none";', 1),

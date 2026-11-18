@@ -50,7 +50,7 @@ function startWork(key,cb,opt){
 /* 여러 단계 작업 (대차 · 리프터 끌기 등) : leg = {stand, path?, deck?, reach?, dur, carry?, grab?, release?, on?} */
 function legRoute(w,L){ if(L.path) return L.path.map(q=>[q[0],q[1],0]).concat([[L.stand[0],L.stand[1],0]]); return navPath(w,L.stand,L.deck?1:0); }
 const curLeg=J=>J.legs?J.legs[J.li]:J.j;
-const WK_SPD=1.6;                               /* 보행 속도 m/s */
+const WK_SPD=1.4;                               /* 보행 속도 m/s (11/18 세 IDT 통일 1.4) */
 function wkTick(dt){
   if(typeof helpTick==="function") helpTick(dt);
   if(CAMRET){ CAMRET.t-=dt; if(CAMRET.t<=0){ if(cam.view==="work"&&!WK.some(w=>w.job&&w.job.hasView)) camSet(CAMRET.view); CAMRET=null; } }

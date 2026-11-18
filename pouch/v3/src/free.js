@@ -1,14 +1,15 @@
 /* ═══════════════════════════════════════════════════════════════════
    자유모드 (11/17 사용자 지시 · 선택)
    · 순서 · 감점 · 평가 없음 : 단계 목록 없음 · 정기 공정검사(IPC) 자동 시작 없음 · 채점 관리 숨김
-   · 설비 인터록 해제 (사용자 선택 — 실제와 다름) : 운전 중 조작 금지 · 전원 순서 · RUN / START / JOG 조건 · 안전도어 · 공기압 알람 등
-     (build.py PATCH 의 !FREE() 조건). 재료가 없어 생기는 상황(은박 없음 · 주성분 없음 · 라벨 없음)과 비상정지 버튼은 그대로
+   · 설비 인터록 — 중간안 (11/18 사용자 결정 · 세 IDT 통일) : 기동 조건 · 운전 중 조작 금지는 해제(실제와 다름 · build.py PATCH 의 !FREE() 조건),
+     메인 파워 · 컨트롤 판넬 · 압축공기 · 안전도어 · 비상정지 · 알람 RESET 은 실제처럼. 운전 중 안전도어 · 카토너 아크릴 문을 열면 인터락 정지.
+     재료가 없어 생기는 상황(은박 없음 · 주성분 없음 · 라벨 없음)은 그대로
    · 문 · 덮개 자유 개폐 : 충전기 안전도어 · 2번 호퍼 뚜껑 · 충전실 남쪽 양개문 2 · 카토너 아크릴 문 3 · 포장실 북쪽 출입문
    · 한 라인 공유 · 상단 작업자 교체(crew.js) · 시작은 두 실 모두 전원 OFF
    ═══════════════════════════════════════════════════════════════════ */
 const FREE=()=>!!S&&S.mode==="free";
 MODE_NM.free="자유모드";
-function freeStart(r){ $("#splash").classList.add("hide"); startSession("free",r); toast(CREW_RNM[r]+" · 자유모드 — 순서 · 감점 없음 · 인터록 해제 · 문 · 덮개 자유 개폐","good"); }
+function freeStart(r){ $("#splash").classList.add("hide"); startSession("free",r); toast(CREW_RNM[r]+" · 자유모드 — 순서 · 감점 없음 · 기동 조건 해제 (전원 · 공압 · 안전문은 실제처럼)","good"); }
 /* 두 실 모두 전원 OFF (과정 모드의 '다른 실 자동 운전' 설정을 되돌림) */
 function freeBlank(){ const keep=S; initState(); const z=S; S=keep; S.f=z.f; S.p=z.p; S.hop=z.hop; S.cnt=z.cnt; S.alarms=[]; S.activeTrouble=null; S.recovery=null;
   Object.assign(S.flags,{ctDoor:[0,0,0], rdoor:{}, lid2:"on", bagsEmpty:false}); if(typeof lineInit==="function") lineInit(); }
@@ -35,20 +36,21 @@ function freeCoach(){
   c.className="free";
   $("#cStep").textContent="자유모드 · "+CREW_RNM[S.room];
   $("#cTitle").textContent="순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요";
-  $("#cDesc").textContent="설비 인터록이 해제되어 있습니다 (실제와 다름). 문 · 덮개는 누르면 열리고 닫힙니다. 상단 [🧍 충전실 작업자 · 🧍 포장실 작업자] 로 같은 라인의 다른 작업장으로 바꿉니다.";
+  $("#cDesc").textContent="기동 조건 · 운전 중 조작 금지가 해제되어 있습니다 (실제와 다름). 메인 파워 · 압축공기는 실제처럼 켜야 하고, 운전 중 안전도어 · 카토너 문을 열면 인터락으로 정지합니다. 문 · 덮개는 누르면 열리고 닫힙니다. 상단 [🧍 충전실 작업자 · 🧍 포장실 작업자] 로 같은 라인의 다른 작업장으로 바꿉니다.";
   $("#stepCur").textContent="자유"; $("#endBtn").textContent="자유모드 종료";
 }
 
 /* ── 설비 인터록 해제 ── */
-{ const f0=fillerBlockers; fillerBlockers=function(){ return FREE()?[]:f0(); }; }
-{ const f0=ctBlockers; ctBlockers=function(){ return FREE()?[]:f0(); }; }
+const FREE_KEEP_F=/메인 파워|컨트롤 판넬 OFF|압축공기|안전도어|비상정지|알람 미해제/, FREE_KEEP_P=/카토너 메인/;
+{ const f0=fillerBlockers; fillerBlockers=function(){ return FREE()?f0().filter(t=>FREE_KEEP_F.test(t)):f0(); }; }
+{ const f0=ctBlockers; ctBlockers=function(){ return FREE()?f0().filter(t=>FREE_KEEP_P.test(t)):f0(); }; }
 
 /* ── 문 · 덮개 ── */
 const FREE_DOOR={
   F:[["frLid","🫙","2번 호퍼 뚜껑",()=>S.flags.lid2==="off"?"들어내 난간에 세움":"덮음 · 클램프 체결",()=>{ S.flags.lid2=S.flags.lid2==="off"?"on":"off"; }],
      ["frDF0","🚪","충전실 남쪽 출입문 (서)",()=>freeDoorOpen("f0")?"열림":"닫힘",()=>freeDoorTog("f0")],
      ["frDF1","🚪","충전실 남쪽 출입문 (동)",()=>freeDoorOpen("f1")?"열림":"닫힘",()=>freeDoorTog("f1")]],
-  P:[0,1,2].map(k=>["frCt"+k,"🚪","카토너 아크릴 문 "+(k+1),()=>(S.flags.ctDoor||[])[k]?"열림":"닫힘",()=>{ if(!S.flags.ctDoor) S.flags.ctDoor=[0,0,0]; S.flags.ctDoor[k]=S.flags.ctDoor[k]?0:1; }])
+  P:[0,1,2].map(k=>["frCt"+k,"🚪","카토너 아크릴 문 "+(k+1),()=>(S.flags.ctDoor||[])[k]?"열림":"닫힘",()=>{ if(!S.flags.ctDoor) S.flags.ctDoor=[0,0,0]; S.flags.ctDoor[k]=S.flags.ctDoor[k]?0:1; if(S.flags.ctDoor[k]&&S.p.ctRun){ S.p.ctRun=false; toast("카토너 아크릴 문 열림 — 인터락 정지 (문을 닫고 다시 가동)","bad"); } }])
      .concat([["frDP0","🚪","포장실 북쪽 출입문",()=>freeDoorOpen("p0")?"열림":"닫힘",()=>freeDoorTog("p0")]])
 };
 const freeDoorOpen=k=>!!(S.flags.rdoor&&S.flags.rdoor[k]);

@@ -34,7 +34,7 @@ const PS_ACT={
   cw:()=>{ if(!PS.cw.set&&!PS.cw.run){ psMsg("중량선별기 — 중량 세팅을 먼저 하세요."); return false; } PS.cw.run=!PS.cw.run; return true; },
   agStart:()=>{ PS.ag.on=true; PS.ag.msg="작업 진행"; },
   agClear:()=>{ PS.ag.list=[]; PS.ag.n=0; PS.ag.msg="클리어 — 이 박스 판독을 처음부터"; },
-  agReissue:()=>{ if(!PS.ag.issued.length) return; PS.ag.paper--; PS.ag.msg="재발급 — "+PS.ag.issued[0].sn; },
+  agReissue:()=>{ if(!PS.ag.issued.length) return; if(PS.ag.paper<=0){ psMsg("AG 라벨지 없음 — 교체 후 재발급"); return; } PS.ag.paper--; PS.ag.msg="재발급 — "+PS.ag.issued[0].sn; },
   agPack:()=>{ if(PS.ag.n>0) psBoxDone(true); },
   agEnd:()=>{ PS.ag.on=false; PS.ag.msg="작업 완료"; },
   allOn:()=>{ Object.assign(PS.tt,{on:true}); PS.pr.on=PS.vis.on=PS.lab.run=PS.leaf.on=true; if(!PS.cw.set) PS_ACT.cwSet(22.20,21.80,22.60); PS.cw.run=true; if(PS.rx) PS_ACT.agStart(); },
@@ -108,7 +108,7 @@ function psScan(q){
   return true;
 }
 function psBoxDone(manual){
-  if(PS.rx){ const sn="(01)1"+PS.job.gtin.slice(1)+"(21)"+PS.job.lot+"S"+String(PS.boxSer).padStart(7,"0"); PS.ag.issued.unshift({no:PS.boxSer,sn}); PS.ag.issued.length=Math.min(PS.ag.issued.length,12); PS.boxSer++; PS.ag.paper--; PS.agFeed=1; }
+  if(PS.rx){ const sn="(01)1"+PS.job.gtin.slice(1)+"(21)"+PS.job.lot+"S"+String(PS.boxSer).padStart(7,"0"); PS.ag.issued.unshift({no:PS.boxSer,sn}); PS.ag.issued.length=Math.min(PS.ag.issued.length,12); PS.boxSer++; if(PS.ag.paper>0){ PS.ag.paper--; PS.agFeed=1; } else { PS.ag.pending=true; psMsg("AG 라벨지 없음 — 라벨지를 교체하면 대기 중인 박스 라벨이 발행됩니다"); } }
   PS.ag.boxes++; PS.ag.msg=manual?"포장완료 (수량 미달 박스 마감)":"포장 완료 — 박스 라벨 발행"; PS.ag.list=[]; PS.ag.n=0;
   PS.box.open=false; PS.box.closing=PS.auto.w2?6:1e9;           /* 작업자 2 : 봉함 · 라벨 · 파렛트 (약 6 초) */
 }
