@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════
    자유모드 · OEE 관리 대시보드 · 이상사례 대처 교육 (B5-2 · 파우치 · PTP 와 같은 방식, 공통 모듈 oee/oee.js)
    · 자유 : 순서 · 감점 · 평가 없음, 기동 조건 해제 (동력 · 공압은 실제처럼 필요 — PTP V4 결정과 같음), 중량선별기 세팅 없이도 가동
-   · OEE : 시트에서 '병' 라인 기록만 읽어 IDT DB 에 저장 (실제 값은 저장소 · 페이지에 넣지 않음)
+   · OEE : 시트에서 '계수기' 라인(병 라인 · 2호 · 3호 등 이름에 계수기가 들어간 줄) 기록만 읽어 IDT DB 에 저장 (실제 값은 저장소 · 페이지에 넣지 않음)
    · 부동 유형 = 사용자 제공 병 라인 부동사유 분류 (11/18) ↔ 충전실 앱 이상사례 · 포장실 신규 이상사례
    ═══════════════════════════════════════════════════════════════════ */
 const OEE_B_CODES=[
@@ -49,7 +49,7 @@ const _cwAct=PS_ACT.cw; PS_ACT.cw=()=>{ if(FREEB.on&&!PS.cw.set){ PS_ACT.cwSet(S
 /* ── OEE · 이상사례 ── */
 function oeebInit(){
   if(typeof OEEEDU==="undefined") return;
-  OEEEDU.init({line:"병", title:"병 라인 · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); incbPick(); }});
+  OEEEDU.init({line:"계수기", title:"병 라인(계수기) · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); incbPick(); }});
 }
 function incbList(r){ const st=(OEEEDU.codeStats&&OEEEDU.codeStats())||{}, has=Object.keys(st).length>0;
   const L=OEE_B_CODES.filter(c=>c.room===r||(!r&&c.room)).map(c=>({c,down:(st[c.k]||{}).down||0,n:(st[c.k]||{}).n||0}));
