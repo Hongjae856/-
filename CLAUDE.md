@@ -8,6 +8,7 @@
 - PTP 통합라인 단일화면 IDT (아티펙트 BXL7P815mbHNcXJ8oquyPB) : `ptp_one/changelog.js` 의 `CHANGELOG` 배열 맨 위에 추가 → `python3 ptp_one/build.py` (원본 `src/filler.html` · `src/line.html` 을 읽어 단일 화면 스크립트를 주입)
 - 파우치 라인 IDT (아티펙트 Cs8MNrLjCXW1ztkcUDvt4M) : `pouch/src/changelog.js` 의 `CHANGELOG` 배열 맨 위에 추가 → `python3 pouch/v3/build.py` (산출물 `파우치라인_IDT.html`). V4 부터 새 3D 연결판 — 교육 로직 `pouch/src` + 3D `pouch/v2/src` + 연결 `pouch/v3/src` + OEE 공통 모듈 `oee/` 를 합쳐 빌드 (옛 3D 판은 `pouch/build.py` 로만 남김 · 게시에 쓰지 않음)
 - PTP 라인 IDT · 파우치 방식 전환판 (아티펙트 ErpiziNEbQKMQxVEpcWVv8) : `ptp3/changelog.js` 의 `CHANGELOG` 배열 맨 위에 추가 → `python3 ptp3/build.py` (산출물 `PTP라인_IDT.html`). 두 앱 문서는 `ptp_one/build.py` 의 주입 결과를 그대로 쓰고 셸 Three.js 가 그림 · 계획 `ptp3/PLAN.md` (기존 PTP 통합 두 판은 더 이상 갱신하지 않음)
+- 병 라인 IDT · 파우치 방식 전환판 + 포장라인 (아티펙트 QBppWCKeNaUmMT1ZrFKBzA) : `bottle3/changelog.js` 의 `CHANGELOG` 배열 맨 위에 추가 → `python3 bottle3/build.py` (산출물 `병라인_IDT.html`). 원본 `bottle/src` 앱을 빌드 때 치환해 쓰고(형상 버퍼만), 포장실 · 1인칭 · 모드는 셸 · 계획 `bottle3/PLAN.md` · 현장 자료 메모 `bottle/pack/` (기존 병충전 IDT 는 더 이상 갱신하지 않음)
 - 날짜는 한국 시간(YYYY-MM-DD). 화면의 버전 표시는 배열 맨 위 항목에서 자동으로 정해진다.
 
 ## 1인칭 조작 대상 표시 (모든 IDT 공통 · 11/17 사용자 결정)
