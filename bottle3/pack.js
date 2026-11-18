@@ -164,22 +164,4 @@ function pkObstacles(){ const L=[], t=PK.tt;
     [PK.cw.x0,PK.cw.x1,-540,220],[15750,16150,140,480],[12350,12650,160,460],[PK.acc[0],PK.acc[1],-350,450],[PK.scan[0],PK.scan[1],-420,470],[PK.box[0],PK.box[1],-450,450],
     [PK.pallet.x-550,PK.pallet.x+550,PK.pallet.z-550,PK.pallet.z+550],[19400,20200,1200,1800],[9950,10550,800,1300]);
   return L; }
-/* 흐름 (B2 : 보기용 — 충전실 양품이 나올 때마다 한 병 · 리젝트 · 판독 · 포장은 B3) */
-function pkTick(dt){
-  if(!PKG.B) return; const w=appWin(); let good=0, run=false, bpm=30;
-  try{ const S=w.__IDT.S(); if(S){ good=S.cnt.good; run=!!S.running; bpm=S.bpm||30; } }catch(e){}
-  if(PKG.last<0) PKG.last=good; if(good<PKG.last) PKG.last=good;
-  while(PKG.last<good){ PKG.last++; if(PKG.list.length<200) PKG.list.push({s:0,lab:false,leaf:false,wt:0}); }
-  const v=(120+2.8*bpm)*(run?1:.6), end=PK_END(), gap=pm(PK.bottle.r*2+6)*1000;
-  PKG.list.sort((a,b)=>b.s-a.s);
-  let front=end+gap;
-  for(const q of PKG.list){ const p=pkPath(q.s);
-    if(p[0]>=PK.cw.w0&&p[0]<PK.cw.w1&&q.wt<.35){ q.wt+=dt; front=Math.min(front,q.s); continue; }   /* 계량부에서 잠깐 */
-    q.s=Math.min(q.s+v*dt,front-gap); front=q.s;
-    const x=pkPath(q.s)[0]; if(x>=PK.labX.wrap) q.lab=true; if(x>=PK.leafX) q.leaf=true; }
-  if(PKG.disc) PKG.disc.rotation.y-=dt*(run?.9:0);
-  const B=PKG.B, m=new T3.Matrix4(), z=new T3.Matrix4().makeScale(0,0,0); let n=0;
-  for(const q of PKG.list){ const p=pkPath(q.s); m.makeTranslation(pm(p[0]),pm(PK.CH),pm(p[2]));
-    B.body.setMatrixAt(n,m); B.cap.setMatrixAt(n,m); B.lab.setMatrixAt(n,q.lab?m:z); B.tab.setMatrixAt(n,q.leaf?m:z); n++; if(n>=240) break; }
-  for(const k of ["body","cap","lab","tab"]){ B[k].count=n; B[k].instanceMatrix.needsUpdate=true; }
-}
+/* 흐름 · 시뮬레이션 · 설비 화면 : packsim.js (B3) */
