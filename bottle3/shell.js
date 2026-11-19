@@ -46,7 +46,7 @@ function show(r){
   setView("fp"); walkSpawnAt(r); crewMark(); $("#modeChip").textContent=MODE_NM[CREW.mode]+" · "+(r==="F"?"충전실":r==="P1"?"포장실 1":"포장실 2");
 }
 function crewGo(r){ if(CREW.mode&&CREW.mode!=="inc") LASTB={m:CREW.mode,r,rx:CREW.rx}; if(!CREW.mode){ spMark(); return; } if(CREW.mode==="inc"){ incbPick(r==="F"?"F":"P"); return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
-function goHome(){ try{ const w=appWin(); w.B3_DEMO_STEP=false; if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
+function goHome(){ idtResClose([document,(()=>{ try{ return appWin().document; }catch(e){ return null; } })()]); try{ const w=appWin(); w.B3_DEMO_STEP=false; if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
   pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").style.display="none"; $("#splash .go").style.display="grid"; document.body.classList.remove("pk"); setView("orbit");
   $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
 function walkSpawnAt(r){ if(r==="F") walkSpawn("F"); else { PK_OBS=PK_OBS||pkObstacles(); const p=r==="P1"?[PK.scanX,900]:[19950,1000];

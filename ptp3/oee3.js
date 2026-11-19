@@ -66,7 +66,11 @@ function inc3Tick(){
       INC3.ded=F.concat(Array.from({length:INC3.hint},()=>"힌트 사용 (−5)")); INC3.wrong=F.filter(t=>/원인|오답|판단|RESET 반복/.test(t)).length;
       INC3.score=ex?Math.max(0,100-pen-5*INC3.hint):null;
       try{ OEEEDU.logPractice&&OEEEDU.logPractice({k:INC3.k, mode:ex?"incExam":"incLearn", ok:true, score:INC3.score, sec, wrong:INC3.wrong, hint:INC3.hint}); }catch(e){}
-      INC3.sec=sec; } }
+      INC3.sec=sec;
+      const c=OEE_PTP_CODES.find(x=>x.k===INC3.k)||{nm:INC3.k}, r=INC3.room, k=INC3.k, m=INC3.mode;
+      idtIncResult({room:ROOM_NM[r], nm:c.nm, grade:INC3_GRADE[k]||"중", ok:true, sec, wrong:INC3.wrong, hint:INC3.hint, exam:ex, score:INC3.score,
+        ded:INC3.ded.map(t=>{ const q=/^(.*?)\s*\(\s*[−-]\s*(\d+)\s*\)\s*$/.exec(t); return q?[q[1],q[2]]:[t,""]; }),
+        again:()=>inc3Start(r,k,m), list:()=>{ goHome(); setTimeout(()=>{ const b=document.querySelector('#splash .go [data-m="inc"]'); if(b) b.click(); const q=document.getElementById("choose"+r); if(q) q.click(); },300); }, home:goHome}); } }
 }
 function inc3Coach(el,r){
   const c=OEE_PTP_CODES.find(x=>x.k===INC3.k)||{nm:INC3.k};

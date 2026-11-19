@@ -8,7 +8,7 @@
   - 한 요청 = 세 IDT 버전을 함께 +1, 세 changelog 에 같은 취지로 기록, 세 IDT 모두 빌드 · 회귀 시험 · 게시.
   - 하드웨어 고유 수정(특정 설비 형상 · 동작)만 해당 IDT 에 한정하고, 그 경우 보고에 "해당 IDT 만 · 이유"를 적는다.
   - 공통 동작은 가능한 한 `idt_common/` 모듈 한 곳에 두어 한 번 고치면 세 IDT 에 같이 들어가게 한다.
-  - 통합 진행 (11/19 사용자 결정 · 단계적) : ① 메인화면 · 이상사례 목록 = `idt_common/splash.py · splash.css · splash.js · incpick.js` (완료) → ② 1인칭 조작 · 상단 바 = `fpctl.js`(파우치 포함 세 IDT 단축키 · 도움말 · 메뉴 · 눈높이 · 속도) · `topbar.js`(그래픽 단계 IDT_GQ_L · 배속 IDT_SPEEDS 공통 값, 파우치는 원본 상단 바가 기준 모양) (완료) → ③ 작업자 동작 = `crewkit.js`(들고 가는 물건 표 IDT_CARRY · 손에 든 자세 idtHold · 걷는 방향 idtFaceStep · 손 뻗기 idtReachAmt · 보행 IDT_WALK 1.4 m/s — PTP · 병 원본 앱 작업자 속도도 빌드 때 1.4 m/s 로 맞춤) (완료) → ④ 시연 · 자유모드 · 결과 창. 각 IDT 고유 부분(작업자 카드 · 병 포장 품목 · PTP 체인지파트 등)은 설정값으로만 둔다. 고유 특징이 깨질 수 있는 중요한 경우는 사용자에게 묻는다.
+  - 통합 진행 (11/19 사용자 결정 · 단계적) : ① 메인화면 · 이상사례 목록 = `idt_common/splash.py · splash.css · splash.js · incpick.js` (완료) → ② 1인칭 조작 · 상단 바 = `fpctl.js`(파우치 포함 세 IDT 단축키 · 도움말 · 메뉴 · 눈높이 · 속도) · `topbar.js`(그래픽 단계 IDT_GQ_L · 배속 IDT_SPEEDS 공통 값, 파우치는 원본 상단 바가 기준 모양) (완료) → ③ 작업자 동작 = `crewkit.js`(들고 가는 물건 표 IDT_CARRY · 손에 든 자세 idtHold · 걷는 방향 idtFaceStep · 손 뻗기 idtReachAmt · 보행 IDT_WALK 1.4 m/s — PTP · 병 원본 앱 작업자 속도도 빌드 때 1.4 m/s 로 맞춤) (완료) → ④ 시연 · 자유모드 · 결과 창 = `modes.js`(결과 창 idtResOpen · 이상사례 결과 idtIncResult · 시연 완료 idtDemoResult · 시연 안내판 idtDemoHtml · 자유모드 안내판 idtFreeHtml — PTP · 병 원본 앱 결과는 빌드 때 `ptp3/appres.js` · `bottle3/appres.js` 를 앱 문서 끝에 넣어 공통 창으로) (완료). 각 IDT 고유 부분(작업자 카드 · 병 포장 품목 · PTP 체인지파트 등)은 설정값으로만 둔다. 고유 특징이 깨질 수 있는 중요한 경우는 사용자에게 묻는다.
   - 이상사례 중요도 등급 : 파우치 11/16 확정, 블리스터 · 병 11/19 확인 (상 = 품질 직접 영향 · 중 = 품질 영향 가능 · 생산 손실 · 하 = 설비 정지 위주).
 
 ## 버전 관리 (네 IDT 공통)

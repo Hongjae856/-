@@ -61,21 +61,11 @@ function eduTick(){
   if(F.incAt&&S.activeTrouble&&!F.incSeen) F.incSeen=performance.now();
 }
 function showIncResult(manual){
-  const F=S.flags, inc=incOf(F.incK), ex=S.mode==="incExam", sc=scoreNow(), pass=sc.score>=PASS, ok=F.resolvedAt!=null&&!manual;
+  const F=S.flags, inc=incOf(F.incK), ex=S.mode==="incExam", sc=scoreNow(), ok=F.resolvedAt!=null&&!manual;
   const sec=F.incAt?(performance.now()-F.incAt)/1000:null;
-  const ded=S.deducts.map(d=>'<tr><td class="l">'+esc(d.why)+'</td><td>−'+d.pts+'</td></tr>').join("")||'<tr><td colspan="2">감점 없음</td></tr>';
   if(F.incAt&&typeof OEEEDU!=="undefined"&&OEEEDU.logPractice) OEEEDU.logPractice({k:F.incK, mode:S.mode, ok, score:ex?sc.score:null, sec:sec==null?null:Math.round(sec), wrong:S.deducts.filter(d=>d.k==="wrong").length, hint:S.hintUsed||0});
-  $("#endBox").innerHTML='<h2>'+(ex?"📝 이상사례 대처 평가":"📘 이상사례 대처 학습")+' — '+esc(ROOM_NM[S.room]+" · "+inc.nm)+'</h2>'+
-    '<p>중요도 '+(INC_GRADE[F.incK]||"-")+' · '+(ok?"대응 완료":"중도 종료")+(sec!=null?' · 발생 → 재가동 '+mmss(sec):'')+' · 원인 판단 오답 '+S.deducts.filter(d=>d.k==="wrong").length+'회 · 힌트 '+(S.hintUsed||0)+'회</p>'+
-    (ex?'<div class="finalScore">'+(ok?sc.score:0)+'<small>점 · '+(ok&&pass?"합격":"불합격")+' (기준 '+PASS+'점)</small></div>':'')+
-    '<h3>올바른 판단</h3><p>'+esc(inc.a)+'</p>'+
-    '<h3>감점 내역</h3><table class="ht"><tr><th>항목</th><th>감점</th></tr>'+ded+'</table>'+
-    '<p class="oeeNote">결과는 [OEE › OEE 관리 대시보드 › ③ 교육 효과] 에 기록됩니다.</p>'+
-    '<div class="mbtn"><button class="pri" id="endAgain">다시 하기</button><button id="endList">이상사례 목록</button><button id="endHome">메인화면</button></div>';
-  $("#mEnd").classList.add("on");
-  $("#endAgain").onclick=()=>{ $("#mEnd").classList.remove("on"); incStart(F.incK,S.mode); };
-  $("#endList").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); $("#choose"+S.room).click(); eduShow("inc"); };
-  $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
+  idtIncResult({room:ROOM_NM[S.room], nm:inc.nm, grade:INC_GRADE[F.incK], ok, sec, wrong:S.deducts.filter(d=>d.k==="wrong").length, hint:S.hintUsed||0, exam:ex, score:sc.score,
+    ded:S.deducts.map(d=>[d.why,d.pts]), answer:inc.a, again:()=>incStart(F.incK,S.mode), list:()=>{ goHome(); $("#choose"+S.room).click(); eduShow("inc"); }, home:goHome});   /* 공통 결과 창 */
 }
 /* 현장 조치 단계 : 조치 위치(빨간 !)가 화면 밖이면 3인칭 카메라를 그 위치로 옮김 (포장실에서 충전기 알람 · 2층 데크 다이얼 등) */
 function fixFocus(){
@@ -91,3 +81,19 @@ function eduInit(){
   $("#courseBack").addEventListener("click",()=>{ $("#incPick").style.display="none"; });
   setInterval(()=>{ eduTick(); fixFocus(); },200);
 }
+{ const g=goHome; goHome=function(){ idtResClose(); return g.apply(this,arguments); }; }   /* 메인화면 : 결과 창 닫기 */
+/* 학습 · 평가 결과 : 공통 결과 창 (idt_common/modes.js · 세 IDT 같은 모양) — 원본 ui.js showResult 를 대신함 */
+showResult=function(manual){
+  const ex=isExam(), sc=scoreNow(), A=STEPS();
+  const kp=S.room==="F"?[[S.cnt.pouch.toLocaleString()+" 포","생산카운터","hi"],[S.cnt.empty.toLocaleString()+" 포","공포 · 불량 배출","ng"],[S.cnt.good+" 카톤","양품 카톤"],[S.ipc.done+" 회","IPC 완료"]]
+                       :[[S.cnt.good+" 카톤","양품 카톤","hi"],[(S.cnt.rejVs+S.cnt.rejXr+S.cnt.rejCw)+" 개","불량 배출","ng"],[S.cwN?fmt(S.cwSum/S.cwN,2)+" g":"-","중량 평균"],[S.cnt.cases+" 개","대케이스"]];
+  const ipc=(S.ipc.log||[]).map(x=>[x.round||"추가",IPC_STD[x.k].nm,fmt(x.avg,3)+" g",x.pass?"적합":"부적합"]);
+  idtResOpen({icon:ex?"📝":"📘", head:ex?"평가 결과":"학습 결과", sub:ROOM_NM[S.room]+" · "+MODE_NM[S.mode],
+    meta:PROD.nm+" · 소요 "+mmss(S.session.sec)+" · 진행 "+Math.min(S.tIdx,A.length)+" / "+A.length+" 단계 · 힌트 "+S.hintUsed+"회"+(manual?" (중도 종료)":""),
+    score:ex?{v:sc.score, pass:sc.score>=PASS, th:PASS, base:sc.base, minus:sc.minus}:null, kpis:kp,
+    secs:[{h:"단계별 수행",th:["No","단계","배점","결과"],l:[1],rows:A.map((st,i)=>{ const l=S.stepLog.find(x=>x.i===i); return [i+1,st.t,st.pts||0,l?"완료 · "+mmss(l.at):"미완료"]; })},
+          {h:"알람 · 이상사례 대응",th:["구분","명칭","발생"],l:[1],rows:(S.flags.incLog||[]).map(x=>[x.kind,x.nm,mmss(x.at)])}]
+      .concat(ipc.length?[{h:"정기 공정검사 (IPC)",th:["회차","대상","평균","판정"],rows:ipc}]:[],
+              [{h:"감점 내역",th:["항목","감점","시각"],l:[0],rows:S.deducts.map(d=>[d.why,"−"+d.pts,mmss(d.at)]),empty:"감점 없음"}]),
+    btns:[["다시 하기",()=>startSession(S.mode,S.room),true],["메인화면",goHome],["닫기",null]]});
+};

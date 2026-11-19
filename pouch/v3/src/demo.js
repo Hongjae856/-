@@ -44,14 +44,9 @@ function demoCoach(st){
   if(isDemo()&&st&&st.k==="dWatchF"&&S.flags.demoWatch) $("#cStep").textContent="시연 · 포장실로 이송 "+S.cnt.toPack+" / "+DEMO_GOAL*6+" 포";
   if(isDemo()&&st&&st.k==="dWatch"&&S.flags.demoWatch) $("#cStep").textContent="시연 · 생산 "+S.cnt.good+" / "+DEMO_GOAL+" 카톤 · 대케이스 "+S.cnt.cases+" 개";
 }
-function showDemoResult(){
-  $("#endBox").innerHTML='<h2>🎬 시연 완료 — '+esc(CREW_RNM[S.room])+'</h2><p>'+(S.room==="P"?"포장실 설비 전원 → 포장 라인 가동 → 수동 포장(대케이스 · 대박스 · 파렛트)까지 진행했습니다.":"충전기 전원 → 진공 이송기 → 충전기 가동 → 포장실 이송까지 진행했습니다.")+' 상단 작업자 버튼으로 다른 작업장 시연을 이어서 볼 수 있습니다.</p>'+
-    '<div class="kpis" style="grid-template-columns:repeat(3,1fr);margin:10px 0">'+kc(S.cnt.pouch.toLocaleString()+" 포","충전 파우치","hi")+kc(S.cnt.good+" 카톤","양품 카톤")+kc(S.cnt.cases+" 개","대케이스")+'</div>'+
-    '<div class="mbtn"><button class="pri" id="endAgain">다시 시연</button><button id="endHome">메인화면</button><button id="endClose">닫기</button></div>';
-  $("#mEnd").classList.add("on");
-  $("#endAgain").onclick=()=>{ $("#mEnd").classList.remove("on"); demoStart(S.room); };
-  $("#endHome").onclick=()=>{ $("#mEnd").classList.remove("on"); goHome(); };
-  $("#endClose").onclick=()=>$("#mEnd").classList.remove("on");
+function showDemoResult(){   /* 공통 결과 창 (idt_common/modes.js) */
+  idtDemoResult({room:CREW_RNM[S.room], flow:S.room==="P"?"포장실 설비 전원 → 포장 라인 가동 → 수동 포장(대케이스 · 대박스 · 파렛트)":"충전기 전원 → 진공 이송기 → 충전기 가동 → 포장실 이송",
+    kpis:[[S.cnt.pouch.toLocaleString()+" 포","충전 파우치","hi"],[S.cnt.good+" 카톤","양품 카톤"],[S.cnt.cases+" 개","대케이스"]], again:()=>demoStart(S.room), home:goHome});
 }
 function demoStart(room){ room=room||"F"; $("#splash").classList.add("hide"); startSession("demo",room); toast((typeof CREW_RNM!=="undefined"?CREW_RNM[room]:room)+" · 시연모드 — [▶ 시연 실행] 버튼을 차례로 누르세요"); }   /* 11/17 : 작업자 선택 · 1인칭 시작 */
 function demoInit(){ const b=$("#spDemo"); if(b) b.onclick=demoStart; }

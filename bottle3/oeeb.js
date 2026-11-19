@@ -90,10 +90,9 @@ function incbDone(now){ INCB.done=true; INCB.sec=Math.round((now-INCB.at)/1000);
   INCB.score=ex?Math.max(0,100-ded.reduce((a,d)=>a+d.pts,0)):null; if(ex) incbExamCss(false);
   try{ OEEEDU.logPractice&&OEEEDU.logPractice({k:INCB.k, mode:ex?"incExam":"incLearn", ok:true, score:INCB.score, sec:INCB.sec, wrong:INCB.wrong, hint:INCB.hint}); }catch(e){}
   const c=OEE_B_CODES.find(x=>x.k===INCB.k)||{nm:INCB.k};
-  pcDlg('<h3>'+(ex?"📝 이상사례 대처 평가":"📘 이상사례 대처 학습")+' — '+c.nm+'</h3><p>대응 완료 · 발생 → 재가동 '+INCB.sec+' 초 · 원인 판단 오답 '+INCB.wrong+' 회 · 힌트 '+INCB.hint+' 회</p>'+
-    (ex?'<p class="score"><b>'+INCB.score+'</b> 점 · '+(INCB.score>=80?"합격":"불합격")+' (기준 80 점)</p>':'')+
-    '<table class="cmp"><tr><th>감점 항목</th><th>감점</th></tr>'+(ded.length?ded.map(d=>'<tr><td>'+d.why+'</td><td>−'+d.pts+'</td></tr>').join(""):'<tr><td colspan="2">감점 없음</td></tr>')+'</table><p>결과는 OEE 관리 대시보드 ③ 교육 효과에 기록됩니다.</p>',
-    [["메인화면",()=>{ goHome(); }],["닫기",null]]); }
+  const r=INCB.room, k=INCB.k, m=INCB.mode;   /* 공통 결과 창 (파우치와 같은 구성) */
+  idtIncResult({room:r==="F"?"충전실":"포장실", nm:c.nm, grade:INCB_GRADE[k]||"중", ok:true, sec:INCB.sec, wrong:INCB.wrong, hint:INCB.hint, exam:ex, score:INCB.score,
+    ded:ded.map(d=>[d.why,d.pts]), again:()=>incbStart(k,m), list:()=>{ goHome(); setTimeout(()=>{ const b=document.querySelector('#splash .go [data-m="inc"]'); if(b) b.click(); const q=document.getElementById(r==="F"?"chooseF":"chooseP1"); if(q) q.click(); },300); }, home:goHome}); }
 /* 충전실 이상사례 평가 : 원본 앱 안내(코치 · 강조)를 숨김 — F1 힌트는 15 초 동안 보여 주고 −5 점 */
 function incbExamCss(on){ try{ const d=appWin().document; let st=d.getElementById("incExamCss");
   if(on&&!st){ st=d.createElement("style"); st.id="incExamCss"; st.textContent="#coach>*{visibility:hidden}.hint,.hintNow{outline:none!important}"; d.head.appendChild(st); }

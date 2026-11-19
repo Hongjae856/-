@@ -28,15 +28,15 @@ function freeAfter(){ buildStatic(); drawHMI(); renderTiles(); renderCoach(); }
 { const f0=renderCoach; renderCoach=function(){ f0(); freeCoach(); }; }
 function freeCoach(){
   const on=!!S&&!!S.session&&FREE(); let b=$("#freeBar");
-  if(!b){ const lc=$("#lcCheck"); if(!lc) return; lc.insertAdjacentHTML("afterend",'<div id="freeBar" style="display:none"><button data-fa="run">▶ 정상 운전 상태로</button><button data-fa="off">■ 전체 OFF 초기화</button></div>'); b=$("#freeBar");
+  if(!b){ const lc=$("#lcCheck"); if(!lc) return; lc.insertAdjacentHTML("afterend",'<div id="freeBar" style="display:none"><button data-fa="run">'+IDT_FREE.run+'</button><button data-fa="off">'+IDT_FREE.off+'</button></div>'); b=$("#freeBar");
     $$("#freeBar [data-fa]").forEach(x=>x.onclick=()=>{ if(!FREE()) return; if(x.dataset.fa==="run") freeRunAll(); else freeOff(); }); }
   b.style.display=on?"":"none"; const rb=$("#rubricBtn"); if(rb) rb.style.display=on?"none":"";
   if(!on) return;
   const c=$("#coach"); if(S.activeTrouble||S.ipc.open) return;
   c.className="free";
   $("#cStep").textContent="자유모드 · "+CREW_RNM[S.room];
-  $("#cTitle").textContent="순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요";
-  $("#cDesc").textContent="기동 조건 · 운전 중 조작 금지가 해제되어 있습니다 (실제와 다름). 메인 파워 · 압축공기는 실제처럼 켜야 하고, 운전 중 안전도어 · 카토너 문을 열면 인터락으로 정지합니다. 문 · 덮개는 누르면 열리고 닫힙니다. 상단 [🧍 충전실 작업자 · 🧍 포장실 작업자] 로 같은 라인의 다른 작업장으로 바꿉니다.";
+  $("#cTitle").textContent=IDT_FREE.title;      /* 공통 문구 (idt_common/modes.js) */
+  $("#cDesc").textContent=idtFreeDesc("카토너 문도 같습니다. 문 · 덮개는 누르면 열리고 닫힙니다.");
   $("#stepCur").textContent="자유"; $("#endBtn").textContent="자유모드 종료";
 }
 

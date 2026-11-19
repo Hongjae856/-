@@ -41,7 +41,7 @@ APP_PATCH = [
     ('    if(S.running&&k!=="table"){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }',
      '    if(S.running&&k!=="table"&&!window.FREEB){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }', 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -64,7 +64,11 @@ def app() -> str:
     if n < 4:
         sys.exit(f"app: 운전 중 조작 금지 패턴이 {n} 곳뿐")
     print(f"app: 자유모드 운전 중 조작 금지 해제 {n} 곳")
-    return text
+    # 결과 창 공통 (11/19 통합 4단계) : 앱 문서 끝에서 showResult 를 공통 결과 창으로 (appres.js)
+    js = (HERE / "appres.js").read_text(encoding="utf-8")
+    if text.count("</body>") != 1 or "</script" in js.lower():
+        sys.exit(f"app: </body> 가 {text.count('</body>')} 번 (기대 1)")
+    return text.replace("</body>", "<script>\n" + js + "</script>\n</body>")
 
 
 sys.path.insert(0, str(ROOT / "idt_common"))
@@ -81,7 +85,7 @@ SPLASH_CFG = {
 
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
-    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
+    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js", "modes.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

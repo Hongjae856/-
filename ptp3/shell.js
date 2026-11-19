@@ -24,7 +24,7 @@ function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode){ LAST3={m:CREW.mode
 function crewGo(){ if(CREW.mode&&CREW.mode.c==="inc"){ inc3Pick(CREW.room); return; } CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
 function startRoom(r){
   const k=APPK[r], c=crs(k), M=CREW.mode;
-  if(M.m==="demo"||M.m==="free"){ MODE3.kind=M.m; DSTEP[r]=0; mode3Start(r); CREW.started[r]=true; show(r); return; }
+  if(M.m==="demo"||M.m==="free"){ MODE3.kind=M.m; DSTEP[r]=0; DRES[r]=false; mode3Start(r); CREW.started[r]=true; show(r); return; }
   MODE3.kind=null;
   try{ if(k==="filler"){ c.begin(M.c,M.m); setTimeout(()=>{ try{ c.quickStart(); }catch(e){ console.error(e); } },150); } else c.begin(M.c,M.m,"A"); }catch(e){ console.error("과정 시작",e); }
   CREW.started[r]=true; show(r);
@@ -42,6 +42,7 @@ function crewHead(){
   $("#fpBtn").textContent=V3P.view!=="orbit"?"🧍 1인칭 → 3인칭 전환":"🎥 3인칭 → 1인칭 전환"; $("#fpBtn").disabled=!CREW.cur;
 }
 function goHome(){
+  idtResClose([document].concat(["filler","line"].map(k=>{ try{ return UNI_HUB.win(k).document; }catch(e){ return null; } })));   /* 결과 창 닫기 */
   for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); try{ const w=UNI_HUB.win(k); w.document.body.classList.remove("mode3"); if(w.__sc0){ w.startChecks=w.__sc0; w.deduct=w.__dd0; w.alarm=w.__al0; } if(w.__door0){ w.document.getElementById("uDoor").onclick=w.__door0; w.__door0=null; } w.FREE3=false; }catch(e){} }   /* 자유모드 인터락 해제 원복 */
   MODE3.kind=null; INC3.k=null; $("#incPick").style.display="none"; $("#splash .go").style.display="grid";
   CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt();
@@ -99,6 +100,9 @@ function ptpHint(){
 /* 배속 : 두 앱의 SPD (원본 ×1 ×2 ×5 + 파우치처럼 ×10) */
 function tbPtpSpd(v){ for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(!w) continue; try{ if(w.eval("SPD")!==v&&!(w.eval("typeof AP!=='undefined'&&AP.on"))) w.eval("SPD="+v); }catch(e){} } }
 let LAST3=null;
+function ptp3ModeNm(){ return CREW.mode?CREW.mode.nm:""; }   /* 결과 창 부제 (앱 appres.js) */
+/* 처음부터 · 결과 창 [다시 하기] : 같은 모드 · 같은 작업자로 다시 시작 */
+function ptp3Restart(){ const L=LAST3; goHome(); if(!L) return; setTimeout(()=>{ const b=document.querySelector('#splash .go button[data-m="'+L.m+'"][data-c="'+L.c+'"]'); if(b) b.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }
 function boot(){ $("#modeChip").textContent=verTxt();
   if(!appsReady()){ setTimeout(boot,100); return; }
   v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); fpcInit({isFP:()=>V3P.view!=="orbit"&&!FP3.hmi, hint:ptpHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});
@@ -109,7 +113,7 @@ function boot(){ $("#modeChip").textContent=verTxt();
   tbInit({wins:()=>["filler","line"].map(k=>UNI_HUB.win(k)).filter(Boolean), cur:()=>CREW.cur?UNI_HUB.win(APPK[CREW.cur]):null, ids:{snd:"sndBtn",end:"testEnd"},
     speed:s=>tbPtpSpd(s), sync:()=>tbPtpSpd(TBQ.spd), R:()=>V3P.R, scene:()=>V3P.sc, lights:()=>V3P.key?[V3P.key]:[],
     end:()=>{ if(!CREW.cur){ return true; } if(MODE3.kind==="free"||MODE3.kind==="demo"||MODE3.kind==="inc"){ goHome(); return true; } return false; },
-    restart:()=>{ const L=LAST3; goHome(); if(!L) return; setTimeout(()=>{ const b=document.querySelector('#splash .go button[data-m="'+L.m+'"][data-c="'+L.c+'"]'); if(b) b.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
+    restart:ptp3Restart}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
   document.querySelectorAll("#splash .go button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
   $("#chooseF").onclick=()=>pickRoom("F"); $("#chooseP").onclick=()=>pickRoom("P");

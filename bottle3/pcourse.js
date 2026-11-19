@@ -133,10 +133,14 @@ function pcHint(){
   fpcToast("다음 작업 : "+st.t); pcRender(); }
 const pcHintOn=()=>!isExamP()||PC.hintI===PC.i;
 /* 과정 결과 (학습 · 평가) */
-function pcResult(){ if(PC.mode==="free"||PC.mode==="demo") return; const sec=Math.round((performance.now()-PC.t0)/1000), mm=Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0"), ex=isExamP();
-  pcDlg('<h3>'+(ex?"📝 포장실 평가 결과":"📘 포장실 학습 완료")+'</h3><p>'+(PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+' · '+(PS.rx?"전문의약품":"일반의약품")+' · '+(PC.deep?"심화":"기본")+' · 소요 '+mm+' · 완성 박스 '+PS.pallet+' · 재투입 '+(PS.reworkN||0)+' 병 · 힌트 '+PC.hints+' 회</p>'+
-    (ex?'<p class="score"><b>'+PC.score+'</b> 점 · '+(PC.score>=80?"합격":"불합격")+' (기준 80 점)</p><table class="cmp"><tr><th>감점 항목</th></tr>'+(PC.ded.length?PC.ded.map(d=>'<tr><td>'+d+'</td></tr>').join(""):'<tr><td>감점 없음</td></tr>')+'</table>':''),
-    [["메인화면",()=>{ goHome(); }],["닫기",null]]); }
+function pcResult(){ if(PC.mode==="free"||PC.mode==="demo") return; const sec=Math.round((performance.now()-PC.t0)/1000), ex=isExamP();   /* 공통 결과 창 (idt_common/modes.js) */
+  idtResOpen({icon:ex?"📝":"📘", head:ex?"평가 결과":"학습 결과", sub:(PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+" · "+(PS.rx?"전문의약품":"일반의약품")+" · "+(PC.deep?"심화":"기본"),
+    meta:"소요 "+idtMmss(sec)+" · 진행 "+Math.min(PC.i,PC.steps.length)+" / "+PC.steps.length+" 단계 · 힌트 "+PC.hints+"회",
+    score:ex?{v:PC.score, pass:PC.score>=IDT_PASS}:null,
+    kpis:[[PS.pallet+" 박스","완성 박스","hi"],[(PS.reworkN||0)+" 병","재투입","ng"],[PS.lab.cnt+" 병","라벨 부착"],[PS.cw.pass+" 병","중량 PASS"]],
+    secs:[{h:"단계별 수행",th:["No","단계","결과"],l:[1],rows:PC.steps.map((st,i)=>[i+1,st.t,i<PC.i?"완료":"미완료"])},
+          {h:"감점 내역",th:["항목","감점"],l:[0],rows:PC.ded.map(d=>{ const q=/^(.*?)\s*[−-](\d+)$/.exec(d); return q?[q[1],"−"+q[2]]:[d,""]; }),empty:"감점 없음"}],
+    btns:[["다시 하기",bRestart,true],["메인화면",goHome],["닫기",null]]}); }
 function pcAct(k){ const T=PT[k]; if(!T) return; const st=PC.steps[PC.i];
   if(isExamP()&&!CREW.inc&&st&&st.k!==k&&!["scan","put","agClear","rej"].includes(k)&&PC.on&&!PC.done){ pcDed(3,"순서가 다른 조작 : "+T.nm); }
   const r=T.run(); if(typeof r==="string") pcToast(r); pcRender(); }
@@ -147,7 +151,7 @@ function pcRender(){
   const c=$("#pkCoach"), n=PC.steps.length, done=PC.done, ih=typeof incbCoach==="function"&&incbCoach();
   if(PC.mode==="demo"&&!ih){ const k=demobHtml("P");
     if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
-  if(ih||PC.mode==="free"){ const k=ih||'<small>자유모드 · '+(PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+' · '+(PS.rx?"전문의약품":"일반의약품")+'</small><b>순서 · 감점 · 평가 없음 — 무엇이든 조작해 보세요</b><span>기동 조건이 해제되어 있습니다 (실제와 다름 · 중량 세팅 없이도 가동). 상단 작업자 버튼으로 다른 작업장으로 바꿉니다.</span>';
+  if(ih||PC.mode==="free"){ const k=ih||idtFreeHtml((PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1")+" · "+(PS.rx?"전문의약품":"일반의약품"),"중량 세팅 없이도 가동합니다.");
     if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }
   const role=PC.role==="P2"?"포장실 작업자 2":"포장실 작업자 1", md=(PC.deep?"심화":"기본")+" · "+(PC.mode==="exam"?"평가":PC.mode==="demo"?"시연":"학습");
   const k='<small>'+md+' · '+role+' · '+(PS.rx?"전문의약품":"일반의약품")+' · STEP '+Math.min(PC.i+1,n)+' / '+n+'</small><b>'+(done?"모든 단계를 마쳤습니다":st.t)+'</b><span>'+
