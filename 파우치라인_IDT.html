@@ -4518,6 +4518,72 @@ function tbViews(o){
     if(T.k){ T.k.t=Math.min(1,T.k.t+.04); const u=T.k.t*T.k.t*(3-2*T.k.t), O=o.orbit(); for(const key in T.k.to){ let a=T.k.from[key], b=T.k.to[key]; if(key==="yaw"){ let d=b-a; d=Math.atan2(Math.sin(d),Math.cos(d)); b=a+d; } O[key]=a+(b-a)*u; } if(T.k.t>=1) T.k=null; } })();
 }
 
+/* ── common/crewkit.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   작업자 공통 (세 IDT · 11/19 통합 3단계 · 파우치 workers.js 방식을 옮김)
+   · 보행 속도 IDT_WALK (m/s) · 들고 가는 물건(종류별 모양 · 손 간격 · 들 높이) · 손에 든 자세 · 걷는 방향 바라보기
+   · 장면 단위 m. 물건 모양은 IDT_CARRY 에 종류별로 등록 — IDT 고유 물건은 그 IDT 파일에서 idtCarryDef 로 추가
+   · 크기는 추정값(현장 확인 전) — 파우치 은박 롤 · STS 용기는 파우치 도면 기준
+   ═══════════════════════════════════════════════════════════════════ */
+const IDT_WALK=1.4;
+const IDT_CARRY={};
+/* def = {mk:()=>THREE.Group 내용 채우기, hw:손 간격 반, y:가슴 앞 높이(바닥 기준), off:물건 중심 보정} */
+function idtCarryDef(kind,def){ IDT_CARRY[kind]=Object.assign({hw:.08,y:1.02,off:0},def); }
+function idtCarryMesh(kind){
+  const G=new T3.Group(), d=IDT_CARRY[kind];
+  if(d&&d.mk) d.mk(G); else G.add(new T3.Mesh(new T3.BoxGeometry(.1,.14,.06),M.dark));
+  G.traverse(o=>{ if(o.isMesh) o.castShadow=true; }); return G;
+}
+const _ckMat=(c,r)=>new T3.MeshStandardMaterial({color:c,roughness:r==null?.6:r});
+const _ckAdd=(G,geo,mat,f)=>{ const m=new T3.Mesh(geo,mat); if(f) f(m); G.add(m); return m; };
+/* ── 공통 물건 (세 IDT) ── */
+idtCarryDef("sts",{hw:.21,y:.78,off:.21,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir,m=>m.position.y=.21)});              /* STS 용기 (파우치) */
+idtCarryDef("roll",{hw:.2,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.19,.19,.86,32),M.foil,m=>m.rotation.z=Math.PI/2)});                       /* 은박 롤 (파우치) */
+idtCarryDef("rollP",{hw:.2,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.19,.19,.86,32),M.foilP,m=>m.rotation.z=Math.PI/2)});
+idtCarryDef("bag",{hw:.15,mk:G=>_ckAdd(G,new T3.SphereGeometry(.14,18,12),_ckMat(0xf4f6f7,.55),m=>m.scale.set(1,.85,.7))});             /* 봉투 (주성분 · 캡) */
+idtCarryDef("scoop",{mk:G=>_ckAdd(G,new T3.CylinderGeometry(.06,.05,.12,16),M.ss)});
+idtCarryDef("cartons",{hw:.16,mk:G=>_ckAdd(G,new T3.BoxGeometry(.3,.16,.12),_ckMat(0x9a1a14))});
+idtCarryDef("leaf",{mk:G=>_ckAdd(G,new T3.BoxGeometry(.2,.06,.14),M.white)});
+idtCarryDef("box",{hw:.21,mk:G=>_ckAdd(G,new T3.BoxGeometry(.4,.25,.3),_ckMat(0xb98d5a,.85))});                                          /* 빈 병 박스 (병) */
+idtCarryDef("reel",{hw:.09,mk:G=>{ _ckAdd(G,new T3.CylinderGeometry(.14,.14,.05,28),_ckMat(0x8a5a3a),m=>m.rotation.x=Math.PI/2); _ckAdd(G,new T3.CylinderGeometry(.04,.04,.055,16),M.dark,m=>m.rotation.x=Math.PI/2); }});
+idtCarryDef("peRoll",{hw:.16,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.1,.1,.3,28),_ckMat(0xdbe9f2,.35),m=>m.rotation.z=Math.PI/2)});      /* PE 필름 롤 (병) */
+idtCarryDef("drum",{hw:.16,mk:G=>{ _ckAdd(G,new T3.CylinderGeometry(.15,.15,.34,28),_ckMat(0x4f84c8,.45)); _ckAdd(G,new T3.CylinderGeometry(.155,.155,.03,28),_ckMat(0x385f93,.45),m=>m.position.y=.18); }});
+idtCarryDef("bottle",{hw:.03,mk:G=>{ _ckAdd(G,new T3.CylinderGeometry(.019,.019,.062,14),M.white,m=>m.position.y=.031); _ckAdd(G,new T3.CylinderGeometry(.016,.016,.014,14),_ckMat(0x2f6fc0,.4),m=>m.position.y=.069); }});
+idtCarryDef("flat",{hw:.26,mk:G=>_ckAdd(G,new T3.BoxGeometry(.5,.02,.38),_ckMat(0xb98d5a,.85))});                                        /* 접힌 박스 */
+idtCarryDef("sticker",{hw:.06,mk:G=>_ckAdd(G,new T3.BoxGeometry(.1,.002,.06),M.white)});                                                  /* 박스 라벨 */
+idtCarryDef("labRoll",{hw:.12,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.16,.16,.08,28),_ckMat(0xf3eef0))});
+idtCarryDef("ribbon",{hw:.07,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.04,.04,.11,16),M.dark,m=>m.rotation.z=Math.PI/2)});
+idtCarryDef("leafRoll",{hw:.12,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.26,.26,.07,32),_ckMat(0xeceeef),m=>m.rotation.x=Math.PI/2)});
+idtCarryDef("agPaper",{hw:.07,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.06,.06,.11,16),M.white,m=>m.rotation.z=Math.PI/2)});
+idtCarryDef("film",{hw:.17,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.17,.17,.3,28),_ckMat(0xe6eef2,.3),m=>m.rotation.z=Math.PI/2)});     /* 성형 필름 롤 (PTP) */
+idtCarryDef("foil",{hw:.15,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.13,.13,.28,28),M.foil,m=>m.rotation.z=Math.PI/2)});                  /* 커버 포일 롤 (PTP) */
+idtCarryDef("part",{hw:.13,mk:G=>_ckAdd(G,new T3.BoxGeometry(.24,.08,.16),M.ss)});                                                         /* 교체부품 */
+idtCarryDef("carton",{hw:.16,mk:G=>_ckAdd(G,new T3.BoxGeometry(.3,.12,.2),_ckMat(0xf2f1ec))});                                            /* 접힌 카톤 묶음 */
+idtCarryDef("leaflet",{hw:.11,mk:G=>_ckAdd(G,new T3.BoxGeometry(.2,.06,.14),M.white)});
+idtCarryDef("cases",{hw:.3,mk:G=>_ckAdd(G,new T3.BoxGeometry(.6,.03,.42),_ckMat(0xb98d5a,.85))});
+idtCarryDef("tape",{hw:.07,mk:G=>_ckAdd(G,new T3.TorusGeometry(.06,.022,10,24),_ckMat(0xc9a46a,.5),m=>m.rotation.y=Math.PI/2)});
+idtCarryDef("label",{hw:.07,mk:G=>_ckAdd(G,new T3.CylinderGeometry(.08,.08,.1,20),M.white,m=>m.rotation.z=Math.PI/2)});
+/* 작업자마다 물건 한 벌씩 · 하나만 보이게 */
+function idtItem(H,kind,scene){ H.items=H.items||{}; for(const k in H.items) H.items[k].visible=false; if(!kind) return null;
+  if(!H.items[kind]){ H.items[kind]=idtCarryMesh(kind); scene.add(H.items[kind]); } const m=H.items[kind]; m.visible=true; m.rotation.set(0,0,0); return m; }
+/* 손에 든 자세 : 물건 중심 cp, 손은 물건 양옆(작업자 좌우 방향) */
+function idtHold(H,P,kind,cp,yaw,scene){ const m=idtItem(H,kind,scene); if(!m) return null; const d=IDT_CARRY[kind]||{hw:.08,off:0};
+  m.position.set(cp[0],cp[1]-(d.off||0),cp[2]); m.rotation.y=yaw;
+  const lf=[Math.cos(yaw),-Math.sin(yaw)], hw=d.hw||.08; P.L=[cp[0]+lf[0]*hw,cp[1],cp[2]+lf[1]*hw]; P.R=[cp[0]-lf[0]*hw,cp[1],cp[2]-lf[1]*hw]; P.gL=P.gR=.55; return m; }
+/* 가슴 앞 위치 (걷는 동안) · 작업 중 손 목표로 r(0~1)만큼 옮김 */
+function idtCarryPt(x,z,y0,yaw,kind,reach,r){ const d=IDT_CARRY[kind]||{y:1.02}, f=[Math.sin(yaw),Math.cos(yaw)];
+  let cp=[x+f[0]*.36,(y0||0)+(d.y||1.02)+(d.off||0),z+f[1]*.36]; if(reach&&r>0) cp=cp.map((v,k)=>v+(reach[k]-v)*r*.8); return cp; }
+/* 걷는 방향 바라보기 (위치만 받는 작업자) : 움직이면 진행 방향, 멈추면 face */
+function idtFaceStep(H,x,z,dt,face){
+  if(H.dx==null||Math.hypot(x-H.dx,z-H.dz)>6){ H.dx=x; H.dz=z; H.yw=face; H.vx=0; H.vz=0; }
+  const ex=x-H.dx, ez=z-H.dz, k=Math.min(1,dt*10); H.dx=x; H.dz=z;
+  if(dt>1e-4){ H.vx+=(ex/dt-H.vx)*k; H.vz+=(ez/dt-H.vz)*k; }
+  const mv=Math.hypot(H.vx,H.vz)>.12, yt=mv?Math.atan2(H.vx,H.vz):face; let dy=yt-H.yw; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); H.yw+=dy*Math.min(1,dt*7);
+  return {yaw:H.yw,moving:mv};
+}
+/* 작업 중 손 뻗기 정도 (0~1) : 작업 시작 0.15 초 뒤 뻗고, 끝나기 0.45 초 전에 거둠 */
+const idtReachAmt=(t,dur)=>{ const a=t-.15, e=dur-.45; if(a<=0) return 0; return Math.min(1,a*2.6)*(t>e?Math.max(0,(dur-t)/.45):1); };
+
 /* ── v3/bridge.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    새 3D 연결 (옛 engine · gfx · models 대체) — 단위 m
@@ -4787,7 +4853,7 @@ function startWork(key,cb,opt){
 /* 여러 단계 작업 (대차 · 리프터 끌기 등) : leg = {stand, path?, deck?, reach?, dur, carry?, grab?, release?, on?} */
 function legRoute(w,L){ if(L.path) return L.path.map(q=>[q[0],q[1],0]).concat([[L.stand[0],L.stand[1],0]]); return navPath(w,L.stand,L.deck?1:0); }
 const curLeg=J=>J.legs?J.legs[J.li]:J.j;
-const WK_SPD=1.4;                               /* 보행 속도 m/s (11/18 세 IDT 통일 1.4) */
+const WK_SPD=IDT_WALK;                          /* 보행 속도 m/s (세 IDT 공통 idt_common/crewkit.js IDT_WALK = 1.4) */
 function wkTick(dt){
   if(typeof helpTick==="function") helpTick(dt);
   if(CAMRET){ CAMRET.t-=dt; if(CAMRET.t<=0){ if(cam.view==="work"&&!WK.some(w=>w.job&&w.job.hasView)) camSet(CAMRET.view); CAMRET=null; } }
@@ -4826,34 +4892,19 @@ function wkTick(dt){
 }
 function reachAmt(J){ const D=curLeg(J).dur, t=J.t-.15, e=D-.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(D-J.t)/.45):1); }
 /* ── 3D 표현 : 방진복 작업자 (human.js makeHuman · poseHuman) · 들고 가는 물건 ── */
-let wkCarryMesh=function(kind){
-  const G=new T3.Group();
-  if(kind==="sts"){ const m=new T3.Mesh(new T3.CylinderGeometry(.2,.2,.42,28),M.ssMir); m.position.y=.21; G.add(m); }
-  else if(kind==="roll"||kind==="rollP"){ const m=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,32),kind==="rollP"?M.foilP:M.foil); m.rotation.z=Math.PI/2; G.add(m); }
-  else if(kind==="bag"){ const m=new T3.Mesh(new T3.SphereGeometry(.14,18,12),new T3.MeshStandardMaterial({color:0xf4f6f7,roughness:.55})); m.scale.set(1,.9,.8); G.add(m); }
-  else if(kind==="scoop"){ const m=new T3.Mesh(new T3.CylinderGeometry(.06,.05,.12,16),M.ss); G.add(m); }
-  else if(kind==="cartons"){ const m=new T3.Mesh(new T3.BoxGeometry(.3,.16,.12),new T3.MeshStandardMaterial({color:0x9a1a14,roughness:.6})); G.add(m); }
-  else if(kind==="leaf"){ const m=new T3.Mesh(new T3.BoxGeometry(.2,.06,.14),M.white); G.add(m); }
-  else { const m=new T3.Mesh(new T3.BoxGeometry(.1,.14,.06),M.dark); G.add(m); }
-  return G;
-};
+/* 들고 가는 물건 : 공통 idt_common/crewkit.js (IDT_CARRY) — 파우치 고유 물건(시료 트레이 · 호퍼 뚜껑 · 세척 키트)만 여기서 등록 */
 function wkDraw(dt){
   if(!V3) return;
   for(const w of WK){
-    if(!w.m){ w.m=makeHuman(V3.scene,w.id==="F"?"suit":"wear"); w.cm={}; }
+    if(!w.m){ w.m=makeHuman(V3.scene,w.id==="F"?"suit":"wear"); }
     const H=w.m; H.G.visible=!cam.fp;
     let da=w.face-w.yaw; da=Math.atan2(Math.sin(da),Math.cos(da)); w.yaw+=da*Math.min(1,dt*9);
     const f=[Math.sin(w.yaw),Math.cos(w.yaw)], lf=[Math.cos(w.yaw),-Math.sin(w.yaw)], J=w.job, LJ=J&&curLeg(J), work=J&&J.phase==="work"&&LJ.reach;
     const P={x:w.x,z:w.z,y0:w.y,yaw:w.yaw,dt,L:null,R:null};
-    for(const k in w.cm) w.cm[k].visible=false;
-    if(w.carry){ if(!w.cm[w.carry]){ w.cm[w.carry]=wkCarryMesh(w.carry); V3.scene.add(w.cm[w.carry]); }
-      const c=w.cm[w.carry], hw=w.carry==="lid"?.36:(w.carry==="roll"||w.carry==="rollP")?.2:w.carry==="sts"?.21:w.carry==="cartons"?.16:.08, cy=w.y+(w.carry==="sts"?.78:1.02);
-      let cp=[w.x+f[0]*.36,cy+(w.carry==="sts"?.21:0),w.z+f[1]*.36];
-      if(work&&reachAmt(J)>0){ const r=reachAmt(J), q=LJ.reach; cp=[cp[0]+(q[0]-cp[0])*r*.8,cp[1]+(q[1]-cp[1])*r*.8,cp[2]+(q[2]-cp[2])*r*.8]; }
-      c.visible=!cam.fp; c.position.set(cp[0],cp[1]-(w.carry==="sts"?.21:0),cp[2]); c.rotation.y=w.yaw;
-      P.L=[cp[0]+lf[0]*hw,cp[1],cp[2]+lf[1]*hw]; P.R=[cp[0]-lf[0]*hw,cp[1],cp[2]-lf[1]*hw]; P.gL=P.gR=.5; }
-    else if(w.tow){ const T=TOW[w.tow], hy=T.hy, h=[w.x+f[0]*T.hd,hy,w.z+f[1]*T.hd]; P.L=[h[0]+lf[0]*.2,hy,h[2]+lf[1]*.2]; P.R=[h[0]-lf[0]*.2,hy,h[2]-lf[1]*.2]; P.gL=P.gR=.6; P.nL=P.nR="down"; P.lean=.04; }
+    if(w.carry){ const cp=idtCarryPt(w.x,w.z,w.y,w.yaw,w.carry,work?LJ.reach:null,work?reachAmt(J):0), c=idtHold(H,P,w.carry,cp,w.yaw,V3.scene); if(c) c.visible=!cam.fp; }
+    else { idtItem(H,null); if(w.tow){ const T=TOW[w.tow], hy=T.hy, h=[w.x+f[0]*T.hd,hy,w.z+f[1]*T.hd]; P.L=[h[0]+lf[0]*.2,hy,h[2]+lf[1]*.2]; P.R=[h[0]-lf[0]*.2,hy,h[2]-lf[1]*.2]; P.gL=P.gR=.6; P.nL=P.nR="down"; P.lean=.04; }
     else if(work&&J.t>.12&&J.t<LJ.dur-.35){ P.R=LJ.reach.slice(); P.gR=.3; P.nR="down"; if(LJ.dur>2.2){ P.L=[LJ.reach[0]+lf[0]*.22,LJ.reach[1],LJ.reach[2]+lf[1]*.22]; P.gL=.3; P.nL="down"; } }
+    }
     poseHuman(H,P);
   }
   propsDraw(); if(typeof helpDraw==="function") helpDraw(dt); lidDraw();
@@ -4937,9 +4988,9 @@ function seqIpc(){
 }
 Object.assign(JOBS,{ hose:{stand:[5.85,2.22], reach:ANC.hoseS, dur:2.2, view:"hose", seqFn:seqHose},
   ipc:{stand:[2.3,2.42], reach:ANC.ipcTake, dur:1.8, view:"ipc", seqFn:seqIpc} });
-{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="tray") return base(kind);       /* 시료 트레이 (파우치 몇 포) */
-    const G=new T3.Group(), t=new T3.Mesh(new T3.BoxGeometry(.26,.025,.16),new T3.MeshStandardMaterial({color:0xe8edf0,roughness:.5})); G.add(t);
-    for(let i=0;i<3;i++){ const s=new T3.Mesh(new T3.BoxGeometry(.2,.008,.03),M.foil); s.position.set(0,.017,-.045+i*.045); G.add(s); } return G; }; }
+idtCarryDef("tray",{mk:G=>{       /* 시료 트레이 (파우치 몇 포) */
+    const t=new T3.Mesh(new T3.BoxGeometry(.26,.025,.16),new T3.MeshStandardMaterial({color:0xe8edf0,roughness:.5})); G.add(t);
+    for(let i=0;i<3;i++){ const s=new T3.Mesh(new T3.BoxGeometry(.2,.008,.03),M.foil); s.position.set(0,.017,-.045+i*.045); G.add(s); } }});
 
 /* ── 2인 1조 보조 작업자 (충전실) : 은박 롤 운반 · 장착 · 교체 때 함께 움직임 ──
    · 주 작업자가 걸어간 길을 약 1 m 뒤에서 그대로 따라감 → 설비 · 벽을 통과하지 않음
@@ -4990,7 +5041,7 @@ function helpDraw(dt){
   let da=H.face-H.yaw; da=Math.atan2(Math.sin(da),Math.cos(da)); H.yaw+=da*Math.min(1,dt*9);
   const w=WK[0], J=w.job, LJ=J&&curLeg(J), P={x:H.x,z:H.z,y0:0,yaw:H.yaw,dt,L:null,R:null};
   if(H.on&&H.side&&!H.sq.length&&J&&J.phase==="work"&&LJ.reach){
-    const roll=w.carry&&w.cm&&w.cm[w.carry]&&w.cm[w.carry].visible?w.cm[w.carry]:null, lf=[Math.cos(w.yaw),-Math.sin(w.yaw)];
+    const it=w.m&&w.m.items&&w.carry&&w.m.items[w.carry], roll=it&&it.visible?it:null, lf=[Math.cos(w.yaw),-Math.sin(w.yaw)];
     if(roll){ const c=roll.position, sg=((H.x-c.x)*lf[0]+(H.z-c.z)*lf[1])>0?1:-1;               /* 롤 반대쪽 끝을 두 손으로 받침 */
       P.L=[c.x+lf[0]*sg*.3,c.y,c.z+lf[1]*sg*.3]; P.R=[c.x+lf[0]*sg*.4,c.y,c.z+lf[1]*sg*.4]; P.gL=P.gR=.5; }
     else if(J.t>.15&&J.t<LJ.dur-.35){ const r=LJ.reach, d=Math.hypot(r[0]-H.x,r[2]-H.z); if(d<1.2){ const k=Math.min(.25,d*.3), u=[(H.x-r[0])/(d||1),(H.z-r[2])/(d||1)];
@@ -5016,9 +5067,9 @@ function seqScoop(){
     {stand:[XF,1.62], deck:true, reach:[XF,yt-.03,zc-D-.02], dur:.8}];
 }
 JOBS.scoop.seqFn=seqScoop;
-{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="lid") return base(kind);       /* 들고 가는 2번 호퍼 뚜껑 */
-    const G=new T3.Group(), p=new T3.Mesh(new T3.BoxGeometry(.86,.014,.44),M.ssMir); G.add(p);
-    const f=new T3.Mesh(new T3.CylinderGeometry(.034,.034,.17,18),M.white); f.position.set(.1,.09,-.05); G.add(f); return G; }; }
+idtCarryDef("lid",{hw:.36,mk:G=>{       /* 들고 가는 2번 호퍼 뚜껑 */
+    const p=new T3.Mesh(new T3.BoxGeometry(.86,.014,.44),M.ssMir); G.add(p);
+    const f=new T3.Mesh(new T3.CylinderGeometry(.034,.034,.17,18),M.white); f.position.set(.1,.09,-.05); G.add(f); }});
 /* 뚜껑 위치 : 호퍼 위(on) · 작업자 손(carry) · 남쪽 난간에 세움(off) */
 function lidDraw(){
   if(typeof FM==="undefined"||!FM.lid2) return; const L=FM.lid2, st=S&&S.session&&S.session.active?(S.flags.lid2||"on"):"on";
@@ -5346,6 +5397,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:36,d:'2026-11-19',t:'통합 3단계 · 작업자 동작 공통화 (11/19) — 들고 가는 물건(종류별 모양 · 손 간격 · 들 높이) · 손에 든 자세 · 걷는 방향 바라보기 · 손 뻗기 시간 · 보행 속도를 세 IDT 모두 idt_common/crewkit.js 한 곳에서 씀 (IDT 고유 물건은 그 IDT 에서 등록)'},
  {v:35,d:'2026-11-19',t:'통합 2단계 · 1인칭 조작 · 상단 바 공통화 (11/19) — 1인칭 단축키(C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴) · 도움말 창 · 메뉴 · 눈높이 · 앉기 · 걷기 속도 · 초점을 세 IDT 모두 idt_common/fpctl.js 한 곳에서, 그래픽 단계 · 배속 목록 값을 idt_common/topbar.js 한 곳에서 씀 — 파우치 도움말에 R(자재 되돌리기) · 계단 줄은 파우치 고유로 유지'},
  {v:34,d:'2026-11-19',t:'통합 1단계 · 메인화면 공통화 (11/19 사용자 지시 : 세 IDT 는 함께 가고 코드 구조도 통일) — 메인화면을 세 IDT 공통 모듈(idt_common/splash.py · splash.css · splash.js)로 만들고, 이상사례 대처 교육 목록도 공통(idt_common/incpick.js : 순위 = 부동시간 40 % · 빈도 30 % · 중요도 등급 30 %, 등급 · 실습 횟수 · 평가 최고점 표시) — 파우치 화면은 그대로(기준판)'},
  {v:33,d:'2026-11-18',t:'메인화면 자유모드 설명을 중간안에 맞춤(인터록 해제 → 기동 조건 해제) — 세 IDT 파우치 기준 통일 작업의 기준판'},
@@ -6574,10 +6626,10 @@ function withKit(key){ const J=JOBS[key], P=J.stand[1]<0, kit=P?ANC.kitP:ANC.kit
   const base=J.seqBase?J.seqBase():[{stand:J.stand, reach:J.reach, dur:J.dur}];
   return [{stand:ks, reach:kit, dur:.8, on(w){ w.carry="wipe"; }}].concat(base,[{stand:ks, reach:kit, dur:.7, on(w){ w.carry=null; }}]); }
 for(const k of KITJ) if(JOBS[k]){ const J=JOBS[k]; if(J.seqFn) J.seqBase=J.seqFn; J.seqFn=()=>withKit(k); }
-{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="wipe") return base(kind);
-    const G=new T3.Group(), bt=new T3.Mesh(new T3.CylinderGeometry(.028,.03,.16,16),M.white); bt.position.y=.03; G.add(bt);
+idtCarryDef("wipe",{mk:G=>{       /* 세척 키트 (분무병 · 천) */
+    const bt=new T3.Mesh(new T3.CylinderGeometry(.028,.03,.16,16),M.white); bt.position.y=.03; G.add(bt);
     const cap=new T3.Mesh(new T3.BoxGeometry(.03,.04,.05),M.blue); cap.position.set(0,.13,.01); G.add(cap);
-    const cl=new T3.Mesh(new T3.BoxGeometry(.1,.01,.08),new T3.MeshStandardMaterial({color:0xe8eef2,roughness:.9})); cl.position.set(.08,-.02,0); G.add(cl); return G; }; }
+    const cl=new T3.Mesh(new T3.BoxGeometry(.1,.01,.08),new T3.MeshStandardMaterial({color:0xe8eef2,roughness:.9})); cl.position.set(.08,-.02,0); G.add(cl); }});
 function buildKits(sc){ const g=new T3.Group(); sc.add(g);
   for(const [x,y,z] of [ANC.kitF,ANC.kitP]){ rod(g,[x-.05,y-.03,z],[x-.05,y+.13,z],.03,M.white,16); bx(g,x-.065,x-.035,y+.13,y+.17,z-.02,z+.03,M.blue);
     bx(g,x+.0,x+.14,y-.03,y+.05,z-.06,z+.06,new T3.MeshStandardMaterial({color:0x3a7bd5,roughness:.6})); rod(g,[x+.1,y-.03,z+.09],[x+.1,y+.1,z+.09],.022,M.yellow,14); } }

@@ -113,10 +113,10 @@ function withKit(key){ const J=JOBS[key], P=J.stand[1]<0, kit=P?ANC.kitP:ANC.kit
   const base=J.seqBase?J.seqBase():[{stand:J.stand, reach:J.reach, dur:J.dur}];
   return [{stand:ks, reach:kit, dur:.8, on(w){ w.carry="wipe"; }}].concat(base,[{stand:ks, reach:kit, dur:.7, on(w){ w.carry=null; }}]); }
 for(const k of KITJ) if(JOBS[k]){ const J=JOBS[k]; if(J.seqFn) J.seqBase=J.seqFn; J.seqFn=()=>withKit(k); }
-{ const base=wkCarryMesh; wkCarryMesh=function(kind){ if(kind!=="wipe") return base(kind);
-    const G=new T3.Group(), bt=new T3.Mesh(new T3.CylinderGeometry(.028,.03,.16,16),M.white); bt.position.y=.03; G.add(bt);
+idtCarryDef("wipe",{mk:G=>{       /* 세척 키트 (분무병 · 천) */
+    const bt=new T3.Mesh(new T3.CylinderGeometry(.028,.03,.16,16),M.white); bt.position.y=.03; G.add(bt);
     const cap=new T3.Mesh(new T3.BoxGeometry(.03,.04,.05),M.blue); cap.position.set(0,.13,.01); G.add(cap);
-    const cl=new T3.Mesh(new T3.BoxGeometry(.1,.01,.08),new T3.MeshStandardMaterial({color:0xe8eef2,roughness:.9})); cl.position.set(.08,-.02,0); G.add(cl); return G; }; }
+    const cl=new T3.Mesh(new T3.BoxGeometry(.1,.01,.08),new T3.MeshStandardMaterial({color:0xe8eef2,roughness:.9})); cl.position.set(.08,-.02,0); G.add(cl); }});
 function buildKits(sc){ const g=new T3.Group(); sc.add(g);
   for(const [x,y,z] of [ANC.kitF,ANC.kitP]){ rod(g,[x-.05,y-.03,z],[x-.05,y+.13,z],.03,M.white,16); bx(g,x-.065,x-.035,y+.13,y+.17,z-.02,z+.03,M.blue);
     bx(g,x+.0,x+.14,y-.03,y+.05,z-.06,z+.06,new T3.MeshStandardMaterial({color:0x3a7bd5,roughness:.6})); rod(g,[x+.1,y-.03,z+.09],[x+.1,y+.1,z+.09],.022,M.yellow,14); } }

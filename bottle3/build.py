@@ -30,6 +30,8 @@ APP_PATCH = [
     ('  if($("#splash").classList.contains("hide")){\n    if(!R3.ready)',
      '  if(window.B3_EXT){ if(STATIC_KEY!==staticKey()) buildStatic(); try{ drawDynamic(); }catch(e){ console.error("동적 형상",e); } window.B3_N=(window.B3_N||0)+1; applyHint(); return; }\n'
      '  if($("#splash").classList.contains("hide")){\n    if(!R3.ready)', 1),
+    # 작업자 보행 속도 = 세 IDT 공통 1.4 m/s (idt_common/crewkit.js IDT_WALK · 11/19 통합 3단계 · 원본 1.9 m/s)
+    ("st=Math.min(dd,dt*1900);", "st=Math.min(dd,dt*1400);", 1),
     # 작업자는 셸이 파우치 인체 모델로 그림 (원본 작업자 형상 생략)
     ("function drawWorkers(){ for(const w of WK){", "function drawWorkers(){ if(window.B3_EXT) return; for(const w of WK){", 1),
     # 시연모드 단계 버튼식 (11/18 사용자 결정) : 셸이 단계마다 준비 · 가동 — 앱 시연 설정은 건너뛰고, 가동 전에는 자동 보충 · 복구 안 함
@@ -39,7 +41,7 @@ APP_PATCH = [
     ('    if(S.running&&k!=="table"){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }',
      '    if(S.running&&k!=="table"&&!window.FREEB){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }', 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -79,7 +81,7 @@ SPLASH_CFG = {
 
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
-    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
+    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

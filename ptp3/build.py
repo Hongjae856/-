@@ -29,6 +29,12 @@ APP_PATCH = [
      "window.UNI_ROOM=function(){ if(!ROOM||ROOM.ver!==HUB.roomVer){ ROOM=buildRoom(); ROOM.ver=HUB.roomVer; } return ROOM; };\n"
      "window.UNI_DYN=function(){ const fw=HUB.win('filler'), ink=(fw&&fw.UNI_INK&&fw.UNI_INK())||{ink:[1,1,1],film:'#dfeaf0',foil:'#cfd3d8'}; return packsMesh(ink); };\n"
      "window.UNI_GEN=function(cam){", 1, ("filler", "line")),
+    # 작업자 보행 속도 = 세 IDT 공통 1.4 m/s (idt_common/crewkit.js IDT_WALK · 11/19 통합 3단계) — 앱 단위 : 충전 1 = 4 mm, 포장라인 1 = 5 mm
+    ("const delta=w.xt-w.x,step=Math.min(Math.abs(delta),motionDt*180);", "const delta=w.xt-w.x,step=Math.min(Math.abs(delta),motionDt*280);", 1, ("line",)),
+    ("walkTime:Math.max(.5,Math.abs(to-workerX)/380),commit}", "walkTime:Math.max(.5,Math.abs(to-workerX)/350),commit}", 1, ("filler",)),
+    ("walkTime:Math.max(.4,Math.abs(to-workerX)/380),commit}", "walkTime:Math.max(.4,Math.abs(to-workerX)/350),commit}", 1, ("filler",)),
+    ("workerJob.walkTime=Math.max(.25,Math.abs(workerJob.to-workerJob.from)/900);", "workerJob.walkTime=Math.max(.25,Math.abs(workerJob.to-workerJob.from)/350);", 1, ("filler",)),
+    ("workerX=Math.max(WORKER_STANDBY_X,workerX-Math.min(Math.max(dt,0),.1)*240);", "workerX=Math.max(WORKER_STANDBY_X,workerX-Math.min(Math.max(dt,0),.1)*350);", 1, ("filler",)),
     # PTP 원본 작업자 모형은 그리지 않고 위치만 셸에 알림 → 셸이 파우치 작업자(human.js)로 그림 (11/17 사용자 지시 : 작업자 디자인 파우치처럼)
     ("worker3=function(){ WK.forEach(drawWorker); };",
      "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
@@ -52,7 +58,7 @@ APP_PATCH = [
     ("function examGate(kind,key){\n  if(!isExam()", "function examGate(kind,key){\n  if(window.FREE3) return true;\n  if(!isExam()", 1, ("line",)),
     # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crewkit.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
@@ -118,7 +124,7 @@ SPLASH_CFG = {
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

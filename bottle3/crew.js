@@ -10,49 +10,21 @@
    · 들고 가는 물건 크기는 추정값 (원본 앱 정의 종류 · 현장 확인 전)
    ═══════════════════════════════════════════════════════════════════ */
 const CREW={F:[], P1:null, P2:null, cur:null, mode:null, rx:true, started:{F:false,P:false}};
-const CRM={};                                     /* 들고 가는 물건 메시 (종류별 한 벌씩 · 작업자별) */
-function crewMesh(kind){
-  const G=new T3.Group(), mat=(c,r)=>new T3.MeshStandardMaterial({color:c,roughness:r==null?.6:r});
-  const kraft=mat(0xb98d5a,.85);
-  if(kind==="box"){ const m=new T3.Mesh(new T3.BoxGeometry(.40,.25,.30),kraft); G.add(m); }                         /* 빈 병 박스 (추정) */
-  else if(kind==="reel"){ const m=new T3.Mesh(new T3.CylinderGeometry(.14,.14,.05,28),mat(0x8a5a3a)); m.rotation.x=Math.PI/2; G.add(m);
-    const c=new T3.Mesh(new T3.CylinderGeometry(.04,.04,.055,16),M.dark); c.rotation.x=Math.PI/2; G.add(c); }        /* 실리카겔 롤 */
-  else if(kind==="roll"){ const m=new T3.Mesh(new T3.CylinderGeometry(.1,.1,.3,28),mat(0xdbe9f2,.35)); m.rotation.z=Math.PI/2; G.add(m); }   /* PE 필름 롤 */
-  else if(kind==="drum"){ const m=new T3.Mesh(new T3.CylinderGeometry(.15,.15,.34,28),mat(0x4f84c8,.45)); G.add(m);
-    const l=new T3.Mesh(new T3.CylinderGeometry(.155,.155,.03,28),mat(0x385f93,.45)); l.position.y=.18; G.add(l); }   /* 정제 용기 */
-  else if(kind==="bag"){ const m=new T3.Mesh(new T3.SphereGeometry(.15,18,12),mat(0xeef0f2,.5)); m.scale.set(1,.75,.6); G.add(m); }        /* 캡 봉투 */
-  else if(kind==="bottle"){ const b=new T3.Mesh(new T3.CylinderGeometry(.019,.019,.062,14),M.white); b.position.y=.031; G.add(b);
-    const c=new T3.Mesh(new T3.CylinderGeometry(.016,.016,.014,14),mat(0x2f6fc0,.4)); c.position.y=.069; G.add(c); }
-  else if(kind==="flat"){ const m=new T3.Mesh(new T3.BoxGeometry(.5,.02,.38),kraft); G.add(m); }                    /* 접힌 박스 */
-  else if(kind==="label"){ const m=new T3.Mesh(new T3.BoxGeometry(.1,.002,.06),M.white); G.add(m); }
-  else if(kind==="labRoll"){ const m=new T3.Mesh(new T3.CylinderGeometry(.16,.16,.08,28),mat(0xf3eef0)); G.add(m); }  /* 라벨 롤 */
-  else if(kind==="ribbon"){ const m=new T3.Mesh(new T3.CylinderGeometry(.04,.04,.11,16),M.dark); m.rotation.z=Math.PI/2; G.add(m); }
-  else if(kind==="leafRoll"){ const m=new T3.Mesh(new T3.CylinderGeometry(.26,.26,.07,32),mat(0xeceeef)); m.rotation.x=Math.PI/2; G.add(m); }
-  else if(kind==="agPaper"){ const m=new T3.Mesh(new T3.CylinderGeometry(.06,.06,.11,16),M.white); m.rotation.z=Math.PI/2; G.add(m); }
-  else { const m=new T3.Mesh(new T3.BoxGeometry(.1,.1,.1),M.dark); G.add(m); }
-  G.traverse(o=>{ if(o.isMesh){ o.castShadow=true; } }); G.visible=false; V3B.sc.add(G); return G;
-}
-function crewItem(H,kind){ H.items=H.items||{}; for(const k in H.items) H.items[k].visible=false; if(!kind) return null; if(!H.items[kind]) H.items[kind]=crewMesh(kind); const m=H.items[kind]; m.visible=true; m.rotation.set(0,0,0); return m; }
+/* 들고 가는 물건 : 공통 idt_common/crewkit.js (IDT_CARRY) — 병 IDT 이름 → 공통 이름 (PE 필름 롤 · 박스 라벨) */
+const CREW_KIND={roll:"peRoll",label:"sticker"};
+const crewItem=(H,kind)=>idtItem(H,kind&&(CREW_KIND[kind]||kind),V3B.sc);
 function crewInit(){
   for(let i=0;i<2;i++){ const H=makeHuman(V3B.sc,"suit"); H.G.visible=false; CREW.F.push(H); }
   CREW.P1=makeHuman(V3B.sc,"wear"); CREW.P2=makeHuman(V3B.sc,"wear");
   for(const k of ["P1","P2"]) Object.assign(CREW[k],{px:null,pz:null,seq:null,q:[]});
 }
-function crewStep(H,x,z,dt,face){
-  if(H.dx==null||Math.hypot(x-H.dx,z-H.dz)>6){ H.dx=x; H.dz=z; H.yw=face; H.vx=0; H.vz=0; }
-  const ex=x-H.dx, ez=z-H.dz, k=Math.min(1,dt*10); H.dx=x; H.dz=z;
-  if(dt>1e-4){ H.vx+=(ex/dt-H.vx)*k; H.vz+=(ez/dt-H.vz)*k; }
-  const mv=Math.hypot(H.vx,H.vz)>.12, yt=mv?Math.atan2(H.vx,H.vz):face; let dy=yt-H.yw; dy=Math.atan2(Math.sin(dy),Math.cos(dy)); H.yw+=dy*Math.min(1,dt*7);
-  return {yaw:H.yw,moving:mv};
-}
+const crewStep=idtFaceStep;
 const crewFace=(x,z,t)=>Math.atan2(t[0]-x,t[2]-z);                 /* 파우치 yaw : 앞 = (sin, cos) */
 /* 손에 든 물건 자세 (파우치 wkDraw 와 같은 방식) : 가슴 앞 cp, 손은 물건 양옆 */
-function crewHold(H,P,kind,cp,hw,rotY){ const m=crewItem(H,kind); if(!m) return; m.position.set(cp[0],cp[1],cp[2]); m.rotation.y=rotY;
-  const lf=[Math.cos(rotY),-Math.sin(rotY)]; P.L=[cp[0]+lf[0]*hw,cp[1],cp[2]+lf[1]*hw]; P.R=[cp[0]-lf[0]*hw,cp[1],cp[2]-lf[1]*hw]; P.gL=P.gR=.55; return m; }
+const crewHold=(H,P,kind,cp,rotY)=>idtHold(H,P,CREW_KIND[kind]||kind,cp,rotY,V3B.sc);
 
 /* ── 충전실 : 원본 앱 작업자 (WK · JOBS) ── */
-const crewReachAmt=J=>{ const t=J.t-.15, e=J.j.dur-.45; if(t<=0) return 0; return Math.min(1,t*2.6)*(J.t>e?Math.max(0,(J.j.dur-J.t)/.45):1); };
-const CREW_HW={box:.21,reel:.09,roll:.16,drum:.16,bag:.15};
+const crewReachAmt=J=>idtReachAmt(J.t,J.j.dur);
 function crewFill(dt,fp){
   const w=appWin(); let W=[]; try{ W=(w.B3&&w.B3.WK())||[]; }catch(e){}
   CREW.F.forEach((H,i)=>{ const q=W[i], me=fp&&CREW.cur==="F"&&i===0; H.G.visible=!!q&&!me; if(!H.G.visible){ H.dx=null; crewItem(H,null); return; }
@@ -65,7 +37,7 @@ function crewFill(dt,fp){
       if(work){ const r=crewReachAmt(J), R=J.j.reach, t=[R[0]*MM,R[1]*MM,R[2]*MM];
         if(J.j.pour){ const dx=t[0]-x, dz=t[2]-z, d=Math.hypot(dx,dz)||1, k=Math.min(.55,.3/d); t[0]-=dx*k; t[2]-=dz*k; t[1]+=.12; tilt=Math.min(1,Math.max(0,(J.t-.9)/.5))*1.05; }
         cp=cp.map((v,k)=>v+(t[k]-v)*r*.85); }
-      const m=crewHold(H,P,kind,cp,CREW_HW[kind]||.12,yaw); if(m&&tilt) m.rotateX(tilt);
+      const m=crewHold(H,P,kind,cp,yaw); if(m&&tilt) m.rotateX(tilt);
       crewPour(H,J,tilt,cp); }
     else { crewItem(H,null); crewPour(H,null,0);
       if(work&&J.t>.12&&J.t<J.j.dur-.35){ const R=J.j.reach, t=[R[0]*MM,R[1]*MM,R[2]*MM], lf=[Math.cos(yaw),-Math.sin(yaw)]; P.R=t; if(J.j.dur>2.2) P.L=[t[0]+lf[0]*.22,t[1],t[2]+lf[1]*.22]; } }
@@ -84,7 +56,7 @@ const PKW={T:12};                                           /* 자동 봉함 ~ �
 const pkm=(x,z)=>[x*MM,z*MM];
 const PKS={scan:pkm(18750,620), handoff:[19.2,.95,.15], box:pkm(19950,680), ag:pkm(19175,620), agP:[19.175,1.01,-.04], pal:pkm(20700,1330), flat:pkm(21000,680)};
 /* 작업자 이동 : 목표 (x, z) 로 직선 보행 (1.4 m/s · 물건 들면 1.0 m/s) — 파우치 보행 속도 */
-function pkWalk(H,to,dt,v){ if(H.px==null){ H.px=to[0]; H.pz=to[1]; } const dx=to[0]-H.px, dz=to[1]-H.pz, d=Math.hypot(dx,dz), s=Math.min(d,(v||1.4)*dt);
+function pkWalk(H,to,dt,v){ if(H.px==null){ H.px=to[0]; H.pz=to[1]; } const dx=to[0]-H.px, dz=to[1]-H.pz, d=Math.hypot(dx,dz), s=Math.min(d,(v||IDT_WALK)*dt);
   if(d>1e-4){ H.px+=dx/d*s; H.pz+=dz/d*s; } return d-s<.02; }
 const pkBelt=()=>{ const p=pkPath(PK_END()); return [p[0]*MM,PK.CH*MM+.035,p[2]*MM]; };
 /* 작업자 2 (일반의약품이면 작업자 1) : 박스 마감 순서 — 봉함 → (AG 라벨) → 들고 파렛트 → 적재 → 접힌 박스 → 조립 */
@@ -102,7 +74,7 @@ function pkSeqTick(H,dt,P){
   let face=Math.PI, done=false;
   if(st.k==="walk"){ done=pkWalk(H,st.to,dt,st.v); const yaw=H.yw==null?Math.PI:H.yw, fw=f(yaw), cp=[H.px+fw[0]*.36,1.02,H.pz+fw[1]*.36];
     if(st.carry==="boxFull"){ PKG.openBox.position.set(cp[0],cp[1]-.06,cp[2]); P.L=[cp[0]+Math.cos(yaw)*.2,cp[1]+.02,cp[2]-Math.sin(yaw)*.2]; P.R=[cp[0]-Math.cos(yaw)*.2,cp[1]+.02,cp[2]+Math.sin(yaw)*.2]; P.gL=P.gR=.6; }
-    else if(st.carry) crewHold(H,P,st.carry,cp,st.carry==="flat"?.26:.06,yaw);
+    else if(st.carry) crewHold(H,P,st.carry,cp,yaw);
     face=null; }
   else { pkWalk(H,st.at,dt); st.t+=dt; done=st.t>=st.dur; const u=Math.min(1,st.t/st.dur);
     if(st.k==="seal"){ face=crewFace(H.px,H.pz,bx); const s=Math.sin(st.t*5)*.12; P.L=[bx[0]-.1,bx[1]+.13,bx[2]]; P.R=[bx[0]+s,bx[1]+.13,bx[2]+.02]; P.gL=.3; P.gR=.6; }
@@ -112,7 +84,7 @@ function pkSeqTick(H,dt,P){
     else if(st.k==="place"){ const slot=pkPalSlot(); face=crewFace(H.px,H.pz,slot); const a=Math.min(1,u*1.6), c=[H.px+(slot[0]-H.px)*a,1.0+(slot[1]+.06-1.0)*a,H.pz+(slot[2]-H.pz)*a];
       PKG.openBox.position.set(c[0],c[1]-.06,c[2]); P.L=[c[0]-.2,c[1],c[2]]; P.R=[c[0]+.2,c[1],c[2]]; P.gL=P.gR=.6; P.lean=.25*a;
       if(done){ PKG.openBox.visible=false; PKG.openBox.position.set(bx[0],bx[1],bx[2]); if(PS.box.closing>0&&PS.box.closing<1e8) PS.box.closing=.001; PKW.waitBox=true; } }
-    else if(st.k==="takeFlat"){ face=crewFace(H.px,H.pz,[21.0,.96,-.15]); P.L=[20.85,.97,-.1]; P.R=[21.15,.97,-.1]; P.gL=P.gR=.5; if(u>.5) crewHold(H,{},"flat",[21.0,.98,-.1],.26,Math.PI); }
+    else if(st.k==="takeFlat"){ face=crewFace(H.px,H.pz,[21.0,.96,-.15]); P.L=[20.85,.97,-.1]; P.R=[21.15,.97,-.1]; P.gL=P.gR=.5; if(u>.5) crewHold(H,{},"flat",[21.0,.98,-.1],Math.PI); }
     else if(st.k==="assemble"){ face=crewFace(H.px,H.pz,bx); const s=Math.sin(st.t*4)*.05; P.L=[bx[0]-.17,bx[1]+.06+s,bx[2]]; P.R=[bx[0]+.17,bx[1]+.06-s,bx[2]]; P.gL=P.gR=.5;
       if(u>.3){ crewItem(H,null); PKG.openBox.visible=true; PKG.openBox.scale.y=Math.min(1,(u-.3)/.7); }
       if(done){ PKG.openBox.scale.y=1; PKW.waitBox=false; PS.box.open=true; } } }
