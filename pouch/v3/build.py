@@ -21,7 +21,7 @@ ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
     ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
-    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("common", "aimmark.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
+    ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("common", "aimmark.js"), ("common", "splash.js"), ("common", "incpick.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
 )
 RENAME_CV = {"layout.js", "data.js", "state.js", "sim.js", "hmi.js", "course.js", "ui.js"}
 
@@ -170,18 +170,6 @@ BODY_PATCH = [   # 메인화면 : 순서도 삭제 · 과정 → 기본 · 심�
     ('<button class="gbtn" id="apBtn">▶ 자동재생</button>', '<button class="gbtn" id="apBtn" hidden>▶ 자동재생</button>\n    <label class="gbtn gqMenu" title="그래픽 품질">🖥 그래픽 <select id="gqSel"><option value="ultra">최고</option><option value="high">상</option><option value="mid">중</option><option value="low">하</option><option value="auto">자동</option></select><s id="gqNow"></s></label>', 1),   # 자동재생 버튼 삭제 · 그래픽 설정 메뉴 (11/16)
     ('상단 [🎥 3인칭 보기] 로', '상단 [🧍 1인칭 → 3인칭 전환] 으로', 1),
     ('<span>R · 우클릭</span>', '<span>C</span>앉기 · 일어서기 (눈높이 약 1.1 m)<span>R · 우클릭</span>', 1),
-    ('      <div id="lineStrip"></div>\n', '', 1),
-    ('<button class="s" id="spEasy">기본모드 · 학습<small>핵심 절차 안내</small></button>',
-     '<h4>기본</h4><button class="s" id="spEasy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button>', 1),
-    ('<button class="e" id="spExamEasy">기본모드 · 평가</button>', '<button class="e" id="spExamEasy">기본 · 평가</button>', 1),
-    ('<button class="s" id="spGuide">심화모드 · 학습<small>전체 절차 단계별 안내</small></button>',
-     '<h4>심화</h4><button class="s" id="spGuide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button>', 1),
-    ('<button class="e" id="spExam">심화모드 · 평가</button>\n        </div>\n      </div>',
-     '<button class="e" id="spExam">심화 · 평가</button>\n        </div>\n'
-     '        <div class="modeColumn oee">\n          <h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button>\n'
-     '          <button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button>\n        </div>\n'
-     '        <div class="modeColumn demo">\n          <h4>시연</h4><button class="d" id="spDemo">시연모드<small>장비 ON → 이송기 → 가동 → 수동 포장까지 간단히</small></button>\n        </div>\n      </div>\n'
-     '      <div id="incPick" style="display:none"></div>', 1),
 ]
 
 
@@ -192,7 +180,20 @@ def body() -> str:
         if c != n:
             sys.exit(f"body.html: '{old[:50]}' 가 {c} 번 (기대 {n})")
         text = text.replace(old, new)
-    return text
+    # 메인화면 = 세 IDT 공통 템플릿 (idt_common/splash.py · 11/19)
+    a, b = text.index('  <div id="splash">'), text.index('  <div id="banner"')
+    return text[:a] + '  <div id="splash">' + SPLASH.render(SPLASH_CFG) + '</div>\n' + text[b:]
+
+
+sys.path.insert(0, str(H.parent.parent / "idt_common"))
+import splash as SPLASH   # noqa: E402
+_PID = {"easy": "spEasy", "examEasy": "spExamEasy", "guide": "spGuide", "exam": "spExam", "demo": "spDemo", "free": "spFree", "oee": "spOee", "inc": "spInc"}
+SPLASH_CFG = {
+    "title": "파우치 라인 IDT", "en": "Pouch Line · Interactive Digital Tutor", "prod": "판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤",
+    "workers": [{"id": "chooseF", "r": "F", "tag": "작업자 1 · FILLING ROOM", "nm": "🧍 충전실 작업자", "desc": "파우치 충전기 SP303 · 2층 데크 · IPC"},
+                {"id": "chooseP", "r": "P", "tag": "작업자 2 · PACKING ROOM", "nm": "🧍 포장실 작업자", "desc": "스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기"}],
+    "cols": SPLASH.std_cols(lambda m: (_PID[m], None), free_sm="순서 · 감점 · 평가 없음 · 기동 조건 해제 · 문 · 덮개 자유 개폐"),
+}
 
 
 def build() -> str:
@@ -207,7 +208,7 @@ def build() -> str:
     if "</script" in js.lower() or "</script" in three.lower():
         sys.exit("script text must not contain </script")
     parts = {
-        "/*__CSS__*/": (OLD / "style.css").read_text(encoding="utf-8") + "\n" + (SRC / "style3.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "oee" / "oee.css").read_text(encoding="utf-8"),
+        "/*__CSS__*/": (OLD / "style.css").read_text(encoding="utf-8") + "\n" + (SRC / "style3.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "idt_common" / "splash.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "oee" / "oee.css").read_text(encoding="utf-8"),
         "<!--__BODY__-->": body(),
     }
     for key, text in parts.items():

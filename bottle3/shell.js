@@ -31,10 +31,9 @@ function hud(){ const h=$("#hud"); if(typeof pfHud==="function"&&pfHud()) return
   :"1인칭 · "+(WALK.room==="F"?"충전실":"포장실")+" · W A S D 걷기 · Shift 빠르게 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)"; }
 /* ── 메인화면 : ① 모드 → ② 작업자 (파우치 방식) ── */
 const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연",free:"자유",inc:"이상사례"};
-function spMark(){ $("#workers").classList.toggle("ready",!!CREW.mode); $("#chooseP2").disabled=!CREW.rx;
-  document.querySelectorAll("#modes [data-m]").forEach(b=>b.classList.toggle("sel",b.dataset.m===CREW.mode));
+function spMark(){ $("#chooseP2").disabled=!CREW.rx;
   document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.classList.toggle("on",(b.dataset.rx==="1")===CREW.rx));
-  $("#spHint").textContent=CREW.mode?"② "+MODE_NM[CREW.mode]+" — 작업자를 고르세요":"① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다"; }
+  idtSplashMark({mode:CREW.mode, modeNm:MODE_NM[CREW.mode], room:null, isSel:b=>b.dataset.m===CREW.mode}); }
 function crewMark(){ document.querySelectorAll("#crewSw [data-r]").forEach(b=>{ const r=b.dataset.r; b.classList.toggle("on",CREW.cur===r);
   b.disabled=!CREW.cur||(r==="P2"&&!CREW.rx)||(r!=="F"&&CREW.pRole&&r!==CREW.pRole); }); }
 function startRoom(r){
@@ -46,20 +45,20 @@ function show(r){
   CREW.cur=r; document.body.classList.toggle("pk",r!=="F"); placeCanvas.k=null;
   setView("fp"); walkSpawnAt(r); crewMark(); $("#modeChip").textContent=MODE_NM[CREW.mode]+" · "+(r==="F"?"충전실":r==="P1"?"포장실 1":"포장실 2");
 }
-function crewGo(r){ if(CREW.mode&&CREW.mode!=="inc") LASTB={m:CREW.mode,r,rx:CREW.rx}; if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
+function crewGo(r){ if(CREW.mode&&CREW.mode!=="inc") LASTB={m:CREW.mode,r,rx:CREW.rx}; if(!CREW.mode){ spMark(); return; } if(CREW.mode==="inc"){ incbPick(r==="F"?"F":"P"); return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
 function goHome(){ try{ const w=appWin(); w.B3_DEMO_STEP=false; if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
-  pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; document.body.classList.remove("pk"); setView("orbit");
+  pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").style.display="none"; $("#splash .go").style.display="grid"; document.body.classList.remove("pk"); setView("orbit");
   $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
 function walkSpawnAt(r){ if(r==="F") walkSpawn("F"); else { PK_OBS=PK_OBS||pkObstacles(); const p=r==="P1"?[PK.scanX,900]:[19950,1000];
   Object.assign(WALK,{x:p[0],z:p[1],y:fpcEye(0),yaw:0,pitch:-.35,room:"P"}); } }
 function bindSplash(){
-  document.querySelectorAll("#modes [data-m]").forEach(b=>b.onclick=()=>{ CREW.mode=b.dataset.m; spMark(); });
+  document.querySelectorAll("#splash .go [data-m]").forEach(b=>b.onclick=()=>{ CREW.mode=b.dataset.m; spMark(); });
   document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.onclick=()=>{ CREW.rx=b.dataset.rx==="1"; spMark(); });
   $("#chooseF").onclick=()=>crewGo("F"); $("#chooseP1").onclick=()=>crewGo("P1"); $("#chooseP2").onclick=()=>crewGo("P2");
   document.querySelectorAll("#crewSw [data-r]").forEach(b=>b.onclick=()=>{ if(!CREW.cur) return; startRoom(b.dataset.r); show(b.dataset.r); });
   $("#homeBtn").onclick=goHome; spMark(); crewMark();
   $("#spOee").onclick=()=>{ if(typeof OEEEDU!=="undefined") OEEEDU.open(); };
-  $("#spInc").onclick=()=>{ CREW.mode="inc"; spMark(); incbPick(); };
+  
 }
 let last=performance.now();
 function loop(now){
@@ -89,7 +88,7 @@ function bEnd(){ if(!CREW.cur) return true; if(CREW.mode==="free"||CREW.mode==="
 function bRubric(){ if(CREW.cur==="F") return false;
   pcDlg('<h3>채점 관리 — 포장실</h3><table class="cmp"><tr><th>항목</th><th>감점</th></tr><tr><td>순서가 다른 조작</td><td>−3</td></tr><tr><td>작업 지시서와 다른 중량 세팅</td><td>−5</td></tr><tr><td>힌트 사용 (단계마다 1 회)</td><td>−5</td></tr></table><p>합격 기준 80 점 (충전실 · 파우치 · 블리스터와 같음)</p>',[["닫기",null]]); return true; }
 let LASTB=null;
-function bRestart(){ const L=LASTB; goHome(); if(!L) return; setTimeout(()=>{ CREW.rx=L.rx; spMark(); const m=document.querySelector('#modes [data-m="'+L.m+'"]'); if(m) m.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }
+function bRestart(){ const L=LASTB; goHome(); if(!L) return; setTimeout(()=>{ CREW.rx=L.rx; spMark(); const m=document.querySelector('#splash .go [data-m="'+L.m+'"]'); if(m) m.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }
 function boot(){
   $("#modeChip").textContent=verTxt();
   v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash(); fpcInit({isFP:()=>V3B.view!=="orbit"&&!(typeof FF!=="undefined"&&FF.hmi), hint:bHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});

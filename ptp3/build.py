@@ -52,7 +52,7 @@ APP_PATCH = [
     ("function examGate(kind,key){\n  if(!isExam()", "function examGate(kind,key){\n  if(window.FREE3) return true;\n  if(!isExam()", 1, ("line",)),
     # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "human.js", "view3.js", "walk.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
@@ -90,15 +90,41 @@ def free_runops(key: str, text: str) -> str:
     return text
 
 
+sys.path.insert(0, str(ROOT / "idt_common"))
+import splash as SPLASH   # noqa: E402  메인화면 공통 템플릿 (11/19)
+
+
+def _course(c, nm):
+    return [{"h": "기본" if c == "operation" else nm, "cls": "" if c == "operation" else "ch", "btns": b} for b in (
+        [[{"cls": "s", "nm": "기본 · 학습", "sm": "라인 가동 핵심 절차 안내", "attrs": {"data-c": c, "data-m": "easy"}}, {"cls": "e", "nm": "기본 · 평가", "attrs": {"data-c": c, "data-m": "examEasy"}}],
+         [{"cls": "s", "nm": "심화 · 학습", "sm": "라인 가동 전체 절차 단계별 안내", "attrs": {"data-c": c, "data-m": "guide"}}, {"cls": "e", "nm": "심화 · 평가", "attrs": {"data-c": c, "data-m": "exam"}}]]
+        if c == "operation" else
+        [[{"cls": "s", "nm": "기본 · 학습", "sm": "교체부품 6묶음", "attrs": {"data-c": c, "data-m": "easy"}}, {"cls": "e", "nm": "기본 · 평가", "attrs": {"data-c": c, "data-m": "examEasy"}},
+          {"cls": "s", "nm": "심화 · 학습", "sm": "교체부품 18종", "attrs": {"data-c": c, "data-m": "guide"}}, {"cls": "e", "nm": "심화 · 평가", "attrs": {"data-c": c, "data-m": "exam"}}]])]
+
+
+_OP = _course("operation", "")
+_OP[1]["h"] = "심화"
+SPLASH_CFG = {
+    "title": "PTP 라인 IDT", "en": "PTP Line · Interactive Digital Tutor", "prod": "블리스터 충전 → 카톤 포장",
+    "workers": [{"id": "chooseF", "r": "F", "tag": "작업자 1 · FILLING ROOM (D구역)", "nm": "🧍 충전실 작업자", "desc": "블리스터 포장기 HM 400P · 성형 · 실링 · 펀칭"},
+                {"id": "chooseP", "r": "P", "tag": "작업자 2 · PACKING ROOM (G구역)", "nm": "🧍 포장실 작업자", "desc": "카토너 · 카톤 인쇄기 · 중량선별기 · 박스포장기 · 팔렛타이저"}],
+    # 파우치와 같은 기본 · 심화 · 시연 · 자유 · OEE + PTP 고유 체인지파트 열
+    "cols": SPLASH.std_cols(lambda m: ("spOee", None) if m == "oee" else (None, {"data-c": "inc" if m == "inc" else "operation", "data-m": m}),
+                            course=_OP + _course("change", "체인지파트")),
+}
+
+
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
         if "</script" in t.lower():
             sys.exit("script text must not contain </script")
+    shell = shell.replace("<!--__SPLASH__-->", SPLASH.render(SPLASH_CFG)).replace("/*__SPLASHCSS__*/", (ROOT / "idt_common" / "splash.css").read_text(encoding="utf-8"))
     for key, val in (("/*__OEECSS__*/", (ROOT / "oee" / "oee.css").read_text(encoding="utf-8")), ("/*__THREE__*/", three), ("__APPS__", json.dumps(apps, separators=(",", ":"))), ("/*__SHELL_JS__*/", js)):
         if shell.count(key) != 1:
             sys.exit(f"shell.html must contain {key} exactly once")

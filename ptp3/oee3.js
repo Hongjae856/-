@@ -24,7 +24,7 @@ const OEE_PTP_CODES=[
 const INC3={k:null, mode:null, room:null, at:0, fired:false, done:false};
 function oee3Init(){
   if(!document.getElementById("oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');   /* 파우치와 같은 OEE 연동 표시 */
-  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ $("#spVer").textContent="V"+CHANGELOG[0].v; }catch(e){}
+  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ idtSplashVer("V"+CHANGELOG[0].v); }catch(e){}
   OEEEDU.init({line:"블리스터", title:"PTP(블리스터) 라인 · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_PTP_CODES, mount:document.body,
     openInc(){ goHome(); pickMode({dataset:{c:"inc",m:"inc"},closest:()=>({querySelector:()=>({textContent:"OEE"})}),firstChild:{textContent:"이상사례 대처 교육"}}); }});
   $("#spOee").onclick=()=>OEEEDU.open();
@@ -36,18 +36,17 @@ function inc3List(r){
   const mD=Math.max(1e-9,...L.map(o=>o.down)), mN=Math.max(1e-9,...L.map(o=>o.n)); for(const o of L) o.s=has?.4*o.down/mD+.3*o.n/mN+.3*.6:0;
   if(has) L.sort((a,b)=>b.s-a.s); return {L,has};
 }
-function inc3Pick(r){
-  const {L,has}=inc3List(r), el=$("#incPick");
-  el.innerHTML='<h3>이상사례 대처 교육 — '+ROOM_NM[r]+'</h3><p>'+(has?"OEE 부동시간 · 발생 빈도 순으로 정렬했습니다.":"OEE 데이터가 없어 알람 순서로 표시합니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 빈도 순으로 바뀝니다.")+'</p>'+
-    L.map((o,i)=>'<div class="ip"><span>'+(i+1)+'</span><b>'+o.c.nm+'<s>'+o.c.k+(has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+'</s></b><button data-k="'+o.c.k+'" data-m="learn">학습</button><button class="e" data-k="'+o.c.k+'" data-m="exam">평가</button></div>').join("")+
-    '<button id="incBack">← 모드 다시 선택</button>';
-  el.hidden=false; $("#modes").hidden=true;
-  el.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>inc3Start(r,b.dataset.k,b.dataset.m));
-  $("#incBack").onclick=()=>{ el.hidden=true; $("#modes").hidden=false; CREW.mode=null; CREW.room=null; crewMark(); };
+/* 중요도 등급 (11/19 사용자 확인 · 파우치 기준) */
+const INC3_GRADE={E140:"상",E051:"상",C160:"상",P201:"상",W211:"상",E130:"중",C152:"중",E131:"하",E132:"하",E152:"하",C150:"하",C170:"하",B221:"하",T232:"하"};
+function inc3Pick(r){   /* 공통 목록 (idt_common/incpick.js) — 파우치와 같은 화면 */
+  const el=$("#incPick");
+  idtIncPick(el,{room:ROOM_NM[r], items:OEE_PTP_CODES.filter(c=>c.room===r).map(c=>({k:c.k, nm:c.nm, src:"알람 "+c.k, g:INC3_GRADE[c.k]||"중"})),
+    onStart:(k,m)=>inc3Start(r,k,m), onBack:()=>{ el.style.display="none"; $("#splash .go").style.display="grid"; CREW.mode=null; CREW.room=null; crewMark(); }});
+  el.style.display="block"; $("#splash .go").style.display="none";
 }
 function inc3Start(r,k,m){
   Object.assign(INC3,{k,mode:m,room:r,at:0,fired:false,done:false,t0:performance.now(),rs:0,kick:0,hint:0,hintUntil:0,p0:0,f0:0,score:null,wrong:0,ded:[]});
-  $("#incPick").hidden=true; $("#modes").hidden=false; $("#splash").classList.add("hide");
+  $("#incPick").style.display="none"; $("#splash .go").style.display="grid"; $("#splash").classList.add("hide");
   CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; MODE3.kind="inc";
   const c=crs(APPK[r]); try{ c.begin("operation","guide"); if(r==="F") setTimeout(()=>{ try{ c.quickStart(); }catch(e){} },150); }catch(e){ console.error(e); }
   setTimeout(()=>{ try{ api3(r).ready(); crs(APPK[r]).start(); }catch(e){ console.error(e); } if(m==="exam") mode3Apply(r); },800);

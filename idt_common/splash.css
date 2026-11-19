@@ -1,0 +1,54 @@
+/* ═══ 메인화면 공통 (세 IDT · 11/19 · 파우치 메인화면 규칙을 그대로 옮김) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
+#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s;overflow:auto;
+  font-family:var(--ff,"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif)}
+#splash.hide{opacity:0;pointer-events:none;visibility:hidden}
+#splash .box{max-width:1300px;width:100%;padding:40px;text-align:center;margin:auto}
+#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
+#splash .ver:hover{color:#15304e;border-color:#15304e}
+#splash h1{font-weight:800;font-size:50px;line-height:1.15;letter-spacing:-2px;margin:0 0 8px}
+#splash h1 small{display:block;font-weight:700;font-size:17px;line-height:1.4;letter-spacing:1px;color:#6a7f96;margin-top:8px}
+#splash .prodLine{font-weight:700;font-size:16px;line-height:1.5;color:#5d7086;margin:-14px 0 22px}
+#crewHint{max-width:900px;margin:0 auto 12px;text-align:center;font-weight:600;font-size:16px;line-height:1.5;color:#40566e}
+#crewHint b{color:#142b47} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
+#coursePicker{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 auto 20px;max-width:900px}
+#coursePicker.n3{grid-template-columns:repeat(3,1fr);max-width:1240px}
+#coursePicker button{padding:24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#fff;color:#142b47;cursor:pointer;font-family:inherit}
+#coursePicker button.main{background:#142b47;color:#fff}
+#coursePicker button:disabled{opacity:.5;cursor:not-allowed}
+#coursePicker button.main.wait{opacity:.55}
+#coursePicker button.main.sel{outline:4px solid #f5b400;outline-offset:3px}
+#coursePicker small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
+#coursePicker strong{display:block;font-size:29px;margin:10px 0}
+#coursePicker span{display:block;font-size:17px;line-height:1.6}
+#coursePicker.n3 strong{font-size:26px}#coursePicker.n3 span{font-size:15px}
+#splash .go{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin:auto;max-width:1380px}
+.modeColumn{display:flex;flex-direction:column;gap:14px}
+#splash .go h4{font-weight:800;font-size:19px;line-height:1;color:#5d7086;letter-spacing:3px;margin:0 0 2px}
+#splash .go button{width:100%;font-weight:700;font-size:23px;line-height:1.3;padding:22px 18px;border:1px solid #152c4b;border-radius:14px;cursor:pointer;font-family:inherit;word-break:keep-all;overflow-wrap:break-word}
+#splash .go small{display:block;font-weight:600;font-size:14px;line-height:1.5;opacity:.75;margin-top:6px;word-break:keep-all;overflow-wrap:break-word}
+#splash .go .s{background:#142b47;color:#fff}
+#splash .go .e{background:#fff;color:#142b47;font-size:20px;padding:19px}
+#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
+#splash .go .fr{background:#5b3fa0;color:#fff;border-color:#45307c}
+#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
+#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:20px;padding:21px}
+#splash .go button.sel{outline:4px solid #f5b400;outline-offset:3px}
+#splash .go button:disabled{opacity:.42;cursor:not-allowed}
+#incPick{max-width:1180px;margin:0 auto;text-align:left}
+#courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer;font-family:inherit}
+/* 이상사례 대처 교육 목록 (idt_common/incpick.js) */
+#incPick h3{font:800 25px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47;margin:0 0 6px}
+#incPick .ipNote{font:600 14px/1.55 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;margin:4px 0 10px}
+#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
+#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
+#incPick .ipRow:first-child{border-top:0}
+#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#8ba2bb}
+#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#fff;flex:none}
+#incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
+#incPick b{flex:1;font:800 19px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47}
+#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#6a7f96;margin-top:2px}
+#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;border:1px solid #152c4b}
+#incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
+#incBack{margin:14px 0 0;padding:10px 20px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer;font-family:inherit}
+#splash .go.n6{grid-template-columns:repeat(6,1fr);max-width:1560px}
+#splash .go.n6 button{font-size:21px;padding:20px 12px}#splash .go.n6 .e,#splash .go.n6 .o2{font-size:18px}

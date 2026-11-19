@@ -25,23 +25,8 @@ body.fp #cross{display:block}
 .seg{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden}
 .seg button{border:0;background:#fff;color:var(--ink);font:800 13.5px "Malgun Gothic",Arial,sans-serif;padding:8px 12px;cursor:pointer}
 .seg button+button{border-left:1px solid #b7c4d2}.seg button.on{background:var(--ink);color:#fff}.seg button:disabled{color:#aab;cursor:default}
-#splash{position:absolute;inset:0;z-index:8;background:linear-gradient(180deg,#f5f7f9,#e8edf1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:24px}
-#splash.hide{display:none}
-#splash h1{margin:0;font:800 44px "Malgun Gothic",Arial,sans-serif;letter-spacing:-1px}
-#splash .sub{margin:-6px 0 0;font:700 14px "Malgun Gothic",Arial,sans-serif;color:var(--sub);letter-spacing:1px}
-#spHint{font:600 16px/1.5 "Malgun Gothic",Arial,sans-serif;color:#40566e;text-align:center}
 #rxSel{display:flex;gap:8px;align-items:center;font:700 14px "Malgun Gothic",Arial,sans-serif}
 #rxSel button{border:1px solid #b7c4d2;border-radius:10px;background:#fff;padding:7px 14px;font:800 14px "Malgun Gothic",Arial,sans-serif;cursor:pointer}#rxSel button.on{background:#1f5fb8;color:#fff;border-color:#1f5fb8}
-#workers{display:grid;grid-template-columns:repeat(3,minmax(220px,300px));gap:14px}
-#workers button{border:0;border-radius:20px;background:#7b8a9c;color:#fff;text-align:left;padding:18px 20px;cursor:pointer;font-family:inherit;opacity:.75}
-#workers.ready button{opacity:1;background:#173a63}#workers button:disabled{background:#c3cad2!important;cursor:default}
-#workers small{display:block;font:600 12px "Malgun Gothic";letter-spacing:1px;opacity:.85}#workers strong{display:block;font:800 22px "Malgun Gothic";margin:6px 0}#workers span{font:500 13.5px/1.4 "Malgun Gothic"}
-#modes{display:grid;grid-template-columns:repeat(5,200px);gap:12px}
-.mcol h4{margin:0 0 6px;text-align:center;font:800 16px "Malgun Gothic";color:var(--sub);letter-spacing:3px}
-.mcol button{display:block;width:100%;margin:0 0 8px;border:2px solid #173a63;border-radius:12px;background:#173a63;color:#fff;font:800 17px "Malgun Gothic",Arial,sans-serif;padding:10px;cursor:pointer;word-break:keep-all}
-.mcol button.e{background:#fff;color:#173a63}.mcol button small{display:block;font:600 12px "Malgun Gothic";opacity:.85}
-.mcol button.sel{outline:4px solid #f2b705}
-.mcol.demo button{background:#2b8a4b;border-color:#2b8a4b}
 body.pk #app{visibility:hidden}
 #pkTiles{position:absolute;z-index:4;left:10px;top:10px;bottom:10px;width:250px;overflow:auto;display:none;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
 body.pk #pkTiles{display:grid}
@@ -64,17 +49,13 @@ body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:
 #pToast{position:absolute;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#142b47ee;color:#fff;border-radius:999px;padding:8px 18px;font:700 14px "Malgun Gothic"}
 body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before{content:"1인칭 — 설비에 다가가 조준하고 E / 클릭 (타일은 현황만)";grid-column:1/3;font:700 12px 'Malgun Gothic';color:#fff;background:#173a63cc;border-radius:8px;padding:5px 8px}
 #hud .far{color:#b04a00;font-weight:800}#hud .nx{background:#ffd22e;border-radius:99px;padding:0 6px;font-weight:800}
-.mcol.free button[data-m]{background:#5b3fa8;border-color:#5b3fa8}
-#incPick{background:#fff;border-radius:16px;padding:16px 20px;max-width:760px;width:100%;box-shadow:0 4px 18px #0002;font:500 14px "Malgun Gothic"}#incPick h3{margin:0 0 6px}
-#incPick .ip{display:flex;align-items:center;gap:10px;border-top:1px solid #e3e8ee;padding:8px 0}#incPick .ip>span{width:24px;font-weight:800;color:#5d7086}#incPick .ip b{flex:1}#incPick .ip s{display:block;text-decoration:none;font:500 12px "Malgun Gothic";color:#5d7086}
-#incPick button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:7px 12px;font:700 13px "Malgun Gothic";cursor:pointer}#incPick button.e{background:#fff;color:#173a63;border:1px solid #173a63}#incBack{margin-top:10px}
 #load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
 
 /* 메인화면 — 파우치 기준 (11/18) : 상단 바 없는 전체 화면 · OEE 연동 표시(왼쪽 아래) · 버전(오른쪽 아래) */
-#splash{position:fixed!important;inset:0!important;z-index:40!important}
-#spVer{position:absolute;right:22px;bottom:16px;border:1px solid #d5dee8;border-radius:16px;background:#fff;padding:6px 12px;font:800 13px "Malgun Gothic","Noto Sans KR",sans-serif;color:#5d7086}
 #splash,#splash *{font-family:"Malgun Gothic","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif}
-.mcol.oee button{background:#e0714a!important;border-color:#c85d38!important;color:#fff!important}.mcol.oee button.e{background:#fff!important;color:#c2502b!important;border:2px solid #e0714a!important}
+/*__SPLASHCSS__*/
+/* 병 고유 : 포장 품목 선택 (작업자 카드 위) */
+#rxSel{display:flex;gap:8px;align-items:center;justify-content:center;margin:0 0 14px;font-weight:700;font-size:15px;color:#40566e}#rxSel button{border:1px solid #b7c4d2;border-radius:10px;background:#fff;padding:7px 14px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;color:#142b47}#rxSel button.on{background:#1f5fb8;color:#fff;border-color:#1f5fb8}
 </style></head><body>
 <div id="bar">
   <div class="brand">병 라인 IDT</div>
@@ -92,25 +73,7 @@ body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before
   <div id="hud"></div>
   <div id="pkTiles"></div><div id="pkCoach"></div><div id="pkStat"></div><div id="dmCoach" hidden></div>
   <div id="pDlg" hidden></div><div id="pToast" hidden></div>
-  <div id="splash">
-    <h1>병 라인 IDT</h1><p class="sub">Bottle Line · Interactive Digital Tutor · 병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장</p>
-    <div id="spHint">① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다</div>
-    <div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div>
-    <div id="workers">
-      <button id="chooseF"><small>FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑</span></button>
-      <button id="chooseP1"><small>PACKING ROOM · 작업자 1</small><strong>🧍 포장실 작업자 1</strong><span>설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독</span></button>
-      <button id="chooseP2"><small>PACKING ROOM · 작업자 2</small><strong>🧍 포장실 작업자 2</strong><span>박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)</span></button>
-    </div>
-    <div id="modes">
-      <div class="mcol"><h4>기본</h4><button data-m="easy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button><button class="e" data-m="examEasy">기본 · 평가</button></div>
-      <div class="mcol"><h4>심화</h4><button data-m="guide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button><button class="e" data-m="exam">심화 · 평가</button></div>
-      <div class="mcol demo"><h4>시연</h4><button data-m="demo">시연모드<small>작업자별 장비 ON → 가동 → 생산까지 간단히</small></button></div>
-      <div class="mcol free"><h4>자유</h4><button data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제</small></button></div>
-      <div class="mcol oee"><h4>OEE</h4><button id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="e" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div>
-    </div>
-    <div id="incPick" hidden></div>
-    <div id="spVer"></div>
-  </div>
+  <div id="splash"><!--__SPLASH__--></div>
   <div id="load">설비 불러오는 중…</div>
 </div>
 <script>/*__THREE__*/</script>

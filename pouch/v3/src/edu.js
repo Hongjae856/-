@@ -28,18 +28,10 @@ function incDone(k){ const log=(typeof OEEEDU!=="undefined"&&OEEEDU.getLog)?OEEE
 /* ── 메인 화면 ── */
 function eduShow(v){ EDU.view=v; const go=$("#splash .go"), ip=$("#incPick");
   go.style.display=v==="menu"?"grid":"none"; ip.style.display=v==="inc"?"block":"none"; if(v==="inc") renderIncPick(); }
-function renderIncPick(){
-  const r=PICK_ROOM, R=incRank(r);
-  $("#incPick").innerHTML='<h3>이상사례 대처 교육 — '+esc(ROOM_NM[r])+'</h3>'+
-    '<p class="ipNote">'+(R.has?'OEE 데이터의 부동시간(40%) · 발생 빈도(30%) · 중요도 등급(30%)으로 정렬했습니다.':'OEE 데이터가 없어 중요도 등급 순으로 정렬했습니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 발생 빈도가 반영됩니다.')+'</p>'+
-    '<div class="ipList">'+R.list.map((o,i)=>{ const d=incDone(o.k), best=d.filter(x=>x.mode==="incExam"&&x.score!=null).reduce((a,x)=>Math.max(a,x.score),-1);
-      return '<div class="ipRow"><span class="rk">'+(i+1)+'</span><span class="gd g'+({상:"H",중:"M",하:"L"}[o.g])+'" title="'+esc(INC_GRADE_WHY[o.g])+'">'+o.g+'</span>'+
-        '<b>'+esc(o.inc.nm)+'<s>'+esc(o.inc.src||"")+(R.has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
-        '<button class="s" data-inc="'+o.k+'" data-m="incLearn">학습</button><button class="e" data-inc="'+o.k+'" data-m="incExam">평가</button></div>'; }).join("")+'</div>'+
-    '<p class="ipNote">중요도 등급 : 상 = '+INC_GRADE_WHY.상+' · 중 = '+INC_GRADE_WHY.중+' · 하 = '+INC_GRADE_WHY.하+'</p>'+
-    '<button id="incBack">← 기본 · 심화 · OEE 로</button>';
-  $$("#incPick [data-inc]").forEach(b=>b.onclick=()=>incStart(b.dataset.inc,b.dataset.m));
-  $("#incBack").onclick=()=>eduShow("menu");
+function renderIncPick(){   /* 공통 목록 (idt_common/incpick.js) */
+  const r=PICK_ROOM;
+  idtIncPick($("#incPick"),{room:ROOM_NM[r], items:incKeys(r).map(k=>{ const inc=incOf(k); return {k, nm:inc.nm, src:inc.src, g:INC_GRADE[k]||"중"}; }),
+    onStart:(k,m)=>incStart(k,m==="exam"?"incExam":"incLearn"), onBack:()=>eduShow("menu")});
 }
 
 /* ── 세션 ── */

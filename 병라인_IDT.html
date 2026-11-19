@@ -86,23 +86,8 @@ body.fp #cross{display:block}
 .seg{display:flex;border:1px solid #b7c4d2;border-radius:11px;overflow:hidden}
 .seg button{border:0;background:#fff;color:var(--ink);font:800 13.5px "Malgun Gothic",Arial,sans-serif;padding:8px 12px;cursor:pointer}
 .seg button+button{border-left:1px solid #b7c4d2}.seg button.on{background:var(--ink);color:#fff}.seg button:disabled{color:#aab;cursor:default}
-#splash{position:absolute;inset:0;z-index:8;background:linear-gradient(180deg,#f5f7f9,#e8edf1);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;overflow:auto;padding:24px}
-#splash.hide{display:none}
-#splash h1{margin:0;font:800 44px "Malgun Gothic",Arial,sans-serif;letter-spacing:-1px}
-#splash .sub{margin:-6px 0 0;font:700 14px "Malgun Gothic",Arial,sans-serif;color:var(--sub);letter-spacing:1px}
-#spHint{font:600 16px/1.5 "Malgun Gothic",Arial,sans-serif;color:#40566e;text-align:center}
 #rxSel{display:flex;gap:8px;align-items:center;font:700 14px "Malgun Gothic",Arial,sans-serif}
 #rxSel button{border:1px solid #b7c4d2;border-radius:10px;background:#fff;padding:7px 14px;font:800 14px "Malgun Gothic",Arial,sans-serif;cursor:pointer}#rxSel button.on{background:#1f5fb8;color:#fff;border-color:#1f5fb8}
-#workers{display:grid;grid-template-columns:repeat(3,minmax(220px,300px));gap:14px}
-#workers button{border:0;border-radius:20px;background:#7b8a9c;color:#fff;text-align:left;padding:18px 20px;cursor:pointer;font-family:inherit;opacity:.75}
-#workers.ready button{opacity:1;background:#173a63}#workers button:disabled{background:#c3cad2!important;cursor:default}
-#workers small{display:block;font:600 12px "Malgun Gothic";letter-spacing:1px;opacity:.85}#workers strong{display:block;font:800 22px "Malgun Gothic";margin:6px 0}#workers span{font:500 13.5px/1.4 "Malgun Gothic"}
-#modes{display:grid;grid-template-columns:repeat(5,200px);gap:12px}
-.mcol h4{margin:0 0 6px;text-align:center;font:800 16px "Malgun Gothic";color:var(--sub);letter-spacing:3px}
-.mcol button{display:block;width:100%;margin:0 0 8px;border:2px solid #173a63;border-radius:12px;background:#173a63;color:#fff;font:800 17px "Malgun Gothic",Arial,sans-serif;padding:10px;cursor:pointer;word-break:keep-all}
-.mcol button.e{background:#fff;color:#173a63}.mcol button small{display:block;font:600 12px "Malgun Gothic";opacity:.85}
-.mcol button.sel{outline:4px solid #f2b705}
-.mcol.demo button{background:#2b8a4b;border-color:#2b8a4b}
 body.pk #app{visibility:hidden}
 #pkTiles{position:absolute;z-index:4;left:10px;top:10px;bottom:10px;width:250px;overflow:auto;display:none;grid-template-columns:1fr 1fr;gap:6px;align-content:start}
 body.pk #pkTiles{display:grid}
@@ -125,17 +110,67 @@ body.pk #pkStat{display:block}#pkStat i{font-style:normal;font-weight:800;color:
 #pToast{position:absolute;z-index:9;left:50%;bottom:24px;transform:translateX(-50%);background:#142b47ee;color:#fff;border-radius:999px;padding:8px 18px;font:700 14px "Malgun Gothic"}
 body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before{content:"1인칭 — 설비에 다가가 조준하고 E / 클릭 (타일은 현황만)";grid-column:1/3;font:700 12px 'Malgun Gothic';color:#fff;background:#173a63cc;border-radius:8px;padding:5px 8px}
 #hud .far{color:#b04a00;font-weight:800}#hud .nx{background:#ffd22e;border-radius:99px;padding:0 6px;font-weight:800}
-.mcol.free button[data-m]{background:#5b3fa8;border-color:#5b3fa8}
-#incPick{background:#fff;border-radius:16px;padding:16px 20px;max-width:760px;width:100%;box-shadow:0 4px 18px #0002;font:500 14px "Malgun Gothic"}#incPick h3{margin:0 0 6px}
-#incPick .ip{display:flex;align-items:center;gap:10px;border-top:1px solid #e3e8ee;padding:8px 0}#incPick .ip>span{width:24px;font-weight:800;color:#5d7086}#incPick .ip b{flex:1}#incPick .ip s{display:block;text-decoration:none;font:500 12px "Malgun Gothic";color:#5d7086}
-#incPick button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:7px 12px;font:700 13px "Malgun Gothic";cursor:pointer}#incPick button.e{background:#fff;color:#173a63;border:1px solid #173a63}#incBack{margin-top:10px}
 #load{position:absolute;inset:0;z-index:9;display:flex;align-items:center;justify-content:center;background:#eef2f4;font:700 18px "Malgun Gothic",Arial,sans-serif;color:var(--sub)}
 
 /* 메인화면 — 파우치 기준 (11/18) : 상단 바 없는 전체 화면 · OEE 연동 표시(왼쪽 아래) · 버전(오른쪽 아래) */
-#splash{position:fixed!important;inset:0!important;z-index:40!important}
-#spVer{position:absolute;right:22px;bottom:16px;border:1px solid #d5dee8;border-radius:16px;background:#fff;padding:6px 12px;font:800 13px "Malgun Gothic","Noto Sans KR",sans-serif;color:#5d7086}
 #splash,#splash *{font-family:"Malgun Gothic","Noto Sans KR","Apple SD Gothic Neo",Arial,sans-serif}
-.mcol.oee button{background:#e0714a!important;border-color:#c85d38!important;color:#fff!important}.mcol.oee button.e{background:#fff!important;color:#c2502b!important;border:2px solid #e0714a!important}
+/* ═══ 메인화면 공통 (세 IDT · 11/19 · 파우치 메인화면 규칙을 그대로 옮김) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
+#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s;overflow:auto;
+  font-family:var(--ff,"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif)}
+#splash.hide{opacity:0;pointer-events:none;visibility:hidden}
+#splash .box{max-width:1300px;width:100%;padding:40px;text-align:center;margin:auto}
+#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
+#splash .ver:hover{color:#15304e;border-color:#15304e}
+#splash h1{font-weight:800;font-size:50px;line-height:1.15;letter-spacing:-2px;margin:0 0 8px}
+#splash h1 small{display:block;font-weight:700;font-size:17px;line-height:1.4;letter-spacing:1px;color:#6a7f96;margin-top:8px}
+#splash .prodLine{font-weight:700;font-size:16px;line-height:1.5;color:#5d7086;margin:-14px 0 22px}
+#crewHint{max-width:900px;margin:0 auto 12px;text-align:center;font-weight:600;font-size:16px;line-height:1.5;color:#40566e}
+#crewHint b{color:#142b47} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
+#coursePicker{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 auto 20px;max-width:900px}
+#coursePicker.n3{grid-template-columns:repeat(3,1fr);max-width:1240px}
+#coursePicker button{padding:24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#fff;color:#142b47;cursor:pointer;font-family:inherit}
+#coursePicker button.main{background:#142b47;color:#fff}
+#coursePicker button:disabled{opacity:.5;cursor:not-allowed}
+#coursePicker button.main.wait{opacity:.55}
+#coursePicker button.main.sel{outline:4px solid #f5b400;outline-offset:3px}
+#coursePicker small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
+#coursePicker strong{display:block;font-size:29px;margin:10px 0}
+#coursePicker span{display:block;font-size:17px;line-height:1.6}
+#coursePicker.n3 strong{font-size:26px}#coursePicker.n3 span{font-size:15px}
+#splash .go{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin:auto;max-width:1380px}
+.modeColumn{display:flex;flex-direction:column;gap:14px}
+#splash .go h4{font-weight:800;font-size:19px;line-height:1;color:#5d7086;letter-spacing:3px;margin:0 0 2px}
+#splash .go button{width:100%;font-weight:700;font-size:23px;line-height:1.3;padding:22px 18px;border:1px solid #152c4b;border-radius:14px;cursor:pointer;font-family:inherit;word-break:keep-all;overflow-wrap:break-word}
+#splash .go small{display:block;font-weight:600;font-size:14px;line-height:1.5;opacity:.75;margin-top:6px;word-break:keep-all;overflow-wrap:break-word}
+#splash .go .s{background:#142b47;color:#fff}
+#splash .go .e{background:#fff;color:#142b47;font-size:20px;padding:19px}
+#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
+#splash .go .fr{background:#5b3fa0;color:#fff;border-color:#45307c}
+#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
+#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:20px;padding:21px}
+#splash .go button.sel{outline:4px solid #f5b400;outline-offset:3px}
+#splash .go button:disabled{opacity:.42;cursor:not-allowed}
+#incPick{max-width:1180px;margin:0 auto;text-align:left}
+#courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer;font-family:inherit}
+/* 이상사례 대처 교육 목록 (idt_common/incpick.js) */
+#incPick h3{font:800 25px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47;margin:0 0 6px}
+#incPick .ipNote{font:600 14px/1.55 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;margin:4px 0 10px}
+#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
+#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
+#incPick .ipRow:first-child{border-top:0}
+#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#8ba2bb}
+#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#fff;flex:none}
+#incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
+#incPick b{flex:1;font:800 19px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47}
+#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#6a7f96;margin-top:2px}
+#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;border:1px solid #152c4b}
+#incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
+#incBack{margin:14px 0 0;padding:10px 20px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer;font-family:inherit}
+#splash .go.n6{grid-template-columns:repeat(6,1fr);max-width:1560px}
+#splash .go.n6 button{font-size:21px;padding:20px 12px}#splash .go.n6 .e,#splash .go.n6 .o2{font-size:18px}
+
+/* 병 고유 : 포장 품목 선택 (작업자 카드 위) */
+#rxSel{display:flex;gap:8px;align-items:center;justify-content:center;margin:0 0 14px;font-weight:700;font-size:15px;color:#40566e}#rxSel button{border:1px solid #b7c4d2;border-radius:10px;background:#fff;padding:7px 14px;font-weight:800;font-size:14px;cursor:pointer;font-family:inherit;color:#142b47}#rxSel button.on{background:#1f5fb8;color:#fff;border-color:#1f5fb8}
 </style></head><body>
 <div id="bar">
   <div class="brand">병 라인 IDT</div>
@@ -153,25 +188,7 @@ body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before
   <div id="hud"></div>
   <div id="pkTiles"></div><div id="pkCoach"></div><div id="pkStat"></div><div id="dmCoach" hidden></div>
   <div id="pDlg" hidden></div><div id="pToast" hidden></div>
-  <div id="splash">
-    <h1>병 라인 IDT</h1><p class="sub">Bottle Line · Interactive Digital Tutor · 병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장</p>
-    <div id="spHint">① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다</div>
-    <div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div>
-    <div id="workers">
-      <button id="chooseF"><small>FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑</span></button>
-      <button id="chooseP1"><small>PACKING ROOM · 작업자 1</small><strong>🧍 포장실 작업자 1</strong><span>설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독</span></button>
-      <button id="chooseP2"><small>PACKING ROOM · 작업자 2</small><strong>🧍 포장실 작업자 2</strong><span>박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)</span></button>
-    </div>
-    <div id="modes">
-      <div class="mcol"><h4>기본</h4><button data-m="easy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button><button class="e" data-m="examEasy">기본 · 평가</button></div>
-      <div class="mcol"><h4>심화</h4><button data-m="guide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button><button class="e" data-m="exam">심화 · 평가</button></div>
-      <div class="mcol demo"><h4>시연</h4><button data-m="demo">시연모드<small>작업자별 장비 ON → 가동 → 생산까지 간단히</small></button></div>
-      <div class="mcol free"><h4>자유</h4><button data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제</small></button></div>
-      <div class="mcol oee"><h4>OEE</h4><button id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="e" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div>
-    </div>
-    <div id="incPick" hidden></div>
-    <div id="spVer"></div>
-  </div>
+  <div id="splash"><div class="box"><h1>병 라인 IDT<small>Bottle Line · Interactive Digital Tutor</small></h1><p class="prodLine">병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장</p><div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG · 2명)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div><div id="crewHint"></div><div id="coursePicker" class="n3"><button id="chooseF" class="main wait" data-r="F"><small>작업자 1 · FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑</span></button><button id="chooseP1" class="main wait" data-r="P1"><small>작업자 2 · PACKING ROOM</small><strong>🧍 포장실 작업자 1</strong><span>설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독</span></button><button id="chooseP2" class="main wait" data-r="P2"><small>작업자 3 · PACKING ROOM</small><strong>🧍 포장실 작업자 2</strong><span>박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)</span></button></div><div class="go n5"><div class="modeColumn "><h4>기본</h4><button class="s" data-m="easy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button><button class="e" data-m="examEasy">기본 · 평가</button></div><div class="modeColumn "><h4>심화</h4><button class="s" data-m="guide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button><button class="e" data-m="exam">심화 · 평가</button></div><div class="modeColumn demo"><h4>시연</h4><button class="d" data-m="demo">시연모드<small>작업자별 장비 ON → 가동 → 생산까지 간단히</small></button></div><div class="modeColumn free"><h4>자유</h4><button class="fr" data-m="free">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제</small></button></div><div class="modeColumn oee"><h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="o2" id="spInc" data-m="inc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div></div><div id="incPick" style="display:none"></div><button id="courseBack" style="display:none">← 과정 다시 선택</button><button id="verBadge" class="ver" title="버전 이력">V</button></div><div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div></div>
   <div id="load">설비 불러오는 중…</div>
 </div>
 <script>/**
@@ -186,6 +203,7 @@ body.pkfp #pkTiles .pt{pointer-events:none;opacity:.88}body.pkfp #pkTiles:before
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:12,d:'2026-11-19',t:'통합 1단계 · 메인화면 공통화 (11/19 사용자 지시 : 세 IDT 는 함께 가고 코드 구조도 통일) — 메인화면을 세 IDT 공통 모듈(idt_common/splash.py · splash.css · splash.js)로 만들고, 이상사례 대처 교육 목록도 공통(idt_common/incpick.js : 순위 = 부동시간 40 % · 빈도 30 % · 중요도 등급 30 %, 등급 · 실습 횟수 · 평가 최고점 표시) — 파우치와 같은 배치(포장 품목 선택은 병 고유로 유지), 이상사례는 파우치처럼 모드 → 작업자 → 그 실의 사례 목록, 중요도 등급 적용(사용자 확인)'},
  {v:11,d:'2026-11-18',t:'파우치 기준 통일 (11/18 사용자 지시 : 하드웨어 외 전부) — 작업자 : 충전실은 자재(빈 병 박스 · 실리카겔 롤 · 정제 용기 · PE 필름 · 캡 봉투)를 들고 가서 손을 뻗어 투입 · 붓기, 포장실 작업자 1은 병을 집어 판독기에 대고 넘김, 작업자 2는 담기 → 봉함 → AG 라벨 → 박스를 들고 파렛트 적재 → 접힌 박스로 새 박스 조립(순간이동 제거), 자동 자재 교체 때 설비로 걸어감, 판독대 의자는 작업자 뒤로 · 상단 바 한 줄(라인 속도 · 배속 ×10 · 그래픽 · 사운드 · 채점 관리 · 학습 종료 · 처음부터 — 원본 앱 머리 줄과 자동재생 버튼 숨김), 메인화면(상단 바 없음 · 5열 · OEE 연동 표시 · 버전), 3인칭 시점 버튼, 1인칭 Tab 메뉴, 1인칭 중 설비 화면은 현장 모니터 앞에서 열기, 설명서 부착기 경광등(에러 깜빡임 · 조치 중 점등)'},
  {v:10,d:'2026-11-18',t:'세 IDT 교차 검증 · 통일 (11/18 사용자 결정 · 파우치 기준) — 1인칭 눈높이 1.55 m · 시야각 65° · C 앉기 · F1 힌트 · H 도움말(공통 모듈 idt_common/fpctl.js), 자유모드 중간안(기동 조건 · 운전 중 조작 금지 해제 · 전원 · 공압 · 안전문(열면 인터락 정지) · 비상정지 · 알람 RESET 은 실제처럼), 시연모드를 단계 버튼식으로(충전실 : 전원 일괄 → 자재 일괄 → 가동 → 관찰 / 포장실 : 설비 일괄 ON → 관찰), 포장실 자재 교체(라벨 롤 · 리본 · 설명서 롤 · AG 라벨지 — 잔량 20 % 경고 · 그 설비 정지 후 교체 · 심화 과정에 라벨 롤 교체 단계 · 라벨지 없으면 박스 라벨 발행 대기), 포장실 평가 힌트(−5 점) · 과정 결과 창, 충전실 이상사례 평가에서 원본 안내가 보이던 문제 수정, 이상사례 결과에 점수 · 오답 · 힌트 기록'},
  {v:9,d:'2026-11-18',t:'OEE 대시보드 라인 이름을 시트 표기에 맞춤 — 병 라인은 시트에 「계수기」로 되어 있어 이름에 계수기가 들어간 라인(예 2호 · 3호)을 읽음 (대시보드 라인 선택에서 호기별로 볼 수 있음)'},
@@ -1520,6 +1538,51 @@ function tbViews(o){
     if(T.k){ T.k.t=Math.min(1,T.k.t+.04); const u=T.k.t*T.k.t*(3-2*T.k.t), O=o.orbit(); for(const key in T.k.to){ let a=T.k.from[key], b=T.k.to[key]; if(key==="yaw"){ let d=b-a; d=Math.atan2(Math.sin(d),Math.cos(d)); b=a+d; } O[key]=a+(b-a)*u; } if(T.k.t>=1) T.k=null; } })();
 }
 
+/* ── splash.js ── */
+/* ═══ 메인화면 공통 동작 (세 IDT · 11/19 · 파우치 crewMark 를 옮김) — 마크업 idt_common/splash.py · 모양 idt_common/splash.css
+   idtSplashMark({mode, modeNm, room, isSel:btn=>bool}) : 고른 모드 · 작업자 표시 + 안내 문구 (① 모드 선택 → ② 작업자)
+   idtSplashVer(text) : 오른쪽 아래 버전 ═══ */
+function idtSplashMark(o){
+  document.querySelectorAll("#splash .go button").forEach(b=>b.classList.toggle("sel",!!o.mode&&!!o.isSel(b)));
+  document.querySelectorAll("#coursePicker button.main").forEach(b=>{ b.classList.toggle("sel",!!o.room&&o.room===b.dataset.r); b.classList.toggle("wait",!o.mode); });
+  const h=document.getElementById("crewHint"), e=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  if(h) h.innerHTML=o.mode?'<b>② 작업자 선택</b> — 위의 작업자를 누르면 그 작업장 1인칭으로 시작합니다 <s>모드 : '+e(o.modeNm||"")+'</s>'
+    :'<b>① 모드 선택</b> — 아래에서 모드를 고른 뒤 <b>② 작업자</b>를 누르면 그 작업장 작업자 1인칭으로 시작합니다';
+}
+function idtSplashVer(t){ const b=document.getElementById("verBadge"); if(b) b.textContent=t; }
+
+/* ── incpick.js ── */
+/* ═══ 이상사례 대처 교육 목록 공통 (세 IDT · 11/19 · 파우치 renderIncPick 을 옮김)
+   · 순위 : OEE 데이터가 있으면 부동시간 40 % · 발생 빈도 30 % · 중요도 등급 30 %, 없으면 등급 순
+   · 중요도 등급 (파우치 11/16 사용자 확정 기준) : 상 = 품질에 직접 영향 · 중 = 품질 영향 가능 · 생산 손실 · 하 = 설비 정지 위주
+   · 블리스터 · 병 등급 : 11/19 사용자 확인 (제안안 그대로)
+   idtIncPick(el, {room:"충전실", items:[{k, nm, src, g}], stats:{k:{down,n}}|null, onStart(k,"learn"|"exam"), onBack(), back:"← …"}) ═══ */
+const IDT_GRADE_W={상:1,중:.6,하:.3};
+const IDT_GRADE_WHY={상:"품질(함량 · 표시 · 첨부문서 · 포장 상태)에 직접 영향",중:"품질 영향 가능 · 생산 손실",하:"설비 정지 위주 · 품질 영향 낮음"};
+function idtIncRank(items,stats){
+  const has=!!(stats&&Object.keys(stats).length);
+  const L=items.map(o=>{ const s=has&&stats[o.k]||{down:0,n:0}; return Object.assign({},o,{g:o.g||"중",down:s.down||0,n:s.n||0}); });
+  const mD=Math.max(1e-9,...L.map(o=>o.down)), mN=Math.max(1e-9,...L.map(o=>o.n));
+  for(const o of L) o.score=has?.4*(o.down/mD)+.3*(o.n/mN)+.3*IDT_GRADE_W[o.g]:IDT_GRADE_W[o.g];
+  L.sort((a,b)=>b.score-a.score||b.down-a.down);
+  return {list:L,has};
+}
+function idtIncPick(el,o){
+  const e=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+  const stats=(typeof OEEEDU!=="undefined"&&OEEEDU.codeStats)?OEEEDU.codeStats():null, log=(typeof OEEEDU!=="undefined"&&OEEEDU.getLog)?OEEEDU.getLog():[];
+  const R=idtIncRank(o.items,o.stats!==undefined?o.stats:stats);
+  el.innerHTML='<h3>이상사례 대처 교육 — '+e(o.room)+'</h3>'+
+    '<p class="ipNote">'+(R.has?'OEE 데이터의 부동시간(40%) · 발생 빈도(30%) · 중요도 등급(30%)으로 정렬했습니다.':'OEE 데이터가 없어 중요도 등급 순으로 정렬했습니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 발생 빈도가 반영됩니다.')+'</p>'+
+    '<div class="ipList">'+R.list.map((x,i)=>{ const d=log.filter(l=>l.k===x.k), best=d.filter(l=>/exam/i.test(l.mode)&&l.score!=null).reduce((a,l)=>Math.max(a,l.score),-1);
+      return '<div class="ipRow"><span class="rk">'+(i+1)+'</span><span class="gd g'+({상:"H",중:"M",하:"L"}[x.g])+'" title="'+e(IDT_GRADE_WHY[x.g])+'">'+x.g+'</span>'+
+        '<b>'+e(x.nm)+'<s>'+e(x.src||"")+(R.has?' · 부동 '+Math.round(x.down)+' 분 · '+x.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
+        '<button class="s" data-inc="'+e(x.k)+'" data-m="learn">학습</button><button class="e" data-inc="'+e(x.k)+'" data-m="exam">평가</button></div>'; }).join("")+'</div>'+
+    '<p class="ipNote">중요도 등급 : 상 = '+IDT_GRADE_WHY.상+' · 중 = '+IDT_GRADE_WHY.중+' · 하 = '+IDT_GRADE_WHY.하+'</p>'+
+    '<button id="incBack">'+(o.back||"← 기본 · 심화 · OEE 로")+'</button>';
+  el.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>o.onStart(b.dataset.inc,b.dataset.m));
+  el.querySelector("#incBack").onclick=()=>o.onBack();
+}
+
 /* ── pfp.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    1인칭 직접 조작 (B5) — 다가가서 조준하고 E 또는 클릭 (파우치 · PTP 와 같은 방식)
@@ -2009,24 +2072,24 @@ const _cwAct=PS_ACT.cw; PS_ACT.cw=()=>{ if(FREEB.on&&!PS.cw.set){ PS_ACT.cwSet(S
 /* ── OEE · 이상사례 ── */
 function oeebInit(){
   if(!document.getElementById("oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');   /* 파우치와 같은 OEE 연동 표시 */
-  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ $("#spVer").textContent="V"+CHANGELOG[0].v; }catch(e){}
+  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ idtSplashVer("V"+CHANGELOG[0].v); }catch(e){}
   if(typeof OEEEDU==="undefined") return;
-  OEEEDU.init({line:"계수기", title:"병 라인(계수기) · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); incbPick(); }});
+  OEEEDU.init({line:"계수기", title:"병 라인(계수기) · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); }});
 }
 function incbList(r){ const st=(OEEEDU.codeStats&&OEEEDU.codeStats())||{}, has=Object.keys(st).length>0;
   const L=OEE_B_CODES.filter(c=>c.room===r||(!r&&c.room)).map(c=>({c,down:(st[c.k]||{}).down||0,n:(st[c.k]||{}).n||0}));
   const mD=Math.max(1e-9,...L.map(o=>o.down)), mN=Math.max(1e-9,...L.map(o=>o.n)); for(const o of L) o.s=has?.4*o.down/mD+.3*o.n/mN+.3*.6:0; if(has) L.sort((a,b)=>b.s-a.s); return {L,has}; }
-function incbPick(){
-  const {L,has}=incbList(null), el=$("#incPick");
-  el.innerHTML='<h3>이상사례 대처 교육 — 병 라인</h3><p>'+(has?"OEE 부동시간 · 발생 빈도 순으로 정렬했습니다.":"OEE 데이터가 없어 기본 순서로 표시합니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 빈도 순으로 바뀝니다.")+'</p>'+
-    L.map((o,i)=>'<div class="ip"><span>'+(i+1)+'</span><b>'+o.c.nm+'<s>'+o.c.roomNm+(has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+'</s></b><button data-k="'+o.c.k+'" data-m="learn">학습</button><button class="e" data-k="'+o.c.k+'" data-m="exam">평가</button></div>').join("")+'<button id="incBack">← 모드 다시 선택</button>';
-  el.hidden=false; $("#workers").hidden=true; $("#modes").hidden=true;
-  el.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>incbStart(b.dataset.k,b.dataset.m));
-  $("#incBack").onclick=()=>{ el.hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; CREW.mode=null; spMark(); };
+/* 중요도 등급 (11/19 사용자 확인 · 파우치 기준) */
+const INCB_GRADE={DM33:"상",RC65:"상",PK1:"상",PK2:"상",PK3:"상",SG22:"중",PE52:"중",WC41:"중"};
+function incbPick(room){   /* 공통 목록 (idt_common/incpick.js) — 파우치처럼 작업자(실)를 고른 뒤 그 실의 사례 */
+  const el=$("#incPick");
+  idtIncPick(el,{room:room==="F"?"충전실":"포장실", items:OEE_B_CODES.filter(c=>c.room===room).map(c=>({k:c.k, nm:c.nm, src:c.roomNm, g:INCB_GRADE[c.k]||"중"})),
+    onStart:(k,m)=>incbStart(k,m), onBack:()=>{ el.style.display="none"; $("#splash .go").style.display="grid"; CREW.mode=null; spMark(); }});
+  el.style.display="block"; $("#splash .go").style.display="none";
 }
 function incbStart(k,m){
   const c=OEE_B_CODES.find(x=>x.k===k); Object.assign(INCB,{k,mode:m,room:c.room,t0:performance.now(),fired:false,launched:false,done:false,at:0,fi:0,hint:0,hintFi:-1,d0:0,h0:0,wrong:0,score:null});
-  $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; $("#splash").classList.add("hide");
+  $("#incPick").style.display="none"; $("#splash .go").style.display="grid"; $("#splash").classList.add("hide");
   CREW.mode=m==="exam"?"exam":"guide";
   if(c.room==="F"){ const w=appWin(); CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession("guide"); w.demoSetup(); if(m==="exam") incbExamCss(true); }catch(e){ console.error(e); } show("F"); }   /* 라인을 바로 운전 상태로 (시연 준비와 같은 설정) */
   else { CREW.started.P=true; CREW.pRole="P1"; pcStart("P1","free",true,CREW.rx); PS_ACT.allOn(); PC.firstOk=PC.sampleOk=PC.rejOk=true; PS.auto.w1=true; PS.auto.w2=true; show("P1"); }
@@ -2214,10 +2277,9 @@ function hud(){ const h=$("#hud"); if(typeof pfHud==="function"&&pfHud()) return
   :"1인칭 · "+(WALK.room==="F"?"충전실":"포장실")+" · W A S D 걷기 · Shift 빠르게 · 화면 클릭 후 마우스로 둘러보기 (Esc 풀기)"; }
 /* ── 메인화면 : ① 모드 → ② 작업자 (파우치 방식) ── */
 const MODE_NM={easy:"기본 · 학습",guide:"심화 · 학습",examEasy:"기본 · 평가",exam:"심화 · 평가",demo:"시연",free:"자유",inc:"이상사례"};
-function spMark(){ $("#workers").classList.toggle("ready",!!CREW.mode); $("#chooseP2").disabled=!CREW.rx;
-  document.querySelectorAll("#modes [data-m]").forEach(b=>b.classList.toggle("sel",b.dataset.m===CREW.mode));
+function spMark(){ $("#chooseP2").disabled=!CREW.rx;
   document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.classList.toggle("on",(b.dataset.rx==="1")===CREW.rx));
-  $("#spHint").textContent=CREW.mode?"② "+MODE_NM[CREW.mode]+" — 작업자를 고르세요":"① 모드 선택 — 아래에서 모드를 고른 뒤 ② 작업자를 누르면 그 작업장 작업자 1인칭으로 시작합니다"; }
+  idtSplashMark({mode:CREW.mode, modeNm:MODE_NM[CREW.mode], room:null, isSel:b=>b.dataset.m===CREW.mode}); }
 function crewMark(){ document.querySelectorAll("#crewSw [data-r]").forEach(b=>{ const r=b.dataset.r; b.classList.toggle("on",CREW.cur===r);
   b.disabled=!CREW.cur||(r==="P2"&&!CREW.rx)||(r!=="F"&&CREW.pRole&&r!==CREW.pRole); }); }
 function startRoom(r){
@@ -2229,20 +2291,20 @@ function show(r){
   CREW.cur=r; document.body.classList.toggle("pk",r!=="F"); placeCanvas.k=null;
   setView("fp"); walkSpawnAt(r); crewMark(); $("#modeChip").textContent=MODE_NM[CREW.mode]+" · "+(r==="F"?"충전실":r==="P1"?"포장실 1":"포장실 2");
 }
-function crewGo(r){ if(CREW.mode&&CREW.mode!=="inc") LASTB={m:CREW.mode,r,rx:CREW.rx}; if(!CREW.mode){ $("#spHint").textContent="먼저 ① 모드를 고르세요"; return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
+function crewGo(r){ if(CREW.mode&&CREW.mode!=="inc") LASTB={m:CREW.mode,r,rx:CREW.rx}; if(!CREW.mode){ spMark(); return; } if(CREW.mode==="inc"){ incbPick(r==="F"?"F":"P"); return; } $("#splash").classList.add("hide"); startRoom(r); show(r); }
 function goHome(){ try{ const w=appWin(); w.B3_DEMO_STEP=false; if(w.S) w.S.running=false; w.goHome&&w.goHome(); }catch(e){}
-  pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; document.body.classList.remove("pk"); setView("orbit");
+  pcStop(); freeStop(); incbExamCss(false); $("#pDlg").hidden=true; PS_ACT.allOff(); Object.assign(PS.leaf,{fault:false,lock:false}); PS.vis.bad=false; PS.pr.faint=false; INCB.k=null; Object.assign(CREW,{cur:null,mode:null,pRole:null,inc:false,started:{F:false,P:false}}); $("#incPick").style.display="none"; $("#splash .go").style.display="grid"; document.body.classList.remove("pk"); setView("orbit");
   $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt(); spMark(); crewMark(); }
 function walkSpawnAt(r){ if(r==="F") walkSpawn("F"); else { PK_OBS=PK_OBS||pkObstacles(); const p=r==="P1"?[PK.scanX,900]:[19950,1000];
   Object.assign(WALK,{x:p[0],z:p[1],y:fpcEye(0),yaw:0,pitch:-.35,room:"P"}); } }
 function bindSplash(){
-  document.querySelectorAll("#modes [data-m]").forEach(b=>b.onclick=()=>{ CREW.mode=b.dataset.m; spMark(); });
+  document.querySelectorAll("#splash .go [data-m]").forEach(b=>b.onclick=()=>{ CREW.mode=b.dataset.m; spMark(); });
   document.querySelectorAll("#rxSel [data-rx]").forEach(b=>b.onclick=()=>{ CREW.rx=b.dataset.rx==="1"; spMark(); });
   $("#chooseF").onclick=()=>crewGo("F"); $("#chooseP1").onclick=()=>crewGo("P1"); $("#chooseP2").onclick=()=>crewGo("P2");
   document.querySelectorAll("#crewSw [data-r]").forEach(b=>b.onclick=()=>{ if(!CREW.cur) return; startRoom(b.dataset.r); show(b.dataset.r); });
   $("#homeBtn").onclick=goHome; spMark(); crewMark();
   $("#spOee").onclick=()=>{ if(typeof OEEEDU!=="undefined") OEEEDU.open(); };
-  $("#spInc").onclick=()=>{ CREW.mode="inc"; spMark(); incbPick(); };
+  
 }
 let last=performance.now();
 function loop(now){
@@ -2272,7 +2334,7 @@ function bEnd(){ if(!CREW.cur) return true; if(CREW.mode==="free"||CREW.mode==="
 function bRubric(){ if(CREW.cur==="F") return false;
   pcDlg('<h3>채점 관리 — 포장실</h3><table class="cmp"><tr><th>항목</th><th>감점</th></tr><tr><td>순서가 다른 조작</td><td>−3</td></tr><tr><td>작업 지시서와 다른 중량 세팅</td><td>−5</td></tr><tr><td>힌트 사용 (단계마다 1 회)</td><td>−5</td></tr></table><p>합격 기준 80 점 (충전실 · 파우치 · 블리스터와 같음)</p>',[["닫기",null]]); return true; }
 let LASTB=null;
-function bRestart(){ const L=LASTB; goHome(); if(!L) return; setTimeout(()=>{ CREW.rx=L.rx; spMark(); const m=document.querySelector('#modes [data-m="'+L.m+'"]'); if(m) m.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }
+function bRestart(){ const L=LASTB; goHome(); if(!L) return; setTimeout(()=>{ CREW.rx=L.rx; spMark(); const m=document.querySelector('#splash .go [data-m="'+L.m+'"]'); if(m) m.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }
 function boot(){
   $("#modeChip").textContent=verTxt();
   v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash(); fpcInit({isFP:()=>V3B.view!=="orbit"&&!(typeof FF!=="undefined"&&FF.hmi), hint:bHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});

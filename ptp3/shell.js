@@ -18,13 +18,8 @@ const crs=k=>{ const w=UNI_HUB.win(k); return w&&w.UNI_COURSE; };
 
 /* ── 메인화면 : 모드 → 작업자 ── */
 const CREW={mode:null, room:null, cur:null, started:{F:false,P:false}, pose:{}, fp:true};
-function crewMark(){
-  document.querySelectorAll("#modes button[data-m]").forEach(b=>b.classList.toggle("sel",!!CREW.mode&&b.dataset.c===CREW.mode.c&&b.dataset.m===CREW.mode.m));
-  for(const r of ["F","P"]){ const b=$("#choose"+r); b.classList.toggle("sel",CREW.room===r); b.classList.toggle("wait",!CREW.mode); }
-  $("#crewHint").innerHTML=CREW.mode?'<b>② 작업자 선택</b> — 위의 충전실 · 포장실 작업자를 누르면 그 작업장 1인칭으로 시작합니다 <s>모드 : '+CREW.mode.nm+'</s>'
-    :'<b>① 모드 선택</b> — 아래에서 모드를 고른 뒤 <b>② 작업자</b>를 누르면 그 작업장 작업자 1인칭으로 시작합니다';
-}
-function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:b.closest(".mcol").querySelector("h4").textContent+" · "+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r:CREW.room}; crewGo(); } }
+function crewMark(){ idtSplashMark({mode:CREW.mode, modeNm:CREW.mode&&CREW.mode.nm, room:CREW.room, isSel:b=>!!CREW.mode&&b.dataset.c===CREW.mode.c&&b.dataset.m===CREW.mode.m}); }
+function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:(b.closest(".modeColumn").querySelector("h4").textContent==="체인지파트"?"체인지파트 · ":"")+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r:CREW.room}; crewGo(); } }
 function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r}; crewGo(); } }
 function crewGo(){ if(CREW.mode&&CREW.mode.c==="inc"){ inc3Pick(CREW.room); return; } CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
 function startRoom(r){
@@ -48,7 +43,7 @@ function crewHead(){
 }
 function goHome(){
   for(const k of ["filler","line"]){ try{ crs(k).home(); }catch(e){} FR[k].classList.add("off"); try{ const w=UNI_HUB.win(k); w.document.body.classList.remove("mode3"); if(w.__sc0){ w.startChecks=w.__sc0; w.deduct=w.__dd0; w.alarm=w.__al0; } if(w.__door0){ w.document.getElementById("uDoor").onclick=w.__door0; w.__door0=null; } w.FREE3=false; }catch(e){} }   /* 자유모드 인터락 해제 원복 */
-  MODE3.kind=null; INC3.k=null; $("#incPick").hidden=true; $("#modes").hidden=false;
+  MODE3.kind=null; INC3.k=null; $("#incPick").style.display="none"; $("#splash .go").style.display="grid";
   CREW.cur=null; CREW.mode=null; CREW.room=null; $("#apps").classList.remove("live"); $("#splash").classList.remove("hide"); $("#modeChip").textContent=verTxt();
   if(document.pointerLockElement) document.exitPointerLock(); crewMark(); crewHead();
 }
@@ -114,9 +109,9 @@ function boot(){ $("#modeChip").textContent=verTxt();
   tbInit({wins:()=>["filler","line"].map(k=>UNI_HUB.win(k)).filter(Boolean), cur:()=>CREW.cur?UNI_HUB.win(APPK[CREW.cur]):null, ids:{snd:"sndBtn",end:"testEnd"},
     speed:s=>tbPtpSpd(s), sync:()=>tbPtpSpd(TBQ.spd), R:()=>V3P.R, scene:()=>V3P.sc, lights:()=>V3P.key?[V3P.key]:[],
     end:()=>{ if(!CREW.cur){ return true; } if(MODE3.kind==="free"||MODE3.kind==="demo"||MODE3.kind==="inc"){ goHome(); return true; } return false; },
-    restart:()=>{ const L=LAST3; goHome(); if(!L) return; setTimeout(()=>{ const b=document.querySelector('#modes button[data-m="'+L.m+'"][data-c="'+L.c+'"]')||document.querySelector('#modes button[data-m="'+L.m+'"]'); if(b) b.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
+    restart:()=>{ const L=LAST3; goHome(); if(!L) return; setTimeout(()=>{ const b=document.querySelector('#splash .go button[data-m="'+L.m+'"][data-c="'+L.c+'"]'); if(b) b.click(); const r=document.getElementById("choose"+L.r); if(r) r.click(); },300); }}); try{ oee3Init(); }catch(e){ console.error("OEE",e); }
   v3Gen(true); v3Gen(true); gridBuild(); try{ v3EnvCapture(); }catch(e){ console.error("반사 환경",e); }
-  document.querySelectorAll("#modes button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
+  document.querySelectorAll("#splash .go button[data-m]").forEach(b=>b.onclick=()=>pickMode(b));
   $("#chooseF").onclick=()=>pickRoom("F"); $("#chooseP").onclick=()=>pickRoom("P");
   document.querySelectorAll("#crewSw button").forEach(b=>b.onclick=()=>crewSwitch(b.dataset.r));
   $("#fpBtn").onclick=()=>{ if(!CREW.cur) return; CREW.fp=V3P.view==="orbit"; if(CREW.fp){ setView(CREW.cur); const q=CREW.pose[CREW.cur]; if(q) Object.assign(WALK,q); } else { CREW.pose[CREW.cur]={x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}; setView("orbit"); } };

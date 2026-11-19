@@ -49,24 +49,24 @@ const _cwAct=PS_ACT.cw; PS_ACT.cw=()=>{ if(FREEB.on&&!PS.cw.set){ PS_ACT.cwSet(S
 /* ── OEE · 이상사례 ── */
 function oeebInit(){
   if(!document.getElementById("oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');   /* 파우치와 같은 OEE 연동 표시 */
-  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ $("#spVer").textContent="V"+CHANGELOG[0].v; }catch(e){}
+  $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ idtSplashVer("V"+CHANGELOG[0].v); }catch(e){}
   if(typeof OEEEDU==="undefined") return;
-  OEEEDU.init({line:"계수기", title:"병 라인(계수기) · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); incbPick(); }});
+  OEEEDU.init({line:"계수기", title:"병 라인(계수기) · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_B_CODES, mount:document.body, openInc(){ goHome(); CREW.mode="inc"; spMark(); }});
 }
 function incbList(r){ const st=(OEEEDU.codeStats&&OEEEDU.codeStats())||{}, has=Object.keys(st).length>0;
   const L=OEE_B_CODES.filter(c=>c.room===r||(!r&&c.room)).map(c=>({c,down:(st[c.k]||{}).down||0,n:(st[c.k]||{}).n||0}));
   const mD=Math.max(1e-9,...L.map(o=>o.down)), mN=Math.max(1e-9,...L.map(o=>o.n)); for(const o of L) o.s=has?.4*o.down/mD+.3*o.n/mN+.3*.6:0; if(has) L.sort((a,b)=>b.s-a.s); return {L,has}; }
-function incbPick(){
-  const {L,has}=incbList(null), el=$("#incPick");
-  el.innerHTML='<h3>이상사례 대처 교육 — 병 라인</h3><p>'+(has?"OEE 부동시간 · 발생 빈도 순으로 정렬했습니다.":"OEE 데이터가 없어 기본 순서로 표시합니다. [OEE 관리 대시보드] 에서 데이터를 연결하면 부동시간 · 빈도 순으로 바뀝니다.")+'</p>'+
-    L.map((o,i)=>'<div class="ip"><span>'+(i+1)+'</span><b>'+o.c.nm+'<s>'+o.c.roomNm+(has?' · 부동 '+Math.round(o.down)+' 분 · '+o.n+' 회':'')+'</s></b><button data-k="'+o.c.k+'" data-m="learn">학습</button><button class="e" data-k="'+o.c.k+'" data-m="exam">평가</button></div>').join("")+'<button id="incBack">← 모드 다시 선택</button>';
-  el.hidden=false; $("#workers").hidden=true; $("#modes").hidden=true;
-  el.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>incbStart(b.dataset.k,b.dataset.m));
-  $("#incBack").onclick=()=>{ el.hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; CREW.mode=null; spMark(); };
+/* 중요도 등급 (11/19 사용자 확인 · 파우치 기준) */
+const INCB_GRADE={DM33:"상",RC65:"상",PK1:"상",PK2:"상",PK3:"상",SG22:"중",PE52:"중",WC41:"중"};
+function incbPick(room){   /* 공통 목록 (idt_common/incpick.js) — 파우치처럼 작업자(실)를 고른 뒤 그 실의 사례 */
+  const el=$("#incPick");
+  idtIncPick(el,{room:room==="F"?"충전실":"포장실", items:OEE_B_CODES.filter(c=>c.room===room).map(c=>({k:c.k, nm:c.nm, src:c.roomNm, g:INCB_GRADE[c.k]||"중"})),
+    onStart:(k,m)=>incbStart(k,m), onBack:()=>{ el.style.display="none"; $("#splash .go").style.display="grid"; CREW.mode=null; spMark(); }});
+  el.style.display="block"; $("#splash .go").style.display="none";
 }
 function incbStart(k,m){
   const c=OEE_B_CODES.find(x=>x.k===k); Object.assign(INCB,{k,mode:m,room:c.room,t0:performance.now(),fired:false,launched:false,done:false,at:0,fi:0,hint:0,hintFi:-1,d0:0,h0:0,wrong:0,score:null});
-  $("#incPick").hidden=true; $("#workers").hidden=false; $("#modes").hidden=false; $("#splash").classList.add("hide");
+  $("#incPick").style.display="none"; $("#splash .go").style.display="grid"; $("#splash").classList.add("hide");
   CREW.mode=m==="exam"?"exam":"guide";
   if(c.room==="F"){ const w=appWin(); CREW.started.F=true; try{ w.document.getElementById("splash").classList.add("hide"); w.hintOn=false; w.startSession("guide"); w.demoSetup(); if(m==="exam") incbExamCss(true); }catch(e){ console.error(e); } show("F"); }   /* 라인을 바로 운전 상태로 (시연 준비와 같은 설정) */
   else { CREW.started.P=true; CREW.pRole="P1"; pcStart("P1","free",true,CREW.rx); PS_ACT.allOn(); PC.firstOk=PC.sampleOk=PC.rejOk=true; PS.auto.w1=true; PS.auto.w2=true; show("P1"); }

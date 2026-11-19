@@ -6,24 +6,6 @@
 /* 입력란은 선택 · 붙여넣기 허용 (전역 user-select:none 예외) */
 input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:text}
 /* 메인화면 : 과정 → 기본 · 심화 · OEE */
-#coursePicker{grid-template-columns:1fr 1fr;max-width:900px}
-#splash .go{grid-template-columns:1fr 1fr 1fr;max-width:1180px}
-#splash .go h4{font:800 19px/1 var(--ff);color:#5d7086;letter-spacing:3px;margin:0 0 2px}
-#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
-#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:23px;padding:21px}
-#incPick{max-width:1180px;margin:0 auto;text-align:left}
-#incPick h3{font:800 25px/1.3 var(--ff);color:#142b47;margin:0 0 6px}
-#incPick .ipNote{font:600 14px/1.55 var(--ff);color:#5d7086;margin:4px 0 10px}
-#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
-#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
-#incPick .ipRow:first-child{border-top:0}
-#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff);color:#8ba2bb}
-#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff);color:#fff;flex:none}
-#incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
-#incPick b{flex:1;font:800 19px/1.3 var(--ff);color:#142b47}
-#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff);color:#6a7f96;margin-top:2px}
-#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff);cursor:pointer;border:1px solid #152c4b}
-#incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
 #incBack{margin-top:14px;padding:11px 22px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer}
 /* 기본 · 심화 : 이상사례 · 알람 발생 버튼 없음 */
 #hMenu{display:none!important}
@@ -94,8 +76,6 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 /* 다음 작업 안내 : 노란 테두리 (11/16) */
 .hint{outline-color:#ffc400!important;box-shadow:0 0 0 3px rgba(255,196,0,.35)}
 /* 시연모드 */
-#splash .go{grid-template-columns:repeat(4,1fr);max-width:1300px}
-#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
 #demoAct{margin-top:8px;width:100%;padding:12px 10px;border:0;border-radius:10px;background:linear-gradient(180deg,#ffd84d,#f0b400);color:#3a2a00;font:800 17px/1.2 var(--ff);cursor:pointer;box-shadow:0 2px 0 #b98a00}
 /* 상단 그래픽 설정 메뉴 (11/16) */
 .gqMenu{display:flex;align-items:center;gap:6px}
@@ -155,13 +135,6 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 .fpSt b{font-family:"DejaVu Sans Mono",Consolas,monospace}
 #fpMon #hBody{overflow:auto}
 /* ═══ 작업자 선택 · 자유모드 (11/17) ═══ */
-#splash .go{grid-template-columns:repeat(5,1fr);max-width:1380px}
-#splash .go .fr{background:#5b3fa0;color:#fff;border-color:#45307c}
-#splash .go button.sel{outline:4px solid #f5b400;outline-offset:3px}
-#crewHint{max-width:900px;margin:0 auto 12px;text-align:center;font:600 16px/1.5 var(--ff);color:#40566e}
-#crewHint b{color:#142b47} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
-#coursePicker button.main.wait{opacity:.55}
-#coursePicker button.main.sel{outline:4px solid #f5b400;outline-offset:3px}
 #crewSw{display:flex;gap:4px;padding:3px}
 #crewSw button{border:1px solid #b7c4d2;background:#fff;color:#142b47;border-radius:999px;padding:4px 12px;font:700 13px var(--ff);cursor:pointer}
 #crewSw button.on{background:#142b47;color:#fff;border-color:#142b47}
@@ -171,6 +144,3 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #freeBar button{flex:1;padding:10px 8px;border:1px solid #5b3fa0;border-radius:10px;background:#fff;color:#45307c;font:800 14px/1.2 var(--ff);cursor:pointer}
 #freeBar button:first-child{background:#5b3fa0;color:#fff}
 /* 메인화면 모드 버튼 : 단어 중간에서 줄바꿈하지 않음 (11/17 · "OEE 관리 / 대시보드") */
-#splash .go button,#splash .go small{word-break:keep-all;overflow-wrap:break-word}
-#splash .go button{font-size:23px;padding:22px 18px;line-height:1.3}
-#splash .go .e,#splash .go .o2{font-size:20px}

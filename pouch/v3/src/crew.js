@@ -13,14 +13,7 @@ const CREW_RNM={F:"충전실 작업자",P:"포장실 작업자"};
 const CREW_MNM={easy:"기본 · 학습", examEasy:"기본 · 평가", guide:"심화 · 학습", exam:"심화 · 평가", demo:"시연모드", free:"자유모드", inc:"이상사례 대처 교육"};
 
 /* ── 메인화면 ── */
-function crewInit(){
-  const go=$("#splash .go"), cp=$("#coursePicker");
-  cp.insertAdjacentHTML("beforebegin",'<div id="crewHint"></div>');
-  $("#chooseF").innerHTML='<small>작업자 1 · FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>파우치 충전기 SP303 · 2층 데크 · IPC</span>';
-  $("#chooseP").innerHTML='<small>작업자 2 · PACKING ROOM</small><strong>🧍 포장실 작업자</strong><span>스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기</span>';
-  { const d=$("#spDemo small"); if(d) d.textContent="작업자별 장비 ON → 가동 → 생산까지 간단히"; }
-  go.insertAdjacentHTML("beforeend",'<div class="modeColumn free"><h4>자유</h4><button class="fr" id="spFree">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제 · 문 · 덮개 자유 개폐</small></button></div>');
-  const oee=go.querySelector(".modeColumn.oee"); if(oee) go.appendChild(oee);                 /* 순서 : 기본 · 심화 · 시연 · 자유 · OEE */
+function crewInit(){   /* 메인화면 마크업은 공통 템플릿(idt_common/splash.py)이 만듦 — 여기서는 연결만 */
   for(const [id,m] of Object.entries(CREW_MODES)){ const b=$("#"+id); if(b) b.onclick=()=>crewPickMode(m); }
   $("#chooseF").onclick=()=>crewPickRoom("F"); $("#chooseP").onclick=()=>crewPickRoom("P");
   $("#roomTag").insertAdjacentHTML("afterend",'<div class="pill crewSw" id="crewSw" title="작업자 교체"><button data-r="F">🧍 충전실 작업자</button><button data-r="P">🧍 포장실 작업자</button></div>');
@@ -33,12 +26,7 @@ function crewSplash(){
   const ip=$("#incPick"); if(ip) ip.style.display="none";
   crewMark();
 }
-function crewMark(){
-  $$("#splash .go button").forEach(b=>b.classList.toggle("sel",CREW_MODES[b.id]===CREW.mode&&!!CREW.mode));
-  for(const r of ["F","P"]){ const b=$("#choose"+r); b.classList.toggle("sel",CREW.room===r); b.classList.toggle("wait",!CREW.mode); }
-  $("#crewHint").innerHTML=CREW.mode?'<b>② 작업자 선택</b> — 위의 충전실 · 포장실 작업자를 누르면 그 작업장 1인칭으로 시작합니다 <s>모드 : '+esc(CREW_MNM[CREW.mode])+'</s>'
-    :'<b>① 모드 선택</b> — 아래에서 모드를 고른 뒤 <b>② 작업자</b>를 누르면 그 작업장 작업자 1인칭으로 시작합니다';
-}
+function crewMark(){ idtSplashMark({mode:CREW.mode, modeNm:CREW_MNM[CREW.mode], room:CREW.room, isSel:b=>CREW_MODES[b.id]===CREW.mode}); }
 function crewPickMode(m){ CREW.mode=m; crewMark(); if(CREW.room) crewGo(); }
 function crewPickRoom(r){ PICK_ROOM=r; CREW.room=r; crewMark(); if(CREW.mode) crewGo(); }
 function crewGo(){

@@ -39,7 +39,7 @@ APP_PATCH = [
     ('    if(S.running&&k!=="table"){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }',
      '    if(S.running&&k!=="table"&&!window.FREEB){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }', 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -65,15 +65,28 @@ def app() -> str:
     return text
 
 
+sys.path.insert(0, str(ROOT / "idt_common"))
+import splash as SPLASH   # noqa: E402  메인화면 공통 템플릿 (11/19)
+SPLASH_CFG = {
+    "title": "병 라인 IDT", "en": "Bottle Line · Interactive Digital Tutor", "prod": "병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장",
+    "extra": '<div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG · 2명)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div>',
+    "workers": [{"id": "chooseF", "r": "F", "tag": "작업자 1 · FILLING ROOM", "nm": "🧍 충전실 작업자", "desc": "언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑"},
+                {"id": "chooseP1", "r": "P1", "tag": "작업자 2 · PACKING ROOM", "nm": "🧍 포장실 작업자 1", "desc": "설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독"},
+                {"id": "chooseP2", "r": "P2", "tag": "작업자 3 · PACKING ROOM", "nm": "🧍 포장실 작업자 2", "desc": "박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)"}],
+    "cols": SPLASH.std_cols(lambda m: ("spOee", None) if m == "oee" else ("spInc", {"data-m": "inc"}) if m == "inc" else (None, {"data-m": m})),
+}
+
+
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
-    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
+    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
         if "</script" in t.lower():
             sys.exit("script text must not contain </script")
     a = base64.b64encode(app().encode("utf-8")).decode("ascii")
+    shell = shell.replace("<!--__SPLASH__-->", SPLASH.render(SPLASH_CFG)).replace("/*__SPLASHCSS__*/", (ROOT / "idt_common" / "splash.css").read_text(encoding="utf-8"))
     for key, val in (("/*__OEECSS__*/", (ROOT / "oee" / "oee.css").read_text(encoding="utf-8")), ("/*__THREE__*/", three), ("__APP__", json.dumps(a)), ("/*__SHELL_JS__*/", js)):
         if shell.count(key) != 1:
             sys.exit(f"shell.html must contain {key} exactly once")
