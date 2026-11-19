@@ -16,7 +16,7 @@ let V3=null;
 
 /* ── 그래픽 단계 ── */
 const GQ={mode:"ultra", lv:"ultra",   /* 처음 시작 = 최고 (11/16 사용자 지시 : 자동(중)은 흐릿함) */ q:1, acc:0, slow:0, fast:0, ema:1/60,
-  L:{ultra:{q:1.3,sh:true,ao:true,sm:4096}, high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}},
+  L:IDT_GQ_L,   /* 세 IDT 공통 값 (idt_common/topbar.js) */
   label(){ const n={ultra:"최고",high:"상",mid:"중",low:"하"}[this.lv]; return this.mode==="auto"?"자동("+n+")":n; }};
 function gqApply(lv){
   GQ.lv=lv; const L=GQ.L[lv]; GQ.q=L.q; if(!V3) return;

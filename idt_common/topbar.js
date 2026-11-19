@@ -4,7 +4,10 @@
    · 원본 앱 머리 줄(#head)은 숨기고, 버튼은 지금 작업장 앱의 같은 버튼을 눌러 줌
    · tbInit({ wins:()=>[앱 window…], cur:()=>지금 작업장 앱 window|null, ids:{snd,end,rub}, speed(s), end(), rubric(), restart(), extra:"html", R:()=>렌더러, lights:()=>[그림자 광원] })
    ═══════════════════════════════════════════════════════════════════ */
-const TBQ={mode:"ultra", lv:"ultra", L:{ultra:{q:1.3,sh:true,sm:4096}, high:{q:1,sh:true,sm:2048}, mid:{q:.78,sh:true,sm:1024}, low:{q:.58,sh:false,sm:512}}, ema:1/60, slow:0, fast:0, spd:1, o:null};
+/* 세 IDT 공통 값 (파우치 bridge.js GQ 도 이것을 씀) : 그래픽 단계 (해상도 배율 · 그림자 · 틈 음영 · 그림자 맵) · 배속 */
+const IDT_GQ_L={ultra:{q:1.3,sh:true,ao:true,sm:4096}, high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}};
+const IDT_SPEEDS=[1,2,5,10];
+const TBQ={mode:"ultra", lv:"ultra", L:IDT_GQ_L, ema:1/60, slow:0, fast:0, spd:1, o:null};
 const tbPR=()=>Math.min(2,(devicePixelRatio||1)*TBQ.L[TBQ.lv].q);
 function tbGq(lv){ TBQ.lv=lv; const L=TBQ.L[lv], o=TBQ.o; if(!o) return; try{ const R=o.R&&o.R(); if(R) R.shadowMap.enabled=L.sh;
     for(const l of (o.lights&&o.lights())||[]){ l.castShadow=L.sh; if(l.shadow&&l.shadow.mapSize.x!==L.sm){ l.shadow.mapSize.set(L.sm,L.sm); if(l.shadow.map){ l.shadow.map.dispose(); l.shadow.map=null; } } }
@@ -25,7 +28,7 @@ function tbInit(o){
     "#tbGrp b.v{min-width:22px;text-align:center;font:800 13px 'Malgun Gothic',sans-serif;color:#173a63}#info{display:none}#crewSw,#crewSw button,#fpBtn{flex-shrink:0;white-space:nowrap}#tbGrp{flex-shrink:1;min-width:0}body:has(#splash:not(.hide)) #bar{display:none}body:has(#splash:not(.hide)) #stage{top:0}";
   document.head.appendChild(st);
   const g=document.createElement("div"); g.id="tbGrp";
-  g.innerHTML=(o.extra||"")+'<span class="pill" id="tbSpd">배속 '+[1,2,5,10].map(s=>'<button data-s="'+s+'"'+(s===1?' class="on"':'')+'>×'+s+'</button>').join("")+'</span>'+
+  g.innerHTML=(o.extra||"")+'<span class="pill" id="tbSpd">배속 '+IDT_SPEEDS.map(s=>'<button data-s="'+s+'"'+(s===1?' class="on"':'')+'>×'+s+'</button>').join("")+'</span>'+
     '<label title="그래픽 품질">🖥 그래픽 <select id="gqSel"><option value="ultra">최고</option><option value="high">상</option><option value="mid">중</option><option value="low">하</option><option value="auto">자동</option></select></label>'+
     '<button id="tbSnd">사운드 OFF</button>';
   bar.insertBefore(g,home||null); if(home) g.appendChild(home);

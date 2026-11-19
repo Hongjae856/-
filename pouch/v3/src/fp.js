@@ -5,8 +5,8 @@
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
 const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false, crouch:false, ck:0};
-const EYE=1.55;      /* 1인칭 눈높이 (11/16 V15 사용자 지시로 1.55 m 로 되돌림) */
-const CROUCH=.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const EYE=FPC.EYE/1000;   /* 1인칭 눈높이 1.55 m — 세 IDT 공통 값 (idt_common/fpctl.js) */
+const CROUCH=FPC.CROUCH/1000, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 
@@ -65,7 +65,7 @@ function fpCanStand(x,z){ return fpPick(x,z)!=null; }
 function fpEyeY(pose,moved,dt){
   const y=fpPick(pose.x,pose.z); if(y!=null) FP.feet=y;
   if(moved>0){ FP.bob+=moved/.62*Math.PI; FP.bobA=Math.min(1,FP.bobA+dt*6); } else FP.bobA=Math.max(0,FP.bobA-dt*4);
-  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.55 → 1.00 m */
+  fpcTick(dt); FP.crouch=FPC.crouch; FP.ck=FPC.ck;                       /* 앉기 (C) : 눈높이 1.55 → 1.00 m */
   return FP.feet+EYE-CROUCH*FP.ck+Math.sin(FP.bob*2)*.011*FP.bobA*(1-FP.ck*.6);
 }
 
@@ -74,7 +74,7 @@ const FP_DOM={w:460, h:700};
 function monRect(m){ const D=m.dom||FP_DOM, h=m.h, w=m.w||h*D.w/D.h, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
   const P=(a,b)=>[m.c[0]+r[0]*a+n[0]*.004, m.c[1]+b, m.c[2]+r[2]*a+n[2]*.004];
   return {w,h,TL:P(-w/2,h/2),TR:P(w/2,h/2),BR:P(w/2,-h/2),BL:P(-w/2,-h/2)}; }
-function monPose(m){ const r=monRect(m), focal=.78, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
+function monPose(m){ const r=monRect(m), focal=FPC.FOCAL, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
 const monOf=k=>Object.values(FP_MON).find(m=>m.k.includes(k));
 
 /* ── 조작 대상 ── */
@@ -196,20 +196,6 @@ function fpHmiInteractive(on,t){
 
 /* ── 단축키 · 안내 ── */
 function fpHint(){ if(isExam()){ if(!hintOn) $("#examHint").click(); return; } const st=curStep(); toast(S.activeTrouble?recoveryStep()?.t||"":st?st.t:""); }
-function fpHelp(){ FP.help=!FP.help; $("#fpHelp").hidden=!FP.help; }
-function fpMenu(){
-  $("#listBox").innerHTML='<h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
-    '<div class="row"><b>교육 계속<s>Esc</s></b><button id="fmGo">계속</button></div>'+
-    '<div class="row"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button id="fm3">전환</button></div>'+
-
-    '<div class="row"><b>조작 도움말<s>H</s></b><button id="fmHelp">보기</button></div>'+
-    '<div class="row"><b>메인화면<s>교육 중단</s></b><button id="fmHome">이동</button></div>';
-  $("#mList").classList.add("on");
-  const close=()=>$("#mList").classList.remove("on");
-  $("#fmGo").onclick=close; $("#fm3").onclick=()=>{ close(); fpSet(false); };
-  if($("#fmCase")) $("#fmCase").onclick=()=>openList("case"); if($("#fmAlm")) $("#fmAlm").onclick=()=>openList("alarm");
-  $("#fmHelp").onclick=()=>{ close(); fpHelp(); }; $("#fmHome").onclick=()=>{ close(); goHome(); };
-}
 function fpReturnPart(){
   const f=S.f;
   if(f.rollCarry==="red"){ f.rollCarry=null; toast("적색 인쇄 은박 롤을 예비 은박 자리에 되돌려 놓았습니다."); after(); return; }
@@ -218,7 +204,7 @@ function fpReturnPart(){
 const fpBusy=()=>!S||!S.session||!S.session.active||!$("#splash").classList.contains("hide")||$$(".modal.on").length>0;
 
 function fpInit(){
-  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:1.4, reach:FP_REACH, look:AIM_LOOK,
+  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:FPC.WALK, reach:FP_REACH, look:AIM_LOOK,
     inReach:(t,p)=>aimInReach(fpAM(t),[p.x,p.y,p.z]), goalDist:(t,p)=>aimReachDist(fpAM(t),[p.x,p.y,p.z]),
     farText:(t,p)=>"가까이 가세요 · "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m)",
     tooFar:(t,p)=>toast("가까이 가세요 — "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m · 손 닿는 거리 1.2 m)"),
@@ -226,14 +212,16 @@ function fpInit(){
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on) toast("설비 화면 조작 중 — 시점 회전 잠금 · F 또는 Esc 로 뒤로"); if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
-    crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.0 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },
-    returnPart:fpReturnPart, menu:fpMenu, help:fpHelp});
+    returnPart:fpReturnPart});
   $("#fpBtn").onclick=()=>fpSet(!FP.on);
+  /* C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴 = 세 IDT 공통 (idt_common/fpctl.js) */
+  fpcInit({isFP:()=>FP.on&&!!FP.mod&&FP.mod.mode==="walk"&&!fpBusy(), hint:fpHint, toast:t=>toast(t), third:()=>fpSet(false), home:()=>goHome(),
+    extra:[["R · 우클릭","들고 있는 자재 되돌리기"],["계단","2층 데크 오르내림 (W A S D)"]]});
 }
 function fpSpawn(){
   FP.feet=0;
-  return S.room==="F"?{x:1.4, y:EYE, z:4.9, yaw:-.63, pitch:.1, focal:.78}:{x:4.4, y:EYE, z:-.9, yaw:.46, pitch:.1, focal:.78};
+  return S.room==="F"?{x:1.4, y:EYE, z:4.9, yaw:-.63, pitch:.1, focal:FPC.FOCAL}:{x:4.4, y:EYE, z:-.9, yaw:.46, pitch:.1, focal:FPC.FOCAL};
 }
 function fpSet(on){
   if(!FP.mod) return;

@@ -4291,7 +4291,7 @@ function use(){
     const length=Math.hypot(f,r); if(!length)return 0;
     const x0=pose.x, z0=pose.z;
     for(let left=dt;left>0;left-=.012){
-      const step=host.speed*(keys.has('ShiftLeft')||keys.has('ShiftRight')?2.6/1.4:1)*Math.min(left,.012)/length;
+      const step=host.speed*(keys.has('ShiftLeft')||keys.has('ShiftRight')?FPC.RUN/FPC.WALK:1)*(1-.45*FPC.ck)*Math.min(left,.012)/length;
       const x=pose.x+step*(-Math.sin(pose.yaw)*f+Math.cos(pose.yaw)*r);
       const z=pose.z+step*(-Math.cos(pose.yaw)*f-Math.sin(pose.yaw)*r);
       if(host.canStand(x,pose.z))pose.x=x;
@@ -4358,7 +4358,7 @@ listen(canvas,'pointerdown',e=>{
     }
     if(e.target?.closest?.('input,textarea,select,[contenteditable=true]'))return;
     if(mode!=='walk')return;
-    const actions={KeyE:use,F1:host.hint,KeyR:host.returnPart,KeyH:host.help,KeyC:host.crouch||(()=>{}),Tab:host.menu};
+    const actions={KeyE:use,KeyR:host.returnPart};   // C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴 = 세 IDT 공통 idt_common/fpctl.js (11/19)
     if(!['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code) && !actions[e.code])return;
     e.preventDefault();
     if(actions[e.code]){if(!e.repeat)actions[e.code]();}else keys.add(e.code);
@@ -4407,6 +4407,117 @@ function placeIDTMonitor(element,corners,width,height) {
     transform:'matrix3d('+[a,d,0,g,b,e,0,h,0,0,1,0,c,f,0,1].join(',')+')'});
 }
 
+/* ── common/fpctl.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   1인칭 공통 조작 (11/18 사용자 결정 · 세 IDT 통일 — 파우치 기준)
+   · 눈높이 1.55 m · 시야각 약 65°(파우치 초점 0.78) · 걷기 1.4 m/s · Shift 2.6 m/s · WASD / 방향키
+   · C 앉기(눈높이 약 1.0 m) · F1 힌트(평가는 원본 앱 힌트 −5 점) · Tab 메뉴 · H 도움말
+   · 장면 단위 mm (PTP · 병 셸). 파우치는 자체 모듈(pouch/src/fps.js)에서 같은 값을 씀
+   ═══════════════════════════════════════════════════════════════════ */
+const FPC={EYE:1550, CROUCH:550, WALK:1.4, RUN:2.6, FOCAL:.78, FOV:2*Math.atan(.5/.78)*180/Math.PI, crouch:false, ck:0, help:false,
+  isFP:()=>false, hint:null, keys:"", extra:[], toast:null};   /* 장면 단위 mm (파우치는 /1000 해서 씀) · toast : IDT 자체 알림 함수 · extra : IDT 고유 도움말 줄 */
+const fpcEye=floor=>(floor||0)+FPC.EYE-FPC.CROUCH*FPC.ck;
+const fpcSpeed=k=>(k.ShiftLeft||k.ShiftRight?FPC.RUN:FPC.WALK)*(1-.45*FPC.ck);      /* 앉은 채로는 느리게 */
+function fpcTick(dt){ FPC.ck+=((FPC.crouch?1:0)-FPC.ck)*Math.min(1,dt*7); if(!FPC.isFP()&&FPC.help) fpcHelp(false); }
+function fpcToast(t){ if(FPC.toast) return FPC.toast(t); let e=document.getElementById("fpcToast"); if(!e){ e=document.createElement("div"); e.id="fpcToast"; document.body.appendChild(e); }
+  e.textContent=t; e.hidden=false; clearTimeout(fpcToast.h); fpcToast.h=setTimeout(()=>e.hidden=true,2800); }
+function fpcHelp(on){ let e=document.getElementById("fpcHelp"); FPC.help=on==null?!FPC.help:on;
+  if(!e){ e=document.createElement("div"); e.id="fpcHelp"; document.body.appendChild(e); }
+  e.innerHTML='<b>1인칭 조작</b><table>'+[["W A S D · 방향키","걷기 (1.4 m/s)"],["Shift","빠르게 (2.6 m/s)"],["마우스","둘러보기 (화면 클릭 → 시점 고정, Esc 풀기)"],
+    ["E · 클릭","조작 (손 닿는 거리 1.2 m 안)"],["F · Esc","설비 화면에서 뒤로"],["C","앉기 / 일어서기 (눈높이 1.55 ↔ 1.0 m)"],["F1","힌트 (평가 : −5 점)"],["Tab","메뉴 (계속 · 3인칭 전환 · 도움말 · 메인화면)"],["H","이 도움말"]]
+    .concat(FPC.keys?[[FPC.keys.split("|")[0],FPC.keys.split("|")[1]]]:[]).concat(FPC.extra||[]).map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</table><small>H 로 닫기</small>';
+  e.hidden=!FPC.help; }
+function fpcInit(o){
+  Object.assign(FPC,o||{});
+  const st=document.createElement("style");
+  st.textContent="#fpcToast{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);z-index:60;background:rgba(20,30,40,.88);color:#fff;padding:8px 16px;border-radius:8px;font:14px sans-serif;pointer-events:none}"+
+    "#fpcHelp{position:fixed;right:16px;top:64px;z-index:60;background:rgba(255,255,255,.97);border:1px solid #c9d3dc;border-radius:10px;padding:12px 16px;font:13px sans-serif;color:#1d2a36;box-shadow:0 6px 20px rgba(0,0,0,.18)}"+
+    "#fpcHelp table{border-collapse:collapse;margin:6px 0}#fpcHelp td{padding:3px 10px 3px 0;vertical-align:top}#fpcHelp td:first-child{font-weight:700;white-space:nowrap}#fpcHelp small{color:#6a7884}"+
+    "[hidden]{display:none!important}";
+  document.head.appendChild(st);
+  addEventListener("keydown",e=>{
+    if(!FPC.isFP()) return; if(e.target&&e.target.closest&&e.target.closest("input,textarea,select,[contenteditable=true]")) return;
+    if(e.code==="KeyC"&&!e.repeat){ FPC.crouch=!FPC.crouch; fpcToast(FPC.crouch?"앉음 — 눈높이 약 1.0 m (C 로 일어서기)":"일어섬"); }
+    else if(e.code==="F1"){ e.preventDefault(); if(!e.repeat&&FPC.hint) FPC.hint(); }
+    else if(e.code==="KeyH"&&!e.repeat) fpcHelp();
+    else if(e.code==="Tab"){ e.preventDefault(); if(!e.repeat) fpcMenu(); }
+  },true);
+}
+/* Tab 메뉴 (파우치와 같음) : 교육 계속 · 3인칭 전환 · 조작 도움말 · 메인화면 */
+function fpcMenu(){ if(document.pointerLockElement) try{ document.exitPointerLock(); }catch(e){}
+  let e=document.getElementById("fpcMenu"); if(!e){ e=document.createElement("div"); e.id="fpcMenu"; document.body.appendChild(e);
+    const st=document.createElement("style"); st.textContent="#fpcMenu{position:fixed;inset:0;z-index:70;background:#0007;display:flex;align-items:center;justify-content:center}#fpcMenu .b{background:#fff;border-radius:14px;padding:18px 22px;min-width:380px;font:500 14px 'Malgun Gothic',sans-serif;color:#1d2a36}#fpcMenu h2{margin:0 0 6px;font-size:20px}#fpcMenu .r{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:8px 0;border-top:1px solid #e3e8ee}#fpcMenu .r s{display:block;text-decoration:none;color:#6a7884;font-size:12px}#fpcMenu button{border:0;border-radius:9px;background:#173a63;color:#fff;padding:7px 14px;font:700 13px 'Malgun Gothic',sans-serif;cursor:pointer}"; document.head.appendChild(st); }
+  e.innerHTML='<div class="b"><h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
+    '<div class="r"><b>교육 계속<s>Esc</s></b><button data-a="go">계속</button></div><div class="r"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button data-a="third">전환</button></div>'+
+    '<div class="r"><b>조작 도움말<s>H</s></b><button data-a="help">보기</button></div><div class="r"><b>메인화면<s>교육 중단</s></b><button data-a="home">이동</button></div></div>';
+  e.hidden=false; const close=()=>{ e.hidden=true; removeEventListener("keydown",esc,true); }, esc=k=>{ if(k.code==="Escape"){ k.preventDefault(); close(); } };
+  addEventListener("keydown",esc,true);
+  e.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{ const a=b.dataset.a; close(); if(a==="third"&&FPC.third) FPC.third(); else if(a==="help") fpcHelp(true); else if(a==="home"&&FPC.home) FPC.home(); }); }
+
+/* ── common/topbar.js ── */
+/* ═══════════════════════════════════════════════════════════════════
+   상단 바 공통 (11/18 사용자 지시 "하드웨어 외에는 파우치 기준") — PTP · 병 셸
+   · 파우치 상단 바처럼 한 줄 : 배속 ×1 ×2 ×5 ×10 · 🖥 그래픽(최고 · 상 · 중 · 하 · 자동, 처음 = 최고) · 사운드 · 메인화면 · 채점 관리 · 학습 종료 · 처음부터
+   · 원본 앱 머리 줄(#head)은 숨기고, 버튼은 지금 작업장 앱의 같은 버튼을 눌러 줌
+   · tbInit({ wins:()=>[앱 window…], cur:()=>지금 작업장 앱 window|null, ids:{snd,end,rub}, speed(s), end(), rubric(), restart(), extra:"html", R:()=>렌더러, lights:()=>[그림자 광원] })
+   ═══════════════════════════════════════════════════════════════════ */
+/* 세 IDT 공통 값 (파우치 bridge.js GQ 도 이것을 씀) : 그래픽 단계 (해상도 배율 · 그림자 · 틈 음영 · 그림자 맵) · 배속 */
+const IDT_GQ_L={ultra:{q:1.3,sh:true,ao:true,sm:4096}, high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}};
+const IDT_SPEEDS=[1,2,5,10];
+const TBQ={mode:"ultra", lv:"ultra", L:IDT_GQ_L, ema:1/60, slow:0, fast:0, spd:1, o:null};
+const tbPR=()=>Math.min(2,(devicePixelRatio||1)*TBQ.L[TBQ.lv].q);
+function tbGq(lv){ TBQ.lv=lv; const L=TBQ.L[lv], o=TBQ.o; if(!o) return; try{ const R=o.R&&o.R(); if(R) R.shadowMap.enabled=L.sh;
+    for(const l of (o.lights&&o.lights())||[]){ l.castShadow=L.sh; if(l.shadow&&l.shadow.mapSize.x!==L.sm){ l.shadow.mapSize.set(L.sm,L.sm); if(l.shadow.map){ l.shadow.map.dispose(); l.shadow.map=null; } } }
+    const sc=o.scene&&o.scene(); if(sc) sc.traverse(m=>{ if(m.material&&!Array.isArray(m.material)) m.material.needsUpdate=true; }); }catch(e){ console.error("그래픽",e); } }
+function tbGqSet(mode){ TBQ.mode=mode; TBQ.slow=TBQ.fast=0; tbGq(mode==="auto"?TBQ.lv:mode); const s=document.getElementById("gqSel"); if(s&&s.value!==mode) s.value=mode; }
+/* 자동 : 3 초 넘게 느리면 한 단계 내리고, 8 초 넘게 넉넉하면 한 단계 올림 (파우치와 같음) */
+function tbTick(dt){ TBQ.ema+=(dt-TBQ.ema)*.05; if(TBQ.mode!=="auto") return; const order=["low","mid","high","ultra"], i=order.indexOf(TBQ.lv);
+  if(TBQ.ema>1/28){ TBQ.slow+=dt; TBQ.fast=0; } else if(TBQ.ema<1/52){ TBQ.fast+=dt; TBQ.slow=0; } else { TBQ.slow=Math.max(0,TBQ.slow-dt); TBQ.fast=Math.max(0,TBQ.fast-dt); }
+  if(TBQ.slow>3&&i>0){ tbGq(order[i-1]); TBQ.slow=0; TBQ.ema=1/45; } else if(TBQ.fast>8&&i<3){ tbGq(order[i+1]); TBQ.fast=0; } }
+function tbAppCss(w){ try{ const d=w.document; if(d.getElementById("tbCss")) return; const st=d.createElement("style"); st.id="tbCss"; st.textContent="#head{display:none!important}"; d.head.appendChild(st); }catch(e){} }
+function tbClick(w,id){ try{ const b=w&&w.document.getElementById(id); if(b){ b.click(); return true; } }catch(e){} return false; }
+function tbInit(o){
+  TBQ.o=o; const bar=document.getElementById("bar"), home=document.getElementById("homeBtn");
+  const st=document.createElement("style");
+  st.textContent="#tbGrp{display:flex;align-items:center;gap:4px;margin-left:auto}#tbGrp .pill{display:flex;align-items:center;gap:2px;border:1px solid #c9d4e0;border-radius:10px;padding:2px 4px;font:700 12px 'Malgun Gothic',sans-serif;color:#5d7086}"+
+    "#tbGrp .pill button{border:0;background:none;border-radius:7px;padding:3px 6px;font:800 13px 'Malgun Gothic',sans-serif;cursor:pointer;color:#33475e}#tbGrp .pill button.on{background:#173a63;color:#fff}"+
+    "#tbGrp>button,#tbGrp>label{border:1px solid #c9d4e0;border-radius:10px;background:#fff;padding:5px 8px;font:700 12.5px 'Malgun Gothic',sans-serif;color:#33475e;cursor:pointer;white-space:nowrap}#tbGrp select{border:0;font:800 13px 'Malgun Gothic',sans-serif;background:none}"+
+    "#tbGrp b.v{min-width:22px;text-align:center;font:800 13px 'Malgun Gothic',sans-serif;color:#173a63}#info{display:none}#crewSw,#crewSw button,#fpBtn{flex-shrink:0;white-space:nowrap}#tbGrp{flex-shrink:1;min-width:0}body:has(#splash:not(.hide)) #bar{display:none}body:has(#splash:not(.hide)) #stage{top:0}";
+  document.head.appendChild(st);
+  const g=document.createElement("div"); g.id="tbGrp";
+  g.innerHTML=(o.extra||"")+'<span class="pill" id="tbSpd">배속 '+IDT_SPEEDS.map(s=>'<button data-s="'+s+'"'+(s===1?' class="on"':'')+'>×'+s+'</button>').join("")+'</span>'+
+    '<label title="그래픽 품질">🖥 그래픽 <select id="gqSel"><option value="ultra">최고</option><option value="high">상</option><option value="mid">중</option><option value="low">하</option><option value="auto">자동</option></select></label>'+
+    '<button id="tbSnd">사운드 OFF</button>';
+  bar.insertBefore(g,home||null); if(home) g.appendChild(home);
+  g.insertAdjacentHTML("beforeend",'<button id="tbRub">채점 관리</button><button id="tbEnd">학습 종료</button><button id="tbRst">처음부터</button>');
+  g.querySelectorAll("#tbSpd [data-s]").forEach(b=>b.onclick=()=>{ TBQ.spd=+b.dataset.s; g.querySelectorAll("#tbSpd [data-s]").forEach(x=>x.classList.toggle("on",x===b)); o.speed&&o.speed(TBQ.spd); });
+  const s=document.getElementById("gqSel"); s.value=TBQ.mode; s.onchange=()=>tbGqSet(s.value);
+  document.getElementById("tbSnd").onclick=()=>{ for(const w of o.wins()) tbClick(w,o.ids.snd); tbSync(); };
+  document.getElementById("tbRub").onclick=()=>{ if(o.rubric&&o.rubric()) return; tbClick(o.cur(),"rubricBtn"); };
+  document.getElementById("tbEnd").onclick=()=>{ if(o.end&&o.end()) return; tbClick(o.cur(),o.ids.end); };
+  document.getElementById("tbRst").onclick=()=>{ if(confirm("진행상황을 지우고 처음부터 다시 시작할까요?")) o.restart&&o.restart(); };
+  for(const w of o.wins()) tbAppCss(w);
+  setInterval(tbSync,600); tbGqSet(TBQ.mode);
+}
+/* 사운드 버튼 글자 · 앱 머리 줄 숨김 · 앱 배속을 셸 값으로 유지 */
+function tbSync(){ const o=TBQ.o; if(!o) return; let t=null; for(const w of o.wins()){ tbAppCss(w); try{ const b=w.document.getElementById(o.ids.snd); if(b&&t==null) t=b.textContent; }catch(e){} }
+  const b=document.getElementById("tbSnd"); if(b&&t) b.textContent=t; o.sync&&o.sync(); }
+/* 3인칭 시점 버튼 (파우치 3D 보기 위 버튼과 같은 방식) : tbViews({orbit:()=>궤도 객체, isOrbit:()=>bool, rect:()=>캔버스 DOMRect(셸 기준), presets:[[이름, {yaw,pitch,dist,tx,ty,tz}]…]}) */
+function tbViews(o){
+  const st=document.createElement("style");
+  st.textContent="#tbView{position:absolute;z-index:6;display:flex;gap:3px;flex-wrap:wrap;padding:4px;border-radius:10px;background:#ffffffe0;border:1px solid #c9d4e0;font:700 12px 'Malgun Gothic',sans-serif}"+
+    "#tbView button{border:0;border-radius:7px;background:none;padding:4px 9px;font:700 12.5px 'Malgun Gothic',sans-serif;color:#33475e;cursor:pointer}#tbView button.on{background:#173a63;color:#fff}#tbView i{width:1px;background:#c9d4e0;margin:2px 3px}";
+  document.head.appendChild(st);
+  const v=document.createElement("div"); v.id="tbView"; document.getElementById("stage").appendChild(v);
+  v.innerHTML=o.presets.map((p,i)=>'<button data-i="'+i+'">'+p[0]+'</button>').join("")+'<i></i><button data-sh="1" class="on">그림자</button>';
+  const T={k:null};
+  v.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{ const P=o.presets[+b.dataset.i][1]; T.k={from:Object.assign({},o.orbit()),to:P,t:0}; v.querySelectorAll("[data-i]").forEach(x=>x.classList.toggle("on",x===b)); });
+  v.querySelector("[data-sh]").onclick=e=>{ const b=e.currentTarget, on=!b.classList.contains("on"); b.classList.toggle("on",on); TBQ.shOff=!on; tbGq(TBQ.lv); };
+  const _g=tbGq; tbGq=function(lv){ _g(lv); if(TBQ.shOff&&TBQ.o){ try{ const R=TBQ.o.R&&TBQ.o.R(); if(R) R.shadowMap.enabled=false; }catch(e){} } };
+  (function tick(){ requestAnimationFrame(tick); const show=o.isOrbit(); v.hidden=!show; if(!show) return; const r=o.rect(); if(r&&r.width>50){ v.style.left=(r.left+10)+"px"; v.style.top=(r.top+10)+"px"; v.style.maxWidth=(r.width-20)+"px"; }
+    if(T.k){ T.k.t=Math.min(1,T.k.t+.04); const u=T.k.t*T.k.t*(3-2*T.k.t), O=o.orbit(); for(const key in T.k.to){ let a=T.k.from[key], b=T.k.to[key]; if(key==="yaw"){ let d=b-a; d=Math.atan2(Math.sin(d),Math.cos(d)); b=a+d; } O[key]=a+(b-a)*u; } if(T.k.t>=1) T.k=null; } })();
+}
+
 /* ── v3/bridge.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    새 3D 연결 (옛 engine · gfx · models 대체) — 단위 m
@@ -4426,7 +4537,7 @@ let V3=null;
 
 /* ── 그래픽 단계 ── */
 const GQ={mode:"ultra", lv:"ultra",   /* 처음 시작 = 최고 (11/16 사용자 지시 : 자동(중)은 흐릿함) */ q:1, acc:0, slow:0, fast:0, ema:1/60,
-  L:{ultra:{q:1.3,sh:true,ao:true,sm:4096}, high:{q:1,sh:true,ao:true,sm:2048}, mid:{q:.78,sh:true,ao:true,sm:1024}, low:{q:.58,sh:false,ao:false,sm:512}},
+  L:IDT_GQ_L,   /* 세 IDT 공통 값 (idt_common/topbar.js) */
   label(){ const n={ultra:"최고",high:"상",mid:"중",low:"하"}[this.lv]; return this.mode==="auto"?"자동("+n+")":n; }};
 function gqApply(lv){
   GQ.lv=lv; const L=GQ.L[lv]; GQ.q=L.q; if(!V3) return;
@@ -4925,8 +5036,8 @@ function lidDraw(){
    · 설비 화면 DOM 은 장면의 실제 모니터 면(방향 포함)에 투영
    ═══════════════════════════════════════════════════════════════════ */
 const FP={on:false, want:true, mod:null, feet:0, bob:0, bobA:0, hl:{goal:null,aim:null}, monK:null, help:false, crouch:false, ck:0};
-const EYE=1.55;      /* 1인칭 눈높이 (11/16 V15 사용자 지시로 1.55 m 로 되돌림) */
-const CROUCH=.55, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
+const EYE=FPC.EYE/1000;   /* 1인칭 눈높이 1.55 m — 세 IDT 공통 값 (idt_common/fpctl.js) */
+const CROUCH=FPC.CROUCH/1000, FP_R=.23, FP_REACH=1.9, STEP_UP=.42;
 const fpActive=()=>!!(FP.on&&cam.fp);
 const inR=(x,z,r,m)=>x>r[0]-m&&x<r[1]+m&&z>r[2]-m&&z<r[3]+m;
 
@@ -4985,7 +5096,7 @@ function fpCanStand(x,z){ return fpPick(x,z)!=null; }
 function fpEyeY(pose,moved,dt){
   const y=fpPick(pose.x,pose.z); if(y!=null) FP.feet=y;
   if(moved>0){ FP.bob+=moved/.62*Math.PI; FP.bobA=Math.min(1,FP.bobA+dt*6); } else FP.bobA=Math.max(0,FP.bobA-dt*4);
-  FP.ck+=((FP.crouch?1:0)-FP.ck)*Math.min(1,dt*7);                       /* 앉기 (C) : 눈높이 1.55 → 1.00 m */
+  fpcTick(dt); FP.crouch=FPC.crouch; FP.ck=FPC.ck;                       /* 앉기 (C) : 눈높이 1.55 → 1.00 m */
   return FP.feet+EYE-CROUCH*FP.ck+Math.sin(FP.bob*2)*.011*FP.bobA*(1-FP.ck*.6);
 }
 
@@ -4994,7 +5105,7 @@ const FP_DOM={w:460, h:700};
 function monRect(m){ const D=m.dom||FP_DOM, h=m.h, w=m.w||h*D.w/D.h, n=m.n, r=[n[2],0,-n[0]];   /* r : 화면을 마주볼 때 오른쪽 */
   const P=(a,b)=>[m.c[0]+r[0]*a+n[0]*.004, m.c[1]+b, m.c[2]+r[2]*a+n[2]*.004];
   return {w,h,TL:P(-w/2,h/2),TR:P(w/2,h/2),BR:P(w/2,-h/2),BL:P(-w/2,-h/2)}; }
-function monPose(m){ const r=monRect(m), focal=.78, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
+function monPose(m){ const r=monRect(m), focal=FPC.FOCAL, d=r.h*1.08*focal; return {x:m.c[0]+m.n[0]*d, y:m.c[1], z:m.c[2]+m.n[2]*d, yaw:Math.atan2(m.n[0],m.n[2]), pitch:0, focal}; }
 const monOf=k=>Object.values(FP_MON).find(m=>m.k.includes(k));
 
 /* ── 조작 대상 ── */
@@ -5116,20 +5227,6 @@ function fpHmiInteractive(on,t){
 
 /* ── 단축키 · 안내 ── */
 function fpHint(){ if(isExam()){ if(!hintOn) $("#examHint").click(); return; } const st=curStep(); toast(S.activeTrouble?recoveryStep()?.t||"":st?st.t:""); }
-function fpHelp(){ FP.help=!FP.help; $("#fpHelp").hidden=!FP.help; }
-function fpMenu(){
-  $("#listBox").innerHTML='<h2>⏸ 메뉴</h2><p>1인칭 교육을 잠시 멈췄습니다.</p>'+
-    '<div class="row"><b>교육 계속<s>Esc</s></b><button id="fmGo">계속</button></div>'+
-    '<div class="row"><b>3인칭(전체 보기)으로 전환<s>설비 화면 · 타일을 마우스로 조작</s></b><button id="fm3">전환</button></div>'+
-
-    '<div class="row"><b>조작 도움말<s>H</s></b><button id="fmHelp">보기</button></div>'+
-    '<div class="row"><b>메인화면<s>교육 중단</s></b><button id="fmHome">이동</button></div>';
-  $("#mList").classList.add("on");
-  const close=()=>$("#mList").classList.remove("on");
-  $("#fmGo").onclick=close; $("#fm3").onclick=()=>{ close(); fpSet(false); };
-  if($("#fmCase")) $("#fmCase").onclick=()=>openList("case"); if($("#fmAlm")) $("#fmAlm").onclick=()=>openList("alarm");
-  $("#fmHelp").onclick=()=>{ close(); fpHelp(); }; $("#fmHome").onclick=()=>{ close(); goHome(); };
-}
 function fpReturnPart(){
   const f=S.f;
   if(f.rollCarry==="red"){ f.rollCarry=null; toast("적색 인쇄 은박 롤을 예비 은박 자리에 되돌려 놓았습니다."); after(); return; }
@@ -5138,7 +5235,7 @@ function fpReturnPart(){
 const fpBusy=()=>!S||!S.session||!S.session.active||!$("#splash").classList.contains("hide")||$$(".modal.on").length>0;
 
 function fpInit(){
-  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:1.4, reach:FP_REACH, look:AIM_LOOK,
+  FP.mod=createIDTFirstPerson({canvas:$("#cv3d"), scene:$("#view3d"), speed:FPC.WALK, reach:FP_REACH, look:AIM_LOOK,
     inReach:(t,p)=>aimInReach(fpAM(t),[p.x,p.y,p.z]), goalDist:(t,p)=>aimReachDist(fpAM(t),[p.x,p.y,p.z]),
     farText:(t,p)=>"가까이 가세요 · "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m)",
     tooFar:(t,p)=>toast("가까이 가세요 — "+t.name+" ("+aimReachDist(fpAM(t),[p.x,p.y,p.z]).toFixed(1)+" m · 손 닿는 거리 1.2 m)"),
@@ -5146,14 +5243,16 @@ function fpInit(){
     use:t=>{ t.run(); after(); }, occluded:fpOccluded, isBusy:fpBusy,
     hmiInteractive:(on,t)=>{ if(on) toast("설비 화면 조작 중 — 시점 회전 잠금 · F 또는 Esc 로 뒤로"); if(on&&t&&t.mon){ FP.monK=t.mon; FPMON=FP_MON[t.mon].k; if(!FPMON.includes(hMach)){ hMach=FPMON[0]; hScr=hMach==="fl"?"run":"main"; } drawHMI(); } fpHmiInteractive(on,t); },
     canOpenHMI:t=>{ const m=FP_MON[t.mon]; if(m&&!m.k.some(k=>machPower(k))){ toast(m.nm+" — 화면 꺼짐. "+powerHint(m.k[0]),"bad"); } return true; },
-    crouch:()=>{ FP.crouch=!FP.crouch; toast(FP.crouch?"앉음 — 눈높이 약 1.0 m (C 로 일어서기)":"일어섬"); },
     hint:fpHint, showGuide:()=>!isExam()||hintOn, highlight:(g,a)=>{ FP.hl={goal:g,aim:a}; },
-    returnPart:fpReturnPart, menu:fpMenu, help:fpHelp});
+    returnPart:fpReturnPart});
   $("#fpBtn").onclick=()=>fpSet(!FP.on);
+  /* C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴 = 세 IDT 공통 (idt_common/fpctl.js) */
+  fpcInit({isFP:()=>FP.on&&!!FP.mod&&FP.mod.mode==="walk"&&!fpBusy(), hint:fpHint, toast:t=>toast(t), third:()=>fpSet(false), home:()=>goHome(),
+    extra:[["R · 우클릭","들고 있는 자재 되돌리기"],["계단","2층 데크 오르내림 (W A S D)"]]});
 }
 function fpSpawn(){
   FP.feet=0;
-  return S.room==="F"?{x:1.4, y:EYE, z:4.9, yaw:-.63, pitch:.1, focal:.78}:{x:4.4, y:EYE, z:-.9, yaw:.46, pitch:.1, focal:.78};
+  return S.room==="F"?{x:1.4, y:EYE, z:4.9, yaw:-.63, pitch:.1, focal:FPC.FOCAL}:{x:4.4, y:EYE, z:-.9, yaw:.46, pitch:.1, focal:FPC.FOCAL};
 }
 function fpSet(on){
   if(!FP.mod) return;
@@ -5247,6 +5346,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:35,d:'2026-11-19',t:'통합 2단계 · 1인칭 조작 · 상단 바 공통화 (11/19) — 1인칭 단축키(C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴) · 도움말 창 · 메뉴 · 눈높이 · 앉기 · 걷기 속도 · 초점을 세 IDT 모두 idt_common/fpctl.js 한 곳에서, 그래픽 단계 · 배속 목록 값을 idt_common/topbar.js 한 곳에서 씀 — 파우치 도움말에 R(자재 되돌리기) · 계단 줄은 파우치 고유로 유지'},
  {v:34,d:'2026-11-19',t:'통합 1단계 · 메인화면 공통화 (11/19 사용자 지시 : 세 IDT 는 함께 가고 코드 구조도 통일) — 메인화면을 세 IDT 공통 모듈(idt_common/splash.py · splash.css · splash.js)로 만들고, 이상사례 대처 교육 목록도 공통(idt_common/incpick.js : 순위 = 부동시간 40 % · 빈도 30 % · 중요도 등급 30 %, 등급 · 실습 횟수 · 평가 최고점 표시) — 파우치 화면은 그대로(기준판)'},
  {v:33,d:'2026-11-18',t:'메인화면 자유모드 설명을 중간안에 맞춤(인터록 해제 → 기동 조건 해제) — 세 IDT 파우치 기준 통일 작업의 기준판'},
  {v:32,d:'2026-11-18',t:'세 IDT 교차 검증 · 통일 (11/18 사용자 결정) — 1인칭 걷기 3.8 → 1.4 m/s · Shift 2.6 m/s · 방향키 이동(블리스터 · 병과 같게), 자동 작업자 보행 1.6 → 1.4 m/s, 자유모드 중간안 : 기동 조건 · 운전 중 조작 금지는 해제하되 메인 파워 · 컨트롤 판넬 · 압축공기 · 안전도어 · 비상정지 · 알람 RESET 은 실제처럼(운전 중 안전도어 · 카토너 아크릴 문을 열면 인터락 정지)'},

@@ -4,18 +4,18 @@
    · C 앉기(눈높이 약 1.0 m) · F1 힌트(평가는 원본 앱 힌트 −5 점) · Tab 메뉴 · H 도움말
    · 장면 단위 mm (PTP · 병 셸). 파우치는 자체 모듈(pouch/src/fps.js)에서 같은 값을 씀
    ═══════════════════════════════════════════════════════════════════ */
-const FPC={EYE:1550, CROUCH:550, WALK:1.4, RUN:2.6, FOV:2*Math.atan(.5/.78)*180/Math.PI, crouch:false, ck:0, help:false,
-  isFP:()=>false, hint:null, keys:""};
+const FPC={EYE:1550, CROUCH:550, WALK:1.4, RUN:2.6, FOCAL:.78, FOV:2*Math.atan(.5/.78)*180/Math.PI, crouch:false, ck:0, help:false,
+  isFP:()=>false, hint:null, keys:"", extra:[], toast:null};   /* 장면 단위 mm (파우치는 /1000 해서 씀) · toast : IDT 자체 알림 함수 · extra : IDT 고유 도움말 줄 */
 const fpcEye=floor=>(floor||0)+FPC.EYE-FPC.CROUCH*FPC.ck;
 const fpcSpeed=k=>(k.ShiftLeft||k.ShiftRight?FPC.RUN:FPC.WALK)*(1-.45*FPC.ck);      /* 앉은 채로는 느리게 */
 function fpcTick(dt){ FPC.ck+=((FPC.crouch?1:0)-FPC.ck)*Math.min(1,dt*7); if(!FPC.isFP()&&FPC.help) fpcHelp(false); }
-function fpcToast(t){ let e=document.getElementById("fpcToast"); if(!e){ e=document.createElement("div"); e.id="fpcToast"; document.body.appendChild(e); }
+function fpcToast(t){ if(FPC.toast) return FPC.toast(t); let e=document.getElementById("fpcToast"); if(!e){ e=document.createElement("div"); e.id="fpcToast"; document.body.appendChild(e); }
   e.textContent=t; e.hidden=false; clearTimeout(fpcToast.h); fpcToast.h=setTimeout(()=>e.hidden=true,2800); }
 function fpcHelp(on){ let e=document.getElementById("fpcHelp"); FPC.help=on==null?!FPC.help:on;
   if(!e){ e=document.createElement("div"); e.id="fpcHelp"; document.body.appendChild(e); }
   e.innerHTML='<b>1인칭 조작</b><table>'+[["W A S D · 방향키","걷기 (1.4 m/s)"],["Shift","빠르게 (2.6 m/s)"],["마우스","둘러보기 (화면 클릭 → 시점 고정, Esc 풀기)"],
     ["E · 클릭","조작 (손 닿는 거리 1.2 m 안)"],["F · Esc","설비 화면에서 뒤로"],["C","앉기 / 일어서기 (눈높이 1.55 ↔ 1.0 m)"],["F1","힌트 (평가 : −5 점)"],["Tab","메뉴 (계속 · 3인칭 전환 · 도움말 · 메인화면)"],["H","이 도움말"]]
-    .concat(FPC.keys?[[FPC.keys.split("|")[0],FPC.keys.split("|")[1]]]:[]).map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</table><small>H 로 닫기</small>';
+    .concat(FPC.keys?[[FPC.keys.split("|")[0],FPC.keys.split("|")[1]]]:[]).concat(FPC.extra||[]).map(r=>'<tr><td>'+r[0]+'</td><td>'+r[1]+'</td></tr>').join("")+'</table><small>H 로 닫기</small>';
   e.hidden=!FPC.help; }
 function fpcInit(o){
   Object.assign(FPC,o||{});

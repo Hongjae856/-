@@ -19,7 +19,7 @@ V2_SCRIPTS = ("kit.js", "layout.js", "room.js", "form.js", "unwind.js", "hopper.
               "pack_anim.js", "anim.js")
 ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
-    ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"),
+    ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"), ("common", "fpctl.js"), ("common", "topbar.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
     ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("common", "aimmark.js"), ("common", "splash.js"), ("common", "incpick.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
 )
@@ -86,11 +86,11 @@ PATCH = {
         ('const info="드래그 회전 · 휠 확대 · Shift/우클릭 드래그 이동";', 'const info="드래그 회전 · 휠 확대 · Shift/우클릭 드래그 이동 · 그래픽 "+GQ.label();', 1),
     ],
     "fps.js": [
-        ("KeyH:host.help,", "KeyH:host.help,KeyC:host.crouch||(()=>{}),", 1),   # 1인칭 앉기 (C)
+        ("const actions={KeyE:use,F1:host.hint,KeyR:host.returnPart,KeyH:host.help,Tab:host.menu};", "const actions={KeyE:use,KeyR:host.returnPart};   // C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴 = 세 IDT 공통 idt_common/fpctl.js (11/19)", 1),
         ("if(!['KeyW','KeyA','KeyS','KeyD'].includes(e.code) && !actions[e.code])return;", "if(!['KeyW','KeyA','KeyS','KeyD','ArrowUp','ArrowDown','ArrowLeft','ArrowRight','ShiftLeft','ShiftRight'].includes(e.code) && !actions[e.code])return;", 1),   # 방향키 · Shift (11/18 세 IDT 통일)
         ("const f=Number(keys.has('KeyW'))-Number(keys.has('KeyS'));", "const f=Number(keys.has('KeyW')||keys.has('ArrowUp'))-Number(keys.has('KeyS')||keys.has('ArrowDown'));", 1),
         ("const r=Number(keys.has('KeyD'))-Number(keys.has('KeyA'));", "const r=Number(keys.has('KeyD')||keys.has('ArrowRight'))-Number(keys.has('KeyA')||keys.has('ArrowLeft'));", 1),
-        ("const step=host.speed*Math.min(left,.012)/length;", "const step=host.speed*(keys.has('ShiftLeft')||keys.has('ShiftRight')?2.6/1.4:1)*Math.min(left,.012)/length;", 1),   # 걷기 1.4 m/s · Shift 2.6 m/s (11/18)
+        ("const step=host.speed*Math.min(left,.012)/length;", "const step=host.speed*(keys.has('ShiftLeft')||keys.has('ShiftRight')?FPC.RUN/FPC.WALK:1)*(1-.45*FPC.ck)*Math.min(left,.012)/length;", 1),   # 걷기 1.4 m/s · Shift 2.6 m/s (11/18)
         ("if(e.code==='Escape' && ['approach','hmi'].includes(mode)){", "if((e.code==='Escape'||(e.code==='KeyF'&&!e.target?.closest?.('input,textarea'))) && ['approach','hmi'].includes(mode)){", 1),   # 설비 화면 조작 중 F 로 뒤로 (11/16)
     ],
     "sim.js": [   # 무작위 소량 불량 (11/17 사용자 선택) : 중량 NG 약 0.15 % · 실링 불량 약 0.15 %
