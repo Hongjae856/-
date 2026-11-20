@@ -52,8 +52,15 @@ function ffGoal(){ const d=ffDoc(); if(!d||FREEB.on||(CREW.inc&&INCB.mode==="exa
   return FF.T.find(t=>{ const e=d.getElementById(t.el); return e&&(e===h||e.contains(h)); })||null; }
 function ffAct(){ const t=FF.aim; if(!t) return false; if(!FF.aimIn){ pcToast("가까이 가세요 — "+t.nm+" ("+(FF.res.aimDist||0).toFixed(1)+" m · 손 닿는 거리 1.2 m)"); return true; }
   if(t.id==="hmi"){ ffHmi(true); return true; } const d=ffDoc(), e=d&&d.getElementById(t.el); if(!e) return false;
-  try{ const W=appWin().eval("WK"); if(W&&W[0]&&!W[0].job){ W[0].x=WALK.x; W[0].z=WALK.z; W[0].route=[]; } }catch(x){}   /* 1인칭 = 작업자 A : 원본 작업자를 내 자리로 (걸어오는 시간 없이 바로 작업) */
-  d.body.classList.remove("fpLock"); try{ e.click(); }finally{ d.body.classList.add("fpLock"); } return true; }
+  let W=null, pre=null; try{ W=appWin().eval("WK"); pre=W[0].job; if(W&&W[0]&&!W[0].job){ W[0].x=WALK.x; W[0].z=WALK.z; W[0].route=[]; } }catch(x){}   /* 1인칭 = 작업자 A : 원본 작업자를 내 자리로 (걸어오는 시간 없이 바로 작업) */
+  d.body.classList.remove("fpLock"); try{ e.click(); }finally{ d.body.classList.add("fpLock"); }
+  ffMeDo(W,pre); return true; }
+/* 1인칭 작업 = 파우치 startWork 1인칭과 같게 (11/20 "1인칭이 근간 · 어색하면 안 됨") : 서는 자리에서 바로 · 손 뻗는 짧은 시간(0.8 초)
+   · 정제 투입은 리프터로 올려 붓는 과정이 보이므로 그대로(B3_HOLD) · 덮개(가드 도어)를 여는 작업은 도어가 열린 뒤 바로 */
+function ffMeDo(W,pre){ try{ const w=W&&W[0], J=w&&w.job; if(!J||J===pre) return;
+  if(J.phase==="walk"){ w.route=[]; w.x=J.j.stand[0]; w.z=J.j.stand[1]; }
+  if(J.key!=="tab"){ J.j=Object.assign({},J.j,{dur:Math.min(J.j.dur||1.4,.8)}); }
+}catch(e){ console.error("1인칭 작업",e); } }
 function ffHmi(on){ const d=ffDoc(); FF.hmi=on; if(d) d.body.classList.toggle("hmiOn",on);
   if(on){ FF.back={x:WALK.x,z:WALK.z,yaw:WALK.yaw,pitch:WALK.pitch}; Object.assign(WALK,{x:FFU.hmi[0],z:FFU.hmi[2]+700,yaw:0,pitch:-.05}); if(document.pointerLockElement) document.exitPointerLock(); }
   else if(FF.back) Object.assign(WALK,FF.back); }

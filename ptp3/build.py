@@ -56,6 +56,30 @@ APP_PATCH = [
      'if((S.running||oneShot)&&window.FREE3&&S.door==="closed"){ S.door="open"; S.doorOpens=(S.doorOpens||0)+1; alarm("E020"); toast("안전문 열림 — 인터락 정지 (E020)","bad"); return; }\nif(S.running||oneShot){ toast("운전 중에는 안전문을 열 수 없습니다.","bad"); return; }', 1, ("filler",)),
     ('if(S.running||oneShot){toast("운전 중에는 안전문을 열 수 없습니다.","bad");return;}',
      'if((S.running||oneShot)&&window.FREE3&&S.door==="closed"){ S.door="open"; S.doorOpens++; alarm("E020"); toast("안전문 열림 — 인터락 정지 (E020)","bad"); return; }\n   if(S.running||oneShot){toast("운전 중에는 안전문을 열 수 없습니다.","bad");return;}', 1, ("line",)),
+    # 인칭 1사이클 동작 중에는 인칭 스위치를 다시 눌러도 사이클을 처음부터 다시 시작하지 않음 (실제 설비 · 11/20 1인칭 점검 : 여러 번 누르면 끝나지 않던 문제)
+    ("function pressINCH(){\n  if(workerJob)", "function pressINCH(){\n  if(inchT>0){ toast(\"인칭 1사이클 동작 중입니다.\"); return; }\n  if(workerJob)", 1, ("line",)),
+    # 체인지파트 (11/20 1인칭 점검) : 원본은 부품 그림을 앱 자체 3D 화면 위 장착 위치(cpTarget)로 끌어 놓는 방식 — 이 판은 셸이 3D 를 그려 그 위치가 나타나지 않아
+    #   1인칭 · 3인칭 모두 멈추던 문제. 셸이 실제 장착 위치에 1인칭 대상을 두고(fp3.js) [장착] 버튼으로도 놓기를 할 수 있게, 준비물 확인은 셸 확인 창(PTP_PREP)
+    ("function cpPerform(fromDrop=false){",
+     "window.PTP_CPINFO=function(){ const st=STEPS()[S.tIdx]; if(S.course!=='change'||!S.session?.active||!st) return null; const p=st.part; return {i:S.tIdx, prep:!!st.prep, fin:!!st.finalCP, phase:st.phase, nm:p&&p.nm, pos:p?[X3(p.x),Y3(p.y),WEBZ+10]:null, busy:!!workerJob, ready:cpPrepReady()}; };\n"
+     "window.PTP_PREPITEMS=CP_PREP_ITEMS; window.PTP_PREPSET=(k)=>{ setPrepCheck(k,true); return cpPrepReady(); };\n"
+     "function cpPerform(fromDrop=false){", 1, ("filler",)),
+    ("if(st.prep){if(!cpPrepReady()){toast('준비물 3개 항목을 모두 확인하세요.');return;}",
+     "if(st.prep){if(!cpPrepReady()){ if(window.parent&&window.parent.PTP_PREP){ window.parent.PTP_PREP(); return; } toast('준비물 3개 항목을 모두 확인하세요.');return;}", 1, ("filler",)),
+    ("if(st.phase===0&&fromDrop!==true){toast('부품 그림을 정확한 장착 위치로 드래그하여 놓으세요.');return;}",
+     "if(st.phase===0&&fromDrop!==true&&!(window.parent&&window.parent.PTP_CP)){toast('부품 그림을 정확한 장착 위치로 드래그하여 놓으세요.');return;}", 1, ("filler",)),
+    # 체인지파트 · 포장라인 (같은 이유) : 장착 위치(＋)와 수치 조절점이 앱 3D 화면 위 표시라 나타나지 않음 → 셸 1인칭 대상 · [진행] 버튼으로
+    ("function openAdjustment(){",
+     "window.PTP_CPINFO=function(){ const st=curStep(); if(S.course!=='change'||!S.session||!S.session.active||!st) return null; let pos=null; if(st.part){ const it=curCP(); if(it){ const m=mountPoint(it); pos=[m[0],m[1],m[2]]; } }\n"
+     "  return {prep:!!st.prep, fin:!!st.finalCP, phase:st.phase, nm:st.part?st.part.nm:(st.adjust?st.adjust.nm:''), pos, adj:st.adjust?[X3(st.adjust.x),Y3(st.adjust.y)]:null, busy:!!workerJob, ready:cpPrepReady()}; };\n"
+     "window.PTP_PREPITEMS=CPPREP_ITEMS; window.PTP_PREPSET=(k)=>{ setPrepCheck(k,true); return cpPrepReady(); };\n"
+     "function openAdjustment(){", 1, ("line",)),
+    ('if(st.phase===0&&how!=="drag"){ toast("부품 그림을 정확한 장착 위치로 끌어다 놓으세요."); return; }',
+     'if(st.phase===0&&how!=="drag"&&!(window.parent&&window.parent.PTP_CP)){ toast("부품 그림을 정확한 장착 위치로 끌어다 놓으세요."); return; }', 1, ("line",)),
+    ('if(!cpPrepReady()){ toast("준비물 3개 항목을 모두 확인하세요.","bad"); return; }',
+     'if(!cpPrepReady()){ if(window.parent&&window.parent.PTP_PREP){ window.parent.PTP_PREP(); return; } toast("준비물 3개 항목을 모두 확인하세요.","bad"); return; }', 1, ("line",)),
+    ("function cpPerform(it,how){\n  const st=curStep();",
+     "function cpPerform(it,how){\n  const st=curStep(); if(st&&st.adjust&&window.parent&&window.parent.PTP_CP&&typeof openAdjustment==='function'){ openAdjustment(); return; }", 1, ("line",)),
     # 자유모드 : 순서 없음 — 이상 대응 · 평가 단계 제한(examGate) 해제
     ("function examGate(kind,key){const ok=", "function examGate(kind,key){if(window.FREE3)return true;const ok=", 1, ("filler",)),
     ("function examGate(kind,key){\n  if(!isExam()", "function examGate(kind,key){\n  if(window.FREE3) return true;\n  if(!isExam()", 1, ("line",)),
@@ -66,8 +90,65 @@ FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
 
+APP_TEXT_HITS = {}
+# 1인칭 기준 문구 (11/20 사용자 지시 "모든 IDT 의 근간은 1인칭") : 화면 왼쪽 타일을 누르라는 안내 → 현장 설비 · 위치 이름으로
+# (3인칭에서도 같은 뜻으로 읽힘 · 정확한 문구만 바꾸고 원본에 없으면 빌드 중단)
+FP_TEXT = [
+    ("좌측 [압축공기] 타일을 눌러 6 bar 공급", "압축공기 밸브를 열어 6 bar 공급"),
+    ("좌측 [압축공기] 타일을 누릅니다.", "압축공기 밸브를 엽니다."),
+    ("좌측 [메인 전원] 타일을 눌러 MAIN S/W 투입", "전기판넬의 메인 스위치를 돌려 MAIN S/W 투입"),
+    ("좌측 [메인 전원] 을 누르면 화면이 켜지고", "전기판넬의 메인 스위치를 켜면 화면이 켜지고"),
+    ("좌측 [성형필름 걸기] — ", ""), ("좌측 [커버포일 걸기] — ", ""), ("좌측 [제품 투입] — 호퍼", "제품 호퍼"),
+    ("좌측 [성형필름 걸기] 로 릴을 다시 겁니다.", "성형필름 보빈에 릴을 다시 겁니다."),
+    ("좌측 [성형필름 걸기] 를 누릅니다.", "성형필름 보빈에 릴을 겁니다."),
+    ("좌측 [커버포일 걸기] 로 새 포일 릴을 겁니다.", "커버포일 보빈에 새 포일 릴을 겁니다."),
+    ("좌측 [커버포일 걸기] 를 누릅니다.", "커버포일 보빈에 릴을 겁니다."),
+    ("좌측 [안전문] 을 여세요.", "안전문을 여세요."),
+    ("좌측 [안전문] 타일을 눌러 닫으세요.", "안전문으로 가서 닫으세요."),
+    ("좌측 [안전문] 타일이 [닫힘] 이어야 합니다", "안전문이 닫혀 있어야 합니다"),
+    ("좌측 [제품 투입] 로 정제를 보충한 뒤", "제품 호퍼에 정제를 보충한 뒤"),
+    ("좌측 [제품 투입] 로 호퍼를 채웁니다.", "제품 호퍼에 정제를 채웁니다."),
+    ("좌측 [제품 투입] 으로 정제를 보충하세요.", "제품 호퍼에 정제를 보충하세요."),
+    ("좌측 [제품 투입] 으로 호퍼 보충", "제품 호퍼 보충"),
+    ("좌측 [제품 투입] 으로 호퍼를 보충합니다.", "제품 호퍼에 정제를 보충합니다."),
+    ("좌측 [필름 연결]로 새 릴을 이어 붙이세요.", "스플라이싱 테이블에서 새 릴을 이어 붙이세요."),
+    ("좌측 [필름 연결]로 새 포일 릴을 이어 붙이세요", "스플라이싱 테이블에서 새 포일 릴을 이어 붙이세요"),
+    ("좌측 [자재 적재] 카드의 회수 버튼으로 카톤", "각 자재 위치로 가서 카톤"),
+    ("좌측 [자재 적재] · 회수 버튼", "현장 자재 위치 · 회수"),
+    ("(좌측 [팔레트 투입])", "(팔레트 투입구)"),
+    ("좌측 [압축공기] 타일", "현장 [압축공기 밸브]"), ("좌측 [메인 전원] 타일", "현장 [메인 전원 스위치]"),
+    ("좌측 [안전문] 타일", "현장 [안전문]"), ("좌측 [진공 펌프] 타일", "현장 [진공 펌프]"), ("(좌측 [진공 펌프])", "(현장 진공 펌프)"),
+    ("좌측 [팔레트 투입] 타일로 빈 팔레트를 넣고", "팔레트 투입구로 빈 팔레트를 넣고"), ("좌측 [팔레트 투입] 타일", "현장 [팔레트 투입구]"),
+    ("좌측 [자재 적재] 타일", "현장 자재 위치"),
+    ("좌측 [카톤 적재] 타일을 눌러 매거진을 채우세요.", "카톤 매거진을 채우세요."), ("좌측 [카톤 적재] 타일로 매거진을 채웁니다.", "카톤 매거진을 채웁니다."),
+    ("좌측 [설명지 적재] 타일을 눌러 보충하세요.", "설명지 매거진을 보충하세요."), ("좌측 [설명지 적재] 타일로 매거진을 채웁니다.", "설명지 매거진을 채웁니다."),
+    ("좌측 [박스 적재] 타일을 눌러 보충하세요.", "박스 매거진을 보충하세요."), ("좌측 [박스 적재] 타일로 매거진을 채웁니다.", "박스 매거진을 채웁니다."),
+    ("좌측 [테이프 · 잉크] 타일로 잉크를 보충하세요.", "박스포장기 잉크를 보충하세요."), ("좌측 [테이프 · 잉크] 타일로 잉크를 보충합니다.", "박스포장기 잉크를 보충합니다."),
+    ("좌측 [테이프 · 잉크] 타일로 테이프를 교체하세요.", "박스포장기 테이프를 교체하세요."), ("좌측 [테이프 · 잉크] 타일로 테이프를 교체합니다.", "박스포장기 테이프를 교체합니다."),
+    ('좌측 ["+nm+"] 타일', '현장 ["+nm+"]'), ("좌측 ['+nm+']", "현장 ['+nm+']"),
+    ('좌측 [" + m.nm + " 적재] 를 누르면 운전 중에도 보충', '" + m.nm + " 매거진은 운전 중에도 보충'),
+    ("좌측 ['+material+' 적재]에서 외부 매거진을 보충하세요.", "'+material+' 매거진에 외부에서 보충하세요."),
+    ("좌측 [자재 적재] 카드의 ['+nm+'] 버튼으로", "['+nm+'] 위치로 가서"),
+    ("좌측 자재 타일 또는 3D 화면의 빨간 ! 위치에서 조치하세요.", "현장의 빨간 ! 위치로 가서 조치하세요."),
+    (" 장착부를 선택해 작업자를 이동시키세요.", " 장착 위치로 가서 부품을 맞춰 넣으세요."),
+    ("부품 묶음을 표시 위치로 드래그하세요. 한 번의 장착 동작으로 완료됩니다.", "부품 묶음을 장착 위치로 가져가 맞춰 넣으세요. 한 번의 장착 동작으로 완료됩니다."),
+]
+
+
+def fp_text(key: str, text: str) -> str:
+    hit = 0
+    for old, new in FP_TEXT:
+        c = text.count(old)
+        if c:
+            text = text.replace(old, new); hit += 1
+    return text, hit
+
+
 def app(key: str) -> str:
     text = ONE.patched(key)
+    text, hit = fp_text(key, text)
+    print(f"{key}: 1인칭 문구 {hit} 종 변환")
+    APP_TEXT_HITS[key] = hit
     for old, new, n, keys in APP_PATCH:
         if key not in keys:
             continue

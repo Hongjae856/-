@@ -37,6 +37,7 @@ function fp3Build(){
   for(const el of d.querySelectorAll(".tile[id]")){ const a=A[el.id]; if(!a) continue; const nm=(el.querySelector("b")||{}).textContent||el.id; FP3.T.push({id:el.id, nm:a[3]||nm, p:a, s:[.45,.45,.45], el}); }
   FP3_BTN.forEach(([id,nm],i)=>{ const el=d.getElementById(id); if(!el) return; const p=A.panel; FP3.T.push({id, nm:"판넬 버튼 · "+nm, p:[p[0]+(i-2)*90,p[1]-(i===3?0:40),p[2]], s:[.08,.08,.08], el}); });
   if(A.hmi) FP3.T.push({id:"hmi", nm:A.hmi[3], p:A.hmi, s:[.5,.4,.12], el:d.getElementById("hmiWrap"), hmi:true});
+  const cpT=fp3CpTarget(d); if(cpT) FP3.T.push(cpT);
   /* 점검 단계(코치 [점검 완료]) : 그 단계 장치 위치에 3D 점검 대상 (충전기 = 단계 ↔ 장치 번호 → 장치 라벨 위치, 포장라인 = 카토너 앞) */
   const vis=e=>e&&e.getBoundingClientRect().width>0, h=[...d.querySelectorAll(".hint,.hintNow")].find(vis);
   const lc=d.getElementById("lcCheck"); if(lc&&vis(lc)){ let q=null;
@@ -45,6 +46,7 @@ function fp3Build(){
     q=q||(CREW.cur==="F"?[-3300,1200,560]:[4000,1200,650]);
     FP3.T.push({id:"lcCheck", nm:"점검 : "+(((d.getElementById("cTitle")||{}).textContent)||"확인"), p:q, s:[.6,.6,.6], el:lc}); }
   FP3.goal=h&&MODE3.kind!=="free"&&!(MODE3.kind==="inc"&&INC3.mode==="exam"&&!(performance.now()<INC3.hintUntil))?(FP3.T.find(t=>t.el&&(t.el===h||t.el.contains(h)))||null):null;   /* 자유모드 : 다음 작업 안내 없음 */
+  if(!FP3.goal&&cpT&&MODE3.kind!=="free"&&!fp3CpExam(d)) FP3.goal=cpT;   /* 체인지파트 : 장착 위치(앱 화면에는 표시 없음)를 다음 작업으로 */
 }
 /* 조준 : 화면 가운데 방향과 가장 가까운 대상 (보이는 거리 6 m 안 · 조작은 손 닿는 거리 1.2 m 안만) */
 const fp3T=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s, pt:fp3Snap(t), reachMax:t.reachMax};
@@ -54,6 +56,8 @@ const FP3_SNAP={};
 function fp3Snap(t){ if(t.id==="lcCheck"||t.id==="uAir") return null;   /* uAir : 실제 밸브 모형의 레버 위치 그대로 */ const k=CREW.cur+":"+t.id+":"+t.p.join(","); if(k in FP3_SNAP) return FP3_SNAP[k];
   const L=[]; for(const [n,o] of Object.entries(V3P.objs)) if(n!=="room"&&o&&o.m&&o.m[0]){ o.m[0].geometry.boundingSphere=null; L.push(o.m[0]); }
   if(!L.length) return null; const o3=new T3.Vector3(t.p[0]*MM,t.p[1]*MM,t.p[2]*MM); let best=null;
+  if(/^cp/.test(t.id)){ const o=new T3.Vector3(t.p[0]*MM,t.p[1]*MM,t.p[2]*MM+1.2); _rc.set(o,new T3.Vector3(0,0,-1)); _rc.far=1.25; const h=_rc.intersectObjects(L,false)[0];   /* 교체부품 : 작업자 쪽(앞)에서 장착 위치로 — 앞쪽 첫 면 (뒷면에 붙지 않게) */
+    return FP3_SNAP[k]=h?[h.point.x,h.point.y,h.point.z+.02]:null; }
   for(const d of [[0,0,-1],[0,0,1],[1,0,0],[-1,0,0]]){ _rc.set(o3,new T3.Vector3(...d)); _rc.far=.7; const h=_rc.intersectObjects(L,false)[0]; if(h&&(!best||h.distance<best.distance)) best=h; }
   return FP3_SNAP[k]=best?[best.point.x,best.point.y,best.point.z]:null; }
 const fp3Eye=()=>[WALK.x*MM,WALK.y*MM,WALK.z*MM];
@@ -74,9 +78,22 @@ function fp3Act(){
   const t=FP3.aim; if(!t) return false;
   if(!FP3.aimIn){ FP3.far=performance.now(); fp3Hud(); return false; }   /* 손 닿는 거리 밖 */
   if(t.hmi){ fp3Hmi(true); return true; }
-  const d=fp3Doc(); if(!d) return false; d.body.classList.remove("fpLock"); try{ t.el.click(); }finally{ d.body.classList.add("fpLock"); }
-  return true;
+  const d=fp3Doc(); if(!d) return false; const k=APPK[CREW.cur], w=UNI_HUB.win(k), pre=fp3Jobs(k,w);
+  if(t.act){ try{ t.act(w); }catch(e){ console.error(e); } fp3MeDo(k,w,pre); return true; }
+  d.body.classList.remove("fpLock"); try{ t.el.click(); }finally{ d.body.classList.add("fpLock"); }
+  fp3MeDo(k,w,pre); return true;
 }
+/* 1인칭 = 플레이어가 그 작업자 (11/20 사용자 지시 "1인칭이 근간 · 어색하면 안 됨") — 파우치 startWork 1인칭과 같게 :
+   앱이 작업을 걸면 (1) 다른 구역 작업자에게 가지 않고 플레이어(앱 작업자 0)가 맡고 (2) 걸어오는 시간 없이 지금 자리에서 (3) 손 뻗는 짧은 시간(0.8 초)에 끝냄
+   · 롤 교체(2인 1조)는 보조 작업자가 옆에 올 때까지 기다림(crew3.js CH3 · PTP_HOLD) */
+function fp3Jobs(k,w){ try{ if(k==="filler") return w.eval("workerJob"); return (w.PTP_WK||w.eval("WK")).map(x=>x.job?x.cb||x.job:null); }catch(e){ return null; } }
+function fp3MeDo(k,w,pre){ try{
+  if(k==="filler"){ const j=w.eval("workerJob"); if(!j||j===pre) return; w.eval("workerX="+j.to); j.from=j.to; j.elapsed=Math.max(j.elapsed,j.walkTime); if(!ROLL3.includes(j.key)) j.duration=Math.min(j.duration||2.2,.8); return; }
+  const W=w.PTP_WK||w.eval("WK"); const i=W.findIndex((x,n)=>x.job&&(x.cb||x.job)!==(pre&&pre[n])); if(i<0) return;
+  const me=W[0], o=W[i];
+  if(i!==0){ if(me.job) return; Object.assign(me,{job:o.job,t:o.t,cb:o.cb,xt:o.xt,workPhase:0}); o.job=null; o.cb=null; o.t=0; o.xt=o.x; try{ w.eval("lastWK=WK[0]"); }catch(e){} }
+  me.x=me.xt; me.walking=false; me.t=Math.min(me.t,.8);
+}catch(e){ console.error("1인칭 작업",e); } }
 /* 설비 화면 앞으로 다가감 · 시점 고정 · 오른쪽 설비 화면 조작 가능 */
 function fp3Hmi(on){
   const d=fp3Doc(); FP3.hmi=on; if(d) d.body.classList.toggle("hmiOn",on);
@@ -109,7 +126,7 @@ function fp3Key(e){
   if(e.code==="KeyE"&&!FP3.hmi){ if(fp3Act()) e.preventDefault(); }
 }
 function fp3Tick(now){
-  const on=!!CREW.cur&&V3P.view!=="orbit"; fp3AirSync(now);
+  const on=!!CREW.cur&&V3P.view!=="orbit"; fp3AirSync(now); fp3BenchBuild();
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(w&&w.document.body) w.document.body.classList.toggle("fpLock",on&&APPK[CREW.cur]===k); }
   if(!on){ if(FP3.am) FP3.am.hide(); if(FP3.hmi) fp3Hmi(false); fp3Hud(); return; }
   if(now-FP3.t>300){ FP3.t=now; fp3Build(); }
@@ -117,3 +134,41 @@ function fp3Tick(now){
   FP3.res=FP3.am.update({eye:fp3Eye(), goal:FP3.hmi?null:fp3T(FP3.goal), aim:FP3.hmi?null:fp3T(FP3.aim), now, off:document.body.classList.contains("appModal")});
   fp3Hud();
 }
+
+/* ═══ 체인지파트 1인칭 (11/20 1인칭 점검 · 원본의 '부품 그림을 앱 3D 화면 위로 끌어 놓기'를 현장 작업으로) ═══
+   · 준비물 : 충전기 앞 교체부품 작업대(대차)로 가서 → 확인 창(공구 · 보호장갑 · 부품 세트)
+   · 부품마다 : 그 부품의 실제 장착 위치로 가서 E — 안착 → 체결 → 장착 확인 (한 번 누를 때마다 한 단계)
+   · 전체 장착 확인 : 충전기 가운데 */
+window.PTP_CP=true;
+const fp3Cp=w=>{ try{ return w.PTP_CPINFO&&w.PTP_CPINFO(); }catch(e){ return null; } };
+function fp3CpExam(d){ try{ const w=UNI_HUB.win(CREW.cur==="P"?"line":"filler"); return !!w.eval("isExam()")&&!w.eval("typeof examHintActive==='function'&&examHintActive()"); }catch(e){ return false; } }
+function fp3CpTarget(d){ const F=CREW.cur==="F", w=UNI_HUB.win(F?"filler":"line"), c=fp3Cp(w); if(!c) return null; const L=ROOMBUS.L;
+  const P3=F?(v=>[4*v[0]-3680, 4*v[1]+1128, 4*v[2]+L.fillerZ]):(v=>[8000+5*v[0], 5*v[1], 5*(v[2]||0)]), bench=F?FP3_BENCH.pt:FP3_BENCH.ptP;
+  const place=w=>F?w.cpPerform(true):w.cpPerform(null,"drag");
+  if(c.prep) return {id:"cpPrep", nm:"교체부품 작업대 (공구 · 보호장갑 · 부품 세트 확인)", p:bench||(F?[-2600,800,1800]:[3000,800,1800]), s:[.6,.3,.5], el:d.getElementById("cpPrepChecklist")||d.getElementById("cpAction"), act:()=>PTP_PREP()};
+  if(c.fin) return {id:"cpFin", nm:"전체 장착 확인 (누락 · 미체결 · 남은 공구)", p:F?[-3300,1250,560]:[4000,1200,650], s:[.8,.6,.6], el:d.getElementById("cpAction"), act:w=>w.cpPerform()};
+  if(c.adj) return {id:"cpAdj", nm:"수치 조절 · "+c.nm, p:[8000+5*c.adj[0], 5*c.adj[1], 650], s:[.3,.3,.3], el:d.getElementById("adjustPoint")||d.getElementById("cpAction"), act:w=>{ if(document.pointerLockElement) document.exitPointerLock(); w.openAdjustment(); }};
+  if(!c.pos) return null; const ph=["장착 (위치에 맞춰 넣기)","체결","장착 확인"][c.phase]||"장착";
+  return {id:"cpPart", nm:"교체부품 · "+c.nm+" — "+ph, p:P3(c.pos), s:[.25,.25,.25], el:c.phase===0?d.getElementById("cpTarget"):d.getElementById("cpAction"), act:w=>{ if(c.phase===0) place(w); else w.cpPerform(); }};
+}
+/* 교체부품 작업대 (파우치 대차 모형 + 부품 상자 · 공구 쟁반 · 장갑) — 충전기 앞 빈 바닥 */
+const FP3_BENCH={pt:null};
+function fp3BenchBuild(){ if(FP3_BENCH.G||!GRID.a) return; const at=idtNearFree((x,z)=>PTP_FREER(x,z,.5),-2.9,1.9,2.5,[0,1])||[-2.9,1.9];
+  const G=new T3.Group(); idtCartBuild(G); G.position.set(at[0],0,at[1]); G.rotation.y=Math.PI/2; V3P.sc.add(G); FP3_BENCH.G=G;
+  bx(G,-.17,.17,.63,.8,-.38,-.02,M.grey); bx(G,-.16,.16,.79,.81,-.37,-.03,M.dark);                               /* 교체부품 상자 */
+  bx(G,-.15,.15,.63,.67,.06,.36,M.ssD); rod(G,[-.1,.69,.12],[.08,.69,.3],.008,M.red,8); rod(G,[.05,.69,.1],[.1,.69,.32],.006,M.ssMir,8);   /* 공구 쟁반 */
+  bx(G,-.12,-.02,.67,.69,.2,.34,M.blue);                                                                         /* 보호장갑 */
+  plate(G,.3,.08,labelTex(["교체부품 · 공구"],{w:256,h:64}),[0,.92,0],0);
+  FP3_BENCH.pt=[at[0]*1000,800,at[1]*1000]; FP3_OBS.push([at[0]*1000-480,at[0]*1000+480,at[1]*1000-280,at[1]*1000+280]);
+  const aP=idtNearFree((x,z)=>x>(ROOMBUS.L.wallX+ROOMBUS.L.wallT)/1000+.6&&walkFree(x*1000,z*1000)&&walkFree(x*1000+250,z*1000)&&walkFree(x*1000-250,z*1000),3.0,2.3,2.5,[0,1])||[3.0,2.3];   /* 포장실 : 카토너 앞 */
+  const GP=G.clone(); GP.position.set(aP[0],0,aP[1]); V3P.sc.add(GP); FP3_BENCH.ptP=[aP[0]*1000,800,aP[1]*1000]; FP3_OBS.push([aP[0]*1000-480,aP[0]*1000+480,aP[1]*1000-280,aP[1]*1000+280]); }
+/* 준비물 확인 창 (현장 작업대 앞 · 3인칭 [장착] 버튼에서도) */
+function PTP_PREP(){ const w=UNI_HUB.win(CREW.cur==="P"?"line":"filler"); let items=[]; try{ items=w.PTP_PREPITEMS||[]; }catch(e){}
+  let dl=$("#cpPrepDlg"); if(!dl){ dl=document.createElement("div"); dl.id="cpPrepDlg"; dl.style.cssText="position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(10,20,30,.35)"; document.body.appendChild(dl); }
+  const st=k=>{ try{ return !!w.eval("S.cpPrepChecks&&S.cpPrepChecks['"+k+"']"); }catch(e){ return false; } };
+  const draw=()=>{ dl.innerHTML='<div style="background:#fff;border-radius:14px;padding:16px 18px;min-width:320px;font:600 14px/1.5 \'Malgun Gothic\',sans-serif;color:#173a63;box-shadow:0 10px 30px rgba(0,0,0,.25)"><b style="font-size:16px">교체부품 작업대 — 준비물 확인</b><div style="margin:8px 0 12px;color:#5d7086;font-weight:500">하나씩 눈으로 확인하고 누르세요.</div>'+
+      items.map(([k,t])=>'<button data-k="'+k+'" style="display:block;width:100%;text-align:left;margin:6px 0;padding:9px 12px;border-radius:10px;border:1px solid '+(st(k)?'#1e9a4a;background:#e8f6ee':'#c9d4e0;background:#fff')+';font:inherit;cursor:pointer">'+(st(k)?'✔ ':'☐ ')+t+'</button>').join("")+
+      '<div style="display:flex;gap:8px;justify-content:flex-end;margin-top:10px"><button id="cpPrepX" style="padding:7px 14px;border-radius:9px;border:1px solid #c9d4e0;background:#fff;font:inherit;cursor:pointer">닫기</button></div></div>';
+    dl.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ let all=false; try{ all=w.PTP_PREPSET(b.dataset.k); }catch(e){} draw(); if(all){ setTimeout(()=>{ dl.remove(); try{ w.cpPerform(); }catch(e){} },350); } });
+    $("#cpPrepX").onclick=()=>dl.remove(); };
+  if(document.pointerLockElement) document.exitPointerLock(); draw(); }
