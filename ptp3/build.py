@@ -108,24 +108,26 @@ sys.path.insert(0, str(ROOT / "idt_common"))
 import splash as SPLASH   # noqa: E402  메인화면 공통 템플릿 (11/19)
 
 
-def _course(c, nm):
-    return [{"h": "기본" if c == "operation" else nm, "cls": "" if c == "operation" else "ch", "btns": b} for b in (
-        [[{"cls": "s", "nm": "기본 · 학습", "sm": "라인 가동 핵심 절차 안내", "attrs": {"data-c": c, "data-m": "easy"}}, {"cls": "e", "nm": "기본 · 평가", "attrs": {"data-c": c, "data-m": "examEasy"}}],
-         [{"cls": "s", "nm": "심화 · 학습", "sm": "라인 가동 전체 절차 단계별 안내", "attrs": {"data-c": c, "data-m": "guide"}}, {"cls": "e", "nm": "심화 · 평가", "attrs": {"data-c": c, "data-m": "exam"}}]]
-        if c == "operation" else
-        [[{"cls": "s", "nm": "기본 · 학습", "sm": "교체부품 6묶음", "attrs": {"data-c": c, "data-m": "easy"}}, {"cls": "e", "nm": "기본 · 평가", "attrs": {"data-c": c, "data-m": "examEasy"}},
-          {"cls": "s", "nm": "심화 · 학습", "sm": "교체부품 18종", "attrs": {"data-c": c, "data-m": "guide"}}, {"cls": "e", "nm": "심화 · 평가", "attrs": {"data-c": c, "data-m": "exam"}}]])]
+def _course(mk):
+    """PTP 운전 교육 행 : 가동(기본 · 심화) + 고유 체인지파트(기본 6묶음 · 심화 18종) — 공통 메인화면(idt_common/splash.py) 행 형식"""
+    T = SPLASH.TIPS
+    def B(c, m, nm, full, sm, tip):
+        return {"id": None, "nm": nm, "full": full, "sm": sm, "tip": tip, "attrs": {"data-c": c, "data-m": m}}
+    op = [{"h": "기본", "btns": [B("operation", "easy", "학습", "기본 · 학습", "핵심 절차 안내", T["easy"]), B("operation", "examEasy", "평가", "기본 · 평가", "핵심 절차 채점", T["examEasy"])]},
+          {"h": "심화", "btns": [B("operation", "guide", "학습", "심화 · 학습", "전체 절차 안내", T["guide"]), B("operation", "exam", "평가", "심화 · 평가", "전체 절차 채점", T["exam"])]}]
+    ch = [{"h": "체인지파트", "hs": "기본 · 6묶음", "btns": [B("change", "easy", "학습", "체인지파트 · 기본 · 학습", "교체부품 6묶음", "교체부품 6묶음의 탈착 · 장착 절차를 단계별로 안내합니다."),
+                                                        B("change", "examEasy", "평가", "체인지파트 · 기본 · 평가", "교체부품 6묶음", "안내 없이 교체부품 6묶음을 교체하고 채점합니다.")]},
+          {"h": "체인지파트", "hs": "심화 · 18종", "btns": [B("change", "guide", "학습", "체인지파트 · 심화 · 학습", "교체부품 18종", "교체부품 18종의 탈착 · 장착 절차를 단계별로 안내합니다."),
+                                                        B("change", "exam", "평가", "체인지파트 · 심화 · 평가", "교체부품 18종", "안내 없이 교체부품 18종을 교체하고 채점합니다.")]}]
+    return op + ch
 
 
-_OP = _course("operation", "")
-_OP[1]["h"] = "심화"
 SPLASH_CFG = {
-    "title": "PTP 라인 IDT", "en": "PTP Line · Interactive Digital Tutor", "prod": "블리스터 충전 → 카톤 포장",
-    "workers": [{"id": "chooseF", "r": "F", "tag": "작업자 1 · FILLING ROOM (D구역)", "nm": "🧍 충전실 작업자", "desc": "블리스터 포장기 HM 400P · 성형 · 실링 · 펀칭"},
-                {"id": "chooseP", "r": "P", "tag": "작업자 2 · PACKING ROOM (G구역)", "nm": "🧍 포장실 작업자", "desc": "카토너 · 카톤 인쇄기 · 중량선별기 · 박스포장기 · 팔렛타이저"}],
+    "title": "PTP 라인 IDT", "prod": "블리스터 충전 → 카톤 포장",
+    "workers": [{"id": "chooseF", "r": "F", "tag": "FILLING ROOM · D구역", "nm": "충전실 작업자", "desc": "블리스터 포장기", "tip": "블리스터 포장기 HM 400P · 성형 · 실링 · 펀칭"},
+                {"id": "chooseP", "r": "P", "tag": "PACKING ROOM · G구역", "nm": "포장실 작업자", "desc": "카토너 ~ 팔렛타이저", "tip": "카토너 · 카톤 인쇄기 · 중량선별기 · 박스포장기 · 팔렛타이저 — 포장실의 다른 구역 작업자는 자동으로 일합니다"}],
     # 파우치와 같은 기본 · 심화 · 시연 · 자유 · OEE + PTP 고유 체인지파트 열
-    "cols": SPLASH.std_cols(lambda m: ("spOee", None) if m == "oee" else (None, {"data-c": "inc" if m == "inc" else "operation", "data-m": m}),
-                            course=_OP + _course("change", "체인지파트")),
+    "cols": SPLASH.std_cols(lambda m: ("spOee", None) if m == "oee" else (None, {"data-c": "inc" if m == "inc" else "operation", "data-m": m}), course=_course(None)),
 }
 
 

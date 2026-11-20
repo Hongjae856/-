@@ -19,7 +19,7 @@ const crs=k=>{ const w=UNI_HUB.win(k); return w&&w.UNI_COURSE; };
 /* ── 메인화면 : 모드 → 작업자 ── */
 const CREW={mode:null, room:null, cur:null, started:{F:false,P:false}, pose:{}, fp:true};
 function crewMark(){ idtSplashMark({mode:CREW.mode, modeNm:CREW.mode&&CREW.mode.nm, room:CREW.room, isSel:b=>!!CREW.mode&&b.dataset.c===CREW.mode.c&&b.dataset.m===CREW.mode.m}); }
-function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:(b.closest(".modeColumn").querySelector("h4").textContent==="체인지파트"?"체인지파트 · ":"")+b.firstChild.textContent.trim()}; crewMark(); if(CREW.room){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r:CREW.room}; crewGo(); } }
+function pickMode(b){ CREW.mode={c:b.dataset.c, m:b.dataset.m, nm:b.dataset.nm||b.textContent.trim()}; crewMark(); if(CREW.room){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r:CREW.room}; crewGo(); } }
 function pickRoom(r){ CREW.room=r; crewMark(); if(CREW.mode){ LAST3={m:CREW.mode.m,c:CREW.mode.c,r}; crewGo(); } }
 function crewGo(){ if(CREW.mode&&CREW.mode.c==="inc"){ inc3Pick(CREW.room); return; } CREW.started={F:false,P:false}; CREW.pose={}; CREW.fp=true; $("#splash").classList.add("hide"); startRoom(CREW.room); }
 function startRoom(r){

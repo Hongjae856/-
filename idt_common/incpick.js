@@ -24,7 +24,7 @@ function idtIncPick(el,o){
         '<b>'+e(x.nm)+'<s>'+e(x.src||"")+(R.has?' · 부동 '+Math.round(x.down)+' 분 · '+x.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
         '<button class="s" data-inc="'+e(x.k)+'" data-m="learn">학습</button><button class="e" data-inc="'+e(x.k)+'" data-m="exam">평가</button></div>'; }).join("")+'</div>'+
     '<p class="ipNote">중요도 등급 : 상 = '+IDT_GRADE_WHY.상+' · 중 = '+IDT_GRADE_WHY.중+' · 하 = '+IDT_GRADE_WHY.하+'</p>'+
-    '<button id="incBack">'+(o.back||"← 기본 · 심화 · OEE 로")+'</button>';
+    '<button id="incBack">'+(o.back||"← 교육 과정 선택으로")+'</button>';
   el.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>o.onStart(b.dataset.inc,b.dataset.m));
   el.querySelector("#incBack").onclick=()=>o.onBack();
 }

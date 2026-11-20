@@ -325,39 +325,17 @@ table.ht tr.ng td{background:#fdeae7;color:#b0301c}
 #mList .row button:disabled{opacity:.4;cursor:default}
 
 /* ══ 시작 화면 ══ */
-#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s}
-#splash.hide{opacity:0;pointer-events:none;visibility:hidden}
-#splash .box{max-width:1300px;width:100%;padding:40px;text-align:center}
-#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
-#splash .ver:hover{color:#15304e;border-color:#15304e}
 #verHead{cursor:pointer}
 #mVer .mbox{width:860px;max-width:94%}
 table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{padding:7px 9px}table.vt td:first-child{font-weight:800;white-space:nowrap}table.vt td:nth-child(2){white-space:nowrap}
-#splash h1{font:800 50px/1.15 var(--ff);letter-spacing:-2px;margin:0 0 8px}
-#splash h1 small{display:block;font:700 17px/1.4 var(--ff);letter-spacing:1px;color:#6a7f96;margin-top:8px}
 #lineStrip{display:flex;gap:6px;justify-content:center;align-items:center;margin:26px 0 30px;flex-wrap:nowrap}
 #lineStrip .ls{background:#f2f6fa;border:1px solid #cdd9e5;border-radius:12px;padding:11px 12px;min-width:150px}
 #lineStrip .ls.wc{background:#fff8ec;border-color:#ecd3a7}
 #lineStrip .ls b{display:block;font:800 16px/1.3 var(--ff);color:#142b47}
 #lineStrip .ls s{display:block;text-decoration:none;font:700 11.5px/1.5 var(--ff);color:#6a7f96;margin-top:3px}
 #lineStrip .ar{font:800 20px/1 var(--ff);color:#8ba2bb}
-#coursePicker{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin:0 auto 20px;max-width:1240px}
-#coursePicker button.demo{background:#0f6b5c;color:#fff;border-color:#0f6b5c}
 #demoTour{padding:8px 14px;border:1px solid #0f6b5c;border-radius:10px;background:#fff;color:#0f6b5c;font-weight:800;cursor:pointer}
 #demoTour.on{background:#0f6b5c;color:#fff}
-#coursePicker button{padding:24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#fff;color:#142b47;cursor:pointer}
-#coursePicker button.main{background:#142b47;color:#fff}
-#coursePicker button:disabled{opacity:.5;cursor:not-allowed}
-#coursePicker small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
-#coursePicker strong{display:block;font-size:29px;margin:10px 0}
-#coursePicker span{display:block;font-size:17px;line-height:1.6}
-#splash .go{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin:auto;max-width:840px}
-.modeColumn{display:flex;flex-direction:column;gap:14px}
-#splash .go button{width:100%;font:700 25px var(--ff);padding:24px 30px;border:1px solid #152c4b;border-radius:14px;cursor:pointer}
-#splash .go .s{background:#142b47;color:#fff}
-#splash .go .e{background:#fff;color:#142b47;font-size:21px;padding:19px}
-#splash .go small{display:block;font:600 14px/1.5 var(--ff);opacity:.75;margin-top:6px}
-#courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer}
 
 /* 토스트 · 힌트 · 배너 */
 #toast{position:absolute;left:50%;top:21%;transform:translateX(-50%);z-index:140;background:#fff;color:var(--ink);
@@ -404,8 +382,6 @@ table.vt{font-size:14px}table.vt th{white-space:nowrap}table.vt td,table.vt th{p
 #lineStrip{flex-wrap:wrap}
 #lineStrip .ls{min-width:120px}
 #lineStrip .ls.fr{background:#eef6fb;border-color:#b9d3e6}
-#splash .prodLine{font:700 16px/1.5 var(--ff);color:#5d7086;margin:-14px 0 22px}
-#coursePicker{grid-template-columns:1fr 1fr;max-width:900px}
 #coach.case{border-left-color:#e07a12;background:#fff7ee}
 #coach.case #cStep{color:#c46200}
 #coach.ipc{border-left-color:#1d7fa8;background:#f1f9fd}
@@ -599,42 +575,67 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #freeBar button:first-child{background:#5b3fa0;color:#fff}
 /* 메인화면 모드 버튼 : 단어 중간에서 줄바꿈하지 않음 (11/17 · "OEE 관리 / 대시보드") */
 
-/* ═══ 메인화면 공통 (세 IDT · 11/19 · 파우치 메인화면 규칙을 그대로 옮김) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
-#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s;overflow:auto;
+/* ═══ 메인화면 공통 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ 교육 시작 · 남색 1색 + 회색) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
+#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:flex-start;justify-content:center;background:#f4f6f9;color:#16202c;transition:opacity .35s;overflow:auto;
   font-family:var(--ff,"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif)}
 #splash.hide{opacity:0;pointer-events:none;visibility:hidden}
-#splash .box{max-width:1300px;width:100%;padding:40px;text-align:center;margin:auto}
-#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
-#splash .ver:hover{color:#15304e;border-color:#15304e}
-#splash h1{font-weight:800;font-size:50px;line-height:1.15;letter-spacing:-2px;margin:0 0 8px}
-#splash h1 small{display:block;font-weight:700;font-size:17px;line-height:1.4;letter-spacing:1px;color:#6a7f96;margin-top:8px}
-#splash .prodLine{font-weight:700;font-size:16px;line-height:1.5;color:#5d7086;margin:-14px 0 22px}
-#crewHint{max-width:900px;margin:0 auto 12px;text-align:center;font-weight:600;font-size:16px;line-height:1.5;color:#40566e}
-#crewHint b{color:#142b47} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
-#coursePicker{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 auto 20px;max-width:900px}
-#coursePicker.n3{grid-template-columns:repeat(3,1fr);max-width:1240px}
-#coursePicker button{padding:24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#fff;color:#142b47;cursor:pointer;font-family:inherit}
-#coursePicker button.main{background:#142b47;color:#fff}
-#coursePicker button:disabled{opacity:.5;cursor:not-allowed}
-#coursePicker button.main.wait{opacity:.55}
-#coursePicker button.main.sel{outline:4px solid #f5b400;outline-offset:3px}
-#coursePicker small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
-#coursePicker strong{display:block;font-size:29px;margin:10px 0}
-#coursePicker span{display:block;font-size:17px;line-height:1.6}
-#coursePicker.n3 strong{font-size:26px}#coursePicker.n3 span{font-size:15px}
-#splash .go{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin:auto;max-width:1380px}
-.modeColumn{display:flex;flex-direction:column;gap:14px}
-#splash .go h4{font-weight:800;font-size:19px;line-height:1;color:#5d7086;letter-spacing:3px;margin:0 0 2px}
-#splash .go button{width:100%;font-weight:700;font-size:23px;line-height:1.3;padding:22px 18px;border:1px solid #152c4b;border-radius:14px;cursor:pointer;font-family:inherit;word-break:keep-all;overflow-wrap:break-word}
-#splash .go small{display:block;font-weight:600;font-size:14px;line-height:1.5;opacity:.75;margin-top:6px;word-break:keep-all;overflow-wrap:break-word}
-#splash .go .s{background:#142b47;color:#fff}
-#splash .go .e{background:#fff;color:#142b47;font-size:20px;padding:19px}
-#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
-#splash .go .fr{background:#5b3fa0;color:#fff;border-color:#45307c}
-#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
-#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:20px;padding:21px}
-#splash .go button.sel{outline:4px solid #f5b400;outline-offset:3px}
-#splash .go button:disabled{opacity:.42;cursor:not-allowed}
+#splash .box.msx{width:100%;max-width:1440px;margin:0 auto;padding:0 0 28px;text-align:left;box-sizing:border-box}
+#splash .msHead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 40px;background:#fff;border-bottom:1px solid #d6dfe9}
+#splash .msT{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;min-width:0}
+#splash h1{margin:0;font-weight:800;font-size:26px;line-height:1.3;letter-spacing:-.5px;color:#173a63}
+#splash .prodLine{font-weight:500;font-size:14px;color:#5d6b7a}
+#splash .msMeta{display:flex;align-items:center;gap:10px}
+#splash #oeeLamp{position:static;padding:6px 12px;border:1px solid #d6dfe9;border-radius:999px;background:#fff;font-size:13px}
+#splash .ver{position:static;border:1px solid #d6dfe9;background:#fff;cursor:pointer;font:700 13px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#173a63;border-radius:999px;padding:8px 14px}
+#splash .ver:hover{border-color:#173a63}
+#splash .msBody{display:flex;flex-wrap:wrap;gap:24px;padding:24px 40px 0;align-items:flex-start}
+#splash .msCard{background:#fff;border:1px solid #d6dfe9;border-radius:14px;padding:22px 26px;box-sizing:border-box}
+#splash .msModes{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:16px}
+#splash .msSide{flex:1 1 380px;max-width:460px;display:flex;flex-direction:column;gap:18px}
+#splash .msH{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:800;font-size:18px;color:#16202c}
+#splash .msModes .msH{margin:0}
+#splash .msH i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#173a63;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+#splash .go{display:grid;gap:16px}
+#splash .msGrid{display:grid;grid-template-columns:118px minmax(0,1fr) minmax(0,1fr);gap:10px 12px}
+#splash .msCH{font-weight:700;font-size:13px;color:#5d6b7a;padding:0 4px}
+#splash .msRH{display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:15px;color:#173a63}
+#splash .msRH small{font-weight:700;font-size:12px;color:#5d6b7a;margin-top:2px}
+#splash .msSep{height:1px;background:#e3e9f0}
+#splash .msB{position:relative;min-height:62px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:9px 16px;border:1.5px solid #c9d4e0;border-radius:10px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit}
+#splash .msB b{font-weight:800;font-size:16px;line-height:1.3}
+#splash .msB small{font-weight:500;font-size:13px;color:#5d6b7a}
+#splash .msB:hover{border-color:#173a63}
+#splash .msB.sel{background:#173a63;border-color:#173a63;color:#fff}#splash .msB.sel small{color:#d6e2f0}
+#splash .msB:disabled{opacity:.42;cursor:not-allowed}
+#splash .msNote{margin:0;font-size:12.5px;color:#5d6b7a}
+#coursePicker{display:flex;flex-direction:column;gap:10px}
+#coursePicker button.main{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;border:1.5px solid #c9d4e0;border-radius:12px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit;box-sizing:border-box}
+#coursePicker button.main:hover{border-color:#173a63}
+#coursePicker button.main.sel{background:#173a63;border-color:#173a63;color:#fff}
+#coursePicker button:disabled{opacity:.45;cursor:not-allowed}
+#coursePicker .msP{flex:none;color:#173a63}#coursePicker button.sel .msP{color:#fff}
+#coursePicker .wT{display:flex;flex-direction:column;gap:1px;min-width:0}
+#coursePicker .wT small{font-weight:700;font-size:12px;letter-spacing:.06em;color:#5d6b7a}
+#coursePicker .wT strong{font-weight:800;font-size:17px}
+#coursePicker .wT span{font-size:13px;color:#5d6b7a}
+#coursePicker button.sel .wT small,#coursePicker button.sel .wT span{color:#d6e2f0}
+#splash .msSide .msNote{margin-top:10px}
+#crewHint:empty{display:none}
+#splash #rxSel{display:grid;grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0;margin:0 0 12px;font-weight:700;font-size:13px;color:#5d6b7a}
+#splash #rxSel button{position:relative;height:38px;border:1.5px solid #c9d4e0;border-radius:0;background:#fff;color:#16202c;font:700 14px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;padding:0 8px}
+#splash #rxSel button+button{border-left:0}
+#splash #rxSel button:first-of-type{border-radius:10px 0 0 10px}#splash #rxSel button:last-of-type{border-radius:0 10px 10px 0}
+#splash #rxSel button.on{background:#173a63;border-color:#173a63;color:#fff}
+#msSum{font-size:15px;line-height:1.6;color:#16202c;margin:0 0 12px;min-height:24px}
+#msSum b{color:#173a63}#msSum s{text-decoration:none;color:#5d6b7a}
+#msStart{width:100%;height:52px;border:0;border-radius:10px;background:#173a63;color:#fff;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer}
+#msStart:disabled{background:#c9d4e0;color:#fff;cursor:not-allowed}
+#msStart:not(:disabled):hover{background:#0f2a4a}
+/* 말풍선 (마우스를 올리거나 길게 누르면) */
+#splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);width:max-content;max-width:260px;padding:9px 12px;border-radius:8px;background:#16202c;color:#fff;font-weight:500;font-size:13px;line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
+#splash .tipB::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#16202c}
+#splash button:hover>.tipB,#splash button:focus-visible>.tipB,#splash button.tipOn>.tipB{display:block}
+@media (max-width:640px){#splash .msHead,#splash .msBody{padding-left:16px;padding-right:16px}#splash .msGrid{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)}#splash .msSide{max-width:none}}
 #incPick{max-width:1180px;margin:0 auto;text-align:left}
 #courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer;font-family:inherit}
 /* 이상사례 대처 교육 목록 (idt_common/incpick.js) */
@@ -651,8 +652,6 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;border:1px solid #152c4b}
 #incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
 #incBack{margin:14px 0 0;padding:10px 20px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer;font-family:inherit}
-#splash .go.n6{grid-template-columns:repeat(6,1fr);max-width:1560px}
-#splash .go.n6 button{font-size:21px;padding:20px 12px}#splash .go.n6 .e,#splash .go.n6 .o2{font-size:18px}
 
 /* OEE 연계 교육 (공통) */
 #oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
@@ -819,7 +818,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <div class="modal" id="mRub"><div class="mbox" id="rubBox" style="width:640px"></div></div>
   <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
   <div class="modal" id="mVer"><div class="mbox" id="verBox"></div></div>
-  <div id="splash"><div class="box"><h1>파우치 라인 IDT<small>Pouch Line · Interactive Digital Tutor</small></h1><p class="prodLine">판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤</p><div id="crewHint"></div><div id="coursePicker" class="n2"><button id="chooseF" class="main wait" data-r="F"><small>작업자 1 · FILLING ROOM</small><strong>🧍 충전실 작업자</strong><span>파우치 충전기 SP303 · 2층 데크 · IPC</span></button><button id="chooseP" class="main wait" data-r="P"><small>작업자 2 · PACKING ROOM</small><strong>🧍 포장실 작업자</strong><span>스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기</span></button></div><div class="go n5"><div class="modeColumn "><h4>기본</h4><button class="s" id="spEasy">기본 · 학습<small>라인 가동 핵심 절차 안내</small></button><button class="e" id="spExamEasy">기본 · 평가</button></div><div class="modeColumn "><h4>심화</h4><button class="s" id="spGuide">심화 · 학습<small>라인 가동 전체 절차 단계별 안내</small></button><button class="e" id="spExam">심화 · 평가</button></div><div class="modeColumn demo"><h4>시연</h4><button class="d" id="spDemo">시연모드<small>작업자별 장비 ON → 가동 → 생산까지 간단히</small></button></div><div class="modeColumn free"><h4>자유</h4><button class="fr" id="spFree">자유모드<small>순서 · 감점 · 평가 없음 · 기동 조건 해제 · 문 · 덮개 자유 개폐</small></button></div><div class="modeColumn oee"><h4>OEE</h4><button class="o" id="spOee">OEE 관리 대시보드<small>OEE DB 연결 · 부동 트렌드 · 교육 효과</small></button><button class="o2" id="spInc">이상사례 대처 교육<small>부동 빈도 · 중요도 순 학습 · 평가</small></button></div></div><div id="incPick" style="display:none"></div><button id="courseBack" style="display:none">← 과정 다시 선택</button><button id="verBadge" class="ver" title="버전 이력">V</button></div><div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div></div>
+  <div id="splash"><div class="box msx"><header class="msHead"><div class="msT"><h1>파우치 라인 IDT</h1><span class="prodLine">판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤</span></div><div class="msMeta"><div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div><button id="verBadge" class="ver" title="버전 이력">V</button></div></header><div class="msBody"><section class="msCard msModes"><h2 class="msH"><i>1</i>교육 과정 선택</h2><div class="go"><div class="msGrid"><div></div><div class="msCH">학습 · 안내 있음</div><div class="msCH">평가 · 안내 없음 · 채점</div><div class="msRH">기본</div><button class="msB" id="spEasy" data-nm="기본 · 학습"><b>학습</b><small>핵심 절차 안내</small><span class="tipB" role="tooltip">라인 가동 핵심 절차만 단계별로 안내합니다. 점수 없음.</span></button><button class="msB" id="spExamEasy" data-nm="기본 · 평가"><b>평가</b><small>핵심 절차 채점</small><span class="tipB" role="tooltip">안내 없이 핵심 절차를 수행하고 채점합니다. 합격 80점 · 힌트(F1) −5점.</span></button><div class="msRH">심화</div><button class="msB" id="spGuide" data-nm="심화 · 학습"><b>학습</b><small>전체 절차 안내</small><span class="tipB" role="tooltip">라인 가동 전체 절차(라인 클리어런스 · 문서 · 점검 포함)를 단계별로 안내합니다.</span></button><button class="msB" id="spExam" data-nm="심화 · 평가"><b>평가</b><small>전체 절차 채점</small><span class="tipB" role="tooltip">안내 없이 전체 절차를 수행하고 채점합니다. 합격 80점 · 힌트(F1) −5점.</span></button></div><div class="msSep"></div><div class="msGrid"><div class="msRH">체험</div><button class="msB" id="spDemo" data-nm="시연모드"><b>시연모드</b><small>자동 진행 관찰</small><span class="tipB" role="tooltip">단계마다 [시연 실행] 을 눌러 장비 ON → 가동 → 생산을 지켜봅니다. 평가 없음.</span></button><button class="msB" id="spFree" data-nm="자유모드"><b>자유모드</b><small>순서 · 채점 없음</small><span class="tipB" role="tooltip">순서 · 감점 없이 자유롭게 조작합니다. 전원 · 공압 · 안전문 · 비상정지는 실제처럼 동작하고, 문 · 덮개는 자유롭게 여닫습니다.</span></button><div class="msRH">관리 · 분석</div><button class="msB" id="spInc" data-nm="이상사례 대처 교육"><b>이상사례 대처 교육</b><small>알람 대응 연습</small><span class="tipB" role="tooltip">부동 빈도 · 중요도 순으로 정리한 실제 이상사례에 대응합니다. 작업자를 고르면 사례 목록이 나옵니다.</span></button><button class="msB" id="spOee" data-nm="OEE 관리 대시보드"><b>OEE 관리 대시보드</b><small>부동 · 교육 효과</small><span class="tipB" role="tooltip">OEE DB 연결 · 부동 트렌드 · 교육 효과를 봅니다. 작업자 선택 없이 엽니다.</span></button></div></div><div id="incPick" style="display:none"></div><button id="courseBack" style="display:none">← 과정 다시 선택</button><p class="msNote">버튼에 마우스를 올리거나 길게 누르면 자세한 설명이 나옵니다.</p></section><aside class="msSide"><section class="msCard"><h2 class="msH"><i>2</i>작업자 선택</h2><div id="coursePicker" class="n2"><button id="chooseF" class="main wait" data-r="F" data-nm="충전실 작업자"><svg class="msP" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="3"></circle><path d="M6 21v-5a6 6 0 0 1 12 0v5"></path></svg><span class="wT"><small>FILLING ROOM</small><strong>충전실 작업자</strong><span>충전기 · 2층 데크 · IPC</span></span><span class="tipB" role="tooltip">파우치 충전기 SP303 · 2층 데크 원료 투입 · IPC 검사</span></button><button id="chooseP" class="main wait" data-r="P" data-nm="포장실 작업자"><svg class="msP" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="3"></circle><path d="M6 21v-5a6 6 0 0 1 12 0v5"></path></svg><span class="wT"><small>PACKING ROOM</small><strong>포장실 작업자</strong><span>카토너 · 검사 설비</span></span><span class="tipB" role="tooltip">스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기 · 수동 포장</span></button></div><div id="crewHint"></div></section><section class="msCard msGoC"><h2 class="msH"><i>3</i>시작</h2><div id="msSum">교육 과정과 작업자를 고르세요</div><button id="msStart" disabled>교육 시작</button></section></aside></div></div></div>
   <div id="banner" role="alert" hidden></div>
   <div id="toast"></div>
 </div></div>
@@ -5499,6 +5498,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:39,d:'2026-11-20',t:'메인화면 개편 (11/20 사용자 지시 · 세 IDT 공통 idt_common/splash.*) — ① 교육 과정(기본 · 심화 × 학습 · 평가 표, 체험, 관리 · 분석) → ② 작업자 → ③ [교육 시작] 순서로 정리, 남색 1색 + 회색, 버튼 부제는 10자 안팎으로 줄이고 자세한 설명은 마우스를 올리거나 길게 누르면 말풍선(사용자 선택 C), 과정 · 작업자를 눌러도 바로 시작하지 않고 [교육 시작] 으로 시작(OEE 는 [대시보드 열기] · 이상사례는 [사례 목록 보기])'},
  {v:38,d:'2026-11-20',t:'작업자 능력 통일 (11/20 사용자 지시 "다 통일해") — 세 IDT 작업자가 같은 공통 기능(idt_common/crewkit.js)으로 움직임 : 설비를 돌아가는 길로 걷기(격자 경로 · 도착 전에는 작업 시간 멈춤), 실제 설비 표면 · 조작 지점에 손 대기, 대차 · 리프터 끌기, 2인 1조 보조 작업자(1인칭에서도 동행해 롤 반대쪽을 함께 잡음 · 11/20 사용자 결정), 붓기 흐름 · 파우치 : 대차 · 드럼리프터 모델과 보조 작업자를 공통 모듈로 옮김, 1인칭 은박 롤 작업 때 보조 작업자가 와서 함께 잡은 뒤 완료'},
  {v:37,d:'2026-11-19',t:'통합 4단계 · 시연 · 자유모드 · 결과 창 공통화 (11/19) — 학습 · 평가 · 이상사례 · 시연 결과 창을 세 IDT 모두 파우치 결과 창 모양(제목 · 요약 · 점수 · 실적 카드 · 표 · 버튼)의 공통 모듈 idt_common/modes.js 로 띄움, 시연 안내판(단계마다 [▶ 단계 이름] 버튼) · 자유모드 안내판([▶ 정상 운전 상태로] [■ 전체 OFF 초기화]) 문구 · 버튼 공통, 메인화면으로 가면 결과 창 닫힘'},
  {v:36,d:'2026-11-19',t:'통합 3단계 · 작업자 동작 공통화 (11/19) — 들고 가는 물건(종류별 모양 · 손 간격 · 들 높이) · 손에 든 자세 · 걷는 방향 바라보기 · 손 뻗기 시간 · 보행 속도를 세 IDT 모두 idt_common/crewkit.js 한 곳에서 씀 (IDT 고유 물건은 그 IDT 에서 등록)'},
@@ -6142,17 +6142,62 @@ function createAimMark(o){
 }
 
 /* ── common/splash.js ── */
-/* ═══ 메인화면 공통 동작 (세 IDT · 11/19 · 파우치 crewMark 를 옮김) — 마크업 idt_common/splash.py · 모양 idt_common/splash.css
-   idtSplashMark({mode, modeNm, room, isSel:btn=>bool}) : 고른 모드 · 작업자 표시 + 안내 문구 (① 모드 선택 → ② 작업자)
-   idtSplashVer(text) : 오른쪽 아래 버전 ═══ */
+/* ═══ 메인화면 공통 동작 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ [교육 시작]) — 마크업 idt_common/splash.py · 모양 idt_common/splash.css
+   · 사람이 누른 과정 · 작업자 버튼은 "선택"만 하고(기존 IDT 처리기에 넘기지 않음), [교육 시작] 을 누르면 고른 과정 → 작업자 순서로
+     IDT 의 기존 처리기를 그대로 실행 (각 IDT 의 시작 흐름 · 시험 스크립트의 .click() 은 그대로 동작)
+   · OEE 관리 대시보드는 작업자 없이 [대시보드 열기], 이상사례 대처 교육은 작업자를 고르면 [사례 목록 보기]
+   · 말풍선 : 마우스를 올리면(CSS) · 길게 누르면(0.45 초 · 터치 화면) 표시 — 길게 누른 뒤의 클릭은 선택하지 않음
+   idtSplashMark({mode, modeNm, room, isSel:btn=>bool}) : IDT 상태로 선택 표시 맞춤 (메인화면 복귀 때 선택 지움)
+   idtSplashVer(text) : 오른쪽 위 버전 ═══ */
+const IDT_SP={mode:null, room:null, pass:false, lp:null, lpT:0, swallow:false};
+const _spModes=()=>Array.from(document.querySelectorAll("#splash .go button"));
+const _spRooms=()=>Array.from(document.querySelectorAll("#coursePicker button.main"));
+const _spNoRoom=b=>!!b&&(b.id==="spOee"||b.dataset.m==="oee");
+function idtSpSync(){
+  const M=IDT_SP.mode, R=IDT_SP.room;
+  _spModes().forEach(b=>b.classList.toggle("sel",b===M));
+  _spRooms().forEach(b=>{ b.classList.toggle("sel",b===R); b.classList.toggle("wait",!M); });
+  const sum=document.getElementById("msSum"), go=document.getElementById("msStart"); if(!sum||!go) return;
+  const e=s=>String(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  const rx=document.querySelector("#rxSel button.on"), noRoom=_spNoRoom(M), inc=!!M&&(M.dataset.m==="inc"||M.id==="spInc");
+  if(R&&R.disabled){ IDT_SP.room=null; return idtSpSync(); }
+  sum.innerHTML=!M?(R?'<s>교육 과정을 고르세요</s> › '+e(R.dataset.nm):'<s>교육 과정과 작업자를 고르세요</s>')
+    :noRoom?'<b>'+e(M.dataset.nm)+'</b> <s>· 작업자 선택 없이 엽니다</s>'
+    :'<b>'+e(M.dataset.nm)+'</b> › '+(R?e(R.dataset.nm)+(inc?'':' <s>(1인칭)</s>')+(rx&&R.dataset.r!=="F"?' <s>· '+e(rx.firstChild.textContent)+'</s>':''):'<s>작업자를 고르세요</s>');
+  go.disabled=!(M&&(noRoom||R));
+  go.textContent=noRoom?"대시보드 열기":inc?"사례 목록 보기":"교육 시작";
+}
 function idtSplashMark(o){
-  document.querySelectorAll("#splash .go button").forEach(b=>b.classList.toggle("sel",!!o.mode&&!!o.isSel(b)));
-  document.querySelectorAll("#coursePicker button.main").forEach(b=>{ b.classList.toggle("sel",!!o.room&&o.room===b.dataset.r); b.classList.toggle("wait",!o.mode); });
-  const h=document.getElementById("crewHint"), e=s=>String(s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
-  if(h) h.innerHTML=o.mode?'<b>② 작업자 선택</b> — 위의 작업자를 누르면 그 작업장 1인칭으로 시작합니다 <s>모드 : '+e(o.modeNm||"")+'</s>'
-    :'<b>① 모드 선택</b> — 아래에서 모드를 고른 뒤 <b>② 작업자</b>를 누르면 그 작업장 작업자 1인칭으로 시작합니다';
+  if(o.mode||o.room){ IDT_SP.mode=o.mode?(_spModes().find(b=>o.isSel(b))||null):IDT_SP.mode; IDT_SP.room=o.room?(_spRooms().find(b=>b.dataset.r===o.room)||null):IDT_SP.room; }
+  else if(IDT_SP.started){ IDT_SP.started=false; IDT_SP.mode=null; IDT_SP.room=null; }     /* 교육을 마치고 메인화면으로 오면 선택 지움 (품목 전환 등 화면 안 갱신은 유지) */
+  idtSpSync();
 }
 function idtSplashVer(t){ const b=document.getElementById("verBadge"); if(b) b.textContent=t; }
+/* 사람이 누른 클릭만 가로챔 (스크립트의 .click() · [교육 시작] 재실행은 통과) */
+document.addEventListener("click",ev=>{
+  if(IDT_SP.pass||!ev.isTrusted) return; const sp=document.getElementById("splash"); if(!sp||sp.classList.contains("hide")) return;
+  const t=ev.target&&ev.target.closest?ev.target:null; if(!t) return;
+  const m=t.closest("#splash .go button"), r=t.closest("#coursePicker button.main");
+  if(IDT_SP.swallow&&(m||r)){ IDT_SP.swallow=false; ev.stopImmediatePropagation(); ev.preventDefault(); return; }
+  if(m){ ev.stopImmediatePropagation(); ev.preventDefault(); if(m.disabled) return; IDT_SP.mode=IDT_SP.mode===m?null:m; idtSpSync(); return; }
+  if(r){ ev.stopImmediatePropagation(); ev.preventDefault(); if(r.disabled) return; IDT_SP.room=IDT_SP.room===r?null:r; idtSpSync(); return; }
+  if(t.closest("#rxSel button")) setTimeout(idtSpSync,0);
+},true);
+function idtSpStart(){
+  const M=IDT_SP.mode, R=IDT_SP.room; if(!M) return; const noRoom=_spNoRoom(M); if(!noRoom&&!R) return;
+  IDT_SP.pass=true; IDT_SP.started=true; try{ M.click(); if(!noRoom&&R&&!document.getElementById("splash").classList.contains("hide")) R.click(); } finally{ IDT_SP.pass=false; }
+}
+/* 길게 누르기 → 말풍선 */
+document.addEventListener("pointerdown",ev=>{
+  document.querySelectorAll("#splash .tipOn").forEach(b=>b.classList.remove("tipOn")); clearTimeout(IDT_SP.lpT); IDT_SP.swallow=false;
+  const b=ev.target&&ev.target.closest&&ev.target.closest("#splash button"); if(!b||!b.querySelector(".tipB")) return;
+  IDT_SP.lpT=setTimeout(()=>{ b.classList.add("tipOn"); IDT_SP.swallow=true; },450);
+},true);
+for(const k of ["pointerup","pointercancel","pointerleave"]) document.addEventListener(k,()=>clearTimeout(IDT_SP.lpT),true);
+(function spBoot(){ const go=document.getElementById("msStart"); if(!go){ return setTimeout(spBoot,200); }
+  go.onclick=idtSpStart; idtSpSync();
+  try{ if(typeof CHANGELOG!=="undefined"&&CHANGELOG[0]){ const b=document.getElementById("verBadge"); if(b&&/^V?$/.test(b.textContent.trim())) b.textContent="V"+CHANGELOG[0].v; } }catch(e){}
+})();
 
 /* ── common/incpick.js ── */
 /* ═══ 이상사례 대처 교육 목록 공통 (세 IDT · 11/19 · 파우치 renderIncPick 을 옮김)
@@ -6181,7 +6226,7 @@ function idtIncPick(el,o){
         '<b>'+e(x.nm)+'<s>'+e(x.src||"")+(R.has?' · 부동 '+Math.round(x.down)+' 분 · '+x.n+' 회':'')+(d.length?' · 실습 '+d.length+' 회'+(best>=0?' · 평가 최고 '+best+' 점':''):'')+'</s></b>'+
         '<button class="s" data-inc="'+e(x.k)+'" data-m="learn">학습</button><button class="e" data-inc="'+e(x.k)+'" data-m="exam">평가</button></div>'; }).join("")+'</div>'+
     '<p class="ipNote">중요도 등급 : 상 = '+IDT_GRADE_WHY.상+' · 중 = '+IDT_GRADE_WHY.중+' · 하 = '+IDT_GRADE_WHY.하+'</p>'+
-    '<button id="incBack">'+(o.back||"← 기본 · 심화 · OEE 로")+'</button>';
+    '<button id="incBack">'+(o.back||"← 교육 과정 선택으로")+'</button>';
   el.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>o.onStart(b.dataset.inc,b.dataset.m));
   el.querySelector("#incBack").onclick=()=>o.onBack();
 }

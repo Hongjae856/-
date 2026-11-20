@@ -26,7 +26,7 @@ function oee3Init(){
   if(!document.getElementById("oeeLamp")) $("#splash").insertAdjacentHTML("beforeend",'<div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div>');   /* 파우치와 같은 OEE 연동 표시 */
   $("#oeeLamp").onclick=()=>OEEEDU.open(); try{ idtSplashVer("V"+CHANGELOG[0].v); }catch(e){}
   OEEEDU.init({line:"블리스터", title:"PTP(블리스터) 라인 · 부동 원인 분석 → 이상사례 대처 교육", codes:OEE_PTP_CODES, mount:document.body,
-    openInc(){ goHome(); pickMode({dataset:{c:"inc",m:"inc"},closest:()=>({querySelector:()=>({textContent:"OEE"})}),firstChild:{textContent:"이상사례 대처 교육"}}); }});
+    openInc(){ goHome(); pickMode({dataset:{c:"inc",m:"inc",nm:"이상사례 대처 교육"}}); }});
   $("#spOee").onclick=()=>OEEEDU.open();
 }
 /* 사례 목록 : OEE 부동시간(40 %) · 빈도(30 %) · 중요도(30 %, 등급 미정 = 중) — 데이터가 없으면 앱 알람 순서 */

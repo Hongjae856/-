@@ -1,39 +1,64 @@
-/* ═══ 메인화면 공통 (세 IDT · 11/19 · 파우치 메인화면 규칙을 그대로 옮김) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
-#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:center;justify-content:center;background:#fff;color:#111c2d;transition:opacity .35s;overflow:auto;
+/* ═══ 메인화면 공통 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ 교육 시작 · 남색 1색 + 회색) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
+#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:flex-start;justify-content:center;background:#f4f6f9;color:#16202c;transition:opacity .35s;overflow:auto;
   font-family:var(--ff,"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif)}
 #splash.hide{opacity:0;pointer-events:none;visibility:hidden}
-#splash .box{max-width:1300px;width:100%;padding:40px;text-align:center;margin:auto}
-#splash .ver{position:absolute;right:22px;bottom:16px;border:1px solid #c9d4e0;background:#fff;cursor:pointer;font:700 14px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;border-radius:16px;padding:7px 14px;letter-spacing:.5px}
-#splash .ver:hover{color:#15304e;border-color:#15304e}
-#splash h1{font-weight:800;font-size:50px;line-height:1.15;letter-spacing:-2px;margin:0 0 8px}
-#splash h1 small{display:block;font-weight:700;font-size:17px;line-height:1.4;letter-spacing:1px;color:#6a7f96;margin-top:8px}
-#splash .prodLine{font-weight:700;font-size:16px;line-height:1.5;color:#5d7086;margin:-14px 0 22px}
-#crewHint{max-width:900px;margin:0 auto 12px;text-align:center;font-weight:600;font-size:16px;line-height:1.5;color:#40566e}
-#crewHint b{color:#142b47} #crewHint s{text-decoration:none;margin-left:10px;padding:2px 10px;border-radius:999px;background:#fff4cc;color:#6b4e00}
-#coursePicker{display:grid;grid-template-columns:1fr 1fr;gap:22px;margin:0 auto 20px;max-width:900px}
-#coursePicker.n3{grid-template-columns:repeat(3,1fr);max-width:1240px}
-#coursePicker button{padding:24px;text-align:left;border:1px solid #b7c4d2;border-radius:20px;background:#fff;color:#142b47;cursor:pointer;font-family:inherit}
-#coursePicker button.main{background:#142b47;color:#fff}
-#coursePicker button:disabled{opacity:.5;cursor:not-allowed}
-#coursePicker button.main.wait{opacity:.55}
-#coursePicker button.main.sel{outline:4px solid #f5b400;outline-offset:3px}
-#coursePicker small{display:block;font-size:13px;letter-spacing:2px;opacity:.7}
-#coursePicker strong{display:block;font-size:29px;margin:10px 0}
-#coursePicker span{display:block;font-size:17px;line-height:1.6}
-#coursePicker.n3 strong{font-size:26px}#coursePicker.n3 span{font-size:15px}
-#splash .go{display:grid;grid-template-columns:repeat(5,1fr);gap:24px;margin:auto;max-width:1380px}
-.modeColumn{display:flex;flex-direction:column;gap:14px}
-#splash .go h4{font-weight:800;font-size:19px;line-height:1;color:#5d7086;letter-spacing:3px;margin:0 0 2px}
-#splash .go button{width:100%;font-weight:700;font-size:23px;line-height:1.3;padding:22px 18px;border:1px solid #152c4b;border-radius:14px;cursor:pointer;font-family:inherit;word-break:keep-all;overflow-wrap:break-word}
-#splash .go small{display:block;font-weight:600;font-size:14px;line-height:1.5;opacity:.75;margin-top:6px;word-break:keep-all;overflow-wrap:break-word}
-#splash .go .s{background:#142b47;color:#fff}
-#splash .go .e{background:#fff;color:#142b47;font-size:20px;padding:19px}
-#splash .go .d{background:#2b8a4b;color:#fff;border-color:#1d6b38}
-#splash .go .fr{background:#5b3fa0;color:#fff;border-color:#45307c}
-#splash .go .o{background:#e0714a;color:#fff;border-color:#c85d38}
-#splash .go .o2{background:#fff;color:#b04a26;border-color:#c85d38;font-size:20px;padding:21px}
-#splash .go button.sel{outline:4px solid #f5b400;outline-offset:3px}
-#splash .go button:disabled{opacity:.42;cursor:not-allowed}
+#splash .box.msx{width:100%;max-width:1440px;margin:0 auto;padding:0 0 28px;text-align:left;box-sizing:border-box}
+#splash .msHead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 40px;background:#fff;border-bottom:1px solid #d6dfe9}
+#splash .msT{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;min-width:0}
+#splash h1{margin:0;font-weight:800;font-size:26px;line-height:1.3;letter-spacing:-.5px;color:#173a63}
+#splash .prodLine{font-weight:500;font-size:14px;color:#5d6b7a}
+#splash .msMeta{display:flex;align-items:center;gap:10px}
+#splash #oeeLamp{position:static;padding:6px 12px;border:1px solid #d6dfe9;border-radius:999px;background:#fff;font-size:13px}
+#splash .ver{position:static;border:1px solid #d6dfe9;background:#fff;cursor:pointer;font:700 13px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#173a63;border-radius:999px;padding:8px 14px}
+#splash .ver:hover{border-color:#173a63}
+#splash .msBody{display:flex;flex-wrap:wrap;gap:24px;padding:24px 40px 0;align-items:flex-start}
+#splash .msCard{background:#fff;border:1px solid #d6dfe9;border-radius:14px;padding:22px 26px;box-sizing:border-box}
+#splash .msModes{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:16px}
+#splash .msSide{flex:1 1 380px;max-width:460px;display:flex;flex-direction:column;gap:18px}
+#splash .msH{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:800;font-size:18px;color:#16202c}
+#splash .msModes .msH{margin:0}
+#splash .msH i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#173a63;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+#splash .go{display:grid;gap:16px}
+#splash .msGrid{display:grid;grid-template-columns:118px minmax(0,1fr) minmax(0,1fr);gap:10px 12px}
+#splash .msCH{font-weight:700;font-size:13px;color:#5d6b7a;padding:0 4px}
+#splash .msRH{display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:15px;color:#173a63}
+#splash .msRH small{font-weight:700;font-size:12px;color:#5d6b7a;margin-top:2px}
+#splash .msSep{height:1px;background:#e3e9f0}
+#splash .msB{position:relative;min-height:62px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:9px 16px;border:1.5px solid #c9d4e0;border-radius:10px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit}
+#splash .msB b{font-weight:800;font-size:16px;line-height:1.3}
+#splash .msB small{font-weight:500;font-size:13px;color:#5d6b7a}
+#splash .msB:hover{border-color:#173a63}
+#splash .msB.sel{background:#173a63;border-color:#173a63;color:#fff}#splash .msB.sel small{color:#d6e2f0}
+#splash .msB:disabled{opacity:.42;cursor:not-allowed}
+#splash .msNote{margin:0;font-size:12.5px;color:#5d6b7a}
+#coursePicker{display:flex;flex-direction:column;gap:10px}
+#coursePicker button.main{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;border:1.5px solid #c9d4e0;border-radius:12px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit;box-sizing:border-box}
+#coursePicker button.main:hover{border-color:#173a63}
+#coursePicker button.main.sel{background:#173a63;border-color:#173a63;color:#fff}
+#coursePicker button:disabled{opacity:.45;cursor:not-allowed}
+#coursePicker .msP{flex:none;color:#173a63}#coursePicker button.sel .msP{color:#fff}
+#coursePicker .wT{display:flex;flex-direction:column;gap:1px;min-width:0}
+#coursePicker .wT small{font-weight:700;font-size:12px;letter-spacing:.06em;color:#5d6b7a}
+#coursePicker .wT strong{font-weight:800;font-size:17px}
+#coursePicker .wT span{font-size:13px;color:#5d6b7a}
+#coursePicker button.sel .wT small,#coursePicker button.sel .wT span{color:#d6e2f0}
+#splash .msSide .msNote{margin-top:10px}
+#crewHint:empty{display:none}
+#splash #rxSel{display:grid;grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0;margin:0 0 12px;font-weight:700;font-size:13px;color:#5d6b7a}
+#splash #rxSel button{position:relative;height:38px;border:1.5px solid #c9d4e0;border-radius:0;background:#fff;color:#16202c;font:700 14px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;padding:0 8px}
+#splash #rxSel button+button{border-left:0}
+#splash #rxSel button:first-of-type{border-radius:10px 0 0 10px}#splash #rxSel button:last-of-type{border-radius:0 10px 10px 0}
+#splash #rxSel button.on{background:#173a63;border-color:#173a63;color:#fff}
+#msSum{font-size:15px;line-height:1.6;color:#16202c;margin:0 0 12px;min-height:24px}
+#msSum b{color:#173a63}#msSum s{text-decoration:none;color:#5d6b7a}
+#msStart{width:100%;height:52px;border:0;border-radius:10px;background:#173a63;color:#fff;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer}
+#msStart:disabled{background:#c9d4e0;color:#fff;cursor:not-allowed}
+#msStart:not(:disabled):hover{background:#0f2a4a}
+/* 말풍선 (마우스를 올리거나 길게 누르면) */
+#splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);width:max-content;max-width:260px;padding:9px 12px;border-radius:8px;background:#16202c;color:#fff;font-weight:500;font-size:13px;line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
+#splash .tipB::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#16202c}
+#splash button:hover>.tipB,#splash button:focus-visible>.tipB,#splash button.tipOn>.tipB{display:block}
+@media (max-width:640px){#splash .msHead,#splash .msBody{padding-left:16px;padding-right:16px}#splash .msGrid{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)}#splash .msSide{max-width:none}}
 #incPick{max-width:1180px;margin:0 auto;text-align:left}
 #courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer;font-family:inherit}
 /* 이상사례 대처 교육 목록 (idt_common/incpick.js) */
@@ -50,5 +75,3 @@
 #incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;border:1px solid #152c4b}
 #incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
 #incBack{margin:14px 0 0;padding:10px 20px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer;font-family:inherit}
-#splash .go.n6{grid-template-columns:repeat(6,1fr);max-width:1560px}
-#splash .go.n6 button{font-size:21px;padding:20px 12px}#splash .go.n6 .e,#splash .go.n6 .o2{font-size:18px}

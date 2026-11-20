@@ -189,11 +189,18 @@ sys.path.insert(0, str(H.parent.parent / "idt_common"))
 import splash as SPLASH   # noqa: E402
 _PID = {"easy": "spEasy", "examEasy": "spExamEasy", "guide": "spGuide", "exam": "spExam", "demo": "spDemo", "free": "spFree", "oee": "spOee", "inc": "spInc"}
 SPLASH_CFG = {
-    "title": "파우치 라인 IDT", "en": "Pouch Line · Interactive Digital Tutor", "prod": "판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤",
-    "workers": [{"id": "chooseF", "r": "F", "tag": "작업자 1 · FILLING ROOM", "nm": "🧍 충전실 작업자", "desc": "파우치 충전기 SP303 · 2층 데크 · IPC"},
-                {"id": "chooseP", "r": "P", "tag": "작업자 2 · PACKING ROOM", "nm": "🧍 포장실 작업자", "desc": "스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기"}],
-    "cols": SPLASH.std_cols(lambda m: (_PID[m], None), free_sm="순서 · 감점 · 평가 없음 · 기동 조건 해제 · 문 · 덮개 자유 개폐"),
+    "title": "파우치 라인 IDT", "prod": "판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤",
+    "workers": [{"id": "chooseF", "r": "F", "tag": "FILLING ROOM", "nm": "충전실 작업자", "desc": "충전기 · 2층 데크 · IPC", "tip": "파우치 충전기 SP303 · 2층 데크 원료 투입 · IPC 검사"},
+                {"id": "chooseP", "r": "P", "tag": "PACKING ROOM", "nm": "포장실 작업자", "desc": "카토너 · 검사 설비", "tip": "스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기 · 수동 포장"}],
+    "cols": SPLASH.std_cols(lambda m: (_PID[m], None), free_tip="순서 · 감점 없이 자유롭게 조작합니다. 전원 · 공압 · 안전문 · 비상정지는 실제처럼 동작하고, 문 · 덮개는 자유롭게 여닫습니다."),
 }
+
+
+def _old_css() -> str:
+    """원본 style.css 에서 옛 메인화면 규칙을 뺌 — 메인화면 모양은 세 IDT 공통 idt_common/splash.css (11/20)"""
+    keep = [ln for ln in (OLD / "style.css").read_text(encoding="utf-8").split("\n")
+            if not ln.lstrip().startswith(("#splash", "#coursePicker", ".modeColumn", "#crewHint", "#courseBack"))]
+    return "\n".join(keep)
 
 
 def build() -> str:
@@ -208,7 +215,7 @@ def build() -> str:
     if "</script" in js.lower() or "</script" in three.lower():
         sys.exit("script text must not contain </script")
     parts = {
-        "/*__CSS__*/": (OLD / "style.css").read_text(encoding="utf-8") + "\n" + (SRC / "style3.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "idt_common" / "splash.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "oee" / "oee.css").read_text(encoding="utf-8"),
+        "/*__CSS__*/": _old_css() + "\n" + (SRC / "style3.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "idt_common" / "splash.css").read_text(encoding="utf-8") + "\n" + (H.parent.parent / "oee" / "oee.css").read_text(encoding="utf-8"),
         "<!--__BODY__-->": body(),
     }
     for key, text in parts.items():

@@ -77,11 +77,12 @@ def app() -> str:
 sys.path.insert(0, str(ROOT / "idt_common"))
 import splash as SPLASH   # noqa: E402  메인화면 공통 템플릿 (11/19)
 SPLASH_CFG = {
-    "title": "병 라인 IDT", "en": "Bottle Line · Interactive Digital Tutor", "prod": "병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장",
-    "extra": '<div id="rxSel">포장 품목 <button data-rx="1" class="on">전문의약품 (판독 · AG · 2명)</button><button data-rx="0">일반의약품 (판독 없음 · 1명)</button></div>',
-    "workers": [{"id": "chooseF", "r": "F", "tag": "작업자 1 · FILLING ROOM", "nm": "🧍 충전실 작업자", "desc": "언스크램블러 · 실리카겔 · 정제 계수 · PE 필름 · 캡핑"},
-                {"id": "chooseP1", "r": "P1", "tag": "작업자 2 · PACKING ROOM", "nm": "🧍 포장실 작업자 1", "desc": "설비 운전 (턴테이블 · 라벨 · 비전 · 설명서 · 중량선별) · 바코드 판독"},
-                {"id": "chooseP2", "r": "P2", "tag": "작업자 3 · PACKING ROOM", "nm": "🧍 포장실 작업자 2", "desc": "박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품)"}],
+    "title": "병 라인 IDT", "prod": "병 충전 → 라벨 · 설명서 · 중량선별 → 판독 · 박스 포장",
+    "extra": '<div id="rxSel"><span>포장 품목</span><button data-rx="1" class="on">전문의약품<span class="tipB" role="tooltip">판독 · AG 라벨 · 포장실 작업자 2명</span></button><button data-rx="0">일반의약품<span class="tipB" role="tooltip">판독 없음 · 포장실 작업자 1명</span></button></div>',
+    "note": "고르지 않은 포장실 작업자는 자동으로 일합니다.",
+    "workers": [{"id": "chooseF", "r": "F", "tag": "FILLING ROOM", "nm": "충전실 작업자", "desc": "병 충전 · 캡핑", "tip": "언스크램블러 · 실리카겔 · 정제 계수(리프터 투입) · PE 필름 · 캡핑"},
+                {"id": "chooseP1", "r": "P1", "tag": "PACKING ROOM · 1", "nm": "포장실 작업자 1", "desc": "설비 운전 · 판독", "tip": "턴테이블 · 라벨 · 비전 · 설명서 · 중량선별 운전 · 바코드 판독"},
+                {"id": "chooseP2", "r": "P2", "tag": "PACKING ROOM · 2", "nm": "포장실 작업자 2", "desc": "박스 포장 · 적재", "tip": "박스 조립 · 봉함 · AG 라벨 부착 · 파렛트 적재 (전문의약품만)"}],
     "cols": SPLASH.std_cols(lambda m: ("spOee", None) if m == "oee" else ("spInc", {"data-m": "inc"}) if m == "inc" else (None, {"data-m": m})),
 }
 
