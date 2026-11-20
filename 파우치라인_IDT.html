@@ -4661,6 +4661,45 @@ function idtHelperPose(H,P,leadYaw,item,reach,act){
       P.R=[r[0]+u[0]*k,r[1],r[2]+u[1]*k]; P.gR=.3; P.nR="down"; } }
 }
 
+/* ═══ 보이는 작업자 걷기 (위치만 주는 앱 작업자 · 11/20 "다 통일해") ═══
+   앱이 주는 자리(want)에서 가장 가까운 빈 바닥을 찾아(idtNearFree), 설비를 돌아가는 길(idtGridPath · 격자 A*)로 1.4 m/s 걸음
+   free(x,z) : 그 IDT 의 바닥 판정(m) · 도착 전에는 앱 작업 시간을 멈춤(앱 쪽 HOLD 연결) */
+function idtNearFree(free,x,z,maxR,pref){
+  if(free(x,z)) return [x,z]; pref=pref||[0,1];
+  for(let r=.1;r<=(maxR||1.5)+1e-6;r+=.1){ let best=null, bs=-1e9;
+    for(let a=0;a<24;a++){ const q=a/24*Math.PI*2, px=x+Math.cos(q)*r, pz=z+Math.sin(q)*r; if(!free(px,pz)) continue; const sc=Math.cos(q)*pref[0]+Math.sin(q)*pref[1]; if(sc>bs){ bs=sc; best=[px,pz]; } }
+    if(best) return best; }
+  return null;
+}
+function idtGridPath(free,a,b,step,maxN){
+  step=step||.1; maxN=maxN||20000; const K=(i,k)=>i+","+k, gi=v=>Math.round(v/step);
+  const si=gi(a[0]), sk=gi(a[1]), ti=gi(b[0]), tk=gi(b[1]); if(si===ti&&sk===tk) return [b];
+  const open=new Map(), came=new Map(), g=new Map(), h=(i,k)=>Math.hypot(i-ti,k-tk);
+  open.set(K(si,sk),[si,sk,h(si,sk)]); g.set(K(si,sk),0); let n=0, found=null;
+  while(open.size&&n++<maxN){ let bk=null, bv=null; for(const [k,v] of open) if(!bv||v[2]<bv[2]){ bk=k; bv=v; } open.delete(bk);
+    const [i,k]=bv; if(i===ti&&k===tk){ found=bk; break; }
+    for(let di=-1;di<=1;di++) for(let dk=-1;dk<=1;dk++){ if(!di&&!dk) continue; const ni=i+di, nk=k+dk, nkK=K(ni,nk);
+      if(!(ni===ti&&nk===tk)&&!free(ni*step,nk*step)) continue; const ng=g.get(bk)+Math.hypot(di,dk);
+      if(g.has(nkK)&&g.get(nkK)<=ng) continue; g.set(nkK,ng); came.set(nkK,bk); open.set(nkK,[ni,nk,ng+h(ni,nk)]); } }
+  if(!found) return null;
+  const pts=[]; for(let k=found;k;k=came.get(k)){ const [i,kk]=k.split(",").map(Number); pts.unshift([i*step,kk*step]); }
+  pts[0]=[a[0],a[1]]; pts[pts.length-1]=[b[0],b[1]];
+  const out=[pts[0]]; let i=0; while(i<pts.length-1){ let j=pts.length-1; while(j>i+1&&!_ckSeg(free,pts[i],pts[j])) j--; out.push(pts[j]); i=j; }   /* 줄 당기기 : 곧게 갈 수 있으면 건너뜀 */
+  out.shift(); return out;
+}
+/* V = {x,z,path,goal,stand} · want = [x,z] (앱 자리) · 돌려줌 : {x,z,moving,arrived} */
+function idtWalkerNew(o){ return {x:null, z:null, path:[], goal:null, stand:null, o}; }
+function idtWalkerTick(V,want,dt,spd){
+  const free=V.o.free;
+  if(V.x==null||Math.hypot(want[0]-V.x,want[1]-V.z)>8){ const s=idtNearFree(free,want[0],want[1],1.5,V.o.pref)||want; V.x=s[0]; V.z=s[1]; V.path=[]; V.goal=want.slice(); V.stand=s; }
+  if(!V.goal||Math.hypot(want[0]-V.goal[0],want[1]-V.goal[1])>.25){ V.goal=want.slice(); V.stand=idtNearFree(free,want[0],want[1],1.5,V.o.pref)||want.slice();
+    V.path=(Math.hypot(V.stand[0]-V.x,V.stand[1]-V.z)<.05)?[]:(idtGridPath(free,[V.x,V.z],V.stand,.1)||[V.stand]); }
+  let st=dt*(spd||IDT_WALK), mv=false;
+  while(st>1e-4&&V.path.length){ const p=V.path[0], dx=p[0]-V.x, dz=p[1]-V.z, d=Math.hypot(dx,dz); mv=true;
+    if(d<=st){ V.x=p[0]; V.z=p[1]; st-=d; V.path.shift(); } else { V.x+=dx/d*st; V.z+=dz/d*st; st=0; } }
+  return {x:V.x, z:V.z, moving:mv, arrived:!V.path.length};
+}
+
 /* ── v3/bridge.js ── */
 /* ═══════════════════════════════════════════════════════════════════
    새 3D 연결 (옛 engine · gfx · models 대체) — 단위 m
@@ -5460,6 +5499,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:38,d:'2026-11-20',t:'작업자 능력 통일 (11/20 사용자 지시 "다 통일해") — 세 IDT 작업자가 같은 공통 기능(idt_common/crewkit.js)으로 움직임 : 설비를 돌아가는 길로 걷기(격자 경로 · 도착 전에는 작업 시간 멈춤), 실제 설비 표면 · 조작 지점에 손 대기, 대차 · 리프터 끌기, 2인 1조 보조 작업자(1인칭에서도 동행해 롤 반대쪽을 함께 잡음 · 11/20 사용자 결정), 붓기 흐름 · 파우치 : 대차 · 드럼리프터 모델과 보조 작업자를 공통 모듈로 옮김, 1인칭 은박 롤 작업 때 보조 작업자가 와서 함께 잡은 뒤 완료'},
  {v:37,d:'2026-11-19',t:'통합 4단계 · 시연 · 자유모드 · 결과 창 공통화 (11/19) — 학습 · 평가 · 이상사례 · 시연 결과 창을 세 IDT 모두 파우치 결과 창 모양(제목 · 요약 · 점수 · 실적 카드 · 표 · 버튼)의 공통 모듈 idt_common/modes.js 로 띄움, 시연 안내판(단계마다 [▶ 단계 이름] 버튼) · 자유모드 안내판([▶ 정상 운전 상태로] [■ 전체 OFF 초기화]) 문구 · 버튼 공통, 메인화면으로 가면 결과 창 닫힘'},
  {v:36,d:'2026-11-19',t:'통합 3단계 · 작업자 동작 공통화 (11/19) — 들고 가는 물건(종류별 모양 · 손 간격 · 들 높이) · 손에 든 자세 · 걷는 방향 바라보기 · 손 뻗기 시간 · 보행 속도를 세 IDT 모두 idt_common/crewkit.js 한 곳에서 씀 (IDT 고유 물건은 그 IDT 에서 등록)'},
  {v:35,d:'2026-11-19',t:'통합 2단계 · 1인칭 조작 · 상단 바 공통화 (11/19) — 1인칭 단축키(C 앉기 · F1 힌트 · H 도움말 · Tab 메뉴) · 도움말 창 · 메뉴 · 눈높이 · 앉기 · 걷기 속도 · 초점을 세 IDT 모두 idt_common/fpctl.js 한 곳에서, 그래픽 단계 · 배속 목록 값을 idt_common/topbar.js 한 곳에서 씀 — 파우치 도움말에 R(자재 되돌리기) · 계단 줄은 파우치 고유로 유지'},
