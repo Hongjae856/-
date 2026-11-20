@@ -106,7 +106,8 @@ function ptp3Restart(){ const L=LAST3; goHome(); if(!L) return; setTimeout(()=>{
 function boot(){ $("#modeChip").textContent=verTxt();
   if(!appsReady()){ setTimeout(boot,100); return; }
   v3Init(); v3Orbit(); walkBind(); crew3Init(); forwardKeys(); fp3Init(); fpcInit({isFP:()=>V3P.view!=="orbit"&&!FP3.hmi, hint:ptpHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});
-  tbViews({orbit:()=>V3P.orbit, isOrbit:()=>V3P.view==="orbit"&&$("#splash").classList.contains("hide"), rect:()=>{ const c=document.getElementById("cv").getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect(); return {left:c.left-s.left,top:c.top-s.top,width:c.width}; },
+  tbViews({orbit:()=>V3P.orbit, isOrbit:()=>V3P.view==="orbit"&&$("#splash").classList.contains("hide"), rect:()=>{ const c=document.getElementById("cv").getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect(), k=document.getElementById("shCoach"), kr=k&&!k.hidden?k.getBoundingClientRect():null;   /* 안내판과 겹치지 않게 그 아래 */
+      return {left:c.left-s.left,top:Math.max(c.top,kr&&kr.bottom>c.top&&kr.top<c.top+80?kr.bottom-4:c.top)-s.top,width:c.width}; },
     presets:[["전체",{yaw:-.42,pitch:.42,dist:12500,tx:2600,ty:700,tz:200}],["충전실",{yaw:-.4,pitch:.36,dist:7000,tx:-4600,ty:900,tz:0}],["포장실",{yaw:-.4,pitch:.38,dist:9000,tx:8000,ty:800,tz:300}],
       ["전면",{yaw:0,pitch:.12,dist:12500,tx:2600,ty:1000,tz:0}],["평면",{yaw:0,pitch:1.45,dist:17000,tx:2600,ty:0,tz:500}]]});
   /* 상단 바 (파우치 기준 · idt_common/topbar.js) */

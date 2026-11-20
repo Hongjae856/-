@@ -92,7 +92,9 @@ function bRestart(){ const L=LASTB; goHome(); if(!L) return; setTimeout(()=>{ CR
 function boot(){
   $("#modeChip").textContent=verTxt();
   v3bInit(); pkBuild(V3B.sc); crewInit(); pfInit(); ffInit(); oeebInit(); v3bOrbit(); walkBind(); bindSplash(); fpcInit({isFP:()=>V3B.view!=="orbit"&&!(typeof FF!=="undefined"&&FF.hmi), hint:bHint, third:()=>$("#fpBtn").click(), home:()=>goHome()});
-  tbViews({orbit:()=>V3B.orbit, isOrbit:()=>V3B.view==="orbit"&&$("#splash").classList.contains("hide"), rect:()=>{ const c=document.getElementById("cv").getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect(); return {left:c.left-s.left,top:c.top-s.top,width:c.width}; },
+  tbViews({orbit:()=>V3B.orbit, isOrbit:()=>V3B.view==="orbit"&&$("#splash").classList.contains("hide"), rect:()=>{ const c=document.getElementById("cv").getBoundingClientRect(), s=document.getElementById("stage").getBoundingClientRect(); let top=c.top;   /* 안내판(충전 · 포장)과 겹치지 않게 그 아래 */
+    for(const id of ["dmCoach","pkCoach"]){ const k=document.getElementById(id); if(!k||k.hidden||!k.offsetParent||!k.innerHTML) continue; const r=k.getBoundingClientRect(); if(r.width>0&&r.left<c.left+460&&r.top<c.top+80) top=Math.max(top,r.bottom+4); }
+    return {left:c.left-s.left,top:top-s.top,width:c.width}; },
     presets:[["전체",{yaw:-.45,pitch:.38,dist:9500,tx:1400,ty:700,tz:200}],["충전실",{yaw:-.4,pitch:.36,dist:8500,tx:-1000,ty:800,tz:0}],["포장실",{yaw:-.4,pitch:.38,dist:9000,tx:15500,ty:800,tz:300}],
       ["전면",{yaw:0,pitch:.12,dist:17000,tx:7500,ty:1100,tz:0}],["평면",{yaw:0,pitch:1.45,dist:23000,tx:7500,ty:0,tz:1200}]]});
   /* 상단 바 (파우치 기준 · idt_common/topbar.js) — 라인 속도는 원본 앱 값(병/분)을 그대로 조절 */

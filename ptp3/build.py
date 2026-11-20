@@ -35,11 +35,14 @@ APP_PATCH = [
     ("walkTime:Math.max(.4,Math.abs(to-workerX)/380),commit}", "walkTime:Math.max(.4,Math.abs(to-workerX)/350),commit}", 1, ("filler",)),
     ("workerJob.walkTime=Math.max(.25,Math.abs(workerJob.to-workerJob.from)/900);", "workerJob.walkTime=Math.max(.25,Math.abs(workerJob.to-workerJob.from)/350);", 1, ("filler",)),
     ("workerX=Math.max(WORKER_STANDBY_X,workerX-Math.min(Math.max(dt,0),.1)*240);", "workerX=Math.max(WORKER_STANDBY_X,workerX-Math.min(Math.max(dt,0),.1)*350);", 1, ("filler",)),
+    # 보이는 작업자가 도착할 때까지(설비를 돌아 걷기 · 롤 대차 운반 · 2인 준비) 앱 작업 시간을 멈춤 (11/20 · crew3.js PTP_HOLD)
+    ("if(workerJob){const j=workerJob;j.elapsed+=dt*(j.speed||1);", "if(workerJob){const j=workerJob;j.elapsed+=(j.elapsed>=j.walkTime&&window.parent&&window.parent.PTP_HOLD&&window.parent.PTP_HOLD('filler',j))?0:dt*(j.speed||1);", 1, ("filler",)),
+    ("  if(w.job&&!w.walking){\n   w.workPhase=(w.workPhase||0)+dt;w.t-=dt;", "  if(w.job&&!w.walking&&!(window.parent&&window.parent.PTP_HOLD&&window.parent.PTP_HOLD('line',i))){\n   w.workPhase=(w.workPhase||0)+dt;w.t-=dt;", 1, ("line",)),
     # PTP 원본 작업자 모형은 그리지 않고 위치만 셸에 알림 → 셸이 파우치 작업자(human.js)로 그림 (11/17 사용자 지시 : 작업자 디자인 파우치처럼)
     ("worker3=function(){ WK.forEach(drawWorker); };",
      "worker3=function(){ window.PTP_WK=WK; if(window.NO_PTP_WORKER) return; WK.forEach(drawWorker); };", 1, ("line",)),
     ("worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});",
-     "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target,key:j&&j.key,ph:phase}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
+     "window.PTP_WKF={x:X3(workerX),z:DEPTH+145,walk,reach,both:!!j,target,key:j&&j.key,ph:phase,to:j?X3(j.to):null}; if(!window.NO_PTP_WORKER) worker3(workerX,DEPTH+145,{back:true,reach,walk,phase:tSim*9,both:!!j,target});", 1, ("filler",)),
     # 충전실 작업자 : 원본이 drawTrainingWorker 를 다시 정의(교체부품 과정)해 위 패치가 쓰이지 않던 문제 (11/18 발견) — 실제 쓰이는 정의에서 위치 · 작업을 셸로 넘김
     ("worker3(workerX,z+110,{reach:j?Math.sin(Math.PI*phase):0,",
      "window.PTP_WKF={x:X3(workerX),z:z+110,walk:j?+(j.elapsed<j.walkTime):+workerWalkingAside(),reach:j?Math.sin(Math.PI*phase):0,both:!!j,target:{x:X3(contact.x),y:Y3(contact.y),z},key:j&&j.key,ph:phase}; if(!window.NO_PTP_WORKER) worker3(workerX,z+110,{reach:j?Math.sin(Math.PI*phase):0,", 1, ("filler",)),

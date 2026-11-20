@@ -50,22 +50,14 @@ function buildFillZone(S){
     bx(g,.16,.68,.2,.22,z0+.05,z0+.95,M.ss); bx(g,.26,.56,.82,.88,z0+.3,z0+.62,M.white); bx(g,.3,.52,.88,.89,z0+.34,z0+.58,M.ssMir); bx(g,.3,.52,.82,.9,z0+.66,z0+.74,M.dark); }
   /* ── 드럼리프터 (북동 보관 · 원료투입구로 이동해 사용) : 높은 마스트(기둥 2 + 판) · 승강 발판(난간) · 뒤쪽 구동함 · 빨간 캐스터 ── */
   { const LG=new T3.Group(); LG.position.set(10.75,0,1.8); LG.rotation.y=Math.PI; g.add(LG); FILLLIFT=LG; const x=0, z=0, mh=3.1;   /* 보관 시 발판이 동쪽 벽 쪽 (현장 사진) */
-    for(const s of [-1,1]) bx(LG,x-.05,x+.05,.1,mh,z+s*.27-.04,z+s*.27+.04,M.ss); bx(LG,x-.01,x+.01,.5,mh,z-.23,z+.23,M.ss); bx(LG,x-.06,x+.06,mh-.06,mh,z-.31,z+.31,M.ss); bx(LG,x-.07,x+.4,.06,.12,z-.33,z+.33,M.ssD);
-    rrect(LG,x+.3,z,.2,.26,.05,.12,.78,M.ss); rod(LG,[x+.3,.78,z-.1],[x+.3,.82,z-.1],.014,M.red,10); tube(LG,[[x+.12,.7,z+.1],[x+.1,1.1,z+.14],[x+.08,1.5,z+.1],[x+.06,1.9,z+.12]],.012,M.dark);
-    rod(LG,[x+.52,.95,z-.2],[x+.52,.95,z+.2],.012,M.ssMir,10); for(const s of [-1,1]) rod(LG,[x+.48,.78,z+s*.2],[x+.52,.95,z+s*.2],.012,M.ssMir,10);
-    const LP=new T3.Group(); LG.add(LP); FILLPROP.plat=LP;                                       /* 승강 발판 (위아래로 움직임) */
-    bx(LP,x-.9,x-.05,.14,.165,z-.36,z+.36,M.ssMir); bx(LP,x-.9,x-.05,.1,.14,z-.36,z+.36,M.ss);
-    for(const s of [-1,1]){ rod(LP,[x-.86,.165,z+s*.34],[x-.86,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.12,.165,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.86,.5,z+s*.34],[x-.12,.5,z+s*.34],.012,M.ssMir); rod(LP,[x-.86,.33,z+s*.34],[x-.12,.33,z+s*.34],.008,M.ssMir); }
+    const LP=idtLifterBuild(LG,mh); FILLPROP.plat=LP;                                       /* 드럼리프터 모델 = 공통 (idt_common/crewkit.js) · 승강 발판 */
     { const B=new T3.Group(); LP.add(B); FILLPROP.bagsOn=B; B.visible=false; for(const [dx,dz] of [[-.62,-.13],[-.33,.12]]){ add(B,bagMesh(x+dx,.165,z+dz)); } }   /* 적재칸 위 주성분 봉투 (STS 용기에서 옮겨 담음 · 11/16 사용자 정정) */
-    for(const [dx,dz] of [[-.8,-.3],[-.8,.3],[.3,-.26],[.3,.26]]) { const c=new T3.Mesh(new T3.CylinderGeometry(.055,.055,.04,20),M.red); c.rotation.x=Math.PI/2; c.position.set(x+dx,.055,z+dz); add(LG,c); bx(LG,x+dx-.02,x+dx+.02,.06,.1,z+dz-.03,z+dz+.03,M.ssD); }
     plate(g,.42,.3,labelTex([["리프터 사용 규칙","#111",44],["3인 1조","#c00",52],["(1명 운전 · 2명 하역)","#111",34]],{w:512,h:360,border:"#1f5fb8"}),[RM.fill.x1-.03,1.6,2.9],-Math.PI/2); }
   /* ── 예비 은박 (남동) : 스테인리스 팔레트 + 은박 롤 ── */
   { const x=10.95, z=6.2; bx(g,x-.55,x+.55,.1,.16,z-.5,z+.5,M.ss); for(const dx of [-.45,0,.45]) bx(g,x+dx-.04,x+dx+.04,0,.1,z-.5,z+.5,M.ss);
   /* ── 은박 교체 대차 (남동 예비 은박 자리에 보관 · 교체 시 언와인더 옆으로 이동 — 사용자 확정 11/11) : 스테인리스 틀 · 캐스터 · 받침 롤러 · 흰 포장 롤 ── */
   { const G=new T3.Group(); G.position.set(9.9,0,5.9); g.add(G); FILLCART=G;
-    for(const x of [-.2,.2]) for(const z of [-.42,.42]){ bx(G,x-.02,x+.02,.09,.62,z-.02,z+.02,M.ss); rod(G,[x,.045,z],[x,.045,z+.03],.045,M.dark,16); bx(G,x-.015,x+.015,.07,.1,z-.015,z+.015,M.ssD); }
-    for(const y of [.2,.6]){ for(const z of [-.42,.42]) bx(G,-.2,.2,y,y+.03,z-.015,z+.015,M.ss); for(const x of [-.2,.2]) bx(G,x-.015,x+.015,y,y+.03,-.42,.42,M.ss); }
-    for(const x of [-.09,.09]) rod(G,[x,.65,-.44],[x,.65,.44],.03,M.dark,16); rod(G,[-.26,.9,-.42],[-.26,.9,.42],.012,M.ssMir,10); for(const z of [-.42,.42]) rod(G,[-.2,.62,z],[-.26,.9,z],.012,M.ssMir,10);
+    idtCartBuild(G);                                                                     /* 대차 모델 = 공통 (idt_common/crewkit.js) */
     /* 대차 위 은박 롤 : 평소 비어 있음 — 교체하러 갈 때 예비 롤을 올림 (적색 인쇄 · 은색 무지 2종만, 11/16 사용자 지시 : SOLPAC 흰 롤 삭제) */
     for(const [k,m] of [["red",M.foil],["plain",M.foilP]]){ const r=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,40),m); r.rotation.x=Math.PI/2; r.position.set(0,.85,0); add(G,r); r.visible=false; FILLPROP["cart_"+k]=r; } }
     for(const [k,dz,m] of [["red",-.25,M.foil],["plain",.25,M.foilP]]){ const R=new T3.Group(); g.add(R); FILLPROP["pal_"+k]=R; const r=new T3.Mesh(new T3.CylinderGeometry(.19,.19,.86,40),m); r.rotation.z=Math.PI/2; r.position.set(x,.35,z+dz); add(R,r); rod(R,[x-.46,.35,z+dz],[x+.46,.35,z+dz],.045,M.dark,16); } }

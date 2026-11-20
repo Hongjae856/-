@@ -13,9 +13,40 @@ const CREW={F:[], P1:null, P2:null, cur:null, mode:null, rx:true, started:{F:fal
 /* 들고 가는 물건 : 공통 idt_common/crewkit.js (IDT_CARRY) — 병 IDT 이름 → 공통 이름 (PE 필름 롤 · 박스 라벨) */
 const CREW_KIND={roll:"peRoll",label:"sticker"};
 const crewItem=(H,kind)=>idtItem(H,kind&&(CREW_KIND[kind]||kind),V3B.sc);
+/* ═══ 정제 투입 리프터 (11/20 사용자 결정 "리프터로 올려 붓기" · 파우치 드럼리프터 모델 = 공통 idtLifterBuild) ═══
+   DMC-60T 계단 발판 동쪽 바닥에 고정 (발판 x 0.85~1.70 · z −1.66~−0.94, 호퍼 · 계단 난간과 겹치지 않음 — 바닥 점유 격자로 확인)
+   순서 : 용기를 들고 리프터 앞으로 → 발판에 올림 → 상승(약 1.1 m) → 계단으로 작업 발판에 올라감 → 리프터에서 용기를 받아 호퍼에 붓기 → 내려오면 리프터 하강
+   1인칭 : 투입을 누르면 리프터가 용기를 싣고 올라간 뒤 붓기 진행 */
+const BL={G:null, LP:null, drum:null, y:0, ph:null, t:0, i:-1, V:{x:0,z:0}, path:[], fp:false};
+const BL_POS=[1.75,-1.3], BL_LOAD=[1.28,-1.98], BL_UP=1.08, BL_CLIMB=[[.43,-2.05],[.43,-1.45],[.59,-1.25]];
+function blInit(){ const G=new T3.Group(); BL.LP=idtLifterBuild(G,2.2); G.position.set(BL_POS[0],0,BL_POS[1]); V3B.sc.add(G); BL.G=G;
+  BL.drum=idtCarryMesh("drum"); BL.drum.position.set(-.47,.165+.17,0); BL.drum.visible=false; BL.LP.add(BL.drum); }
+const B3_FREE=(x,z)=>walkFree(x*1000,z*1000);
+window.B3_HOLD=J=>!!(J&&J.key==="tab"&&BL.ph&&BL.ph!=="pour");
+function blStep(path,dt){ let st=dt*IDT_WALK, mv=false; const V=BL.V; while(st>1e-4&&path.length){ const p=path[0], dx=p[0]-V.x, dz=p[1]-V.z, d=Math.hypot(dx,dz); mv=true;
+    if(d<=st){ V.x=p[0]; V.z=p[1]; st-=d; path.shift(); } else { V.x+=dx/d*st; V.z+=dz/d*st; st=0; } } return mv; }
+/* 리프터 진행 (작업자 i 의 앱 작업 J) — 셸이 보이는 위치를 정하면 {x,z,moving,face,act} 를 돌려줌 */
+function blTick(dt,i,q,me){
+  const J=q&&q.job, tab=!!(J&&J.key==="tab"&&J.phase!=="exit");
+  if(tab&&!BL.ph&&BL.i<0){ BL.i=i; BL.t=0; BL.fp=me; BL.drum.visible=me; BL.ph=me?"raise":"load"; if(!me){ BL.V={x:q.x*MM,z:(q.z||1100)*MM}; BL.path=idtGridPath(B3_FREE,[BL.V.x,BL.V.z],BL_LOAD,.1)||[BL_LOAD]; } }
+  if(BL.i!==i) return null;
+  if(!tab&&BL.ph&&BL.ph!=="lower"){ BL.ph="lower"; }
+  BL.t+=dt; const lp=BL.LP;
+  if(BL.ph==="lower"){ lp.position.y=Math.max(0,lp.position.y-dt*.5); if(lp.position.y<=0){ BL.ph=null; BL.i=-1; BL.drum.visible=false; } return null; }
+  if(BL.ph==="raise"){ lp.position.y=Math.min(BL_UP,lp.position.y+dt*.45); if(lp.position.y>=BL_UP){ BL.ph=BL.fp?"pour":"climb"; BL.path=BL_CLIMB.map(p=>p.slice()); } }
+  if(BL.ph==="pour"){ BL.drum.visible=false; return null; }
+  if(BL.fp) return null;
+  let mv=false, face=0, act=null;
+  if(BL.ph==="load"){ mv=blStep(BL.path,dt); face=Math.atan2(BL_POS[0]-.47-BL.V.x,BL_POS[1]-BL.V.z); if(!BL.path.length){ BL.ph="place"; BL.t=0; } }
+  else if(BL.ph==="place"){ face=Math.atan2(BL_POS[0]-.47-BL.V.x,BL_POS[1]-BL.V.z); act="place"; if(BL.t>.9){ BL.drum.visible=true; BL.ph="raise"; BL.t=0; } }
+  else if(BL.ph==="raise"){ face=Math.atan2(BL_POS[0]-BL.V.x,BL_POS[1]-BL.V.z); act="raise"; }
+  else if(BL.ph==="climb"){ mv=blStep(BL.path,dt); const p=BL.path[0]; face=p?Math.atan2(p[0]-BL.V.x,p[1]-BL.V.z):Math.atan2(BL_POS[0]-BL.V.x,BL_POS[1]-BL.V.z); if(!BL.path.length) BL.ph="pour"; }
+  let y0=0; try{ y0=appWin().floorY(BL.V.x/MM,BL.V.z/MM)*MM; }catch(e){}
+  return {x:BL.V.x, z:BL.V.z, y0, moving:mv, face, act};
+}
 function crewInit(){
   for(let i=0;i<2;i++){ const H=makeHuman(V3B.sc,"suit"); H.G.visible=false; CREW.F.push(H); }
-  CREW.P1=makeHuman(V3B.sc,"wear"); CREW.P2=makeHuman(V3B.sc,"wear");
+  CREW.P1=makeHuman(V3B.sc,"wear"); CREW.P2=makeHuman(V3B.sc,"wear"); blInit();
   for(const k of ["P1","P2"]) Object.assign(CREW[k],{px:null,pz:null,seq:null,q:[]});
 }
 const crewStep=idtFaceStep;
@@ -27,13 +58,20 @@ const crewHold=(H,P,kind,cp,rotY)=>idtHold(H,P,CREW_KIND[kind]||kind,cp,rotY,V3B
 const crewReachAmt=J=>idtReachAmt(J.t,J.j.dur);
 function crewFill(dt,fp){
   const w=appWin(); let W=[]; try{ W=(w.B3&&w.B3.WK())||[]; }catch(e){}
-  CREW.F.forEach((H,i)=>{ const q=W[i], me=fp&&CREW.cur==="F"&&i===0; H.G.visible=!!q&&!me; if(!H.G.visible){ H.dx=null; crewItem(H,null); return; }
+  CREW.F.forEach((H,i)=>{ const q=W[i], me=fp&&CREW.cur==="F"&&i===0, B=q?blTick(dt,i,q,me):null; H.G.visible=!!q&&!me; if(!H.G.visible){ H.dx=null; crewItem(H,null); return; }
+    if(B){ const P={x:B.x,z:B.z,y0:B.y0,yaw:0,dt,L:null,R:null,gL:.3,gR:.3,nL:"down",nR:"down"}; if(H.yw==null) H.yw=B.face; let da=B.face-H.yw; da=Math.atan2(Math.sin(da),Math.cos(da)); H.yw+=da*Math.min(1,dt*9); P.yaw=H.yw;
+      const lp=new T3.Vector3(); BL.drum.getWorldPosition(lp);
+      if(BL.ph==="load"){ crewHold(H,P,"drum",idtCarryPt(B.x,B.z,B.y0,H.yw,"drum"),H.yw); }
+      else if(B.act==="place"){ const u=Math.min(1,BL.t/.9), a=idtCarryPt(B.x,B.z,B.y0,H.yw,"drum"), b=[lp.x,lp.y,lp.z]; crewHold(H,P,"drum",a.map((v,k)=>v+(b[k]-v)*u),H.yw); }
+      else { crewItem(H,null); if(B.act==="raise"){ const c=[BL_POS[0]+.3,.85,BL_POS[1]-.1]; P.R=c; P.gR=.5; } }
+      crewPour(H,null,0); poseHuman(H,P); return; }
     const x=q.x*MM, z=(q.z||1100)*MM, y0=(q.y||0)*MM, want=(q.face!=null?q.face:0)+Math.PI;          /* 앱 face(−z 기준) → 파우치 yaw */
     if(H.yw==null) H.yw=want; let da=want-H.yw; da=Math.atan2(Math.sin(da),Math.cos(da)); H.yw+=da*Math.min(1,dt*9);
     const yaw=H.yw, f=[Math.sin(yaw),Math.cos(yaw)], J=q.job, work=J&&J.phase==="work"&&J.j&&J.j.reach, P={x,z,y0,yaw,dt,L:null,R:null,gL:.3,gR:.3,nL:"down",nR:"down"};
     const kind=q.carry, hold=J&&J.j&&(J.j.pour?J.j.dur*.78:J.j.dur*.55);
     const carrying=kind&&(q.walking||!J||J.phase!=="work"||J.t<hold);
     if(carrying){ let cp=[x+f[0]*.36,y0+1.02,z+f[1]*.36], tilt=0;
+      if(J&&J.key==="tab"&&BL.i===i&&J.t<.45&&BL.G){ const lp=new T3.Vector3(); BL.drum.getWorldPosition(lp); const u=Math.min(1,J.t/.45); cp=[lp.x+(cp[0]-lp.x)*u,lp.y+(cp[1]-lp.y)*u,lp.z+(cp[2]-lp.z)*u]; }
       if(work){ const r=crewReachAmt(J), R=J.j.reach, t=[R[0]*MM,R[1]*MM,R[2]*MM];
         if(J.j.pour){ const dx=t[0]-x, dz=t[2]-z, d=Math.hypot(dx,dz)||1, k=Math.min(.55,.3/d); t[0]-=dx*k; t[2]-=dz*k; t[1]+=.12; tilt=Math.min(1,Math.max(0,(J.t-.9)/.5))*1.05; }
         cp=cp.map((v,k)=>v+(t[k]-v)*r*.85); }
@@ -43,21 +81,18 @@ function crewFill(dt,fp){
       if(work&&J.t>.12&&J.t<J.j.dur-.35){ const R=J.j.reach, t=[R[0]*MM,R[1]*MM,R[2]*MM], lf=[Math.cos(yaw),-Math.sin(yaw)]; P.R=t; if(J.j.dur>2.2) P.L=[t[0]+lf[0]*.22,t[1],t[2]+lf[1]*.22]; } }
     poseHuman(H,P); });
 }
-/* 붓는 흐름 (병 · 정제 · 캡) : 용기 입구 → 투입구 */
-function crewPour(H,J,tilt,cp){
-  if(!H.pour){ H.pour=[]; for(let i=0;i<10;i++){ const m=new T3.Mesh(new T3.SphereGeometry(.012,8,6),M.white); m.visible=false; V3B.sc.add(m); H.pour.push(m); } }
-  const on=J&&J.j&&J.j.pour&&tilt>.6&&J.t<J.j.dur*.78-.1;
-  H.pour.forEach((m,i)=>{ m.visible=!!on; if(!on) return; const R=J.j.reach, t=((J.t*2.2+i/10)%1), e=[R[0]*MM,R[1]*MM-.04,R[2]*MM-.04];
-    m.position.set(cp[0]+(e[0]-cp[0])*t, cp[1]+.08+(e[1]-cp[1]-.08)*t+Math.sin(t*Math.PI)*.03, cp[2]+(e[2]-cp[2])*t); });
-}
+/* 붓는 흐름 (병 · 정제 · 캡) : 용기 입구 → 투입구 — 공통 idtPour */
+function crewPour(H,J,tilt,cp){ const on=!!(J&&J.j&&J.j.pour&&tilt>.6&&J.t<J.j.dur*.78-.1); const R=J&&J.j&&J.j.reach; idtPour(H,V3B.sc,on,cp,R?[R[0]*MM,R[1]*MM-.04,R[2]*MM-.04]:cp,J?J.t:0); }
 
 /* ── 포장실 ── */
 const PKW={T:12};                                           /* 자동 봉함 ~ 적재 시간 (packsim 의 closing 과 같음) */
 const pkm=(x,z)=>[x*MM,z*MM];
 const PKS={scan:pkm(18750,620), handoff:[19.2,.95,.15], box:pkm(19950,680), ag:pkm(19175,620), agP:[19.175,1.01,-.04], pal:pkm(20700,1330), flat:pkm(21000,680)};
 /* 작업자 이동 : 목표 (x, z) 로 직선 보행 (1.4 m/s · 물건 들면 1.0 m/s) — 파우치 보행 속도 */
-function pkWalk(H,to,dt,v){ if(H.px==null){ H.px=to[0]; H.pz=to[1]; } const dx=to[0]-H.px, dz=to[1]-H.pz, d=Math.hypot(dx,dz), s=Math.min(d,(v||IDT_WALK)*dt);
-  if(d>1e-4){ H.px+=dx/d*s; H.pz+=dz/d*s; } return d-s<.02; }
+function pkWalk(H,to,dt,v){ if(H.px==null){ H.px=to[0]; H.pz=to[1]; }          /* 11/20 : 설비를 돌아가는 길(공통 idtGridPath · 바닥 점유 격자) */
+  if(!H.wp||H.wpTo!==to){ H.wpTo=to; H.wp=Math.hypot(to[0]-H.px,to[1]-H.pz)<.05?[]:(idtGridPath(B3_FREE,[H.px,H.pz],to,.1)||[to]); }
+  let st=(v||IDT_WALK)*dt; while(st>1e-4&&H.wp.length){ const q=H.wp[0], dx=q[0]-H.px, dz=q[1]-H.pz, d=Math.hypot(dx,dz); if(d<=st){ H.px=q[0]; H.pz=q[1]; st-=d; H.wp.shift(); } else { H.px+=dx/d*st; H.pz+=dz/d*st; st=0; } }
+  return !H.wp.length; }
 const pkBelt=()=>{ const p=pkPath(PK_END()); return [p[0]*MM,PK.CH*MM+.035,p[2]*MM]; };
 /* 작업자 2 (일반의약품이면 작업자 1) : 박스 마감 순서 — 봉함 → (AG 라벨) → 들고 파렛트 → 적재 → 접힌 박스 → 조립 */
 function pkBoxSeq(rx){ const S=[];

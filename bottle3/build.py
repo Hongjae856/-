@@ -32,6 +32,9 @@ APP_PATCH = [
      '  if($("#splash").classList.contains("hide")){\n    if(!R3.ready)', 1),
     # 작업자 보행 속도 = 세 IDT 공통 1.4 m/s (idt_common/crewkit.js IDT_WALK · 11/19 통합 3단계 · 원본 1.9 m/s)
     ("st=Math.min(dd,dt*1900);", "st=Math.min(dd,dt*1400);", 1),
+    # 정제 투입 = 리프터로 올려 붓기 (11/20 사용자 결정) : 서는 자리를 발판 동쪽 끝(리프터 옆)으로 · 리프터 준비(싣기 · 상승 · 계단) 동안 작업 시간 멈춤 (셸 crew.js B3_HOLD)
+    ('tab:   {stand:[436,-1240], reach:[436,1830,-780], carry:"drum", view:"tab", dur:2.9, pour:true},', 'tab:   {stand:[590,-1250], reach:[436,1830,-780], carry:"drum", view:"tab", dur:3.4, pour:true},', 1),
+    ('      if(J.phase==="walk"){ J.phase="work"; J.t=0; }\n      J.t+=dt;', '      if(J.phase==="walk"){ J.phase="work"; J.t=0; }\n      J.t+=(window.parent&&window.parent.B3_HOLD&&window.parent.B3_HOLD(J))?0:dt;', 1),
     # 작업자는 셸이 파우치 인체 모델로 그림 (원본 작업자 형상 생략)
     ("function drawWorkers(){ for(const w of WK){", "function drawWorkers(){ if(window.B3_EXT) return; for(const w of WK){", 1),
     # 시연모드 단계 버튼식 (11/18 사용자 결정) : 셸이 단계마다 준비 · 가동 — 앱 시연 설정은 건너뛰고, 가동 전에는 자동 보충 · 복구 안 함
