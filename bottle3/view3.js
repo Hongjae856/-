@@ -17,10 +17,10 @@ function v3bMat(transparent){
       .replace("#include <color_vertex>","#include <color_vertex>\nvMet=aM; if(aM>-0.5) vColor.rgb=pow(max(vColor.rgb,vec3(0.0)),vec3(2.2));")
       .replace("#include <worldpos_vertex>","#include <worldpos_vertex>\nvWP=(modelMatrix*vec4(transformed,1.0)).xyz;");
     sh.fragmentShader=sh.fragmentShader.replace("#include <common>","#include <common>\nvarying float vMet; varying vec3 vWP;\nfloat hHash(vec2 p){ return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453); }")
-      .replace("#include <roughnessmap_fragment>","float metalnessFactor=vMet<-0.5?0.0:clamp((vMet-0.45)*1.8,0.0,1.0);\nfloat roughnessFactor=mix(0.62,0.22+0.1*hHash(floor(vec2(vWP.y*900.0,vWP.x*7.0))),metalnessFactor);")
-      .replace("#include <metalnessmap_fragment>","")
       .replace("#include <normal_fragment_maps>","#include <normal_fragment_maps>\nif(dot(normal,vViewPosition)<0.0) normal=-normal;")
       .replace("#include <dithering_fragment>","#include <dithering_fragment>\nif(vMet<-0.5) gl_FragColor=vec4(vColor.rgb,diffuseColor.a);");
+    /* 재질 = 파우치 값 (idt_common/look.js · 11/20) — 금속도 = 정점 금속도 (발광면은 그대로) */
+    idtLookFrag(sh,{met:"(vMet<-0.5?-1.0:clamp(vMet,0.0,1.0))", room:false, tr:!!transparent});   /* 앱 금속도 0.7~0.9 = 스테인리스 함체 */
   };
   m.customProgramCacheKey=()=>"bottle-"+(transparent?"t":"o");
   return m;
@@ -42,9 +42,10 @@ function v3bSet(o,s){
 /* ── 방 : 바닥 · 벽 · 칸막이(통과구) · 천장(1인칭만) ── */
 function v3bRoom(sc){
   const G=new T3.Group(), R=ROOM, x0=R.x0*MM, x1=R.x1*MM, z0=R.z0*MM, z1=R.z1*MM, H=R.h*MM, wx=R.wallX*MM;
-  const fm=new T3.MeshStandardMaterial({color:0xcfd8d2,roughness:.38,metalness:0,envMapIntensity:.6});
+  const ft=TX.floor.clone(); ft.needsUpdate=true; ft.repeat.set((x1-x0)/1.97,(z1-z0)/1.97);   /* 바닥 · 벽 = 파우치 M.floor · M.wall (11/20) */
+  const fm=M.floor.clone(); fm.map=ft;
   const fl=new T3.Mesh(new T3.PlaneGeometry(x1-x0,z1-z0),fm); fl.rotation.x=-Math.PI/2; fl.position.set((x0+x1)/2,0,(z0+z1)/2); fl.receiveShadow=true; G.add(fl);
-  const wm=new T3.MeshStandardMaterial({color:0xe9ece8,roughness:.8,envMapIntensity:.3});
+  const wm=M.wall;
   const wall=(w,h,d,x,y,z)=>{ const m=new T3.Mesh(new T3.BoxGeometry(w,h,d),wm); m.position.set(x,y,z); m.receiveShadow=true; m.castShadow=true; G.add(m); return m; };
   wall(x1-x0,H,.12,(x0+x1)/2,H/2,z0-.06);                          /* 뒷벽 */
   wall(.12,H,z1-z0,x0-.06,H/2,(z0+z1)/2); wall(.12,H,z1-z0,x1+.06,H/2,(z0+z1)/2);   /* 양 끝 벽 */
@@ -73,12 +74,10 @@ function v3bInit(){
   { const es=new T3.Scene(); es.add(new T3.Mesh(new T3.BoxGeometry(W,4.2,D),new T3.MeshBasicMaterial({color:0xaab0ac,side:T3.BackSide})));
     for(let x=-W/2+2;x<W/2;x+=3.2) for(const z of [-2,0,2]){ const l=new T3.Mesh(new T3.PlaneGeometry(1.3,.35),new T3.MeshBasicMaterial({color:0xffffff})); l.rotation.x=Math.PI/2; l.position.set(x,2.08,z); l.material.color.multiplyScalar(9); es.add(l); }
     const pm=new T3.PMREMGenerator(R); sc.environment=pm.fromScene(es,.03).texture; }
-  sc.add(new T3.HemisphereLight(0xffffff,0x9aa09c,.55));
-  const key=new T3.DirectionalLight(0xffffff,1.1); key.position.set(cx-5,10,cz+6); key.target.position.set(cx,0,cz); key.castShadow=true; key.shadow.mapSize.set(4096,4096);
-  Object.assign(key.shadow.camera,{left:-W/2-1,right:W/2+1,top:D/2+3,bottom:-D/2-3,near:1,far:40}); key.shadow.bias=-.0004; key.shadow.normalBias=.015; sc.add(key); sc.add(key.target);
-  const fillL=new T3.DirectionalLight(0xffffff,.35); fillL.position.set(cx+5,4,cz+8); sc.add(fillL);
+  /* 조명 · 배경 = 파우치 값 (idt_common/look.js · 11/20) */
+  const key=idtLookLights(sc,{cx,cz,W,D,H:ROOM.h*MM,x0:ROOM.x0*MM,x1:ROOM.x1*MM});
   const cam=new T3.PerspectiveCamera(50,1,.05,120);
-  Object.assign(V3B,{R,sc,cam,key});
+  Object.assign(V3B,{R,sc,cam,key,POST:idtLookPost()});
   v3bRoom(sc);
   for(const s of ["stat","dyn"]){ v3bPart(s+"Op",false); v3bPart(s+"Tr",true); }
   V3B.ready=true;
@@ -106,7 +105,7 @@ function v3bFrame(now){
   else { cam.position.set(WALK.x*MM,WALK.y*MM,WALK.z*MM); const f=walkFwd(); cam.lookAt((WALK.x+f[0]*1000)*MM,(WALK.y+f[1]*1000)*MM,(WALK.z+f[2]*1000)*MM); cam.fov=FPC.FOV; }
   cam.updateProjectionMatrix();
   v3bGen();
-  R.render(V3B.sc,cam);
+  idtLookDraw(R,V3B.POST,V3B.sc,cam,TBQ.L[TBQ.lv].ao);   /* 파우치 후처리 (틈 음영 · ACES · 대비) */
   V3B.t.n++; if(now-V3B.t.t0>1000){ V3B.t.fps=V3B.t.n*1000/(now-V3B.t.t0); V3B.t.n=0; V3B.t.t0=now; }
 }
 function v3bOrbit(){

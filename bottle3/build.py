@@ -59,7 +59,7 @@ APP_PATCH = [
      '  const w=wkFor(JOBS[k].stand); if(w.job){ if(w.job.key!==k) toast("작업자가 다른 작업 중입니다."); return; }\n'
      '  startWork(k,fn); renderTiles(); }', 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "look.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -104,7 +104,7 @@ SPLASH_CFG = {
 
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
-    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js", "modes.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
+    src = lambda n: (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js", "modes.js", "look.js") else (ROOT / "oee" / n) if n == "oee.js" else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
