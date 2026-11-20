@@ -34,7 +34,7 @@ const ANC={
   ibc:[6.75,1.55,1.5],
   lift:[10.75,1.20,1.8],                /* 드럼리프터 (보관 위치) */
   liftUse:[XF,0.70,FL.z1+.55],          /* 원료투입구 아래 사용 위치 */
-  air1:[5.66,1.30,1.02], air2:[5.66,1.30,1.22],   /* 압축공기 밸브 [확인 필요] */
+  air1:[AIRDROP_P.x+.155,AIRDROP_P.y[0]+.055,AIRDROP_P.z], air2:[AIRDROP_P.x+.155,AIRDROP_P.y[1]+.055,AIRDROP_P.z],   /* 압축공기 밸브 레버 : 충전기 북쪽 천장 강하관 (pouch/v2 fillzone.js · 11/20) */
   redPal:[10.95,0.40,5.95], plainPal:[10.95,0.40,6.45],
   ipc:[0.42,0.90,0.75],                 /* 저울 작업대 1 (IPC) */
   leak:[0.42,0.90,1.90],                /* 기밀도 시험 [확인 필요 : 저울 작업대 2 로 가정] */
@@ -105,7 +105,7 @@ const LBL3=[[4.2,4.15,ZC,"파우치 충전기 SP303 · 2층 데크","F"],[6.75,2
 const JOBS={
   look:   {stand:[1.4,4.9], reach:null, dur:1.4},
   power:  {stand:[2.25,2.47], reach:ANC.mainPow, dur:1.2},
-  air:    {stand:[6.05,1.12], reach:ANC.air1, dur:1.4},
+  air:    {stand:[6.12,1.12], reach:ANC.air1, dur:1.4},
   dust:   {stand:[5.2,1.95], deck:true, reach:ANC.dust, dur:1.4, view:"hopper"},
   panel:  {stand:[1.65,1.83], reach:ANC.panelSw, dur:1.0},
   lift:   {stand:[3.9,5.2], reach:ANC.liftUse, carry:"sts", dur:2.6, view:"lift"},

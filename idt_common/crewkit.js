@@ -186,3 +186,33 @@ function idtWalkerTick(V,want,dt,spd){
     if(d<=st){ V.x=p[0]; V.z=p[1]; st-=d; V.path.shift(); } else { V.x+=dx/d*st; V.z+=dz/d*st; st=0; } }
   return {x:V.x, z:V.z, moving:mv, arrived:!V.path.length};
 }
+/* ── 압축공기 공급 배관 (세 IDT 공통 형상 · 위치는 IDT 별 설정 · 11/20 사용자 지시 : 천장과 연결된 배관 + 에어 밸브) ──
+   천장(또는 천장 밑 수평 주관) → 수직 강하관(파랑) → 티 → 볼 밸브(빨간 레버) → 필터 레귤레이터 · 압력계 → 호스로 설비
+   o : {x,z, top:천장 높이, header:[x,z] (천장 밑 수평 주관을 벽 · 주관 쪽으로, 선택), label,
+        valves:[{y:밸브 높이, dir:[dx,dz] 레버가 보이는 쪽(작업자 쪽 단위 벡터), to:[x,y,z] 호스 끝(설비 · 선택)}]}
+   반환 {G, pt:[레버 중심 좌표…], set(i,open)} — 열림 = 레버가 배관과 나란히 · 닫힘 = 직각 (현장 볼 밸브) */
+function idtAirDrop(sc,o){
+  const G=new T3.Group(); sc.add(G); const r=.017, x=o.x, z=o.z, top=o.top, ys=o.valves.map(v=>v.y), yb=Math.min(...ys)-.12;
+  const yt=o.header?top-.18:top;
+  rod(G,[x,yb,z],[x,yt,z],r,M.blue,14); rod(G,[x,yb-.04,z],[x,yb,z],r*1.25,M.ssD,14);                    /* 강하관 · 끝 마개(드레인) */
+  if(o.header){ const [hx,hz]=o.header; rod(G,[x,yt,z],[x,yt,hz],r*1.3,M.blue,14); if(Math.abs(hx-x)>.01) rod(G,[x,yt,hz],[hx,yt,hz],r*1.3,M.blue,14);
+    const L=Math.abs(hz-z)+Math.abs(hx-x); for(let s=0;s<=L+.01;s+=1.2){ const a=Math.min(s,Math.abs(hz-z)), b=s-a, px=x+Math.sign(hx-x)*b, pz=z+Math.sign(hz-z)*a;   /* 행거 */
+      rod(G,[px,yt+r,pz],[px,top,pz],.005,M.ssD,8); bx(G,px-.03,px+.03,top-.01,top,pz-.03,pz+.03,M.ss); } }
+  else bx(G,x-.07,x+.07,top-.012,top,z-.07,z+.07,M.ss);                                                    /* 천장 플랜지 */
+  const pt=[], LV=[];
+  o.valves.forEach(v=>{ const [dx,dz]=v.dir, y=v.y, e=[x+dx*.16,z+dz*.16], yaw=Math.atan2(dx,dz);
+    rod(G,[x,y,z],[e[0],y,e[1]],r*.85,M.blue,12); bx(G,x-.03,x+.03,y-.03,y+.03,z-.03,z+.03,M.ssD);          /* 티 · 가지관 */
+    const B=new T3.Group(); B.position.set(x+dx*.08,y,z+dz*.08); B.rotation.y=yaw; G.add(B);
+    bx(B,-.032,.032,-.03,.03,-.035,.035,M.brass); rod(B,[0,.03,0],[0,.05,0],.008,M.ssD,8);                   /* 볼 밸브 몸체 · 축 */
+    const LG=new T3.Group(); LG.position.y=.052; B.add(LG); bx(LG,-.011,.011,-.006,.006,-.01,.15,M.red); LV.push(LG);   /* 레버 */
+    rod(G,[e[0],y,e[1]],[e[0],y-.16,e[1]],r*.8,M.blue,12);                                                  /* 레귤레이터로 */
+    const R=new T3.Group(); R.position.set(e[0],y-.21,e[1]); R.rotation.y=yaw; G.add(R);
+    bx(R,-.03,.03,-.05,.05,-.03,.03,M.grey); rod(R,[0,-.05,0],[0,-.11,0],.022,M.acryl||M.white,14);        /* 필터 레귤레이터 · 보울 */
+    rod(R,[0,.02,.03],[0,.02,.045],.028,M.ssD,18); rod(R,[0,.02,.045],[0,.02,.048],.025,M.white,18);       /* 압력계 */
+    rod(R,[0,.05,0],[0,.075,0],.012,M.dark,10);                                                             /* 조정 손잡이 */
+    if(v.to){ const a=[e[0],y-.33,e[1]], t=v.to, m=[(a[0]+t[0])/2,Math.min(a[1],t[1])-.25,(a[2]+t[2])/2]; tube(G,[a,[a[0],a[1]-.12,a[2]],m,t],.008,M.dark); }
+    pt.push([x+dx*.08+dx*.075,y+.055,z+dz*.08+dz*.075]); });
+  if(o.label){ const v=o.valves[0], [dx,dz]=v.dir; plate(G,.24,.07,labelTex([o.label],{w:256,h:72,bg:"#2a63b8"}),[x+dx*(r+.006),Math.max(...ys)+.28,z+dz*(r+.006)],Math.atan2(dx,dz)); }
+  const A={G, pt, open:o.valves.map(()=>null), set(i,on){ on=!!on; if(A.open[i]===on) return; A.open[i]=on; LV[i].rotation.y=on?0:Math.PI/2; }};
+  o.valves.forEach((v,i)=>A.set(i,false)); return A;
+}

@@ -16,7 +16,7 @@ function frame(){
   fpFrame(now);
   camStep(dt);
   uiAcc+=dt; hmiAcc+=dt;
-  if(uiAcc>0.25&&S&&S.session){ uiAcc=0; renderTiles(); stepCheck(); renderCoach(); }
+  if(uiAcc>0.25&&S&&S.session){ uiAcc=0; renderTiles(); stepCheck(); renderCoach(); if(FILLAIR){ FILLAIR.set(0,S.f.airV[0]); FILLAIR.set(1,S.f.airV[1]); } }   /* 밸브 레버 = 실제 상태 */
   if(hmiAcc>0.6&&S&&S.session){ hmiAcc=0; drawHMI(); clock(); }
   apTick(now);
   if($("#splash").classList.contains("hide")){

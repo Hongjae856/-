@@ -5,7 +5,8 @@
    · 계단 발판(정제 호퍼 · 캡 볼 피더) 위로 올라서면 눈높이도 올라감 (원본 floorY)
    ═══════════════════════════════════════════════════════════════════ */
 const FF={T:[], aim:null, aimIn:false, goal:null, res:{}, hmi:false};
-const FFU={main:[-6400,1450,-2620], air:[-6000,1150,-2620], dust:[-5600,1400,-2620], pend:[-3200,1250,700], hmi:[-3200,1560,700]};
+const FF_OBS=[];                                   /* 셸이 추가한 충전실 설비 바닥 점유 (mm · walk.js gridHit) */
+const FFU={main:[-6400,1450,-2620], air:[-4900,1205,-1305], dust:[-5600,1400,-2620], pend:[-3200,1250,700], hmi:[-3200,1560,700]};
 /* 원본 3D 에 없는 유틸리티 · 조작 판넬 모형 */
 function ffBuild(sc){
   const g=new T3.Group(); sc.add(g); const P=v=>v*MM;
@@ -13,9 +14,10 @@ function ffBuild(sc){
   bx(g,P(-6700),P(-6100),P(800),P(1900),P(-2690),P(-2600),new T3.MeshStandardMaterial({color:0xd9dcd6,roughness:.5}));
   rod(g,[P(-6400),P(1450),P(-2600)],[P(-6400),P(1450),P(-2560)],.04,M.red,20); FF.mainH=bx(g,P(-6420),P(-6380),P(1400),P(1500),P(-2560),P(-2540),M.yellow);
   plate(g,.3,.08,labelTex(["전기판넬 · MAIN S/W"],{w:256,h:64}),[P(-6400),P(1750),P(-2598)],0);
-  /* 압축공기 밸브 (배관 · 레버) */
-  rod(g,[P(-6000),P(700),P(-2640)],[P(-6000),P(2400),P(-2640)],.022,M.blue,14); FF.airH=bx(g,P(-6000),P(-5860),P(1140),P(1160),P(-2640),P(-2620),M.red);
-  bx(g,P(-6040),P(-5960),P(1110),P(1190),P(-2660),P(-2600),M.ss); plate(g,.22,.06,labelTex(["압축공기 6 bar"],{w:256,h:64}),[P(-6000),P(1300),P(-2610)],0);
+  /* 압축공기 : 라인 한쪽(UA-120 뒤편 · 뒤 통로 쪽) 천장 강하관 · 볼 밸브 · 레귤레이터 → 호스로 UA-120 (공통 형상 idt_common/crewkit.js idtAirDrop · 11/20 사용자 지시 "라인 한쪽에 천장과 연결된 배관 · 에어 밸브")
+     서쪽 끝 통로(작업자 A 가 앞 · 뒤 통로를 오가는 x −5750)와 겹치지 않게 UA-120 뒤에 둠 · 작업자는 뒤 통로에서 접근 */
+  FF.air=idtAirDrop(g,{x:P(-4900), z:P(-1150), top:P(ROOM.h), label:"압축공기 6 bar", valves:[{y:P(1150), dir:[0,-1], to:[P(-4900),P(650),P(-820)]}]});
+  FF_OBS.push([-4970,-4830,-1340,-1090]);
   /* 집진기 전원 스위치 함 */
   bx(g,P(-5700),P(-5500),P(1300),P(1500),P(-2690),P(-2620),M.white); add(g,new T3.Mesh(new T3.CylinderGeometry(.025,.025,.02,20),M.green)).position.set(P(-5600),P(1400),P(-2612)); g.children[g.children.length-1].rotation.x=Math.PI/2;
   plate(g,.24,.06,labelTex(["집진기"],{w:256,h:64}),[P(-5600),P(1560),P(-2618)],0);
@@ -62,13 +64,17 @@ function ffHud(){ if(CREW.cur!=="F"||V3B.view==="orbit") return false; const h=$
 function ffInit(){
   ffBuild(V3B.sc); FF.am=createAimMark({T3, scene:V3B.sc, camera:()=>V3B.cam, canvas:()=>$("#cv"), unit:1});
   const css="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}body.fpLock:not(.hmiOn) #hmiWrap{position:relative}body.fpLock:not(.hmiOn) #hmiWrap>*{visibility:hidden!important}body.fpLock:not(.hmiOn) #hmiWrap::before{content:\"🧍 1인칭 진행 중\\A\\A설비 화면은 현장 모니터 앞에서 조준하고 E 로 엽니다. F · Esc 로 닫습니다.\\A\\A상단 [3인칭 전환] 으로 이 자리에 다시 표시할 수 있습니다.\";white-space:pre-wrap;position:absolute;left:12px;right:12px;top:12px;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid #c9d4e0;color:#173a63;font:600 14px/1.55 \"Malgun Gothic\",\"Noto Sans KR\",sans-serif;visibility:visible;z-index:5}";
-  const inj=()=>{ const d=ffDoc(); if(d&&d.head&&!d.getElementById("ffCss")){ const s=d.createElement("style"); s.id="ffCss"; s.textContent=css; d.head.appendChild(s); } };
+  const inj=()=>{ const d=ffDoc(); if(d&&d.head&&!d.getElementById("ffCss")){ const s=d.createElement("style"); s.id="ffCss"; s.textContent=css; d.head.appendChild(s);
+      /* 1인칭 : 타일 · 판넬 스위치 직접 클릭 차단 (CSS 와 이중 · 11/20) — 3D 대상(ffAct)의 클릭은 프로그램 클릭이라 통과 */
+      d.addEventListener("click",e=>{ if(!e.isTrusted||!d.body.classList.contains("fpLock")) return; const t=e.target&&e.target.closest&&e.target.closest(".tile,#panel .psw"); if(!t) return;
+        e.stopImmediatePropagation(); e.preventDefault(); pcToast("1인칭 — 설비 앞으로 걸어가 조준하고 E / 클릭으로 조작합니다."); },true); } };
   APP_FR.addEventListener("load",()=>{ inj(); const w=appWin(); w.addEventListener("keydown",e=>{ if(e.target&&e.target.closest&&e.target.closest("input,textarea,select")) return; ffKey(e); WALK.keys[e.code]=true; }); w.addEventListener("keyup",e=>{ WALK.keys[e.code]=false; }); });
   inj(); addEventListener("keydown",ffKey);
 }
 function ffKey(e){ if(CREW.cur!=="F"||V3B.view==="orbit") return; if(FF.hmi&&(e.code==="KeyF"||e.code==="Escape")){ ffHmi(false); e.preventDefault(); return; } if(e.code==="KeyE"&&!FF.hmi){ if(ffAct()) e.preventDefault(); } }
 function ffTick(now){
   const on=CREW.cur==="F"&&V3B.view!=="orbit"; const d=ffDoc(); if(d&&d.body) d.body.classList.toggle("fpLock",on);
+  if(FF.air&&now-(FF.ta||0)>250){ FF.ta=now; try{ FF.air.set(0,!!appWin().eval("S.air")); }catch(e){} }   /* 밸브 레버 = 실제 상태 */
   if(!on){ FF.am&&FF.am.hide(); if(FF.hmi) ffHmi(false); return; }
   if(now-(FF.t||0)>300){ FF.t=now; ffTargets(); }
   ffAim(); FF.goal=ffGoal(); FF.res=FF.am.update({eye:ffEye(), goal:FF.hmi?null:ffT(FF.goal), aim:FF.hmi?null:ffT(FF.aim), now});

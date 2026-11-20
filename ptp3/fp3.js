@@ -16,6 +16,19 @@ const FP3_A={
       mCarton:[2900,1100,650,"카톤 매거진"], mLeaflet:[4400,1300,650,"설명지 매거진"], mCase:[10225,1100,900,"박스 매거진 (박스포장기)"], mPallet:[13350,500,1300,"팔레트 (팔렛타이저)"],
       hmi:[5400,1450,650,"설비 화면 (카토너 HMI)"], panel:[4700,1250,650] }
 };
+/* 압축공기 (11/20 사용자 지시 "블리스터도 장비 후면에 에어밸브") : 충전기 · 카토너 뒤(후면 통로) 강하관 — 벽 위 주관에서 내려옴 · 볼 밸브 레버는 후면 통로 쪽(-z)
+   공통 형상 idt_common/crewkit.js idtAirDrop · 레버 = 앱 압축공기 상태 · 조작 대상(uAir)은 레버 위치 (mm) */
+/*   충전기(블리스터) : 본체 뒤 0.26 m (x −4.4 m) · 후면 통로(서쪽 끝으로 돌아 들어감)에서 접근 · 주관은 뒷벽 위
+     카토너 라인 : 후면은 동쪽 끝(약 15 m)으로만 돌아갈 수 있어 서쪽 끝 앞(칸막이벽 쪽)에 둠 [확인 필요 : 현장 위치] · 주관은 칸막이벽 위 */
+const FP3_AIR={F:{x:-4400, z:-1150, dir:[0,-1], hdr:"back", to:[-4400,700,-890]}, P:{x:1350, z:450, dir:[-1,0], hdr:"wall", to:[1650,700,450]}};
+const FP3_OBS=[];
+for(const r of ["F","P"]){ const a=FP3_AIR[r], d=a.dir; FP3_A[r].uAir=[a.x+d[0]*155,1205,a.z+d[1]*155,"압축공기 밸브"];
+  FP3_OBS.push([Math.min(a.x-70,a.x+d[0]*200),Math.max(a.x+70,a.x+d[0]*200),Math.min(a.z-70,a.z+d[1]*200),Math.max(a.z+70,a.z+d[1]*200)]); }
+function fp3AirBuild(){ FP3.air={}; const L=ROOMBUS.L;
+  for(const r of ["F","P"]){ const a=FP3_AIR[r], hd=a.hdr==="back"?[a.x/1000,(L.backZ+60)/1000]:[(L.wallX+L.wallT/2+20)/1000,a.z/1000];
+    FP3.air[r]=idtAirDrop(V3P.sc,{x:a.x/1000, z:a.z/1000, top:L.wallH/1000, header:hd, label:"압축공기 6 bar", valves:[{y:1.15, dir:a.dir, to:a.to.map(v=>v/1000)}]}); } }
+function fp3AirSync(now){ if(!FP3.air||now-(FP3.ta||0)<250) return; FP3.ta=now;
+  for(const [r,k] of [["F","filler"],["P","line"]]){ try{ FP3.air[r].set(0,!!UNI_HUB.win(k).eval("S.air")); }catch(e){} } }
 const FP3_BTN=[["swStart","START"],["swStop","STOP"],["swReset","RESET"],["swEmg","비상정지"],["swInch","인칭 (수동 1사이클)"]];
 const fp3Doc=()=>{ try{ return UNI_HUB.win(APPK[CREW.cur]).document; }catch(e){ return null; } };
 /* 대상 목록 (0.3 초마다) */
@@ -38,7 +51,7 @@ const fp3T=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s, 
 /* 조작 지점을 실제 설비 표면에 붙임 : 위치 값(일부 추정)에서 수평 4방향으로 광선 → 0.7 m 안의 가장 가까운 설비 면 (없으면 위치 값 그대로) (실별 1회 계산 · 저장)
    설비 앞 빈 공간에 놓인 위치 값 때문에 마커가 공중에 뜨는 것을 막음 */
 const FP3_SNAP={};
-function fp3Snap(t){ if(t.id==="lcCheck") return null; const k=CREW.cur+":"+t.id+":"+t.p.join(","); if(k in FP3_SNAP) return FP3_SNAP[k];
+function fp3Snap(t){ if(t.id==="lcCheck"||t.id==="uAir") return null;   /* uAir : 실제 밸브 모형의 레버 위치 그대로 */ const k=CREW.cur+":"+t.id+":"+t.p.join(","); if(k in FP3_SNAP) return FP3_SNAP[k];
   const L=[]; for(const [n,o] of Object.entries(V3P.objs)) if(n!=="room"&&o&&o.m&&o.m[0]){ o.m[0].geometry.boundingSphere=null; L.push(o.m[0]); }
   if(!L.length) return null; const o3=new T3.Vector3(t.p[0]*MM,t.p[1]*MM,t.p[2]*MM); let best=null;
   for(const d of [[0,0,-1],[0,0,1],[1,0,0],[-1,0,0]]){ _rc.set(o3,new T3.Vector3(...d)); _rc.far=.7; const h=_rc.intersectObjects(L,false)[0]; if(h&&(!best||h.distance<best.distance)) best=h; }
@@ -82,6 +95,7 @@ function fp3Hud(){ const h=$("#fpTip"); if(!h) return;
 /* 3D : 조작 지점 마커 (공통 모듈) */
 function fp3Init(){
   FP3.am=createAimMark({T3, scene:V3P.sc, camera:()=>V3P.cam, canvas:()=>$("#cv"), unit:1, occluded:fp3Occ});
+  fp3AirBuild();
   /* 앱 화면 : 1인칭 중 타일 · 판넬 버튼은 현황만 / 설비 화면은 다가간 뒤에만 */
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(!w) continue; const st=w.document.createElement("style");
     st.textContent="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock .tile{cursor:default}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}body.fpLock:not(.hmiOn) #hmiWrap{position:relative}body.fpLock:not(.hmiOn) #hmiWrap>*{visibility:hidden!important}body.fpLock:not(.hmiOn) #hmiWrap::before{content:\"🧍 1인칭 진행 중\\A\\A설비 화면은 현장 모니터 앞에서 조준하고 E 로 엽니다. F · Esc 로 닫습니다.\\A\\A상단 [3인칭 전환] 으로 이 자리에 다시 표시할 수 있습니다.\";white-space:pre-wrap;position:absolute;left:12px;right:12px;top:12px;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid #c9d4e0;color:#173a63;font:600 14px/1.55 \"Malgun Gothic\",\"Noto Sans KR\",sans-serif;visibility:visible;z-index:5}";
@@ -95,7 +109,7 @@ function fp3Key(e){
   if(e.code==="KeyE"&&!FP3.hmi){ if(fp3Act()) e.preventDefault(); }
 }
 function fp3Tick(now){
-  const on=!!CREW.cur&&V3P.view!=="orbit";
+  const on=!!CREW.cur&&V3P.view!=="orbit"; fp3AirSync(now);
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(w&&w.document.body) w.document.body.classList.toggle("fpLock",on&&APPK[CREW.cur]===k); }
   if(!on){ if(FP3.am) FP3.am.hide(); if(FP3.hmi) fp3Hmi(false); fp3Hud(); return; }
   if(now-FP3.t>300){ FP3.t=now; fp3Build(); }

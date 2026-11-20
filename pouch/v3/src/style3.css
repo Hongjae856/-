@@ -84,6 +84,9 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 /* 1인칭 : 왼쪽 타일은 현황 표시만 */
 #main.fpMode .tile{cursor:default}
 #main.fpMode .tile:hover{filter:none}
+/* 1인칭 : 타일로는 조작하지 않음 — 설비에 다가가 조준하고 E / 클릭 (11/20 사용자 지시 · PTP · 병 fpLock 과 같음) */
+#main.fpMode #utilTiles .tile,#main.fpMode #matTiles .tile{pointer-events:none;opacity:.9}
+#main.fpMode #utilTiles:before{content:"1인칭 — 설비에 다가가 조준하고 E / 클릭 (타일은 현황만)";grid-column:1/-1;font:700 12px var(--ff,sans-serif);color:#fff;background:#173a63cc;border-radius:8px;padding:5px 8px}
 /* 충전량 조절 미니게임 (11/16) */
 #dialGame{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:rgba(8,12,16,.55);z-index:60}
 #dialGame.on{display:flex}

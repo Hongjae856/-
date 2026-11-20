@@ -21,7 +21,9 @@ function gridBuild(){
       mark(a[0],a[2],b[0],b[2],c[0],c[2],Math.min(a[1],b[1],c[1]),Math.max(a[1],b[1],c[1])); } }
   WALK.grid=GRID;
 }
-function gridHit(x,z){ const L=ROOMBUS.L, m=250; if(x<L.dMinX+m||x>L.gMaxX-m||z<L.backZ+m||z>L.frontZ-m) return true; if(!GRID.a) return false;
+function gridHit(x,z){ const L=ROOMBUS.L, m=250; if(x<L.dMinX+m||x>L.gMaxX-m||z<L.backZ+m||z>L.frontZ-m) return true;
+  if(typeof FP3_OBS!=="undefined"&&FP3_OBS.some(r=>x>r[0]&&x<r[1]&&z>r[2]&&z<r[3])) return true;   /* 압축공기 강하관 (fp3.js) */
+  if(!GRID.a) return false;
   const i=Math.floor((x-GRID.x0)/GRID.c), k=Math.floor((z-GRID.z0)/GRID.c); if(i<0||k<0||i>=GRID.nx||k>=GRID.nz) return true; return !!GRID.a[k*GRID.nx+i]; }
 function walkFree(x,z){ const r=WALK.R; if(gridHit(x,z)) return false; for(let a=0;a<8;a++){ const q=a*Math.PI/4; if(gridHit(x+Math.cos(q)*r,z+Math.sin(q)*r)) return false; } return true; }
 /* 작업자 시작 위치 : 그 실 설비 앞(작업자 쪽 +z)에서 비어 있는 가장 가까운 곳 */

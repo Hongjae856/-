@@ -23,6 +23,7 @@ function gridHit(x,z){
   const m=250; if(x<ROOM.x0+m||x>ROOM.x1-m||z<ROOM.z0+m||z>ROOM.z1-m) return true;
   if(Math.abs(x-ROOM.wallX)<75+m&&!(z>DOORZ[0]&&z<DOORZ[1])) return true;          /* 칸막이 벽 (앞쪽 문 자리만 통과) */
   if(PK_OBS&&PK_OBS.some(r=>x>r[0]&&x<r[1]&&z>r[2]&&z<r[3])) return true;
+  if(typeof FF_OBS!=="undefined"&&FF_OBS.some(r=>x>r[0]&&x<r[1]&&z>r[2]&&z<r[3])) return true;   /* 압축공기 강하관 등 (ffp.js) */
   if(!GRID.a) return false; const i=Math.floor((x-GRID.x0)/GRID.c), k=Math.floor((z-GRID.z0)/GRID.c);
   if(i<0||k<0||i>=GRID.nx||k>=GRID.nz) return true; return !!GRID.a[k*GRID.nx+i]; }
 function walkFree(x,z){ const r=WALK.R; if(gridHit(x,z)) return false; for(let a=0;a<8;a++){ const q=a*Math.PI/4; if(gridHit(x+Math.cos(q)*r,z+Math.sin(q)*r)) return false; } return true; }

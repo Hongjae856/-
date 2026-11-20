@@ -23,6 +23,7 @@ function blInit(){ const G=new T3.Group(); BL.LP=idtLifterBuild(G,2.2); G.positi
   BL.drum=idtCarryMesh("drum"); BL.drum.position.set(-.47,.165+.17,0); BL.drum.visible=false; BL.LP.add(BL.drum); }
 const B3_FREE=(x,z)=>walkFree(x*1000,z*1000);
 window.B3_HOLD=J=>!!(J&&J.key==="tab"&&BL.ph&&BL.ph!=="pour");
+window.B3_FPME=()=>V3B.view!=="orbit"&&CREW.cur==="F";   /* 1인칭 충전실 작업자 : 유틸리티는 플레이어가 그 자리에서 바로 조작 (앱 utilDo) */
 function blStep(path,dt){ let st=dt*IDT_WALK, mv=false; const V=BL.V; while(st>1e-4&&path.length){ const p=path[0], dx=p[0]-V.x, dz=p[1]-V.z, d=Math.hypot(dx,dz); mv=true;
     if(d<=st){ V.x=p[0]; V.z=p[1]; st-=d; path.shift(); } else { V.x+=dx/d*st; V.z+=dz/d*st; st=0; } } return mv; }
 /* 리프터 진행 (작업자 i 의 앱 작업 J) — 셸이 보이는 위치를 정하면 {x,z,moving,face,act} 를 돌려줌 */

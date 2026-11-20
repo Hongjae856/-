@@ -147,7 +147,7 @@ function pcAct(k){ const T=PT[k]; if(!T) return; const st=PC.steps[PC.i];
 function pcRender(){
   const t=$("#pkTiles"); if(!PC.on){ t.innerHTML=""; return; } const L=pcTiles(), st=PC.steps[PC.i], hint=pcHintOn()&&st?st.k:null;
   const html=L.map(k=>{ const T=PT[k], sub=typeof T.sub==="function"?T.sub():T.sub, on=T.st&&T.st(); return '<button class="pt'+(on?" on":"")+(hint===k?" hint":"")+(T.low&&T.low()?" low":"")+'" data-k="'+k+'"><b>'+T.nm+'</b><s>'+(sub||"")+'</s></button>'; }).join("");
-  if(t.dataset.h!==html){ t.dataset.h=html; t.innerHTML=html; t.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>pcAct(b.dataset.k)); }
+  if(t.dataset.h!==html){ t.dataset.h=html; t.innerHTML=html; t.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{ if(document.body.classList.contains("pkfp")){ pcToast("1인칭 — 설비 앞으로 걸어가 조준하고 E / 클릭으로 조작합니다."); return; } pcAct(b.dataset.k); }); }   /* 1인칭 : 타일은 현황만 (CSS 와 이중 · 11/20) */
   const c=$("#pkCoach"), n=PC.steps.length, done=PC.done, ih=typeof incbCoach==="function"&&incbCoach();
   if(PC.mode==="demo"&&!ih){ const k=demobHtml("P");
     if(c.dataset.h!==k){ c.dataset.h=k; c.innerHTML=k; } pcStat(); return; }

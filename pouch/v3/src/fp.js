@@ -29,6 +29,7 @@ function fpObstacles(){
   b(10.38,11.52,5.68,6.72);                                      /* 예비 은박 팔레트 (대차 · 드럼리프터는 propBlock) */
   b(RM.pier-.14,RM.pier+.14,0,.62); b(RM.pier-.14,RM.pier+.14,6.33,7);   /* 벽기둥 */
   b(7.42,7.82,.18,.52);                                          /* 수지 마개 */
+  b(AIRDROP_P.x-.05,AIRDROP_P.x+.2,AIRDROP_P.z-.05,AIRDROP_P.z+.05);   /* 압축공기 강하관 · 밸브 (11/20) */
   /* 포장실 : 라인 · 받침대 · 작업자 · 자재대 · 작업대 · 파렛트 · 성형 박스 대차 · 자재 */
   b(CVX-.62,CVX+.98,-9.15,-.2);                                  /* 스틱공급장치 ~ 배출함 */
   b(CVX-1.22,CVX+1.22,-11.05,-9.15);                             /* 대케이스 포장 : 받침대 · 작업자 2 · 자재대 */
@@ -80,6 +81,9 @@ const monOf=k=>Object.values(FP_MON).find(m=>m.k.includes(k));
 /* ── 조작 대상 ── */
 const TB=(id,name,p,w,h,d,run,sels,o)=>Object.assign({id,name,x:p[0],y:p[1],z:p[2],w,h,d,run,sels},o||{});
 const tileRun=id=>()=>TILE[id].click();
+/* 1인칭 : 왼쪽 타일 클릭 · 키보드로 설비를 조작하지 못하게 막음 (CSS pointer-events 와 이중) — 1인칭 조작은 3D 대상(위 tileRun)으로만 (11/20) */
+document.addEventListener("click",e=>{ if(!cam.fp||typeof FP==="undefined"||!FP.on) return; const t=e.target&&e.target.closest&&e.target.closest("#utilTiles .tile,#matTiles .tile"); if(!t) return;
+  e.stopImmediatePropagation(); e.preventDefault(); toast("1인칭 — 설비 앞으로 걸어가 조준하고 E / 클릭으로 조작합니다."); },true);
 function fpTargetDefs(){
   const f=S.f, T=[], A=ANC;
   const add=(...a)=>T.push(TB(...a));

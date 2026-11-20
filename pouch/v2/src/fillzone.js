@@ -1,6 +1,6 @@
 /* ═══ 충전실 주변 : 북쪽 벽 유리창 · 개구부, 경사 컨베이어, 프린터 컨트롤러 거치대, IBC 2기 · 받침 호퍼 · 진공호스,
        저울 작업대 2대(북서), 드럼리프터(북동), 예비 은박(남동), 출입문 2(남) — DRAWING.md 6 · 8절 ═══ */
-let FILLCART=null, FILLLIFT=null, FILLPROP={};
+let FILLCART=null, FILLLIFT=null, FILLPROP={}, FILLAIR=null;
 /* 주성분 봉투 (흰 PE 봉투 · 묶은 목) */
 function bagMesh(x,y,z){ const G=new T3.Group(), m=new T3.MeshStandardMaterial({color:0xf4f6f7,roughness:.55,transparent:true,opacity:.92}); const b=new T3.Mesh(new T3.SphereGeometry(.14,20,14),m); b.scale.set(1,.9,.8); b.position.set(x,y+.13,z); G.add(b); const n=new T3.Mesh(new T3.CylinderGeometry(.02,.035,.08,12),m); n.position.set(x,y+.27,z); G.add(n); return G; }   /* 대차 · 리프터 · 예비 은박 롤 · STS 용기 (workers.js 가 상태에 맞춰 움직임) */
 function buildFillZone(S){
@@ -75,5 +75,10 @@ function buildFillZone(S){
       RD.push({G, s, key:"f"+di, ang:0}); } }
   /* ── 소화기 (진공청소기는 구현하지 않음 — 사용자 지시 11/11) ── */
   rod(g,[.3,.05,6.5],[.3,.5,6.5],.06,M.red,18); rod(g,[.3,.5,6.5],[.3,.58,6.5],.02,M.dark,10);
+  /* ── 압축공기 공급 : 충전기 북쪽(동쪽 끝 바깥) 천장 강하관 · 밸브 2 (공통 형상 idt_common/crewkit.js idtAirDrop · 11/20 사용자 지시 "장비 북쪽에 에어관과 밸브") ── */
+  if(typeof idtAirDrop==="function") FILLAIR=idtAirDrop(g,{x:AIRDROP_P.x, z:AIRDROP_P.z, top:H, label:"압축공기 6 bar",
+    valves:AIRDROP_P.y.map((y,i)=>({y, dir:[1,0], to:[F.x1-.06,.55+i*.2,F.z0+.12]}))});
   return g;
 }
+/* 압축공기 강하관 위치 (m) : 충전기 북동 모서리 바깥 · 작업자는 동쪽에서 접근 */
+const AIRDROP_P={x:5.70, z:1.12, y:[1.15,1.40]};

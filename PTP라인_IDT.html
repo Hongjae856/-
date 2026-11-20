@@ -222,6 +222,7 @@ body.appModal .aimEdge{display:none!important}
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:14,d:'2026-11-20',t:'1인칭 조작 · 압축공기 배관 (11/20 사용자 확인) — 1인칭에서는 상태 아이콘(타일)으로 설비를 조작하지 못함을 세 IDT 모두 시험으로 확인하고 막음을 이중화(타일 잠금 + 클릭 차단 · 「설비에 다가가 조준하고 E / 클릭」 안내). 3인칭에서 압축공기 · 메인 전원 등 유틸리티 타일을 누르면 작업자가 그 설비까지 걸어가 손을 뻗은 뒤 조작(파우치 방식으로 통일 · 블리스터 · 병은 전에는 즉시 바뀜). 압축공기 배관 · 볼 밸브(빨간 레버 = 실제 열림/잠금 상태) · 레귤레이터 · 압력계 · 호스를 공통 모형(idt_common/crewkit.js idtAirDrop)으로 실제 위치에 둠 : 블리스터 = 충전기(블리스터) 후면 강하관 · 밸브 (뒷벽 위 주관 · 후면 통로에서 접근), 카토너 라인 = 서쪽 끝 앞(칸막이벽 위 주관) [현장 위치 확인 필요]'},
  {v:13,d:'2026-11-20',t:'메인화면 개편 (11/20 사용자 지시 · 세 IDT 공통 idt_common/splash.*) — ① 교육 과정(기본 · 심화 × 학습 · 평가 표, 체험, 관리 · 분석) → ② 작업자 → ③ [교육 시작] 순서로 정리, 남색 1색 + 회색, 버튼 부제는 10자 안팎으로 줄이고 자세한 설명은 마우스를 올리거나 길게 누르면 말풍선(사용자 선택 C), 과정 · 작업자를 눌러도 바로 시작하지 않고 [교육 시작] 으로 시작(OEE 는 [대시보드 열기] · 이상사례는 [사례 목록 보기]) · 체인지파트는 기본 · 6묶음 / 심화 · 18종 행'},
  {v:12,d:'2026-11-20',t:'작업자 능력 통일 (11/20 사용자 지시 "다 통일해") — 세 IDT 작업자가 같은 공통 기능(idt_common/crewkit.js)으로 움직임 : 설비를 돌아가는 길로 걷기(격자 경로 · 도착 전에는 작업 시간 멈춤), 실제 설비 표면 · 조작 지점에 손 대기, 대차 · 리프터 끌기, 2인 1조 보조 작업자(1인칭에서도 동행해 롤 반대쪽을 함께 잡음 · 11/20 사용자 결정), 붓기 흐름 · PTP : 충전실 성형필름 · 커버포일 롤 교체 = 대차 운반 + 2인 장착 + 대차 원위치(파우치 은박 롤과 같음 · 11/20 사용자 결정), 포장실 손이 설비 안으로 들어가던 것 → 실제 표면, 핸드파렛트카 손잡이 잡기, 통로 설비 겹침(충전 x −2.8 m · 포장 카토너 · 팔레타이저) → 돌아감'},
  {v:11,d:'2026-11-19',t:'통합 4단계 · 시연 · 자유모드 · 결과 창 공통화 (11/19) — 학습 · 평가 · 이상사례 · 시연 결과 창을 세 IDT 모두 파우치 결과 창 모양(제목 · 요약 · 점수 · 실적 카드 · 표 · 버튼)의 공통 모듈 idt_common/modes.js 로 띄움, 시연 안내판(단계마다 [▶ 단계 이름] 버튼) · 자유모드 안내판([▶ 정상 운전 상태로] [■ 전체 OFF 초기화]) 문구 · 버튼 공통, 메인화면으로 가면 결과 창 닫힘 · 이상사례 결과와 시연 완료를 공통 결과 창으로 띄움 · 자유모드 [■ 정지] → [■ 전체 OFF 초기화] · PTP 고유 [결과 복사] [인쇄] 와 평가 총평 카드는 유지'},
@@ -834,7 +835,9 @@ function gridBuild(){
       mark(a[0],a[2],b[0],b[2],c[0],c[2],Math.min(a[1],b[1],c[1]),Math.max(a[1],b[1],c[1])); } }
   WALK.grid=GRID;
 }
-function gridHit(x,z){ const L=ROOMBUS.L, m=250; if(x<L.dMinX+m||x>L.gMaxX-m||z<L.backZ+m||z>L.frontZ-m) return true; if(!GRID.a) return false;
+function gridHit(x,z){ const L=ROOMBUS.L, m=250; if(x<L.dMinX+m||x>L.gMaxX-m||z<L.backZ+m||z>L.frontZ-m) return true;
+  if(typeof FP3_OBS!=="undefined"&&FP3_OBS.some(r=>x>r[0]&&x<r[1]&&z>r[2]&&z<r[3])) return true;   /* 압축공기 강하관 (fp3.js) */
+  if(!GRID.a) return false;
   const i=Math.floor((x-GRID.x0)/GRID.c), k=Math.floor((z-GRID.z0)/GRID.c); if(i<0||k<0||i>=GRID.nx||k>=GRID.nz) return true; return !!GRID.a[k*GRID.nx+i]; }
 function walkFree(x,z){ const r=WALK.R; if(gridHit(x,z)) return false; for(let a=0;a<8;a++){ const q=a*Math.PI/4; if(gridHit(x+Math.cos(q)*r,z+Math.sin(q)*r)) return false; } return true; }
 /* 작업자 시작 위치 : 그 실 설비 앞(작업자 쪽 +z)에서 비어 있는 가장 가까운 곳 */
@@ -1059,6 +1062,36 @@ function idtWalkerTick(V,want,dt,spd){
     if(d<=st){ V.x=p[0]; V.z=p[1]; st-=d; V.path.shift(); } else { V.x+=dx/d*st; V.z+=dz/d*st; st=0; } }
   return {x:V.x, z:V.z, moving:mv, arrived:!V.path.length};
 }
+/* ── 압축공기 공급 배관 (세 IDT 공통 형상 · 위치는 IDT 별 설정 · 11/20 사용자 지시 : 천장과 연결된 배관 + 에어 밸브) ──
+   천장(또는 천장 밑 수평 주관) → 수직 강하관(파랑) → 티 → 볼 밸브(빨간 레버) → 필터 레귤레이터 · 압력계 → 호스로 설비
+   o : {x,z, top:천장 높이, header:[x,z] (천장 밑 수평 주관을 벽 · 주관 쪽으로, 선택), label,
+        valves:[{y:밸브 높이, dir:[dx,dz] 레버가 보이는 쪽(작업자 쪽 단위 벡터), to:[x,y,z] 호스 끝(설비 · 선택)}]}
+   반환 {G, pt:[레버 중심 좌표…], set(i,open)} — 열림 = 레버가 배관과 나란히 · 닫힘 = 직각 (현장 볼 밸브) */
+function idtAirDrop(sc,o){
+  const G=new T3.Group(); sc.add(G); const r=.017, x=o.x, z=o.z, top=o.top, ys=o.valves.map(v=>v.y), yb=Math.min(...ys)-.12;
+  const yt=o.header?top-.18:top;
+  rod(G,[x,yb,z],[x,yt,z],r,M.blue,14); rod(G,[x,yb-.04,z],[x,yb,z],r*1.25,M.ssD,14);                    /* 강하관 · 끝 마개(드레인) */
+  if(o.header){ const [hx,hz]=o.header; rod(G,[x,yt,z],[x,yt,hz],r*1.3,M.blue,14); if(Math.abs(hx-x)>.01) rod(G,[x,yt,hz],[hx,yt,hz],r*1.3,M.blue,14);
+    const L=Math.abs(hz-z)+Math.abs(hx-x); for(let s=0;s<=L+.01;s+=1.2){ const a=Math.min(s,Math.abs(hz-z)), b=s-a, px=x+Math.sign(hx-x)*b, pz=z+Math.sign(hz-z)*a;   /* 행거 */
+      rod(G,[px,yt+r,pz],[px,top,pz],.005,M.ssD,8); bx(G,px-.03,px+.03,top-.01,top,pz-.03,pz+.03,M.ss); } }
+  else bx(G,x-.07,x+.07,top-.012,top,z-.07,z+.07,M.ss);                                                    /* 천장 플랜지 */
+  const pt=[], LV=[];
+  o.valves.forEach(v=>{ const [dx,dz]=v.dir, y=v.y, e=[x+dx*.16,z+dz*.16], yaw=Math.atan2(dx,dz);
+    rod(G,[x,y,z],[e[0],y,e[1]],r*.85,M.blue,12); bx(G,x-.03,x+.03,y-.03,y+.03,z-.03,z+.03,M.ssD);          /* 티 · 가지관 */
+    const B=new T3.Group(); B.position.set(x+dx*.08,y,z+dz*.08); B.rotation.y=yaw; G.add(B);
+    bx(B,-.032,.032,-.03,.03,-.035,.035,M.brass); rod(B,[0,.03,0],[0,.05,0],.008,M.ssD,8);                   /* 볼 밸브 몸체 · 축 */
+    const LG=new T3.Group(); LG.position.y=.052; B.add(LG); bx(LG,-.011,.011,-.006,.006,-.01,.15,M.red); LV.push(LG);   /* 레버 */
+    rod(G,[e[0],y,e[1]],[e[0],y-.16,e[1]],r*.8,M.blue,12);                                                  /* 레귤레이터로 */
+    const R=new T3.Group(); R.position.set(e[0],y-.21,e[1]); R.rotation.y=yaw; G.add(R);
+    bx(R,-.03,.03,-.05,.05,-.03,.03,M.grey); rod(R,[0,-.05,0],[0,-.11,0],.022,M.acryl||M.white,14);        /* 필터 레귤레이터 · 보울 */
+    rod(R,[0,.02,.03],[0,.02,.045],.028,M.ssD,18); rod(R,[0,.02,.045],[0,.02,.048],.025,M.white,18);       /* 압력계 */
+    rod(R,[0,.05,0],[0,.075,0],.012,M.dark,10);                                                             /* 조정 손잡이 */
+    if(v.to){ const a=[e[0],y-.33,e[1]], t=v.to, m=[(a[0]+t[0])/2,Math.min(a[1],t[1])-.25,(a[2]+t[2])/2]; tube(G,[a,[a[0],a[1]-.12,a[2]],m,t],.008,M.dark); }
+    pt.push([x+dx*.08+dx*.075,y+.055,z+dz*.08+dz*.075]); });
+  if(o.label){ const v=o.valves[0], [dx,dz]=v.dir; plate(G,.24,.07,labelTex([o.label],{w:256,h:72,bg:"#2a63b8"}),[x+dx*(r+.006),Math.max(...ys)+.28,z+dz*(r+.006)],Math.atan2(dx,dz)); }
+  const A={G, pt, open:o.valves.map(()=>null), set(i,on){ on=!!on; if(A.open[i]===on) return; A.open[i]=on; LV[i].rotation.y=on?0:Math.PI/2; }};
+  o.valves.forEach((v,i)=>A.set(i,false)); return A;
+}
 
 /* ── crew3.js ── */
 /* ═══════════════════════════════════════════════════════════════════
@@ -1105,15 +1138,38 @@ function crew3Ready(){
 /* 앱 작업 시간 멈춤 : 보이는 작업자가 아직 도착하지 않았거나(걷기) 대차 운반 · 2인 준비 중 */
 window.PTP_HOLD=function(app,a){
   if(!CREW3V.F) return false;
+  if(app==="filler"&&UT3.F) return true; if(app==="line"&&a===0&&UT3.P) return true;   /* 유틸리티 조작하러 가는 중 */
   if(app==="filler"){ if(CH3.k&&["toCart","tow","pick","carry"].includes(CH3.ph)) return true; if(CH3.k&&CH3.ph==="mount"&&!(CH3.hold>1.6||CH3.t>(CH3.fp?10:40))) return true; return !!(CREW3V.F.path&&CREW3V.F.path.length)&&!CH3.k; }
   const V=CREW3V.P[a]; return !!(V&&V.path&&V.path.length);
 };
 function crew3Path(a,b,r){ return idtGridPath(r?((x,z)=>PTP_FREER(x,z,r)):PTP_FREE_F,a,b,.1)||[b]; }   /* 충전실 안 */
 function crew3StepPath(V,path,dt,spd){ let st=dt*(spd||IDT_WALK), mv=false; while(st>1e-4&&path.length){ const p=path[0], dx=p[0]-V.x, dz=p[1]-V.z, d=Math.hypot(dx,dz); mv=true;
     if(d<=st){ V.x=p[0]; V.z=p[1]; st-=d; path.shift(); } else { V.x+=dx/d*st; V.z+=dz/d*st; st=0; } } return mv; }
+/* ═══ 유틸리티 조작 = 파우치 방식 (11/20 사용자 확인 "실제 작업처럼 물 흐르듯이") ═══
+   3인칭에서 압축공기 · 메인 전원 · 냉동기 · 진공 펌프 · 안전문 타일을 누르면 → 보이는 작업자가 그 설비(fp3.js FP3_A 위치)로 걸어가 손을 뻗은 뒤 앱 조작
+   1인칭(그 실 작업자)은 타일이 잠기고(fpLock) 플레이어가 그 자리에 가서 3D 대상을 누르면 바로 적용 — 파우치 startWork 와 같음 */
+const UT3={F:null, P:null, pass:false}, UT3_IDS=["uAir","uMain","uChiller","uVac","uDoor"];
+function ut3Bind(k){ const w=UNI_HUB.win(k); if(!w||!w.document||w.__ut3===w.document) return; w.__ut3=w.document;
+  w.document.addEventListener("click",e=>{ if(!e.isTrusted||!(V3P.view!=="orbit"&&APPK[CREW.cur]===k)) return; const t=e.target&&e.target.closest&&e.target.closest(".tile,#panel .psw"); if(!t||UT3_IDS.includes(t.id)) return;   /* 1인칭 : 자재 타일 · 판넬 스위치도 직접 클릭 차단 */
+    e.stopImmediatePropagation(); e.preventDefault(); try{ w.toast("1인칭 — 설비 앞으로 걸어가 조준하고 E / 클릭으로 조작합니다."); }catch(x){} },true);
+  w.document.addEventListener("click",e=>{ const t=e.target&&e.target.closest&&e.target.closest(".tile[id]"); if(!t||!UT3_IDS.includes(t.id)||UT3.pass) return;
+    const r=k==="filler"?"F":"P", A=FP3_A[r]&&FP3_A[r][t.id]; if(!A||!CREW3V.F) return;
+    if(V3P.view!=="orbit"&&APPK[CREW.cur]===k){ if(e.isTrusted){ e.stopImmediatePropagation(); e.preventDefault(); try{ w.toast("1인칭 — 설비 앞으로 걸어가 조준하고 E / 클릭으로 조작합니다."); }catch(x){} } return; }   /* 1인칭 그 실 : 타일 직접 클릭 차단 (CSS fpLock 과 이중) · 플레이어가 그 자리에서 3D 대상으로 (fp3Act) */
+    try{ if(["uAir","uMain"].includes(t.id)&&!w.eval("S.air||S.main")&&!w.eval("clearanceDone()")) return; }catch(x){}   /* 앱 선행 조건(라인클리어런스) 미충족 : 걸어가지 않고 앱 안내를 바로 */
+    e.stopImmediatePropagation(); e.preventDefault(); if(UT3[r]) return;
+    const busy=r==="F"?!!(w.PTP_WKF&&w.PTP_WKF.key)||!!CH3.k:!!(w.PTP_WK&&w.PTP_WK[0]&&w.PTP_WK[0].job);
+    if(busy){ try{ w.toast("작업자가 다른 작업 중입니다."); }catch(x){} return; }
+    const tg=[A[0]/1000,A[1]/1000,A[2]/1000], free=r==="F"?PTP_FREE_F:PTP_FREE_P, d=t.id==="uAir"?FP3_AIR[r].dir:null;   /* 밸브 : 레버 정면 0.45 m 에 섬 */
+    const st=(d&&idtNearFree(free,tg[0]+d[0]*.45,tg[2]+d[1]*.45,.6,d))||idtNearFree(free,tg[0],tg[2],1.6,[0,tg[2]<-.3?-1:1])||[tg[0],tg[2]+.6];
+    UT3[r]={id:t.id, el:t, tg, stand:st, ph:"walk", t:0, done:false}; },true); }
+function ut3Step(r,V,dt){ const U=UT3[r]; const w=idtWalkerTick(V,U.stand,dt);
+  if(U.ph==="walk"&&w.arrived&&!w.moving){ U.ph="work"; U.t=0; }
+  if(U.ph==="work"){ U.t+=dt; if(U.t>=.55&&!U.done){ U.done=true; UT3.pass=true; try{ U.el.click(); }catch(e){} finally{ UT3.pass=false; } } if(U.t>=1.3) UT3[r]=null; }
+  return {x:w.x, z:w.z, moving:w.moving, face:Math.atan2(U.tg[0]-w.x,U.tg[2]-w.z), reach:U.ph==="work"&&U.t>.12&&U.t<1.15?U.tg:null}; }
 function crew3Tick(dt){
   const fw=UNI_HUB.win("filler"), lw=UNI_HUB.win("line"), L=ROOMBUS.L, fp=V3P.view!=="orbit";
   if(!crew3Ready()) return;
+  ut3Bind("filler"); ut3Bind("line");
   /* ── 충전실 ── */
   { const f=fw&&fw.PTP_WKF, H=CREW3.F, me=fp&&WALK.room==="F", V=CREW3V.F, HP=CREW3.HP, C=CH3;
     const X=v=>(4*v-3680)/1000, Zf=(4*(f?f.z:0)+L.fillerZ)/1000;
@@ -1138,6 +1194,8 @@ function crew3Tick(dt){
       if(C.ph==="pick"){ C.pt+=dt; if(C.pt>.9){ C.ph="carry"; C.roll[C.k].visible=false; C.path=crew3Path([V.x,V.z],C.S); } }
       else if(C.ph==="carry"){ moving=crew3StepPath(V,C.path,dt,IDT_WALK*.8)||moving; if(!C.path.length) C.ph="mount"; }
       const q=idtFaceStep(H,V.x,V.z,dt,C.ph==="pick"?Math.atan2(cart.x-V.x,cart.z-V.z):tg?Math.atan2(tg[0]-V.x,tg[2]-V.z):Math.PI); P.x=V.x; P.z=V.z; P.yaw=(C.ph==="tow"||C.ph==="towBack")?C.tyaw:q.yaw; moving=moving||q.moving; V.path=[]; V.goal=null; }
+    else if(UT3.F&&f&&!me){ if(V.x==null){ V.x=X(f.x); V.z=Zf; } const u=ut3Step("F",V,dt); const q=idtFaceStep(H,u.x,u.z,dt,u.face);   /* 유틸리티 조작하러 */
+      P.x=u.x; P.z=u.z; P.yaw=q.yaw; moving=q.moving||u.moving; P.ut=u.reach; }
     else if(f&&!me){                                                         /* 평소 : 앱 자리로 걸어감 (도착 전 앱 작업 멈춤) */
       const want=[X(job&&f.to!=null?f.to:f.x),Zf], w=idtWalkerTick(V,want,dt);
       const q=idtFaceStep(H,w.x,w.z,dt,tg&&!w.moving?Math.atan2(tg[0]-w.x,tg[2]-w.z):Math.PI); P.x=w.x; P.z=w.z; P.yaw=q.yaw; moving=q.moving||w.moving; }
@@ -1149,6 +1207,7 @@ function crew3Tick(dt){
       else if(act){ crew3Item(H,null); }
       else if(job&&!roll&&(moving||(f.ph||0)<.15)){ let cp=idtCarryPt(P.x,P.z,0,P.yaw,"part"); if(!moving&&tg){ const r=Math.min(1,(f.reach||0)*1.4); cp=cp.map((v,k)=>v+(tg[k]-v)*r*.85); } crew3Hold(H,P,"part",cp,P.yaw); }
       else { crew3Item(H,null); if(!moving&&tg&&job){ P.L=[tg[0]-.1,tg[1],tg[2]]; P.R=[tg[0]+.1,tg[1],tg[2]]; } }
+      if(P.ut){ crew3Item(H,null); P.L=null; P.R=P.ut; P.gR=.5; }
       poseHuman(H,P); }
     else { H.G.visible=false; crew3Item(H,null); V.path=[]; if(!me){ V.x=null; } }
     /* 보조 작업자 (충전실) : 롤 교체 동안 주 작업자(1인칭이면 플레이어)를 따라와 옆자리에서 롤 반대쪽을 함께 잡음 */
@@ -1163,10 +1222,11 @@ function crew3Tick(dt){
   const W=(lw&&lw.PTP_WK)||[], dz=((lw&&lw.S&&lw.S.doorT)||0)*120;
   CREW3.P.forEach((H,i)=>{ const w=W[i], me=fp&&WALK.room==="P"&&i===0, V=CREW3V.P[i]; H.G.visible=!!w&&!me; if(!H.G.visible){ H.dx=null; V.x=null; crew3Item(H,null); return; }
     const jack=w.job==="jack"||!!w.grip, ax=(8000+5*w.x)/1000, az=5*(w.z+dz)/1000;
-    let x, z, moving;
+    let x, z, moving, U0=null;
     if(jack){ V.x=ax; V.z=az; V.path=[]; V.goal=null; x=ax; z=az; }                        /* 핸드파렛트카 : 앱 경로 그대로 (설비 앞 통로) */
+    else if(i===0&&UT3.P){ if(V.x==null){ V.x=ax; V.z=az; } U0=ut3Step("P",V,dt); x=U0.x; z=U0.z; }           /* 유틸리티 조작하러 */
     else { const r=idtWalkerTick(V,[(8000+5*(w.job?w.xt:w.x))/1000,az],dt); x=r.x; z=r.z; }
-    const q=idtFaceStep(H,x,z,dt,Math.PI), yaw=jack&&w.yawLock!=null?w.yawLock+Math.PI:q.yaw; moving=q.moving||(V.path&&V.path.length>0);
+    const q=idtFaceStep(H,x,z,dt,U0&&!U0.moving?U0.face:Math.PI), yaw=jack&&w.yawLock!=null?w.yawLock+Math.PI:q.yaw; moving=q.moving||(V.path&&V.path.length>0);
     const work=w.job==="work"&&!moving, fwd=[Math.sin(yaw),Math.cos(yaw)], lf=[Math.cos(yaw),-Math.sin(yaw)];
     const kind=w.job==="work"?CREW3_LK[w.key]:null, P={x,z,yaw,dt,L:null,R:null,gL:.3,gR:.3,nL:"down",nR:"down"};
     if(jack&&w.grip){ crew3Item(H,null); const g=w.grip.map(p=>[(8000+5*p[0])/1000,5*p[1]/1000,5*p[2]/1000]); P.L=g[0]; P.R=g[1]; P.gL=P.gR=.6; P.lean=.06; }
@@ -1174,6 +1234,7 @@ function crew3Tick(dt){
     else { crew3Item(H,null);
       if(work){ const ex=[H.G].concat(Object.values(H.items||{})); let s=idtReachSurface(V3P.sc,ex,x,z,yaw,1.05,.8); if(!s) s=[x+fwd[0]*.45,1.05,z+fwd[1]*.45]; else s=[s[0]-fwd[0]*.03,s[1],s[2]-fwd[1]*.03];
         P.L=[s[0]+lf[0]*.15,s[1],s[2]+lf[1]*.15]; P.R=[s[0]-lf[0]*.15,s[1],s[2]-lf[1]*.15]; } }
+    if(U0&&U0.reach){ crew3Item(H,null); P.L=null; P.R=U0.reach; P.gR=.5; }
     poseHuman(H,P); });
 }
 
@@ -1557,6 +1618,19 @@ const FP3_A={
       mCarton:[2900,1100,650,"카톤 매거진"], mLeaflet:[4400,1300,650,"설명지 매거진"], mCase:[10225,1100,900,"박스 매거진 (박스포장기)"], mPallet:[13350,500,1300,"팔레트 (팔렛타이저)"],
       hmi:[5400,1450,650,"설비 화면 (카토너 HMI)"], panel:[4700,1250,650] }
 };
+/* 압축공기 (11/20 사용자 지시 "블리스터도 장비 후면에 에어밸브") : 충전기 · 카토너 뒤(후면 통로) 강하관 — 벽 위 주관에서 내려옴 · 볼 밸브 레버는 후면 통로 쪽(-z)
+   공통 형상 idt_common/crewkit.js idtAirDrop · 레버 = 앱 압축공기 상태 · 조작 대상(uAir)은 레버 위치 (mm) */
+/*   충전기(블리스터) : 본체 뒤 0.26 m (x −4.4 m) · 후면 통로(서쪽 끝으로 돌아 들어감)에서 접근 · 주관은 뒷벽 위
+     카토너 라인 : 후면은 동쪽 끝(약 15 m)으로만 돌아갈 수 있어 서쪽 끝 앞(칸막이벽 쪽)에 둠 [확인 필요 : 현장 위치] · 주관은 칸막이벽 위 */
+const FP3_AIR={F:{x:-4400, z:-1150, dir:[0,-1], hdr:"back", to:[-4400,700,-890]}, P:{x:1350, z:450, dir:[-1,0], hdr:"wall", to:[1650,700,450]}};
+const FP3_OBS=[];
+for(const r of ["F","P"]){ const a=FP3_AIR[r], d=a.dir; FP3_A[r].uAir=[a.x+d[0]*155,1205,a.z+d[1]*155,"압축공기 밸브"];
+  FP3_OBS.push([Math.min(a.x-70,a.x+d[0]*200),Math.max(a.x+70,a.x+d[0]*200),Math.min(a.z-70,a.z+d[1]*200),Math.max(a.z+70,a.z+d[1]*200)]); }
+function fp3AirBuild(){ FP3.air={}; const L=ROOMBUS.L;
+  for(const r of ["F","P"]){ const a=FP3_AIR[r], hd=a.hdr==="back"?[a.x/1000,(L.backZ+60)/1000]:[(L.wallX+L.wallT/2+20)/1000,a.z/1000];
+    FP3.air[r]=idtAirDrop(V3P.sc,{x:a.x/1000, z:a.z/1000, top:L.wallH/1000, header:hd, label:"압축공기 6 bar", valves:[{y:1.15, dir:a.dir, to:a.to.map(v=>v/1000)}]}); } }
+function fp3AirSync(now){ if(!FP3.air||now-(FP3.ta||0)<250) return; FP3.ta=now;
+  for(const [r,k] of [["F","filler"],["P","line"]]){ try{ FP3.air[r].set(0,!!UNI_HUB.win(k).eval("S.air")); }catch(e){} } }
 const FP3_BTN=[["swStart","START"],["swStop","STOP"],["swReset","RESET"],["swEmg","비상정지"],["swInch","인칭 (수동 1사이클)"]];
 const fp3Doc=()=>{ try{ return UNI_HUB.win(APPK[CREW.cur]).document; }catch(e){ return null; } };
 /* 대상 목록 (0.3 초마다) */
@@ -1579,7 +1653,7 @@ const fp3T=t=>t&&{id:t.id, name:t.nm, c:[t.p[0]*MM,t.p[1]*MM,t.p[2]*MM], s:t.s, 
 /* 조작 지점을 실제 설비 표면에 붙임 : 위치 값(일부 추정)에서 수평 4방향으로 광선 → 0.7 m 안의 가장 가까운 설비 면 (없으면 위치 값 그대로) (실별 1회 계산 · 저장)
    설비 앞 빈 공간에 놓인 위치 값 때문에 마커가 공중에 뜨는 것을 막음 */
 const FP3_SNAP={};
-function fp3Snap(t){ if(t.id==="lcCheck") return null; const k=CREW.cur+":"+t.id+":"+t.p.join(","); if(k in FP3_SNAP) return FP3_SNAP[k];
+function fp3Snap(t){ if(t.id==="lcCheck"||t.id==="uAir") return null;   /* uAir : 실제 밸브 모형의 레버 위치 그대로 */ const k=CREW.cur+":"+t.id+":"+t.p.join(","); if(k in FP3_SNAP) return FP3_SNAP[k];
   const L=[]; for(const [n,o] of Object.entries(V3P.objs)) if(n!=="room"&&o&&o.m&&o.m[0]){ o.m[0].geometry.boundingSphere=null; L.push(o.m[0]); }
   if(!L.length) return null; const o3=new T3.Vector3(t.p[0]*MM,t.p[1]*MM,t.p[2]*MM); let best=null;
   for(const d of [[0,0,-1],[0,0,1],[1,0,0],[-1,0,0]]){ _rc.set(o3,new T3.Vector3(...d)); _rc.far=.7; const h=_rc.intersectObjects(L,false)[0]; if(h&&(!best||h.distance<best.distance)) best=h; }
@@ -1623,6 +1697,7 @@ function fp3Hud(){ const h=$("#fpTip"); if(!h) return;
 /* 3D : 조작 지점 마커 (공통 모듈) */
 function fp3Init(){
   FP3.am=createAimMark({T3, scene:V3P.sc, camera:()=>V3P.cam, canvas:()=>$("#cv"), unit:1, occluded:fp3Occ});
+  fp3AirBuild();
   /* 앱 화면 : 1인칭 중 타일 · 판넬 버튼은 현황만 / 설비 화면은 다가간 뒤에만 */
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(!w) continue; const st=w.document.createElement("style");
     st.textContent="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock .tile{cursor:default}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}body.fpLock:not(.hmiOn) #hmiWrap{position:relative}body.fpLock:not(.hmiOn) #hmiWrap>*{visibility:hidden!important}body.fpLock:not(.hmiOn) #hmiWrap::before{content:\"🧍 1인칭 진행 중\\A\\A설비 화면은 현장 모니터 앞에서 조준하고 E 로 엽니다. F · Esc 로 닫습니다.\\A\\A상단 [3인칭 전환] 으로 이 자리에 다시 표시할 수 있습니다.\";white-space:pre-wrap;position:absolute;left:12px;right:12px;top:12px;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid #c9d4e0;color:#173a63;font:600 14px/1.55 \"Malgun Gothic\",\"Noto Sans KR\",sans-serif;visibility:visible;z-index:5}";
@@ -1636,7 +1711,7 @@ function fp3Key(e){
   if(e.code==="KeyE"&&!FP3.hmi){ if(fp3Act()) e.preventDefault(); }
 }
 function fp3Tick(now){
-  const on=!!CREW.cur&&V3P.view!=="orbit";
+  const on=!!CREW.cur&&V3P.view!=="orbit"; fp3AirSync(now);
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(w&&w.document.body) w.document.body.classList.toggle("fpLock",on&&APPK[CREW.cur]===k); }
   if(!on){ if(FP3.am) FP3.am.hide(); if(FP3.hmi) fp3Hmi(false); fp3Hud(); return; }
   if(now-FP3.t>300){ FP3.t=now; fp3Build(); }

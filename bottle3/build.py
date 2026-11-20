@@ -43,6 +43,21 @@ APP_PATCH = [
     # 자유모드 중간안 (11/18) : 운전 중 자재 조작 허용 (안전문은 그대로 — 운전 중 열면 인터락 E001 정지)
     ('    if(S.running&&k!=="table"){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }',
      '    if(S.running&&k!=="table"&&!window.FREEB){ toast("운전 중에는 자재를 다룰 수 없습니다. 먼저 STOP.","bad"); deduct("runMat"); return; }', 1),
+    # 유틸리티(압축공기 · 메인 전원 · 집진기 · 안전문) = 파우치 방식 (11/20) : 3인칭에서 타일을 누르면 작업자가 그 설비로 걸어가 손을 뻗은 뒤 조작
+    #   1인칭(충전실 작업자)은 플레이어가 그 자리에 가서 누르므로 바로 적용 (셸 crew.js B3_FPME) · 위치 = 셸 ffp.js FFU (압축공기 = UA-120 뒤 천장 강하관)
+    ('  look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}',
+     '  uAir:  {stand:[-4900,-1640], reach:[-4900,1205,-1305], carry:null, dur:1.4},\n'
+     '  uMain: {stand:[-6400,-2170], reach:[-6400,1450,-2560], carry:null, dur:1.2},\n'
+     '  uDust: {stand:[-5600,-2170], reach:[-5600,1400,-2610], carry:null, dur:1.0},\n'
+     '  uDoor: {stand:[-4300,900], reach:[-4300,1100,420], carry:null, dur:1.4},\n'
+     '  look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}', 1),
+    ('  mat("#mTable","table","table",()=>{ unloadTable(); },"완제품 회수 — 다음 공정으로 이송");\n}',
+     '  mat("#mTable","table","table",()=>{ unloadTable(); },"완제품 회수 — 다음 공정으로 이송");\n'
+     '  for(const id of ["uAir","uMain","uDust","uDoor"]){ const e=$("#"+id), f=e.onclick; e.onclick=ev=>{ if(!gate("#"+id)) return; utilDo(id,()=>f.call(e,ev)); }; }\n}\n'
+     '/* 유틸리티 조작 : 3인칭 = 작업자가 걸어가서 · 1인칭 = 바로 (파우치 act 와 같음) */\n'
+     'function utilDo(k,fn){ if(window.parent&&window.parent.B3_FPME&&window.parent.B3_FPME()){ fn(); return; }\n'
+     '  const w=wkFor(JOBS[k].stand); if(w.job){ if(w.job.key!==k) toast("작업자가 다른 작업 중입니다."); return; }\n'
+     '  startWork(k,fn); renderTiles(); }', 1),
 ]
 SHELL_SCRIPTS = ("changelog.js", "kit.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
