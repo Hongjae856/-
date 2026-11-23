@@ -43,7 +43,7 @@ function v3bSet(o,s){
 function v3bRoom(sc){
   const G=new T3.Group(), R=ROOM, x0=R.x0*MM, x1=R.x1*MM, z0=R.z0*MM, z1=R.z1*MM, H=R.h*MM, wx=R.wallX*MM;
   const ft=TX.floor.clone(); ft.needsUpdate=true; ft.repeat.set((x1-x0)/1.97,(z1-z0)/1.97);   /* 바닥 · 벽 = 파우치 M.floor · M.wall (11/20) */
-  const fm=M.floor.clone(); fm.map=ft;
+  const fm=M.floor.clone(); fm.map=ft; fm.roughness=IDT_FLOOR_R;   /* 천장 점광 흰 점 완화 (look.js · 11/23) */
   const fl=new T3.Mesh(new T3.PlaneGeometry(x1-x0,z1-z0),fm); fl.rotation.x=-Math.PI/2; fl.position.set((x0+x1)/2,0,(z0+z1)/2); fl.receiveShadow=true; G.add(fl);
   const wm=M.wall;
   const wall=(w,h,d,x,y,z)=>{ const m=new T3.Mesh(new T3.BoxGeometry(w,h,d),wm); m.position.set(x,y,z); m.receiveShadow=true; m.castShadow=true; G.add(m); return m; };

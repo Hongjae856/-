@@ -11,11 +11,18 @@
    · 조명 · 반사 · 후처리 = 파우치 bridge.js · room.js 와 같은 값 : 반구광 .22 · 주광 .95(위에서) · 천장 점광 .22,
      실제 장면을 찍은 반사(셸 EnvCapture), 틈 음영(SSAO 반해상도) → ACES(노출 .62) → 대비 .42 → sRGB
    ═══════════════════════════════════════════════════════════════════ */
+/* 화면 밝기 맞춤 (11/23 사용자 결정 「금속 톤 파우치 수준으로 · 바닥 반사 줄임」)
+   · PTP · 병 방은 흰 벽 · 밝은 주변이 반사돼 같은 재질 값이라도 금속이 밝게 보임 → 반사 색(F0)을 낮춤
+     실측(근접 3인칭 · 금속 화소 평균 sRGB 밝기) : 파우치 스테인리스 약 124 · 알루미늄 약 158
+     조정 전 PTP 170 · 병 172 / 알루미늄 175 → 스테인리스 ×.58 · 알루미늄 ×.82 로 약 120~125 · 155
+   · 바닥 거칠기 .14 → .32 : 천장 점광이 바닥에 흰 점으로 비치던 것 완화 (병은 bottle3/view3.js 바닥 재질도 같은 값) */
+const IDT_FLOOR_R=0.32;
 /* 재질 분류 조각 : met = 0~1 금속도 식(GLSL, 음수 = 발광 · 그대로), room = 방 형상(바닥 · 벽), tr = 투명 */
 function idtLookFrag(sh,o){
   sh.uniforms.tHair={value:TX.hair}; sh.uniforms.tFloor={value:TX.floor};
   const room=o.room?`
-    if(an.y>0.9&&vWP.y<0.006){ diffuseColor.rgb=vec3(.565,.610,.521)*texture2D(tFloor,vWP.xz/1.97).rgb; metalnessFactor=0.0; roughnessFactor=0.14; eMI=0.85; }
+    float IDT_FLOOR_R=${IDT_FLOOR_R.toFixed(2)};
+    if(an.y>0.9&&vWP.y<0.006){ diffuseColor.rgb=vec3(.565,.610,.521)*texture2D(tFloor,vWP.xz/1.97).rgb; metalnessFactor=0.0; roughnessFactor=IDT_FLOOR_R; eMI=0.85; }
     else if(an.y<0.2&&mIn<0.25){ roughnessFactor=0.6; eMI=0.35; }`:"";
   const tr=o.tr?`
     roughnessFactor=0.04; metalnessFactor=0.0; eMI=1.0; if(Lo>0.25){ diffuseColor.rgb=vec3(.905,.939,1.0); diffuseColor.a=min(diffuseColor.a,0.16); eMI=0.4; }`:"";   /* 밝은 투명면(아크릴 · 유리 덮개) = 파우치 M.acryl (f4f8ff · 불투명도 .2) · 어두운 · 짙은 색 투명은 그대로 */
@@ -26,8 +33,8 @@ function idtLookFrag(sh,o){
   float Lo=dot(diffuseColor.rgb,vec3(.2126,.7152,.0722));
   float metalnessFactor=0.0, roughnessFactor=0.5;
   if(mIn>0.6){ float h=texture2D(tHair,tuv*2.5).g; bool lite=Lo>0.30;
-    diffuseColor.rgb=(lite?vec3(.645,.672,.694):vec3(.468,.497,.521))*clamp(Lo/(lite?0.62:0.45),0.35,1.0); metalnessFactor=1.0; roughnessFactor=(lite?0.24:0.40)*h; eMI=lite?1.7:1.5; }   /* 앱이 넣은 밝기(음영)는 유지 */
-  else if(mIn>0.25){ diffuseColor.rgb=vec3(.686,.708,.730)*clamp(Lo/0.62,0.35,1.0); metalnessFactor=0.9; roughnessFactor=0.45; eMI=1.5; }
+    diffuseColor.rgb=(lite?vec3(.645,.672,.694):vec3(.468,.497,.521))*clamp(Lo/(lite?0.62:0.45),0.35,1.0)*0.58; metalnessFactor=1.0; roughnessFactor=(lite?0.24:0.40)*h; eMI=lite?1.7:1.5; }   /* 앱이 넣은 밝기(음영)는 유지 · ×.58 / ×.82 = 화면 밝기를 파우치 실측에 맞춤 */
+  else if(mIn>0.25){ diffuseColor.rgb=vec3(.686,.708,.730)*clamp(Lo/0.62,0.35,1.0)*0.82; metalnessFactor=0.9; roughnessFactor=0.45; eMI=1.5; }
   else if(mIn>=0.0){ metalnessFactor=Lo<0.012?0.1:(Lo<0.04?0.2:0.0); roughnessFactor=Lo<0.012?0.6:((Lo>0.04&&Lo<0.35&&abs(diffuseColor.r-diffuseColor.b)<0.04)?0.55:0.5); eMI=1.0; }${room}${tr}
   roughnessFactor=max(roughnessFactor,0.035);`;
   sh.fragmentShader=sh.fragmentShader
