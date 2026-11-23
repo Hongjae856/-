@@ -69,7 +69,7 @@ function v3SetLine(o,k,P,N,C){
 /* ── 장면 ── */
 function v3Init(){
   const cv=document.getElementById("cv");
-  const R=new T3.WebGLRenderer({canvas:cv, antialias:true, preserveDrawingBuffer:true});
+  const R=new T3.WebGLRenderer({canvas:cv, antialias:false, preserveDrawingBuffer:false, powerPreference:"high-performance"});   /* 파우치와 같은 설정 (11/23 최적화) — 장면 다중 표본은 후처리 대상(samples 4)에서, 화면 버퍼는 전체 화면 사각형 1장만 그려 결과 같음 */
   R.outputEncoding=T3.sRGBEncoding; R.toneMapping=T3.ACESFilmicToneMapping; R.toneMappingExposure=.82;
   R.shadowMap.enabled=true; R.shadowMap.type=T3.PCFSoftShadowMap;
   const sc=new T3.Scene(); sc.background=new T3.Color(0xe7ebee);

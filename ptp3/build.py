@@ -88,7 +88,7 @@ APP_PATCH = [
     ("function depthPaint(ctx,opaque,transparent,W,H){\ntry{\nconst gpu=DEPTH_GPU||", "function depthPaint(ctx,opaque,transparent,W,H){\nreturn;   /* ptp3 : 앱 자체 3D 미사용 (통합판 depthPaint 는 filler_one.js 가 다시 정의) */\ntry{\nconst gpu=DEPTH_GPU||", 1, ("filler",)),
     # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
-SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "look.js", "human.js", "view3.js", "walk.js", "crewkit.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "look.js", "batch.js", "human.js", "view3.js", "walk.js", "crewkit.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
 FROM_ONE = {"bus.js", "hub.js"}
 FROM_POUCH = {"kit.js", "human.js"}   # 파우치 재질 · 작업자 인체 모델 그대로
 
@@ -218,7 +218,7 @@ SPLASH_CFG = {
 def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
-    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js", "modes.js", "look.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
+    src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js", "modes.js", "look.js", "batch.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
     js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):

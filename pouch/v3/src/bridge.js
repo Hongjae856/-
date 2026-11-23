@@ -205,6 +205,7 @@ function r3Paint(){
   if(!V3) return; const r=V3.renderer, P=V3.POST, sc=V3.scene, c=V3.camera;
   v3Sync(RDT||1/60); v3Cut();
   const sh=GQ.L[GQ.lv].sh&&R3.shadowOn; if(r.shadowMap.enabled!==sh) gqApply(GQ.lv);
+  if(typeof idtBatch==="function") idtBatch(sc);                  /* 정적 형상 묶어 그리기 (idt_common/batch.js · 11/23) */
   r.toneMapping=T3.NoToneMapping; r.outputEncoding=T3.LinearEncoding; r.setRenderTarget(P.rt); r.render(sc,c);
   if(P.mat.uniforms.ao.value>.5){ P.matA.uniforms.tD.value=P.rt.depthTexture; P.matA.uniforms.nf.value.set(c.near,c.far); r.setRenderTarget(P.ao); r.render(P.scnA,P.cam); }
   P.mat.uniforms.tC.value=P.rt.texture; P.mat.uniforms.tA.value=P.ao.texture;

@@ -19,7 +19,7 @@ V2_SCRIPTS = ("kit.js", "layout.js", "room.js", "form.js", "unwind.js", "hopper.
               "pack_anim.js", "anim.js")
 ORDER = (  # (folder, file)
     ("old", "util.js"), ("old", "layout.js"), ("old", "data.js"), ("old", "state.js"), ("old", "sim.js"),
-    ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"), ("common", "fpctl.js"), ("common", "topbar.js"), ("common", "crewkit.js"),
+    ("v3", "anchors.js"), ("old", "hmi.js"), ("v3", "solpac.js"), ("old", "course.js"), ("old", "ui.js"), ("old", "fps.js"), ("common", "fpctl.js"), ("common", "topbar.js"), ("common", "crewkit.js"), ("common", "batch.js"),
     ("v3", "bridge.js"), ("v3", "workers.js"), ("v3", "fp.js"), ("old", "autoplay.js"), ("old", "changelog.js"),
     ("oee", "oee.js"), ("v3", "oee_pouch.js"), ("v3", "cases.js"), ("v3", "edu.js"), ("common", "aimmark.js"), ("common", "splash.js"), ("common", "incpick.js"), ("common", "modes.js"), ("v3", "guide.js"), ("v3", "lamp.js"), ("v3", "hmitex.js"), ("v3", "dial.js"), ("v3", "consume.js"), ("v3", "printer.js"), ("v3", "realism.js"), ("v3", "reject.js"), ("v3", "demo.js"), ("v3", "crew.js"), ("v3", "free.js"), ("v3", "boot.js"),
 )

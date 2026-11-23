@@ -81,6 +81,7 @@ function idtLookSize(P,w,h){
 }
 /* 그리기 : 장면 → (틈 음영) → 톤 · 대비 → 화면 — 그래픽 '하' 는 틈 음영 끔 (세 IDT 공통 IDT_GQ_L.ao) */
 function idtLookDraw(R,P,sc,cam,ao){
+  if(typeof idtBatch==="function") idtBatch(sc);                  /* 정적 형상 묶어 그리기 (idt_common/batch.js · 11/23) */
   R.getDrawingBufferSize(P.v2); idtLookSize(P,Math.max(2,P.v2.x),Math.max(2,P.v2.y));
   R.toneMapping=T3.NoToneMapping; R.outputEncoding=T3.LinearEncoding;
   R.setRenderTarget(P.rt); R.clear(); R.render(sc,cam);
