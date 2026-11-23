@@ -58,7 +58,7 @@ function ffAct(){ const t=FF.aim; if(!t) return false; if(!FF.aimIn){ pcToast("�
 /* 1인칭 작업 = 파우치 startWork 1인칭과 같게 (11/20 "1인칭이 근간 · 어색하면 안 됨") : 서는 자리에서 바로 · 손 뻗는 짧은 시간(0.8 초)
    · 정제 투입은 리프터로 올려 붓는 과정이 보이므로 그대로(B3_HOLD) · 덮개(가드 도어)를 여는 작업은 도어가 열린 뒤 바로 */
 function ffMeDo(W,pre){ try{ const w=W&&W[0], J=w&&w.job; if(!J||J===pre) return;
-  if(J.phase==="walk"){ w.route=[]; w.x=J.j.stand[0]; w.z=J.j.stand[1]; }
+  if(J.phase==="walk"||J.phase==="walk0"||J.phase==="door"){ w.route=[]; w.x=J.j.stand[0]; w.z=J.j.stand[1]; }   /* 안전문이 있는 설비(walk0 → door → walk) : 문 열림(약 0.6 초)은 그대로, 문 앞에서 서는 자리까지 걷던 대기 제거 (11/23 단계별 측정 : 누른 뒤 8~14 초) */
   if(J.key!=="tab"){ J.j=Object.assign({},J.j,{dur:Math.min(J.j.dur||1.4,.8)}); }
 }catch(e){ console.error("1인칭 작업",e); } }
 function ffHmi(on){ const d=ffDoc(); FF.hmi=on; if(d) d.body.classList.toggle("hmiOn",on);
