@@ -132,6 +132,11 @@ function fp3Tick(now){
   /* 1인칭 라인 클리어런스 : 원본은 점검 1건마다 여러 장치를 차례로 도는 방문 작업(startClearanceVisit) — 첫 방문만 즉시였고 남은 방문은 보이지 않는 작업자가 걸어 돌아 점검마다 4~10 초 대기 (11/23 단계별 측정)
      → 플레이어가 이미 그 자리에서 확인하므로 남은 방문도 그 자리에서 짧게 (파우치 startWork 1인칭과 같음) */
   if(CREW.cur==="F"){ try{ const w=UNI_HUB.win("filler"), j=w.eval("workerJob"); if(j&&j.kind==="clearance"&&!j.fpMe){ j.fpMe=1; w.eval("workerX="+j.to); j.from=j.to; j.elapsed=Math.max(j.elapsed,j.walkTime); j.duration=Math.min(j.duration||2.2,.8); } }catch(e){} }
+  if(CREW.cur==="P"){ try{ const w=UNI_HUB.win("line"), W=w.PTP_WK||w.eval("WK"), me=W[0];   /* 포장실 : 연속 방문은 보이지 않는 다른 작업자에게 넘어가 라인을 걸어 돌던 것(점검마다 12~44 초) → 플레이어(WK[0])가 그 자리에서 짧게 */
+    W.forEach(x=>{ if(!x.job) x.fpMe=false; });
+    const i=W.findIndex(x=>x.job==="clearance"&&!x.fpMe);
+    if(i>=0&&(i===0||!me.job)){ const o=W[i]; if(i!==0){ Object.assign(me,{job:o.job,t:o.t,cb:o.cb,xt:o.xt,workPhase:0}); o.job=null; o.cb=null; o.t=0; o.xt=o.x; try{ w.eval("lastWK=WK[0]"); }catch(e){} }
+      me.x=me.xt; me.walking=false; me.t=Math.min(me.t,.8); me.fpMe=true; } }catch(e){} }
   if(now-FP3.t>300){ FP3.t=now; fp3Build(); }
   fp3Aim();
   FP3.res=FP3.am.update({eye:fp3Eye(), goal:FP3.hmi?null:fp3T(FP3.goal), aim:FP3.hmi?null:fp3T(FP3.aim), now, off:document.body.classList.contains("appModal")});
