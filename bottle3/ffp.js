@@ -6,7 +6,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 const FF={T:[], aim:null, aimIn:false, goal:null, res:{}, hmi:false};
 const FF_OBS=[];                                   /* 셸이 추가한 충전실 설비 바닥 점유 (mm · walk.js gridHit) */
-const FFU={main:[-6400,1450,-2620], air:[-4900,1205,-1305], dust:[-5600,1400,-2620], pend:[-3200,1250,700], hmi:[-3200,1560,700]};
+const FFU={main:[-6400,1450,-2620], air:[-4900,1305,-1305], dust:[-5600,1400,-2620], pend:[-3200,1250,700], hmi:[-3200,1560,700]};
 /* 원본 3D 에 없는 유틸리티 · 조작 판넬 모형 */
 function ffBuild(sc){
   const g=new T3.Group(); sc.add(g); const P=v=>v*MM;
@@ -16,7 +16,7 @@ function ffBuild(sc){
   plate(g,.3,.08,labelTex(["전기판넬 · MAIN S/W"],{w:256,h:64}),[P(-6400),P(1750),P(-2598)],0);
   /* 압축공기 : 라인 한쪽(UA-120 뒤편 · 뒤 통로 쪽) 천장 강하관 · 볼 밸브 · 레귤레이터 → 호스로 UA-120 (공통 형상 idt_common/crewkit.js idtAirDrop · 11/20 사용자 지시 "라인 한쪽에 천장과 연결된 배관 · 에어 밸브")
      서쪽 끝 통로(작업자 A 가 앞 · 뒤 통로를 오가는 x −5750)와 겹치지 않게 UA-120 뒤에 둠 · 작업자는 뒤 통로에서 접근 */
-  FF.air=idtAirDrop(g,{x:P(-4900), z:P(-1150), top:P(ROOM.h), label:"압축공기 6 bar", valves:[{y:P(1150), dir:[0,-1], to:[P(-4900),P(650),P(-820)]}]});
+  FF.air=idtAirDrop(g,{x:P(-4900), z:P(-1150), top:P(ROOM.h), label:"압축공기 6 bar", valves:[{y:P(1250), dir:[0,-1], to:[P(-4900),P(650),P(-820)]}]});
   FF_OBS.push([-4970,-4830,-1340,-1090]);
   /* 집진기 전원 스위치 함 */
   bx(g,P(-5700),P(-5500),P(1300),P(1500),P(-2690),P(-2620),M.white); add(g,new T3.Mesh(new T3.CylinderGeometry(.025,.025,.02,20),M.green)).position.set(P(-5600),P(1400),P(-2612)); g.children[g.children.length-1].rotation.x=Math.PI/2;

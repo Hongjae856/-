@@ -48,7 +48,7 @@ APP_PATCH = [
     # 유틸리티(압축공기 · 메인 전원 · 집진기 · 안전문) = 파우치 방식 (11/20) : 3인칭에서 타일을 누르면 작업자가 그 설비로 걸어가 손을 뻗은 뒤 조작
     #   1인칭(충전실 작업자)은 플레이어가 그 자리에 가서 누르므로 바로 적용 (셸 crew.js B3_FPME) · 위치 = 셸 ffp.js FFU (압축공기 = UA-120 뒤 천장 강하관)
     ('  look:  {stand:[0,AISLE-150], reach:null, carry:null, dur:1.4}',
-     '  uAir:  {stand:[-4900,-1640], reach:[-4900,1205,-1305], carry:null, dur:1.4},\n'
+     '  uAir:  {stand:[-4900,-1640], reach:[-4900,1305,-1305], carry:null, dur:1.4},\n'
      '  uMain: {stand:[-6400,-2170], reach:[-6400,1450,-2560], carry:null, dur:1.2},\n'
      '  uDust: {stand:[-5600,-2170], reach:[-5600,1400,-2610], carry:null, dur:1.0},\n'
      '  uDoor: {stand:[-4300,900], reach:[-4300,1100,420], carry:null, dur:1.4},\n'

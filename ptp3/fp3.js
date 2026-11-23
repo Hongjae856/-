@@ -22,11 +22,11 @@ const FP3_A={
      카토너 : 라인 중간쯤 뒤쪽 (11/20 사용자 지시 "카토너는 라인 중간쯤 뒤쪽으로") — 카토너 본체(x 2.0~6.0 m) 가운데 뒤 · 주관은 뒷벽 위 · 후면 통로에서 접근 */
 const FP3_AIR={F:{x:-4400, z:-1150, dir:[0,-1], hdr:"back", to:[-4400,700,-890]}, P:{x:4000, z:-900, dir:[0,-1], hdr:"back", to:[4000,700,-640]}};
 const FP3_OBS=[];
-for(const r of ["F","P"]){ const a=FP3_AIR[r], d=a.dir; FP3_A[r].uAir=[a.x+d[0]*155,1205,a.z+d[1]*155,"압축공기 밸브"];
+for(const r of ["F","P"]){ const a=FP3_AIR[r], d=a.dir; FP3_A[r].uAir=[a.x+d[0]*155,1305,a.z+d[1]*155,"압축공기 밸브"];
   FP3_OBS.push([Math.min(a.x-70,a.x+d[0]*200),Math.max(a.x+70,a.x+d[0]*200),Math.min(a.z-70,a.z+d[1]*200),Math.max(a.z+70,a.z+d[1]*200)]); }
 function fp3AirBuild(){ FP3.air={}; const L=ROOMBUS.L;
   for(const r of ["F","P"]){ const a=FP3_AIR[r], hd=a.hdr==="back"?[a.x/1000,(L.backZ+60)/1000]:[(L.wallX+L.wallT/2+20)/1000,a.z/1000];
-    FP3.air[r]=idtAirDrop(V3P.sc,{x:a.x/1000, z:a.z/1000, top:L.wallH/1000, header:hd, label:"압축공기 6 bar", valves:[{y:1.15, dir:a.dir, to:a.to.map(v=>v/1000)}]}); } }
+    FP3.air[r]=idtAirDrop(V3P.sc,{x:a.x/1000, z:a.z/1000, top:L.wallH/1000, header:hd, label:"압축공기 6 bar", valves:[{y:1.25, dir:a.dir, to:a.to.map(v=>v/1000)}]}); } }
 function fp3AirSync(now){ if(!FP3.air||now-(FP3.ta||0)<250) return; FP3.ta=now;
   for(const [r,k] of [["F","filler"],["P","line"]]){ try{ FP3.air[r].set(0,!!UNI_HUB.win(k).eval("S.air")); }catch(e){} } }
 const FP3_BTN=[["swStart","START"],["swStop","STOP"],["swReset","RESET"],["swEmg","비상정지"],["swInch","인칭 (수동 1사이클)"]];
