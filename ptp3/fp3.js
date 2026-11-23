@@ -118,12 +118,17 @@ function fp3Init(){
     st.textContent="body.fpLock .tile,body.fpLock #panel .psw{pointer-events:none!important}body.fpLock .tile{cursor:default}body.fpLock:not(.hmiOn) #hmiWrap{pointer-events:none!important;filter:saturate(.85)}body.fpLock.hmiOn #hmiWrap{box-shadow:0 0 0 4px #ffd22e}body.fpLock:not(.hmiOn) #hmiWrap{position:relative}body.fpLock:not(.hmiOn) #hmiWrap>*{visibility:hidden!important}body.fpLock:not(.hmiOn) #hmiWrap::before{content:\"🧍 1인칭 진행 중\\A\\A설비 화면은 현장 모니터 앞에서 조준하고 E 로 엽니다. F · Esc 로 닫습니다.\\A\\A상단 [3인칭 전환] 으로 이 자리에 다시 표시할 수 있습니다.\";white-space:pre-wrap;position:absolute;left:12px;right:12px;top:12px;padding:14px 16px;border-radius:12px;background:#fff;border:1px solid #c9d4e0;color:#173a63;font:600 14px/1.55 \"Malgun Gothic\",\"Noto Sans KR\",sans-serif;visibility:visible;z-index:5}";
     w.document.head.appendChild(st); }
   addEventListener("keydown",e=>{ fp3Key(e); });
+  /* 인칭 스위치 누르고 있기 (11/23 사용자 결정 「누르고 있는 동안 연속」) : E 키 · 마우스를 떼면 멈춤 */
+  const up=e=>{ if(!e||!e.code||e.code==="KeyE") FP3.hold=false; };
+  addEventListener("keyup",up); addEventListener("mouseup",()=>{ FP3.hold=false; }); addEventListener("blur",()=>{ FP3.hold=false; });
+  $("#cv").addEventListener("mousedown",()=>{ if(V3P.view!=="orbit") FP3.hold=true; });
+  for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(w){ w.addEventListener("keyup",up); w.addEventListener("mouseup",()=>{ FP3.hold=false; }); } }
   for(const k of ["filler","line"]){ const w=UNI_HUB.win(k); if(w) w.addEventListener("keydown",e=>{ if(e.target&&e.target.closest&&e.target.closest("input,textarea,select")) return; fp3Key(e); }); }
 }
 function fp3Key(e){
   if(!CREW.cur||V3P.view==="orbit") return;
   if(FP3.hmi&&(e.code==="KeyF"||e.code==="Escape")){ fp3Hmi(false); e.preventDefault(); return; }
-  if(e.code==="KeyE"&&!FP3.hmi){ if(fp3Act()) e.preventDefault(); }
+  if(e.code==="KeyE"&&!FP3.hmi){ if(e.repeat){ e.preventDefault(); return; } FP3.hold=true; if(fp3Act()) e.preventDefault(); }   /* 키 자동 반복으로 여러 번 눌리지 않게 · 누르고 있기는 fp3Tick(인칭) */
 }
 function fp3Tick(now){
   const on=!!CREW.cur&&V3P.view!=="orbit"; fp3AirSync(now); fp3BenchBuild();
@@ -132,6 +137,12 @@ function fp3Tick(now){
   /* 1인칭 라인 클리어런스 : 원본은 점검 1건마다 여러 장치를 차례로 도는 방문 작업(startClearanceVisit) — 첫 방문만 즉시였고 남은 방문은 보이지 않는 작업자가 걸어 돌아 점검마다 4~10 초 대기 (11/23 단계별 측정)
      → 플레이어가 이미 그 자리에서 확인하므로 남은 방문도 그 자리에서 짧게 (파우치 startWork 1인칭과 같음) */
   if(CREW.cur==="F"){ try{ const w=UNI_HUB.win("filler"), j=w.eval("workerJob"); if(j&&j.kind==="clearance"&&!j.fpMe){ j.fpMe=1; w.eval("workerX="+j.to); j.from=j.to; j.elapsed=Math.max(j.elapsed,j.walkTime); j.duration=Math.min(j.duration||2.2,.8); } }catch(e){} }
+  /* 자동설정(1) · (2) 성형필름 만들기 : 실제 인칭 스위치처럼 누르고 있는 동안 사이클을 이어서 (원본은 4번 · 2번 반복 누름) */
+  if(CREW.cur==="F"&&FP3.hold&&FP3.aim&&FP3.aim.id==="swInch"&&FP3.aimIn&&now-(FP3.holdT||0)>250){ try{ const w=UNI_HUB.win("filler");
+    if(w.eval("inchT<=0&&!oneShot&&(()=>{ const D=S.man2, a1=S.setup.as1<D_SEAL-D_FORM, a2=S.setup.as2<PATH.total-D_SEAL; return (D.as1&&a1)||(D.as2&&!a1&&a2); })()")){ FP3.holdT=now; fp3Act(); } }catch(e){} }
+  /* 팔레트 투입 · 만적 팔레트 반출 (11/23 사용자 결정 「1인칭은 즉시 배치」) : 원본은 보이지 않는 작업자가 팔레트잭을 약 30 초 끌고 옴 → 누르고 약 0.8 초 뒤 제자리에 놓이고 고정 (3인칭은 그대로) */
+  if(CREW.cur==="P"){ try{ const w=UNI_HUB.win("line"), pt=w.eval("typeof palletTransfer!=='undefined'?palletTransfer:null");
+    if(pt){ if(!pt.fpT) pt.fpT=now; else if(now-pt.fpT>800&&w.eval("WK.every(q=>!q.job||q.job==='jack')")) w.eval("for(let i=0;i<600&&palletTransfer;i++) trainingTick(.1)"); } }catch(e){} }
   if(CREW.cur==="P"){ try{ const w=UNI_HUB.win("line"), W=w.PTP_WK||w.eval("WK"), me=W[0];   /* 포장실 : 연속 방문은 보이지 않는 다른 작업자에게 넘어가 라인을 걸어 돌던 것(점검마다 12~44 초) → 플레이어(WK[0])가 그 자리에서 짧게 */
     W.forEach(x=>{ if(!x.job) x.fpMe=false; });
     const i=W.findIndex(x=>x.job==="clearance"&&!x.fpMe);
