@@ -83,6 +83,9 @@ APP_PATCH = [
     # 자유모드 : 순서 없음 — 이상 대응 · 평가 단계 제한(examGate) 해제
     ("function examGate(kind,key){const ok=", "function examGate(kind,key){if(window.FREE3)return true;const ok=", 1, ("filler",)),
     ("function examGate(kind,key){\n  if(!isExam()", "function examGate(kind,key){\n  if(window.FREE3) return true;\n  if(!isExam()", 1, ("line",)),
+    # 최적화 (11/23 사용자 결정 N1) : 이 판은 셸(Three.js)이 3D 를 그리므로 두 원본 앱이 로딩 때 만들던 자체 WebGL 화면(쓰지 않음 · 그림자 맵 2048 + 정점 버퍼 약 5 MB)을 만들지 않음
+    ("  gl=createDepthGPU();\n  if(!gl){", "  m3.ready=true; return;   /* ptp3 : 앱 자체 3D 미사용 */\n  gl=createDepthGPU();\n  if(!gl){", 1, ("line",)),
+    ("function depthPaint(ctx,opaque,transparent,W,H){\ntry{\nconst gpu=DEPTH_GPU||", "function depthPaint(ctx,opaque,transparent,W,H){\nreturn;   /* ptp3 : 앱 자체 3D 미사용 (통합판 depthPaint 는 filler_one.js 가 다시 정의) */\ntry{\nconst gpu=DEPTH_GPU||", 1, ("filler",)),
     # (P6) 자유모드에서 메인 전원 없이 START 하던 패치는 삭제 — 동력 없이 설비가 움직이는 것은 비현실적
 ]
 SHELL_SCRIPTS = ("changelog.js", "bus.js", "hub.js", "kit.js", "look.js", "human.js", "view3.js", "walk.js", "crewkit.js", "crew3.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "fp3.js", "modes3.js", "oee.js", "oee3.js", "shell.js")
