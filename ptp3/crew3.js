@@ -76,8 +76,8 @@ function crew3Tick(dt){
   ut3Bind("filler"); ut3Bind("line");
   /* ── 충전실 ── */
   { const f=fw&&fw.PTP_WKF, H=CREW3.F, me=fp&&WALK.room==="F", V=CREW3V.F, HP=CREW3.HP, C=CH3;
-    const X=v=>(4*v-3680)/1000, Zf=(4*(f?f.z:0)+L.fillerZ)/1000;
-    const tg=f&&f.target?[X(f.target.x),(4*f.target.y+1128)/1000,(4*f.target.z+L.fillerZ)/1000]:null;
+    const X=v=>pfX(v)/1000, Zf=pfZ(f?f.z:0)/1000;   /* 충전기 ×0.8 (view3.js PF · 11/24) */
+    const tg=f&&f.target?[X(f.target.x),pfY(f.target.y)/1000,pfZ(f.target.z)/1000]:null;
     const job=!!(f&&f.key), roll=job&&ROLL3.includes(f.key), cart=C.cart.position;
     /* 롤 교체 : 대차 끌고 가기(대차 중심 경로 · 작업자는 뒤) → 롤 들기 → 2인이 들고 가서 장착 → 대차 원위치 */
     const behind=(pth,c)=>{ const q=pth[0]||[c[0],c[1]+1], d=Math.hypot(q[0]-c[0],q[1]-c[1])||1; return [c[0]-(q[0]-c[0])/d*IDT_TOW.cart.off, c[1]-(q[1]-c[1])/d*IDT_TOW.cart.off]; };

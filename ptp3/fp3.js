@@ -9,9 +9,10 @@
 const FP3={T:[], aim:null, goal:null, hmi:false, t:0, ui:null};
 /* 3D 위치 (mm) — 충전기 : 장치 라벨(M3LBL, 2D → 3D) · 판넬 'P' / 포장라인 : 장비 시점 중심(m1~m5) */
 const FP3_A={
-  F:{ uAir:[-5650,900,-700,"압축공기 밸브"], uMain:[-5750,1350,-100,"메인 전원 스위치 (전기판넬)"], uChiller:[-6500,600,-1600,"냉동기 (외장형 칠러)"], uDoor:[-3300,1250,560,"안전문"],
-      mFilm:[-1960,800,560,"성형필름 릴"], mFoil:[-3000,2200,300,"커버포일 릴"], mProd:[-5180,2150,200,"제품 호퍼"], mSplice:[-2150,950,560,"필름 연결부"],
-      hmi:[-5300,1500,600,"설비 화면 (터치스크린)"], panel:[-5300,1080,600] },
+  /* 충전실 : 충전기 ×0.8 (11/24) — 설비 위 대상은 pfW 로 옮김 · 설비 화면 · 판넬 버튼은 실제 매달린 조작판넬(앱 형상 HMI) 위 (아래 FP3_HMI) */
+  F:{ uAir:[-5650,900,-700,"압축공기 밸브"], uMain:pfW([-5750,1350,-100,"메인 전원 스위치 (전기판넬)"]), uChiller:[-6500,600,-1600,"냉동기 (외장형 칠러)"], uDoor:pfW([-3300,1250,560,"안전문"]),
+      mFilm:pfW([-1960,800,560,"성형필름 릴"]), mFoil:pfW([-3000,2200,300,"커버포일 릴"]), mProd:pfW([-5180,2150,200,"제품 호퍼"]), mSplice:pfW([-2150,950,560,"필름 연결부"]),
+      hmi:null, panel:null },
   P:{ uAir:[1700,900,-700,"압축공기 밸브"], uMain:[2000,1300,-500,"메인 전원 스위치 (라인 MAIN S/W)"], uVac:[2600,500,-700,"진공 펌프"], uDoor:[4000,1200,650,"안전문"],
       mCarton:[2900,1100,650,"카톤 매거진"], mLeaflet:[4400,1300,650,"설명지 매거진"], mCase:[10225,1100,900,"박스 매거진 (박스포장기)"], mPallet:[13350,500,1300,"팔레트 (팔렛타이저)"],
       hmi:[5400,1450,650,"설비 화면 (카토너 HMI)"], panel:[4700,1250,650] }
@@ -20,7 +21,12 @@ const FP3_A={
    공통 형상 idt_common/crewkit.js idtAirDrop · 레버 = 앱 압축공기 상태 · 조작 대상(uAir)은 레버 위치 (mm) */
 /*   충전기(블리스터) : 본체 뒤 0.26 m (x −4.4 m) · 후면 통로(서쪽 끝으로 돌아 들어감)에서 접근 · 주관은 뒷벽 위
      카토너 : 라인 중간쯤 뒤쪽 (11/20 사용자 지시 "카토너는 라인 중간쯤 뒤쪽으로") — 카토너 본체(x 2.0~6.0 m) 가운데 뒤 · 주관은 뒷벽 위 · 후면 통로에서 접근 */
-const FP3_AIR={F:{x:-4400, z:-1150, dir:[0,-1], hdr:"back", to:[-4400,700,-890]}, P:{x:4000, z:-900, dir:[0,-1], hdr:"back", to:[4000,700,-640]}};
+/* 충전기 조작판넬 (11/24 사용자 지시 「판넬 1.7 m · 조작은 눈높이」) : 앱 HMI (SVG x 400 · y 151+36 · 앞면 z) — 판넬 위 1.70 m · 화면 가운데 1.53 m · 버튼 1.41~1.62 m
+   버튼 : START = 초록 · RESET = 노랑 · STOP = 검정 · 인칭 = 파랑(빌드 때 추가) · 비상정지 = 빨강 버섯 (build.py APP_PATCH 와 같은 값) */
+const FP3_HMI={x:400, y:187, z:158}, fp3Hs=(sx,sy,az)=>[pfX(sx-620), pfY(380-sy), pfZ(az)];
+FP3_A.F.hmi=fp3Hs(FP3_HMI.x-9,FP3_HMI.y-3,FP3_HMI.z+17).concat(["설비 화면 (터치스크린)"]);
+const FP3_BTNP={swStart:fp3Hs(459,FP3_HMI.y-30,FP3_HMI.z+20), swReset:fp3Hs(459,FP3_HMI.y-12,FP3_HMI.z+20), swStop:fp3Hs(459,FP3_HMI.y+6,FP3_HMI.z+20), swInch:fp3Hs(459,FP3_HMI.y+18,FP3_HMI.z+20), swEmg:fp3Hs(458,FP3_HMI.y+34,FP3_HMI.z+24)};
+const FP3_AIR={F:{x:-4400, z:-1150, dir:[0,-1], hdr:"back", to:pfW([-4400,700,-890])}, P:{x:4000, z:-900, dir:[0,-1], hdr:"back", to:[4000,700,-640]}};
 const FP3_OBS=[];
 for(const r of ["F","P"]){ const a=FP3_AIR[r], d=a.dir; FP3_A[r].uAir=[a.x+d[0]*155,1305,a.z+d[1]*155,"압축공기 밸브"];
   FP3_OBS.push([Math.min(a.x-70,a.x+d[0]*200),Math.max(a.x+70,a.x+d[0]*200),Math.min(a.z-70,a.z+d[1]*200),Math.max(a.z+70,a.z+d[1]*200)]); }
@@ -35,15 +41,15 @@ const fp3Doc=()=>{ try{ return UNI_HUB.win(APPK[CREW.cur]).document; }catch(e){ 
 function fp3Build(){
   const d=fp3Doc(), A=FP3_A[CREW.cur]; FP3.T=[]; if(!d||!A) return;
   for(const el of d.querySelectorAll(".tile[id]")){ const a=A[el.id]; if(!a) continue; const nm=(el.querySelector("b")||{}).textContent||el.id; FP3.T.push({id:el.id, nm:a[3]||nm, p:a, s:[.45,.45,.45], el}); }
-  FP3_BTN.forEach(([id,nm],i)=>{ const el=d.getElementById(id); if(!el) return; const p=A.panel; FP3.T.push({id, nm:"판넬 버튼 · "+nm, p:[p[0]+(i-2)*90,p[1]-(i===3?0:40),p[2]], s:[.08,.08,.08], el}); });
+  FP3_BTN.forEach(([id,nm],i)=>{ const el=d.getElementById(id); if(!el) return; const p=CREW.cur==="F"?FP3_BTNP[id]:A.panel; FP3.T.push({id, nm:"판넬 버튼 · "+nm, p:CREW.cur==="F"?p:[p[0]+(i-2)*90,p[1]-(i===3?0:40),p[2]], s:[.06,.06,.06], el}); });   /* 충전기 = 조작판넬 위 실제 버튼 (11/24) */
   if(A.hmi) FP3.T.push({id:"hmi", nm:A.hmi[3], p:A.hmi, s:[.5,.4,.12], el:d.getElementById("hmiWrap"), hmi:true});
   const cpT=fp3CpTarget(d); if(cpT) FP3.T.push(cpT);
   /* 점검 단계(코치 [점검 완료]) : 그 단계 장치 위치에 3D 점검 대상 (충전기 = 단계 ↔ 장치 번호 → 장치 라벨 위치, 포장라인 = 카토너 앞) */
   const vis=e=>e&&e.getBoundingClientRect().width>0, h=[...d.querySelectorAll(".hint,.hintNow")].find(vis);
   const lc=d.getElementById("lcCheck"); if(lc&&vis(lc)){ let q=null;
     if(CREW.cur==="F"){ try{ const w=UNI_HUB.win("filler"), dv=w.eval("typeof m3StepDevs==='function'?[...(m3StepDevs()||[])]:[]"), L=w.eval("M3LBL"); const e=dv.map(n=>L.find(x=>x[0]===n)).find(Boolean);
-        if(e) q=[4*(e[1]-620)-3680, 4*(380-e[2])+1128, 560]; }catch(x){} }
-    q=q||(CREW.cur==="F"?[-3300,1200,560]:[4000,1200,650]);
+        if(e) q=pfW([4*(e[1]-620)-3680, 4*(380-e[2])+1128, 560]); }catch(x){} }
+    q=q||(CREW.cur==="F"?pfW([-3300,1200,560]):[4000,1200,650]);
     FP3.T.push({id:"lcCheck", nm:"점검 : "+(((d.getElementById("cTitle")||{}).textContent)||"확인"), p:q, s:[.6,.6,.6], el:lc}); }
   FP3.goal=h&&MODE3.kind!=="free"&&!(MODE3.kind==="inc"&&INC3.mode==="exam"&&!(performance.now()<INC3.hintUntil))?(FP3.T.find(t=>t.el&&(t.el===h||t.el.contains(h)))||null):null;   /* 자유모드 : 다음 작업 안내 없음 */
   if(!FP3.goal&&cpT&&MODE3.kind!=="free"&&!fp3CpExam(d)) FP3.goal=cpT;   /* 체인지파트 : 장착 위치(앱 화면에는 표시 없음)를 다음 작업으로 */
@@ -162,10 +168,10 @@ window.PTP_CP=true;
 const fp3Cp=w=>{ try{ return w.PTP_CPINFO&&w.PTP_CPINFO(); }catch(e){ return null; } };
 function fp3CpExam(d){ try{ const w=UNI_HUB.win(CREW.cur==="P"?"line":"filler"); return !!w.eval("isExam()")&&!w.eval("typeof examHintActive==='function'&&examHintActive()"); }catch(e){ return false; } }
 function fp3CpTarget(d){ const F=CREW.cur==="F", w=UNI_HUB.win(F?"filler":"line"), c=fp3Cp(w); if(!c) return null; const L=ROOMBUS.L;
-  const P3=F?(v=>[4*v[0]-3680, 4*v[1]+1128, 4*v[2]+L.fillerZ]):(v=>[8000+5*v[0], 5*v[1], 5*(v[2]||0)]), bench=F?FP3_BENCH.pt:FP3_BENCH.ptP;
+  const P3=F?(v=>[pfX(v[0]), pfY(v[1]), pfZ(v[2])]):(v=>[8000+5*v[0], 5*v[1], 5*(v[2]||0)]), bench=F?FP3_BENCH.pt:FP3_BENCH.ptP;
   const place=w=>F?w.cpPerform(true):w.cpPerform(null,"drag");
   if(c.prep) return {id:"cpPrep", nm:"교체부품 작업대 (공구 · 보호장갑 · 부품 세트 확인)", p:bench||(F?[-2600,800,1800]:[3000,800,1800]), s:[.6,.3,.5], el:d.getElementById("cpPrepChecklist")||d.getElementById("cpAction"), act:()=>PTP_PREP()};
-  if(c.fin) return {id:"cpFin", nm:"전체 장착 확인 (누락 · 미체결 · 남은 공구)", p:F?[-3300,1250,560]:[4000,1200,650], s:[.8,.6,.6], el:d.getElementById("cpAction"), act:w=>w.cpPerform()};
+  if(c.fin) return {id:"cpFin", nm:"전체 장착 확인 (누락 · 미체결 · 남은 공구)", p:F?pfW([-3300,1250,560]):[4000,1200,650], s:[.8,.6,.6], el:d.getElementById("cpAction"), act:w=>w.cpPerform()};
   if(c.adj) return {id:"cpAdj", nm:"수치 조절 · "+c.nm, p:[8000+5*c.adj[0], 5*c.adj[1], 650], s:[.3,.3,.3], el:d.getElementById("adjustPoint")||d.getElementById("cpAction"), act:w=>{ if(document.pointerLockElement) document.exitPointerLock(); w.openAdjustment(); }};
   if(!c.pos) return null; const ph=["장착 (위치에 맞춰 넣기)","체결","장착 확인"][c.phase]||"장착";
   return {id:"cpPart", nm:"교체부품 · "+c.nm+" — "+ph, p:P3(c.pos), s:[.25,.25,.25], el:c.phase===0?d.getElementById("cpTarget"):d.getElementById("cpAction"), act:w=>{ if(c.phase===0) place(w); else w.cpPerform(); }};

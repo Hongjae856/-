@@ -22,6 +22,27 @@ function idtSpSync(){
     :'<b>'+e(M.dataset.nm)+'</b> › '+(R?e(R.dataset.nm)+(inc?'':' <s>(1인칭)</s>')+(rx&&R.dataset.r!=="F"?' <s>· '+e(rx.firstChild.textContent)+'</s>':''):'<s>작업자를 고르세요</s>');
   go.disabled=!(M&&(noRoom||R));
   go.textContent=noRoom?"대시보드 열기":inc?"사례 목록 보기":"교육 시작";
+  idtSpGuide(M,R,noRoom,inc);
+}
+/* 처음 사용자 안내 (11/24 · 항상 표시) : ★ 추천(자유모드 · 충전실 작업자) · 지금 고를 단계로 옮겨 가는 말풍선 · ③ 시작 카드 3단계 안내 */
+const IDT_SPG={tip:null};
+function idtSpRecMode(){ return document.querySelector("#splash .go button[data-m=\"free\"]")||document.getElementById("spFree"); }
+function idtSpRecRoom(){ return document.querySelector("#coursePicker button.main[data-r=\"F\"]"); }
+function idtSpGuide(M,R,noRoom,inc){
+  const go=document.getElementById("msStart"), fm=idtSpRecMode(), fr=idtSpRecRoom(); if(!go) return;
+  for(const b of [fm,fr]) if(b&&!b.querySelector(".msRec")){ const s=document.createElement("span"); s.className="msRec"; s.textContent="★ 추천"; b.appendChild(s); }
+  let g=document.getElementById("msGuide"); if(!g){ g=document.createElement("div"); g.id="msGuide"; const sum=document.getElementById("msSum"); if(sum) sum.before(g); }
+  const e=s=>String(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  const ready=!!(M&&(noRoom||R)), step=!M?1:(ready?3:2);
+  const lab=[M?(M.dataset.nm||"교육 과정"):"자유모드", noRoom?"작업자 선택 없음":(R?(R.dataset.nm||"작업자"):"충전실 작업자"), go.textContent];
+  g.className=ready?"ready":"";
+  g.innerHTML='<h4>'+(ready?(noRoom?'준비 완료 — ['+e(go.textContent)+'] 을 누르세요':inc?'준비 완료 — ['+e(go.textContent)+'] 를 눌러 사례를 고르세요':'준비 완료 — [교육 시작] 을 누르면 1인칭으로 시작합니다'):'처음이라면 이렇게 시작하세요')+'</h4>'+
+    '<div class="gs">'+lab.map((t,i)=>'<span class="'+(i+1<step||(i===1&&noRoom&&M)?'ok':(i+1===step?'on':''))+'">'+(i+1<step?'✓':(i+1))+' '+e(t)+'</span>').join('<i>›</i>')+'</div>'+
+    '<div class="gk"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 걷기 · 마우스 둘러보기 · <kbd>E</kbd> 조작</div>';
+  go.classList.toggle("msGlow",ready);
+  let t=IDT_SPG.tip; if(!t){ t=IDT_SPG.tip=document.createElement("div"); t.className="msGTip"; } t.remove();
+  if(step===1&&fm){ t.className="msGTip onBtn"; t.innerHTML='처음이라면 자유롭게 둘러보세요<small>순서 · 채점 없음</small>'; fm.appendChild(t); }
+  else if(step===2){ const h=fr&&fr.closest(".msCard")&&fr.closest(".msCard").querySelector(".msH"); if(h){ t.className="msGTip onTtl"; t.innerHTML=(M===fm?'충전실부터 둘러보세요':'처음이라면 충전실부터')+' ↓'; h.appendChild(t); } }
 }
 function idtSplashMark(o){
   if(o.mode||o.room){ IDT_SP.mode=o.mode?(_spModes().find(b=>o.isSel(b))||null):IDT_SP.mode; IDT_SP.room=o.room?(_spRooms().find(b=>b.dataset.r===o.room)||null):IDT_SP.room; }

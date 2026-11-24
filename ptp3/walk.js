@@ -16,7 +16,7 @@ function gridBuild(){
       mark(a[0],a[2],b[0],b[2],c[0],c[2],Math.min(a[1],b[1],c[1]),Math.max(a[1],b[1],c[1])); } };
   const O=V3P.objs;
   if(O.room.buf) inter(O.room,STRIDE,O.room.g[0].drawRange.count,1,0,0,0);
-  if(O.filler.buf) inter(O.filler,STRIDE,O.filler.g[0].drawRange.count,4,-3680,1128,L.fillerZ);
+  if(O.filler.buf) inter(O.filler,STRIDE,O.filler.g[0].drawRange.count,4*PF.s,pfX(0),pfY(0),pfZ(0));   /* 충전기 ×0.8 (view3.js PF) */
   const lp=O.line.part[0]; if(lp.P){ const n=lp.g.drawRange.count; for(let t=0;t<n;t+=3){ const v=i=>[8000+lp.P[(t+i)*3]*5, lp.P[(t+i)*3+1]*5, lp.P[(t+i)*3+2]*5]; const a=v(0),b=v(1),c=v(2);
       mark(a[0],a[2],b[0],b[2],c[0],c[2],Math.min(a[1],b[1],c[1]),Math.max(a[1],b[1],c[1])); } }
   WALK.grid=GRID;

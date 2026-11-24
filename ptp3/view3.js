@@ -7,6 +7,12 @@
    · 원본 렌더러처럼 면 방향은 시점 쪽으로 뒤집어 조명 (원본 형상의 감김 방향이 일정하지 않음)
    ═══════════════════════════════════════════════════════════════════ */
 const MM=.001, STRIDE=16;
+/* 충전기 크기 (11/24 사용자 지시 「PTP 충전기가 실제보다 너무 높음 — 같은 비율 0.8 · 조작판넬 1.7 m · 장비 2 m 이하 · 작업은 허리~가슴 · 조작은 눈높이」)
+   앱 형상을 ×0.8 : 기준점 = 배출 컨베이어 끝(x −1296) · 라인 중심(z −230) · 바닥(y 0) — 해당 IDT 만(PTP 충전기 하드웨어)
+   pfX · pfY · pfZ = 앱 단위(충전 1 = 4 mm) → 공용 mm / pfW = 옛 공용 mm(×1) → 새 공용 mm (1인칭 대상 · 작업 위치) */
+const PF={s:.8, px:-1296, pz:-230};
+const pfX=v=>PF.px+PF.s*(4*v-3680-PF.px), pfY=v=>PF.s*(4*v+1128), pfZ=v=>PF.pz+PF.s*(4*v-230-PF.pz);
+const pfW=p=>[PF.px+PF.s*(p[0]-PF.px), PF.s*p[1], PF.pz+PF.s*(p[2]-PF.pz)].concat(p.slice(3));
 const V3P={R:null, sc:null, cam:null, objs:{}, t:{gen:0,genMs:0,fps:0,n:0,t0:0}, ready:false, view:"orbit",
   orbit:{yaw:-0.42,pitch:0.42,dist:12500,tx:2600,ty:700,tz:200}};
 /* ── 재질 : 정점색(sRGB → 선형) · 정점별 금속도 · 밝기 · 무광 ── */
@@ -93,7 +99,7 @@ function v3Init(){
     const f=new T3.Mesh(new T3.BoxGeometry(x1-x0,H,.12),wm); f.position.set((x0+x1)/2,H/2,z1+.06); f.receiveShadow=true; G.add(f);
     G.visible=false; sc.add(G); V3P.inner=G; }
   v3Inter("room",[0,0,0],1); v3Inter("dyn",[0,0,0],1);
-  v3Inter("filler",[-3680,1128,L.fillerZ],4); v3Line("line",[8000,0,0],5);
+  v3Inter("filler",[pfX(0),pfY(0),pfZ(0)],4*PF.s);   /* ×0.8 (11/24) */ v3Line("line",[8000,0,0],5);
   V3P.ready=true;
 }
 /* 실제 장면을 찍어 반사에 사용 (파우치와 같은 방식) — 형상을 처음 받은 뒤 한 번 */

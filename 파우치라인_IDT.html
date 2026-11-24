@@ -646,6 +646,27 @@ body:has(#splash:not(.hide)) #bar{display:none}body:has(#splash:not(.hide)) #sta
 #splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9*var(--u));transform:translateX(-50%);width:max-content;max-width:calc(280*var(--u));padding:calc(9*var(--u)) calc(12*var(--u));border-radius:calc(8*var(--u));background:#16202c;color:#fff;font-weight:500;font-size:calc(14*var(--u));line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
 #splash .tipB::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#16202c}
 #splash button:hover>.tipB,#splash button:focus-visible>.tipB,#splash button.tipOn>.tipB{display:block}
+/* 처음 사용자 안내 (11/24 사용자 지시 · 스케치 승인 「처음 해보는 경우 자유롭게 둘러보세요 · 자유모드 · 충전실 작업자 추천 · 시작 방법 안내」 · 항상 표시)
+   ★ 추천 = 자유모드 · 충전실 작업자 / 노란 말풍선 = 지금 고를 단계로 이동 (자유모드 → 작업자 카드 제목 → [교육 시작] 강조) / ③ 시작 카드 = 3단계 안내 + 1인칭 조작 */
+#splash .msRec{position:absolute;top:calc(-10*var(--u));right:calc(12*var(--u));z-index:6;padding:calc(3*var(--u)) calc(10*var(--u));border-radius:999px;background:#173a63;color:#fff;font-weight:800;font-size:calc(13*var(--u));line-height:1.3;box-shadow:0 2px 6px rgba(12,22,36,.25);pointer-events:none;white-space:nowrap}
+#splash .sel>.msRec{background:#fff;color:#173a63;border:1.5px solid #173a63}
+#splash .msGTip{position:absolute;z-index:7;white-space:nowrap;padding:calc(3*var(--u)) calc(12*var(--u));border-radius:calc(9*var(--u));background:#fff8e1;border:1.5px solid #e0a100;color:#4a3500;font-weight:700;font-size:calc(13.5*var(--u));line-height:1.3;box-shadow:0 6px 16px rgba(12,22,36,.18);pointer-events:none;text-align:left;letter-spacing:0}
+#splash .msGTip small{font-weight:600;font-size:calc(12.5*var(--u));color:#6b5200;margin-left:calc(6*var(--u))}
+#splash .msGTip.onBtn{bottom:calc(100% + 3*var(--u));right:calc(112*var(--u))}   /* 위 줄 버튼과 사이(33u) 안에 들어가게 */
+#splash .msGTip.onBtn::after{content:"";position:absolute;right:calc(-7*var(--u));bottom:calc(6*var(--u));width:calc(12*var(--u));height:calc(12*var(--u));background:#fff8e1;border-right:1.5px solid #e0a100;border-bottom:1.5px solid #e0a100;transform:rotate(-45deg)}
+#splash .msGTip.onTtl{right:0;top:50%;transform:translateY(-50%)}
+#splash .msH{position:relative}
+#splash button:hover>.msGTip,#splash button.tipOn>.msGTip{visibility:hidden}   /* 말풍선(설명)이 뜰 때는 안내 말풍선을 숨김 */
+#msStart.msGlow{box-shadow:0 0 0 calc(4*var(--u)) #ffd76a,0 0 calc(18*var(--u)) #e0a10088}
+#msGuide{margin:0 0 calc(12*var(--u));padding:calc(10*var(--u)) calc(12*var(--u));border-radius:calc(10*var(--u));background:#f4f6f9;border:1px solid #e3e9f0}
+#msGuide.ready{border-color:#e0a100;background:#fff8e1}
+#msGuide h4{margin:0 0 calc(6*var(--u));font-size:calc(13.5*var(--u));font-weight:800;color:#173a63}#msGuide.ready h4{color:#4a3500}
+#msGuide .gs{display:flex;gap:calc(6*var(--u));align-items:center;font-size:calc(13.5*var(--u));font-weight:700;color:#5d6b7a;flex-wrap:wrap}
+#msGuide .gs span{display:inline-flex;align-items:center;gap:calc(5*var(--u));padding:calc(3*var(--u)) calc(9*var(--u));border-radius:999px;background:#fff;border:1px solid #d6dfe9}
+#msGuide .gs span.on{border-color:#e0a100;background:#fff8e1;color:#4a3500}#msGuide .gs span.ok{color:#2b8a4b;border-color:#bfe3cb;background:#effaf2}
+#msGuide .gs i{font-style:normal;color:#9aa8b6}
+#msGuide .gk{margin-top:calc(7*var(--u));font-size:calc(12.5*var(--u));color:#5d6b7a;line-height:1.55}
+#msGuide kbd{display:inline-block;min-width:calc(18*var(--u));padding:0 calc(5*var(--u));margin-right:calc(2*var(--u));border:1px solid #c9d4e0;border-bottom-width:2px;border-radius:calc(5*var(--u));background:#fff;font-weight:700;font-size:calc(12*var(--u));line-height:1.5;font-family:inherit;color:#173a63;text-align:center}
 /* 필요한 높이 재기 (splash.js idtSpFit) : 늘이지 않은 본래 크기 */
 #splash.msMeasure .box.msx{height:auto}
 #splash.msMeasure .msBody{flex:none}
@@ -5665,6 +5686,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:47,d:'2026-11-24',t:'메인화면 처음 사용자 안내 (11/24 사용자 지시 · 스케치 승인 「처음 해보는 경우 자유롭게 둘러보세요 · 자유모드 · 충전실 작업자 추천 · 시작 방법 가이드」 · 항상 표시) — 자유모드 · 충전실 작업자에 ★ 추천 표시, 노란 말풍선이 지금 고를 단계로 옮겨 감(「처음이라면 자유롭게 둘러보세요」 → 작업자 카드 「충전실부터 둘러보세요」 → [교육 시작] 버튼 강조), ③ 시작 카드에 3단계 안내(✓ 진행 표시) · 1인칭 조작(WASD 걷기 · 마우스 둘러보기 · E 조작). 세 IDT 공통 idt_common/splash.css · splash.js · 1280×720 ~ 1920×1080 한 화면 · 말풍선이 다른 버튼을 가리지 않음'},
  {v:46,d:'2026-11-24',t:'함량조절다이얼 L 렌치 360° 회전 (11/24 사용자 지시 「A/D 를 누르면 L렌치가 부드럽게 360도 회전하며 돌아가야 함 · 지금은 20~30도만 깔짝깔짝」) — 렌치 손잡이를 60° 마다 다시 끼우던 방식(손잡이가 한 자리에서 왔다 갔다)을 없애고 소켓과 함께 그대로 돌게 함. 짧게 누르면 한 눈금(24°)을 부드럽게, 누르고 있으면 키 자동 반복 대신 일정 속도(약 300°/초 · 0.22 초 뒤 시작)로 끊김 없이 계속 돌며 24° 마다 한 눈금(0.1 %%) 확정 · 손을 떼면 반 눈금 넘게 돈 것은 한 눈금으로. 파우치만 해당(함량조절다이얼은 파우치 충전기 고유 설비)'},
  {v:45,d:'2026-11-24',t:'작업장 벽 · 천장 무광 흰색~밝은 회색 (11/24 사용자 지시 · 현장 사진 「벽면 및 천장은 스텐 재질이 아닌 매트한 화이트~회색톤 · 지금은 너무 회색빛」) — 벽 · 천장을 세 IDT 공통 무광 도장 패널 값(pouch/v2/src/kit.js M.wall · M.ceil)으로 통일하고 천장 조명이 흰 벽에서 되비쳐 드는 간접광을 반영. 1인칭 실측(화면 sRGB 밝기) : 벽 126 → 197 · 천장 156 → 212 · 연두빛 → 무채색 · 벽 이음 몰딩 · 바닥 코브도 알루미늄 → 무광 도장. 설비 금속 반사는 11/23 금속 톤 맞춤 그대로 유지(금속 102 → 103)'},
  {v:44,d:'2026-11-24',t:'메인화면 화면 전체 사용 (11/24 사용자 지시 「메인 시작 화면에서 너무 화면의 일부만 씀 · 전체적으로 활용 · 모든 IDT 공통」) — 고정 폭(최대 1440) · 위쪽 정렬이라 큰 화면에서 아래 절반이 비던 것을 화면 폭 · 높이에 맞춰 글자 · 여백 · 버튼을 함께 키우고(기준 폭 1240 대비 배율), 남는 높이는 과정 버튼 · 작업자 카드가 나눠 채움(앱 화면 비율 안에서). 1280×720 ~ 1920×1080 에서 스크롤 없이 한 화면 · 폭 900 미만은 한 줄 배치. 이상사례 목록도 같은 배율. 세 IDT 공통 idt_common/splash.css · splash.js · splash.py'},
@@ -6340,6 +6362,27 @@ function idtSpSync(){
     :'<b>'+e(M.dataset.nm)+'</b> › '+(R?e(R.dataset.nm)+(inc?'':' <s>(1인칭)</s>')+(rx&&R.dataset.r!=="F"?' <s>· '+e(rx.firstChild.textContent)+'</s>':''):'<s>작업자를 고르세요</s>');
   go.disabled=!(M&&(noRoom||R));
   go.textContent=noRoom?"대시보드 열기":inc?"사례 목록 보기":"교육 시작";
+  idtSpGuide(M,R,noRoom,inc);
+}
+/* 처음 사용자 안내 (11/24 · 항상 표시) : ★ 추천(자유모드 · 충전실 작업자) · 지금 고를 단계로 옮겨 가는 말풍선 · ③ 시작 카드 3단계 안내 */
+const IDT_SPG={tip:null};
+function idtSpRecMode(){ return document.querySelector("#splash .go button[data-m=\"free\"]")||document.getElementById("spFree"); }
+function idtSpRecRoom(){ return document.querySelector("#coursePicker button.main[data-r=\"F\"]"); }
+function idtSpGuide(M,R,noRoom,inc){
+  const go=document.getElementById("msStart"), fm=idtSpRecMode(), fr=idtSpRecRoom(); if(!go) return;
+  for(const b of [fm,fr]) if(b&&!b.querySelector(".msRec")){ const s=document.createElement("span"); s.className="msRec"; s.textContent="★ 추천"; b.appendChild(s); }
+  let g=document.getElementById("msGuide"); if(!g){ g=document.createElement("div"); g.id="msGuide"; const sum=document.getElementById("msSum"); if(sum) sum.before(g); }
+  const e=s=>String(s||"").replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  const ready=!!(M&&(noRoom||R)), step=!M?1:(ready?3:2);
+  const lab=[M?(M.dataset.nm||"교육 과정"):"자유모드", noRoom?"작업자 선택 없음":(R?(R.dataset.nm||"작업자"):"충전실 작업자"), go.textContent];
+  g.className=ready?"ready":"";
+  g.innerHTML='<h4>'+(ready?(noRoom?'준비 완료 — ['+e(go.textContent)+'] 을 누르세요':inc?'준비 완료 — ['+e(go.textContent)+'] 를 눌러 사례를 고르세요':'준비 완료 — [교육 시작] 을 누르면 1인칭으로 시작합니다'):'처음이라면 이렇게 시작하세요')+'</h4>'+
+    '<div class="gs">'+lab.map((t,i)=>'<span class="'+(i+1<step||(i===1&&noRoom&&M)?'ok':(i+1===step?'on':''))+'">'+(i+1<step?'✓':(i+1))+' '+e(t)+'</span>').join('<i>›</i>')+'</div>'+
+    '<div class="gk"><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> 걷기 · 마우스 둘러보기 · <kbd>E</kbd> 조작</div>';
+  go.classList.toggle("msGlow",ready);
+  let t=IDT_SPG.tip; if(!t){ t=IDT_SPG.tip=document.createElement("div"); t.className="msGTip"; } t.remove();
+  if(step===1&&fm){ t.className="msGTip onBtn"; t.innerHTML='처음이라면 자유롭게 둘러보세요<small>순서 · 채점 없음</small>'; fm.appendChild(t); }
+  else if(step===2){ const h=fr&&fr.closest(".msCard")&&fr.closest(".msCard").querySelector(".msH"); if(h){ t.className="msGTip onTtl"; t.innerHTML=(M===fm?'충전실부터 둘러보세요':'처음이라면 충전실부터')+' ↓'; h.appendChild(t); } }
 }
 function idtSplashMark(o){
   if(o.mode||o.room){ IDT_SP.mode=o.mode?(_spModes().find(b=>o.isSel(b))||null):IDT_SP.mode; IDT_SP.room=o.room?(_spRooms().find(b=>b.dataset.r===o.room)||null):IDT_SP.room; }

@@ -24,7 +24,68 @@ ONE = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(ONE)
 
 # 앱 문서 추가 치환 : 통합 렌더러(uni_gfx.js) 안의 방 형상 · 팩 형상을 셸이 받을 수 있게 내보냄
+# 연결 컨베이어 경사 구간 (충전기 ×0.8 · 11/24) — 앱 문서 uni_gfx 의 conveyorMesh · packsMesh 를 경로(RB.KEY 여러 점)를 따르게 바꿈 (원래 함수는 …Flat 로 이름만 바꿔 둠)
+PTP_CONV = r"""/* 선분 방향 상자 (x-y 평면 기울기) : A→B 를 따라 d0~d1(법선 쪽) · z0~z1 */
+function oboxXY(m,A,B,d0,d1,z0,z1,cc,mt){ const dx=B.x-A.x, dy=B.y-A.y, L=Math.hypot(dx,dy)||1, nx=-dy/L, ny=dx/L;
+  const P=(i,j,k)=>{ const s=i?B:A, d=j?d1:d0; return [s.x+nx*d, s.y+ny*d, k?z1:z0]; };
+  m.quad(P(0,1,1),P(1,1,1),P(1,1,0),P(0,1,0),cc,mt); m.quad(P(0,0,0),P(1,0,0),P(1,0,1),P(0,0,1),cc,mt);
+  m.quad(P(0,0,1),P(1,0,1),P(1,1,1),P(0,1,1),cc,mt); m.quad(P(1,0,0),P(0,0,0),P(0,1,0),P(1,1,0),cc,mt);
+  m.quad(P(1,0,1),P(1,0,0),P(1,1,0),P(1,1,1),cc,mt); m.quad(P(0,0,0),P(0,0,1),P(0,1,1),P(0,1,0),cc,mt); }
+function convY(x){ const K=RB.KEY; if(x<=K[0].x) return K[0].y; for(let k=0;k<K.length-1;k++){ const A=K[k],B=K[k+1]; if(x<=B.x) return A.y+(B.y-A.y)*(x-A.x)/Math.max(1e-6,B.x-A.x); } return K[K.length-1].y; }
+/* 연결 컨베이어 : 충전기 배출 끝 → (경사) → 벽 개구부 · 카토너 스태커 매거진 — 경사 구간은 기울어진 벨트 · 레일 · 프레임 */
+function conveyorMesh(m){
+  const K=RB.KEY, x0=K[0].x, x1=K[K.length-1].x, z=K[0].z, hw=BL.beltW/2, yE=K[K.length-1].y;
+  for(let k=0;k<K.length-1;k++){ const A=K[k], B=K[k+1], flat=Math.abs(B.y-A.y)<1;
+    const seg=(d0,d1,za,zb,cc,mt)=>flat?m.box(A.x,B.x,A.y+d0,A.y+d1,za,zb,cc,mt):oboxXY(m,A,B,d0,d1,za,zb,cc,mt);
+    seg(-16,0,z-hw,z+hw,C_.belt,{m:0.25});
+    for(const s of [-1,1]){ const zz=z+s*(hw+9); seg(-30,14,zz-7,zz+7,C_.rail,{m:0.7}); seg(-58,-30,zz-3,zz+3,C_.rail,{m:0.7}); } }
+  m.cyl('z',[x0+16,K[0].y-14,0],z-hw-12,z+hw+12,14,'#cfd5db',14,{m:0.85});
+  for(let x=x0+250;x<x1-150;x+=900){ if(Math.abs(x)<300||x>1830) continue; const y=convY(x);
+    for(const s of [-1,1]){ const zz=z+s*(hw-6); m.box(x-9,x+9,0,y-58,zz-9,zz+9,C_.leg,{m:0.6}); }
+    m.box(x-14,x+14,y-120,y-100,z-hw,z+hw,C_.leg,{m:0.6});
+    m.box(x-40,x+40,0,6,z-hw-30,z+hw+30,C_.plate,{m:0.75});
+    for(const s of [-1,1]) m.cyl('y',[x+s*28,0,z+s*(hw+16)],6,14,7,C_.bolt,8,{m:0.8}); }
+  { const gx=x0+1320, gy=convY(gx)-60; m.box(gx-44,gx+44,gy-40,gy+40,z-hw-50,z-hw-10,'#4d5c6e',{m:0.35});
+    m.cyl('z',[gx,gy,0],z-hw-50,z-hw-170,40,'#516275',16,{m:0.4}); m.cyl('z',[gx,gy,0],z-hw-170,z-hw-182,32,'#2b3036',14,{m:0.3}); }
+  for(const x of [x0+1350,x1-200]){ const y=convY(x); m.box(x-12,x+12,y,y+40,z+hw+16,z+hw+40,C_.dk,{m:0.3}); m.box(x-7,x+7,y+14,y+28,z+hw+14,z+hw+16,'#d9632a',{fl:1});
+    m.box(x-12,x+12,y,y+30,z-hw-30,z-hw-16,'#c94a3a',{m:0.2}); }
+  m.box(x1,x1+70,yE-6,yE,z-60,z+60,C_.rail,{m:0.7});
+  { const gx=1900, y=convY(gx); m.box(gx-30,gx+30,y-70,y-58,z-hw-40,z+hw+40,C_.ss,{m:0.85}); m.box(gx-30,gx+30,y+60,y+72,z-hw-40,z+hw+40,C_.ss,{m:0.85});
+    for(const s of [-1,1]) m.box(gx-30,gx+30,y-70,y+72,z+s*(hw+28),z+s*(hw+40),C_.ss,{m:0.85}); }
+}
+/* 연결 컨베이어 위 팩 : 경로 높이 · 기울기를 따름 (포일면 위 · 필름 포켓면 아래) */
+function packsMesh(ink){
+  const m=new Mesh(), PK=RB.PACK, K=RB.KEY, z=K[0].z, yE=K[K.length-1].y;
+  const film=col(ink.film), foil=col(ink.foil);
+  for(const p of RB.st.packs){ if(p.s<0) continue; const a=RB.at(p.s), cx=a.x, cy=a.y;
+    if(Math.abs(a.ty)<1e-3){ m.box(cx-PK.l/2,cx+PK.l/2,cy,cy+PK.h*0.55,z-PK.w/2,z+PK.w/2,film,{m:0.25});
+      m.box(cx-PK.l/2,cx+PK.l/2,cy+PK.h*0.55,cy+PK.h*0.6,z-PK.w/2,z+PK.w/2,foil,{m:0.8,pat:q=>[(q[0]-cx)*0.8,(q[2]-z)*0.8]}); }
+    else { const h=PK.l/2, A={x:cx-a.tx*h,y:cy-a.ty*h}, B={x:cx+a.tx*h,y:cy+a.ty*h};
+      oboxXY(m,A,B,0,PK.h*0.55,z-PK.w/2,z+PK.w/2,film,{m:0.25}); oboxXY(m,A,B,PK.h*0.55,PK.h*0.6,z-PK.w/2,z+PK.w/2,foil,{m:0.8}); } }
+  if(RB.st.dropT>0){ const k=1-RB.st.dropT/0.18, x=K[K.length-1].x+40, yy=yE-k*70;
+    m.box(x-PK.l/2,x+PK.l/2,yy,yy+PK.h*0.6,z-PK.w/2,z+PK.w/2,foil,{m:0.8}); }
+  return m.data();
+}
+"""
+# 셸 스크립트 빌드 때 치환 (ptp_one 원본은 그대로) — 충전기 ×0.8 : 연결 컨베이어 경로 = 배출 끝(1032) → 경사 끝(1290) → 스태커
+SHELL_PATCH = {"bus.js": [
+    ("""    {x:-1296, y:1290, z:-230},          /* 충전기 배출 컨베이어 끝 (충전기 X 596) */""",
+     """    {x:-1296, y:1032, z:-230},          /* 충전기 배출 컨베이어 끝 (충전기 X 596) — 충전기 ×0.8 (11/24) : 높이 1290 → 1032 */
+    {x:-420,  y:1290, z:-230},          /* 경사 구간 끝 : 벽 개구부(1140~1460) 앞에서 원래 높이 */"""),
+    ("for(let i=0;i<=40;i++){ const t=i/40; SAMP.push({x:KEY[0].x+(KEY[1].x-KEY[0].x)*t,y:KEY[0].y,z:KEY[0].z,s:0}); }",
+     "for(let k=0;k<KEY.length-1;k++){ const A=KEY[k],B=KEY[k+1],n=Math.max(4,Math.round(Math.hypot(B.x-A.x,B.y-A.y)/100)); for(let i=k?1:0;i<=n;i++){ const t=i/n; SAMP.push({x:A.x+(B.x-A.x)*t,y:A.y+(B.y-A.y)*t,z:A.z+(B.z-A.z)*t,s:0}); } }   /* 여러 점 경로 (11/24) */"),
+]}
+
+
 APP_PATCH = [
+    # 충전기 ×0.8 (11/24 사용자 지시 「PTP 충전기가 실제보다 너무 높음 · 같은 비율 0.8」 — ptp3/view3.js PF 와 같은 값) : 방 형상(배선 트레이 · 지지대)이 쓰는 충전기 좌표
+    ("const XF=x=>4*x-3680, YF=y=>4*y+1128, ZF=z=>4*z+BL.fillerZ;",
+     "const PFS=.8, PFX=-1296, XF=x=>PFX+PFS*(4*x-3680-PFX), YF=y=>PFS*(4*y+1128), ZF=z=>BL.fillerZ+PFS*4*z;   /* 충전기 ×0.8 (ptp3 · 11/24) */", 1, ("filler", "line")),
+    ("function packsMesh(ink){", "function packsMeshFlat(ink){", 1, ("filler", "line")),
+    ("function conveyorMesh(m){", PTP_CONV + "function conveyorMeshFlat(m){", 1, ("filler", "line")),
+    # 조작판넬 (11/24 사용자 지시 「판넬 1.7 m · 조작은 눈높이」) : 매달린 HMI 를 SVG y +36 (×0.8 뒤 판넬 위 1.70 m · 화면 가운데 1.53 m) + 인칭 버튼(파랑) — ptp3/fp3.js FP3_HMI 와 같은 값
+    ("{const x=400,y=151,z=DEPTH+34;\nbox2(480,118,74,14,BODYZ+10,z,'#bcc0c4',MET2);",
+     "{const x=400,y=151+36,z=DEPTH+34;\nbox2(480,118+36,74,14,BODYZ+10,z,'#bcc0c4',MET2);cylZ(x+59,y+18,4,z+14,z+20,'#3a6fb0',14,0,{m:.2});", 1, ("filler",)),
     ("window.UNI_GEN=function(cam){",
      "window.UNI_ROOM=function(){ if(!ROOM||ROOM.ver!==HUB.roomVer){ ROOM=buildRoom(); ROOM.ver=HUB.roomVer; } return ROOM; };\n"
      "window.UNI_DYN=function(){ const fw=HUB.win('filler'), ink=(fw&&fw.UNI_INK&&fw.UNI_INK())||{ink:[1,1,1],film:'#dfeaf0',foil:'#cfd3d8'}; return packsMesh(ink); };\n"
@@ -219,7 +280,14 @@ def build() -> str:
     shell = (HERE / "shell.html").read_text(encoding="utf-8")
     apps = {key: base64.b64encode(app(key).encode("utf-8")).decode("ascii") for key in ("filler", "line")}
     src = lambda n: (ROOT / "oee" / n) if n == "oee.js" else (ROOT / "idt_common" / n) if n in ("aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "crewkit.js", "modes.js", "look.js", "batch.js") else (ROOT / "ptp_one" / n) if n in FROM_ONE else (ROOT / "pouch" / "v2" / "src" / n) if n in FROM_POUCH else (HERE / n)
-    js = "\n".join(f"/* ── {name} ── */\n" + src(name).read_text(encoding="utf-8") for name in SHELL_SCRIPTS)
+    def shell_src(name):
+        text = src(name).read_text(encoding="utf-8")
+        for old, new in SHELL_PATCH.get(name, []):
+            if text.count(old) != 1:
+                sys.exit(f"{name}: '{old[:50]}' 가 {text.count(old)} 번 (기대 1)")
+            text = text.replace(old, new)
+        return text
+    js = "\n".join(f"/* ── {name} ── */\n" + shell_src(name) for name in SHELL_SCRIPTS)
     three = THREE.read_text(encoding="utf-8")
     for t in (js, three):
         if "</script" in t.lower():
