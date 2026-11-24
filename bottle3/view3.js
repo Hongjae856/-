@@ -57,7 +57,7 @@ function v3bRoom(sc){
   const ym=new T3.MeshStandardMaterial({color:0xe6c23a,roughness:.6}); for(const z of [700,1850]){ const y=new T3.Mesh(new T3.PlaneGeometry(x1-x0,.05),ym); y.rotation.x=-Math.PI/2; y.position.set((x0+x1)/2,.002,z*MM); G.add(y); }
   sc.add(G);
   /* 1인칭에서만 : 천장 · 조명 판 · 앞벽 */
-  const I=new T3.Group(); const cm=new T3.MeshStandardMaterial({color:0xeef0ee,roughness:.9,envMapIntensity:.2,side:T3.DoubleSide});
+  const I=new T3.Group(); const cm=M.ceil.clone(); cm.side=T3.DoubleSide; V3B.ceilM=cm;   /* 천장 = 공통 무광 패널 (kit.js M.ceil · 11/24) */
   const c=new T3.Mesh(new T3.PlaneGeometry(x1-x0,z1-z0),cm); c.rotation.x=Math.PI/2; c.position.set((x0+x1)/2,H,(z0+z1)/2); I.add(c);
   const lm=new T3.MeshStandardMaterial({color:0xffffff,emissive:0xf4f7f4,emissiveIntensity:1.1,roughness:.8});
   for(let x=x0+1.2;x<x1-.6;x+=2.4) for(const z of [z0+1.4,(z0+z1)/2,z1-1.4]){ const l=new T3.Mesh(new T3.BoxGeometry(1.2,.03,.3),lm); l.position.set(x,H-.02,z); I.add(l); }
@@ -85,7 +85,8 @@ function v3bInit(){
 /* 실제 장면을 찍어 반사에 사용 (파우치 · PTP 와 같은 방식) — 정적 형상을 처음 받은 뒤 한 번 · 포장실 쪽도 한 번 */
 function v3bEnvCapture(){
   const pm=new T3.PMREMGenerator(V3B.R), sc=V3B.sc, c=[(ROOM.x0+ROOM.x1)/2*MM,1.7,1.2]; sc.position.set(-c[0],-c[1],-c[2]); sc.updateMatrixWorld(true);
-  const keep=V3B.inner.visible; V3B.inner.visible=true; const rt=pm.fromScene(sc,.02,.05,60); sc.position.set(0,0,0); sc.updateMatrixWorld(true); V3B.inner.visible=keep;
+  const ENV=[{m:M.wall,c:0xd3dad5,e:0},{m:V3B.ceilM,c:0xeef0ee,e:0}]; idtEnvTone(ENV,true);   /* 금속 반사 = 11/23 톤 유지 (11/24) */
+  const keep=V3B.inner.visible; V3B.inner.visible=true; const rt=pm.fromScene(sc,.02,.05,60); idtEnvTone(ENV,false); sc.position.set(0,0,0); sc.updateMatrixWorld(true); V3B.inner.visible=keep;
   sc.environment=rt.texture;
 }
 /* 앱 형상 받기 : 정적은 판이 바뀔 때만 · 동적은 앱이 새로 만들었을 때만 */

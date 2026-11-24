@@ -252,6 +252,7 @@ body:has(#splash:not(.hide)) #bar{display:none}body:has(#splash:not(.hide)) #sta
 /* ── changelog.js ── */
 /* 버전 이력 — 수정 요청 1건마다 +1 (맨 위가 최신, 날짜 : 한국 시간) */
 const CHANGELOG=[
+ {v:24,d:'2026-11-24',t:'작업장 벽 · 천장 무광 흰색~밝은 회색 (11/24 사용자 지시 · 현장 사진 「벽면 및 천장은 스텐 재질이 아닌 매트한 화이트~회색톤 · 지금은 너무 회색빛」) — 벽 · 천장을 세 IDT 공통 무광 도장 패널 값(pouch/v2/src/kit.js M.wall · M.ceil)으로 통일하고 천장 조명이 흰 벽에서 되비쳐 드는 간접광을 반영. 1인칭 실측(화면 sRGB 밝기) : 벽 167 → 206 · 천장 74 → 215 · 연두빛 → 무채색 · 칸막이 · 뒷벽 · 앞벽 · 천장 공통 값. 설비 금속 반사는 11/23 금속 톤 맞춤 그대로 유지(금속 139 → 130)'},
  {v:23,d:'2026-11-24',t:'메인화면 화면 전체 사용 (11/24 사용자 지시 「메인 시작 화면에서 너무 화면의 일부만 씀 · 전체적으로 활용 · 모든 IDT 공통」) — 고정 폭(최대 1440) · 위쪽 정렬이라 큰 화면에서 아래 절반이 비던 것을 화면 폭 · 높이에 맞춰 글자 · 여백 · 버튼을 함께 키우고(기준 폭 1240 대비 배율), 남는 높이는 과정 버튼 · 작업자 카드가 나눠 채움(위쪽 막대 자리까지 · 오른쪽 위 버전 표시를 누르면 버전 이력 창(파우치와 같은 방식 · 그동안 PTP 는 이력 창이 없었음)). 1280×720 ~ 1920×1080 에서 스크롤 없이 한 화면 · 폭 900 미만은 한 줄 배치. 이상사례 목록도 같은 배율. 세 IDT 공통 idt_common/splash.css · splash.js · splash.py'},
  {v:22,d:'2026-11-23',t:'최적화 · 정적 형상 묶어 그리기 (11/23 사용자 지시 「퀄리티 · 과정 손상 없이 최적화」) — 움직이지 않는 불투명 부품을 재질별로 합쳐 한 번에 그림(세 IDT 공통 idt_common/batch.js). 부품이 하나라도 움직이면 그 묶음을 그 프레임에 바로 풀어 원본으로 그림 · 작업자 손 목표 · 광선 판정은 원본 기준 그대로. 그리기 호출 약 72% 감소 · 화면 버퍼 설정을 파우치와 같게(기본 화면 다중 표본 · 버퍼 보존 끔). 같은 순간 묶음 켬/끔 화소 비교 차이 0.004% 이하(경계 반올림) · 화면 · 과정 변화 없음'},
  {v:21,d:'2026-11-23',t:'1인칭 흐름 사전 점검 반영 (11/23 단계별 대기 · 이동 · 누름 측정) — 라인 클리어런스 점검마다 보이지 않는 작업자가 여러 장치를 걸어 돌아 4~44 초 기다리던 것을 플레이어가 그 자리에서 짧게(충전실 · 포장실). 팔레트 투입 · 만적 팔레트 반출은 1인칭에서 누르고 약 0.8 초 뒤 제자리 배치(사용자 결정 · 3인칭은 팔레트잭 운반 그대로). 자동설정(1) · (2) 인칭 스위치는 실제처럼 누르고 있는 동안 사이클이 이어짐(사용자 결정 · 원본 4번 · 2번 반복 누름 해소), E 키 자동 반복으로 여러 번 눌리던 것 방지'},
@@ -454,10 +455,17 @@ M.grey =new T3.MeshStandardMaterial({color:0x8d9297,metalness:.1,roughness:.55})
 M.dark =new T3.MeshStandardMaterial({color:0x1d2023,metalness:.2,roughness:.5});
 M.black=new T3.MeshStandardMaterial({color:0x0c0d0e,metalness:.1,roughness:.6});
 M.white=new T3.MeshStandardMaterial({color:0xf2f3f1,metalness:0,roughness:.5});
-M.wall =new T3.MeshStandardMaterial({color:0xd3dad5,metalness:0,roughness:.6,envMapIntensity:.35});
+/* 작업장 벽 · 천장 = 매트 흰색~밝은 회색 클린룸 도장 패널 (11/24 사용자 지시 · 현장 사진 「스텐 재질이 아닌 매트한 화이트~회색톤」) — 세 IDT 공통
+   emissive = 천장 조명이 흰 벽 · 바닥에서 되비쳐 들어오는 간접광 대용 (윗면 직사광만으로는 수직 벽 · 아래 향한 천장이 회색으로 어두워짐)
+   PTP 방 형상 벽(앱 정점색)은 idt_common/look.js 가 같은 값을 씀 */
+M.wall =new T3.MeshStandardMaterial({color:0xeceeec,metalness:0,roughness:.92,envMapIntensity:.12,emissive:0xeceeec,emissiveIntensity:.72});
+M.wallJ=new T3.MeshStandardMaterial({color:0xd8dbd9,metalness:0,roughness:.75,envMapIntensity:.2,emissive:0xd8dbd9,emissiveIntensity:.22});   /* 패널 이음 · 바닥 코브 (도장 · 무광) */
 M.alu  =new T3.MeshStandardMaterial({color:0xd8dbde,metalness:.9,roughness:.45,envMapIntensity:1.5});
 M.floor=new T3.MeshStandardMaterial({color:0xc6cdbf,map:TX.floor,metalness:0,roughness:.14,envMapIntensity:.85});
-M.ceil =new T3.MeshStandardMaterial({color:0xe4e7e4,roughness:.9,envMapIntensity:.2,emissive:0xeef2ee,emissiveIntensity:.5});
+M.ceil =new T3.MeshStandardMaterial({color:0xf2f3f2,metalness:0,roughness:.95,envMapIntensity:.1,emissive:0xf2f3f2,emissiveIntensity:1.35});
+/* 반사(환경 맵) 촬영 때만 벽 · 천장을 11/24 이전 톤으로 — 설비 금속이 흰 벽을 비춰 밝아지면 11/23 금속 톤 맞춤(파우치 실측)이 깨지므로 금속 모습은 그대로 유지
+   list = [{m:재질, c:이전 색, e:이전 간접광}] · on = true 촬영 전 / false 촬영 뒤 */
+function idtEnvTone(list,on){ for(const q of list){ if(on){ q.s=[q.m.color.getHex(),q.m.emissiveIntensity]; q.m.color.setHex(q.c); q.m.emissiveIntensity=q.e; } else if(q.s){ q.m.color.setHex(q.s[0]); q.m.emissiveIntensity=q.s[1]; } } }
 M.haz  =new T3.MeshStandardMaterial({map:TX.hazard,roughness:.6});
 M.yellow=new T3.MeshStandardMaterial({color:0xf2c400,roughness:.5});
 M.orange=new T3.MeshStandardMaterial({color:0xf07a1a,roughness:.5});
@@ -547,12 +555,16 @@ M.steel=new T3.MeshStandardMaterial({color:0x6c7177,metalness:.3,roughness:.55})
      조정 전 PTP 170 · 병 172 / 알루미늄 175 → 스테인리스 ×.58 · 알루미늄 ×.82 로 약 120~125 · 155
    · 바닥 거칠기 .14 → .32 : 천장 점광이 바닥에 흰 점으로 비치던 것 완화 (병은 bottle3/view3.js 바닥 재질도 같은 값) */
 const IDT_FLOOR_R=0.32;
-/* 재질 분류 조각 : met = 0~1 금속도 식(GLSL, 음수 = 발광 · 그대로), room = 방 형상(바닥 · 벽), tr = 투명 */
+const IDT_WALLE=new T3.Color().copy(M.wall.emissive).multiplyScalar(M.wall.emissiveIntensity);   /* PTP 방 형상 벽 간접광 (반사 촬영 때 0 · 11/24) */
+/* 재질 분류 조각 : met = 0~1 금속도 식(GLSL, 음수 = 발광 · 그대로), room = 방 형상(바닥 · 벽), tr = 투명
+   wallP = 방 형상 중 벽 패널 위치 (x = 뒷벽 앞면 z · y = 칸막이 중심 x · z = 칸막이 반두께, m) — 그 면만 M.wall 무광 패널 값 (11/24) */
 function idtLookFrag(sh,o){
   sh.uniforms.tHair={value:TX.hair}; sh.uniforms.tFloor={value:TX.floor};
+  sh.uniforms.uWallC={value:M.wall.color}; sh.uniforms.uWallE={value:IDT_WALLE}; sh.uniforms.uWallP={value:o.wallP||new T3.Vector4(1e6,1e6,0,0)};
   const room=o.room?`
     float IDT_FLOOR_R=${IDT_FLOOR_R.toFixed(2)};
     if(an.y>0.9&&vWP.y<0.006){ diffuseColor.rgb=vec3(.565,.610,.521)*texture2D(tFloor,vWP.xz/1.97).rgb; metalnessFactor=0.0; roughnessFactor=IDT_FLOOR_R; eMI=0.85; }
+    else if(an.y<0.2&&mIn<0.25&&Lo>0.4&&(abs(vWP.z-uWallP.x)<0.13||abs(vWP.x-uWallP.y)<uWallP.z)){ diffuseColor.rgb=uWallC; totalEmissiveRadiance+=uWallE; roughnessFactor=0.92; eMI=0.12; }   /* 벽 패널 = 무광 흰색~밝은 회색 (kit.js M.wall · 11/24) */
     else if(an.y<0.2&&mIn<0.25){ roughnessFactor=0.6; eMI=0.35; }`:"";
   const tr=o.tr?`
     roughnessFactor=0.04; metalnessFactor=0.0; eMI=1.0; if(Lo>0.25){ diffuseColor.rgb=vec3(.905,.939,1.0); diffuseColor.a=min(diffuseColor.a,0.16); eMI=0.4; }`:"";   /* 밝은 투명면(아크릴 · 유리 덮개) = 파우치 M.acryl (f4f8ff · 불투명도 .2) · 어두운 · 짙은 색 투명은 그대로 */
@@ -568,7 +580,7 @@ function idtLookFrag(sh,o){
   else if(mIn>=0.0){ metalnessFactor=Lo<0.012?0.1:(Lo<0.04?0.2:0.0); roughnessFactor=Lo<0.012?0.6:((Lo>0.04&&Lo<0.35&&abs(diffuseColor.r-diffuseColor.b)<0.04)?0.55:0.5); eMI=1.0; }${room}${tr}
   roughnessFactor=max(roughnessFactor,0.035);`;
   sh.fragmentShader=sh.fragmentShader
-    .replace("#include <common>","#include <common>\nuniform sampler2D tHair; uniform sampler2D tFloor; float eMI=1.0;")
+    .replace("#include <common>","#include <common>\nuniform sampler2D tHair; uniform sampler2D tFloor; uniform vec3 uWallC; uniform vec3 uWallE; uniform vec4 uWallP; float eMI=1.0;")
     .replace("#include <envmap_physical_pars_fragment>",T3.ShaderChunk.envmap_physical_pars_fragment.split("envMapIntensity").join("(envMapIntensity*eMI)"))
     .replace("#include <roughnessmap_fragment>",chunk)
     .replace("#include <metalnessmap_fragment>","");
@@ -908,7 +920,7 @@ function v3Mat(kind,transparent){
       .replace("#include <normal_fragment_maps>","#include <normal_fragment_maps>\nif(dot(normal,vViewPosition)<0.0) normal=-normal;")
       .replace("#include <dithering_fragment>","#include <dithering_fragment>\nif(vFl>0.5) gl_FragColor=linearToOutputTexel(vec4(vColor.rgb,diffuseColor.a));");
     /* 재질 = 파우치 값 (idt_common/look.js · 11/20) — 금속도 : 충전기 · 방 = 정점 금속도(없으면 색으로) / 포장라인 = 색으로 */
-    idtLookFrag(sh,{met:kind==="l"?"lMet(vSrgb)":"(vMet!=vMet?0.1:(vMet<-0.5?lMet(vSrgb):clamp(vMet,0.0,1.0)))", room:kind==="r", tr:!!transparent});
+    idtLookFrag(sh,{met:kind==="l"?"lMet(vSrgb)":"(vMet!=vMet?0.1:(vMet<-0.5?lMet(vSrgb):clamp(vMet,0.0,1.0)))", room:kind==="r", tr:!!transparent, wallP:kind==="r"?new T3.Vector4(ROOMBUS.L.backZ*MM,ROOMBUS.L.wallX*MM,ROOMBUS.L.wallT/2*MM+.012,0):null});
   };
   m.customProgramCacheKey=()=>"ptp-"+kind+(transparent?"t":"o");                                  /* 충전기 · 방(정점 금속도 · 밝기) 과 포장라인(색으로 금속도) 셰이더를 따로 */
   return m;
@@ -970,11 +982,11 @@ function v3Init(){
   Object.assign(V3P,{R,sc,cam,key,POST:idtLookPost()});
   /* 1인칭에서만 : 천장(조명 판) · 앞벽 — 3인칭 전체 보기는 원본처럼 천장 없는 단면 */
   { const G=new T3.Group(), H=L.wallH*MM, x0=L.dMinX*MM, x1=L.gMaxX*MM, z0=L.backZ*MM, z1=L.frontZ*MM;
-    const cm=new T3.MeshStandardMaterial({color:0xe9ece9,roughness:.9,envMapIntensity:.2,side:T3.DoubleSide});
+    const cm=M.ceil.clone(); cm.side=T3.DoubleSide; V3P.ceilM=cm;   /* 천장 · 앞벽 = 공통 무광 패널 (kit.js M.ceil · M.wall · 11/24) */
     const c=new T3.Mesh(new T3.PlaneGeometry(x1-x0,z1-z0),cm); c.rotation.x=Math.PI/2; c.position.set((x0+x1)/2,H,(z0+z1)/2); G.add(c);
     const lm=new T3.MeshStandardMaterial({color:0xffffff,emissive:0xf4f7f4,emissiveIntensity:1.1,roughness:.8});
     for(let x=x0+1.2;x<x1-.6;x+=2.4) for(const z of [z0+1.6,(z0+z1)/2,z1-1.6]){ const l=new T3.Mesh(new T3.BoxGeometry(1.2,.03,.3),lm); l.position.set(x,H-.02,z); G.add(l); }
-    const wm=new T3.MeshStandardMaterial({color:0xdfe4df,roughness:.65,envMapIntensity:.35});
+    const wm=M.wall;
     const f=new T3.Mesh(new T3.BoxGeometry(x1-x0,H,.12),wm); f.position.set((x0+x1)/2,H/2,z1+.06); f.receiveShadow=true; G.add(f);
     G.visible=false; sc.add(G); V3P.inner=G; }
   v3Inter("room",[0,0,0],1); v3Inter("dyn",[0,0,0],1);
@@ -985,7 +997,8 @@ function v3Init(){
 function v3EnvCapture(){
   const pm=new T3.PMREMGenerator(V3P.R), sc=V3P.sc, c=[-1.2,1.7,1.2]; sc.position.set(-c[0],-c[1],-c[2]); sc.updateMatrixWorld(true);
   const keep=V3P.inner&&V3P.inner.visible; if(V3P.inner) V3P.inner.visible=true;
-  const rt=pm.fromScene(sc,.02,.05,40); sc.position.set(0,0,0); sc.updateMatrixWorld(true); if(V3P.inner) V3P.inner.visible=keep;
+  const ENV=[{m:M.wall,c:0xdfe4df,e:0},{m:V3P.ceilM,c:0xe9ece9,e:0}], we=IDT_WALLE.clone(); idtEnvTone(ENV,true); IDT_WALLE.setRGB(0,0,0);   /* 금속 반사 = 11/23 톤 유지 (11/24) */
+  const rt=pm.fromScene(sc,.02,.05,40); idtEnvTone(ENV,false); IDT_WALLE.copy(we); sc.position.set(0,0,0); sc.updateMatrixWorld(true); if(V3P.inner) V3P.inner.visible=keep;
   sc.environment=rt.texture;
 }
 const appWin=k=>UNI_HUB.win(k);

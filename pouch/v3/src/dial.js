@@ -2,11 +2,11 @@
    충전량 조절 미니게임 (11/16 사용자 지시 · V23 아날로그형) — 2층 데크 함량조절다이얼을 육각 L 렌치로 돌려 노즐별 충전량을 맞춤
    · 함량조절다이얼 (현장 사진) : 주황 카운터(숫자 4자리 창 + 가운데 큰 크롬 육각 소켓) · 은색 소켓(카운터 없음). 서쪽(전면) = 첨가제(주황) 10 / 동쪽(후면) = 한 줄에 백당(은색) · 주성분(주황) 10쌍 (사용자 확정)
    · 화면 : 선택한 다이얼을 크게 가까이서 본 모습(육각 렌치가 꽂힌 채 돌아감 · 카운터 숫자가 굴러감) + 아래에 10개 다이얼을 작게(참고 · 클릭 선택)
-   · A / D : 렌치를 왼쪽(감소) · 오른쪽(증가)으로 돌림 (누르고 있으면 계속)   · ← / → : 노즐 선택   · 1 / 2 : 원료 선택(동쪽)   · F · Esc : 닫기
+   · A / D : 렌치를 왼쪽(감소) · 오른쪽(증가)으로 돌림 — 짧게 = 한 눈금(24°), 누르고 있으면 렌치가 손잡이째 부드럽게 계속 돎(360°) (11/24 사용자 지시)   · ← / → : 노즐 선택   · 1 / 2 : 원료 선택(동쪽)   · F · Esc : 닫기
    · 예상 충전량은 대략적인 범위로 표시 (예 : 2.150 ~ 2.200 g). 실제 값은 공정검사(IPC) 계량으로 확인 — 다이얼 값은 IPC 계량값에 노즐별로 반영
    · 카운터 1 눈금 = 충전량 0.1 % (교육용 설정 · 확인 필요), 기준 = 1000
    ═══════════════════════════════════════════════════════════════════ */
-const DIAL={open:false, side:"F", k:"add", i:0, onClose:null, max:.10, step:.001, ok:.02, disp:0, rot:0, raf:0, shake:0};
+const DIAL={open:false, side:"F", k:"add", i:0, onClose:null, max:.10, step:.001, ok:.02, disp:0, rot:0, raf:0, shake:0, hold:null, deg:24, spd:300, wait:220};   /* deg = 눈금 1칸 회전각 · spd = 누르고 있을 때 회전 속도(°/초) · wait = 계속 돌기 시작까지(ms) */
 const DIAL_SIDE={F:["add"], B:["main","sug"]};                   /* 서쪽(F · 전면) = 첨가제 / 동쪽(B · 후면) = 주성분 · 백당 (11/16 사용자 확정) */
 const dialCount=v=>Math.round(1000*(1+v));                       /* 카운터 표시값 (기준 1000) */
 /* 노즐별 다이얼 값 (기준 대비 비율) — 세션마다 노즐 사이 작은 차이(±1.2 %)로 시작, 이상사례 등으로 원료 전체 값이 바뀌면 노즐 전체를 같이 이동 */
@@ -43,10 +43,10 @@ function dialOpen(side,onClose){
   if(DIAL.side==="B"&&S.activeTrouble) DIAL.k="main";
   let el=$("#dialGame"); if(!el){ $("#main").insertAdjacentHTML("beforeend",'<div id="dialGame" class="modal"></div>'); el=$("#dialGame"); }
   el.classList.add("on"); if(document.pointerLockElement) document.exitPointerLock();
-  DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*24;
+  DIAL.hold=null; DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*DIAL.deg;
   dialRender(); dialLoop();
 }
-function dialClose(){
+function dialClose(){ DIAL.hold=null;
   if(!DIAL.open) return; DIAL.open=false; $("#dialGame").classList.remove("on"); cancelAnimationFrame(DIAL.raf);
   for(const q of DIAL_SIDE[DIAL.side]){ const r=S.ipc&&S.ipc.res&&S.ipc.res[q]; if(r&&!r.pass&&dialOK(q)) r.stale=true; } if(typeof renderIpc==="function") renderIpc();   /* 조절 후 재측정 */
   const cb=DIAL.onClose; DIAL.onClose=null; try{ cb&&cb(); }catch(e){ console.error(e); }
@@ -57,7 +57,7 @@ function dialScene(){
   const v=DIAL.disp, cnt=1000*(1+v), W=560, H=400, ctr=DIAL.k!=="sug", sx=230, sy=ctr?248:205;      /* sx · sy : 육각 소켓 중심 */
   const dig=[]; { const n=cnt; for(let p=0;p<4;p++){ const base=Math.pow(10,p), d=(n/base)%10, f=p===0?d:(Math.floor(d)+Math.max(0,((n%base)-(base-1)))); dig.unshift(f); } }
   const wheel=(x,d)=>{ let s='<g clip-path="url(#dgWin)"><g transform="translate('+x+','+(-((d%10)*40))+')">'; for(let k=-1;k<=11;k++){ const y=114+k*40; s+='<text x="0" y="'+(y+13)+'" font-size="34" font-family="DejaVu Sans Mono,Consolas,monospace" font-weight="700" fill="#f2f2ee" text-anchor="middle">'+(((k%10)+10)%10)+'</text>'; } return s+'</g></g>'; };
-  const sh=DIAL.shake>0?(Math.random()-.5)*DIAL.shake*6:0, a=DIAL.rot+sh, hexR=30, ka=15+(((a-45)%60)+60)%60;
+  const sh=DIAL.shake>0?(Math.random()-.5)*DIAL.shake*6:0, a=DIAL.rot+sh, hexR=30, ka=15+a;
   let s='<svg viewBox="0 0 '+W+' '+H+'" class="dgScene"><defs>'+
     '<linearGradient id="dgSS" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#e3e6e8"/><stop offset=".45" stop-color="#a3a9ae"/><stop offset=".55" stop-color="#c2c7cb"/><stop offset="1" stop-color="#868d93"/></linearGradient>'+
     '<linearGradient id="dgOr" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ff9a3c"/><stop offset=".55" stop-color="#ef6c12"/><stop offset="1" stop-color="#c25208"/></linearGradient>'+
@@ -77,7 +77,7 @@ function dialScene(){
     s+='<g filter="url(#dgSh)"><circle cx="'+sx+'" cy="'+sy+'" r="82" fill="url(#dgCr)"/></g><circle cx="'+sx+'" cy="'+sy+'" r="66" fill="none" stroke="#5c6369" stroke-width="4"/><circle cx="'+sx+'" cy="'+sy+'" r="50" fill="none" stroke="#7d848a" stroke-width="2"/>'; }
   s+='<g transform="rotate('+a+' '+sx+' '+sy+')"><polygon points="'+[0,1,2,3,4,5].map(j=>{ const t=j*Math.PI/3; return (sx+hexR*Math.cos(t))+","+(sy+hexR*Math.sin(t)); }).join(" ")+'" fill="#0e1012"/>'+
     (ctr?'':'<rect x="'+(sx-3)+'" y="'+(sy-80)+'" width="6" height="24" rx="2" fill="#1b1f23"/>')+'</g>'+                               /* 백당 소켓 각도 표시 */
-    /* 꽂힌 육각 L 렌치 (크롬) : 짧은 쪽은 소켓 안, 긴 쪽은 오른쪽 아래 — 좁은 곳에서 돌리듯 60° 마다 다시 끼움(육각은 60° 대칭) → 손잡이가 숫자 창을 가리지 않음 */
+    /* 꽂힌 육각 L 렌치 (크롬) : 짧은 쪽은 소켓 안, 긴 쪽 손잡이가 소켓과 함께 그대로 360° 돎 (11/24 사용자 지시 — 60° 마다 다시 끼우던 방식 제거) */
     '<g transform="rotate('+ka+' '+sx+' '+sy+')"><polygon points="'+[0,1,2,3,4,5].map(j=>{ const t=j*Math.PI/3+Math.PI/6; return (sx+hexR*.8*Math.cos(t))+","+(sy+hexR*.8*Math.sin(t)); }).join(" ")+'" fill="url(#dgKey)"/>'+
     '<rect x="'+sx+'" y="'+(sy-11)+'" width="250" height="22" rx="9" fill="url(#dgKey)"/><rect x="'+(sx+4)+'" y="'+(sy-9)+'" width="242" height="5" rx="2" fill="#fff" opacity=".35"/></g>'+
     '<text x="'+sx+'" y="'+(ctr?342:330)+'" font-size="15" fill="'+(ctr?"#fff1e2":"#2a2f33")+'" text-anchor="middle" font-weight="700">'+esc(IPC_STD[DIAL.k].nm)+' 함량조절 · 노즐 '+(DIAL.i+1)+(ctr?"":" (은색 소켓 · 카운터 없음)")+'</text></svg>';
@@ -105,26 +105,38 @@ function dialRender(){
   $$("#dialGame [data-i]").forEach(b=>b.onclick=()=>{ DIAL.i=+b.dataset.i; dialSnap(); dialRender(); });
 }
 const dialFoot=(k,a)=>dialOK(k)?'<span class="okT">✓ '+IPC_STD[k].nm+' 10개 노즐 모두 기준 ±2 % 이내</span>':'<span>'+IPC_STD[k].nm+' : 기준 ±2 % 를 벗어난 노즐 '+a.filter((x,i)=>Math.abs(dialAct(k,i))>DIAL.ok+1e-9).length+' 개</span>';
-function dialSnap(){ DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*24; }
+function dialSnap(){ DIAL.hold=null; DIAL.disp=dialArr(DIAL.k)[DIAL.i]; DIAL.rot=DIAL.disp/DIAL.step*DIAL.deg; }
 /* 애니메이션 : 카운터 숫자가 굴러가고 렌치가 돌아감 */
 function dialLoop(){
   if(!DIAL.open) return;
-  const a=dialArr(DIAL.k), v=a[DIAL.i], tr=v/DIAL.step*24;
-  const moving=Math.abs(DIAL.disp-v)>1e-6||Math.abs(DIAL.rot-tr)>.05||DIAL.shake>0;
-  if(moving){ DIAL.disp+=(v-DIAL.disp)*.35; DIAL.rot+=(tr-DIAL.rot)*.35; if(Math.abs(DIAL.disp-v)<2e-5) DIAL.disp=v; DIAL.shake=Math.max(0,DIAL.shake-.08);
+  const now=performance.now(), H=DIAL.hold;
+  if(H){ const dt=Math.min(.05,(now-(H.last||now))/1000); H.last=now;
+    if(now-H.t0>DIAL.wait){ H.acc+=DIAL.spd*dt; while(H.acc>=DIAL.deg&&DIAL.hold){ H.acc-=DIAL.deg; if(!dialStep(H.dir)){ DIAL.hold=null; break; } } } }
+  const a=dialArr(DIAL.k), v=a[DIAL.i], h=DIAL.hold, part=h?h.dir*h.acc/DIAL.deg:0, tr=(v/DIAL.step+part)*DIAL.deg, tv=v+part*DIAL.step;
+  const moving=Math.abs(DIAL.disp-tv)>1e-6||Math.abs(DIAL.rot-tr)>.05||DIAL.shake>0;
+  if(moving){ const k=h&&h.acc>0?1:.35; DIAL.disp+=(tv-DIAL.disp)*k; DIAL.rot+=(tr-DIAL.rot)*k; if(Math.abs(DIAL.disp-tv)<2e-5) DIAL.disp=tv; DIAL.shake=Math.max(0,DIAL.shake-.08);   /* 계속 도는 중 = 그대로 따라감(끊김 없음) · 한 번 누름 = 부드럽게 다가감 */
     const b=$("#dgBig"); if(b) b.innerHTML=dialScene(); }
   DIAL.raf=requestAnimationFrame(dialLoop);
 }
+/* 한 눈금 돌리기 (A = −1 · D = +1) : 값 · 예상값 · 아래 작은 다이얼 갱신 — 끝에 닿으면 false */
+function dialStep(dir){
+  const k=DIAL.k, a=dialArr(k), v=a[DIAL.i], nv=clamp(v+dir*DIAL.step,-DIAL.max,DIAL.max);
+  if(Math.abs(nv-v)<1e-12){ DIAL.shake=1; beep(160,.05,"square",.02); return false; }
+  dialSet(k,DIAL.i,Math.round(nv/DIAL.step)*DIAL.step); beep(1500,.012,"square",.012);
+  const x=dialArr(k)[DIAL.i], rg=dialRange(k,dialAct(k,DIAL.i)), P=$("#dgPred"), cell=$('#dialGame [data-i="'+DIAL.i+'"]');
+  if(P){ P.className="dgPred "+dialCls(dialAct(k,DIAL.i)); P.querySelector("b").textContent=rg[0].toFixed(3)+" ~ "+rg[1].toFixed(3)+" g"; }
+  if(cell) cell.outerHTML=dialMini(k,x,DIAL.i); const idx=DIAL.i, nc=$('#dialGame [data-i="'+idx+'"]'); if(nc) nc.onclick=()=>{ DIAL.i=idx; dialSnap(); dialRender(); };
+  const F=$("#dgFoot"); if(F) F.innerHTML=dialFoot(k,dialArr(k));
+  return true;
+}
+/* 손을 떼면 : 반 눈금 넘게 돌았으면 한 눈금 더 확정, 아니면 제자리로 */
+function dialRelease(){ const H=DIAL.hold; if(!H) return; DIAL.hold=null; if(H.acc>=DIAL.deg/2) dialStep(H.dir); }
 function dialKey(e){
   if(!DIAL.open) return; DIAL.keyAt=performance.now();
   const c=e.code, side=DIAL_SIDE[DIAL.side];
-  if(c==="KeyA"||c==="KeyD"){ const a=dialArr(DIAL.k), v=a[DIAL.i], nv=clamp(v+(c==="KeyD"?1:-1)*DIAL.step,-DIAL.max,DIAL.max);
-    if(nv===v){ DIAL.shake=1; beep(160,.05,"square",.02); } else { dialSet(DIAL.k,DIAL.i,Math.round(nv/DIAL.step)*DIAL.step); beep(1500,.012,"square",.012); }
-    e.preventDefault(); e.stopPropagation();
-    const k=DIAL.k, x=dialArr(k)[DIAL.i], rg=dialRange(k,dialAct(k,DIAL.i)), P=$("#dgPred"), cell=$('#dialGame [data-i="'+DIAL.i+'"]');
-    if(P){ P.className="dgPred "+dialCls(dialAct(k,DIAL.i)); P.querySelector("b").textContent=rg[0].toFixed(3)+" ~ "+rg[1].toFixed(3)+" g"; }
-    if(cell) cell.outerHTML=dialMini(k,x,DIAL.i); const idx=DIAL.i, nc=$('#dialGame [data-i="'+idx+'"]'); if(nc) nc.onclick=()=>{ DIAL.i=idx; dialSnap(); dialRender(); };
-    const F=$("#dgFoot"); if(F) F.innerHTML=dialFoot(k,dialArr(k));
+  if(c==="KeyA"||c==="KeyD"){ e.preventDefault(); e.stopPropagation(); const dir=c==="KeyD"?1:-1;
+    if(e.repeat||(DIAL.hold&&DIAL.hold.dir===dir)) return;                       /* 키 자동 반복은 쓰지 않음 — 누르고 있는 동안 dialLoop 가 일정 속도로 돌림 */
+    dialRelease(); const ok=dialStep(dir); if(ok) DIAL.hold={dir, t0:performance.now(), last:performance.now(), acc:0};
     return; }
   if(c==="ArrowLeft"||c==="ArrowRight"){ DIAL.i=clamp(DIAL.i+(c==="ArrowRight"?1:-1),0,9); dialSnap(); }
   else if((c==="Digit1"||c==="Digit2")&&side.length>1){ DIAL.k=side[c==="Digit1"?0:1]; dialSnap(); }
@@ -140,7 +152,8 @@ function dialDraw(){
       if(D.hex) D.hex.rotation.x=v/DIAL.step*.42;
       if(D.cnt!==c&&D.ctx){ D.cnt=c; const x=D.ctx; x.fillStyle="#111"; x.fillRect(0,0,128,48); x.fillStyle="#f2f2ee"; x.font="bold 36px monospace"; x.textAlign="center"; x.fillText(String(c).padStart(4,"0"),64,38); D.tex.needsUpdate=true; } }); }
 }
-function dialInit(){ addEventListener("keydown",dialKey,true); setInterval(()=>{ dialDriftTick(); if(DIAL.open&&!DIAL.keyAt||DIAL.open&&performance.now()-DIAL.keyAt>1500){ DIAL.rt=(DIAL.rt||0)+1; if(DIAL.rt%4===0) dialRender(); } },500); }   /* 변동 · 열린 화면 예상값 갱신(2초) */
+function dialInit(){ addEventListener("keydown",dialKey,true);
+  addEventListener("keyup",e=>{ if(DIAL.hold&&((e.code==="KeyA"&&DIAL.hold.dir<0)||(e.code==="KeyD"&&DIAL.hold.dir>0))) dialRelease(); },true); addEventListener("blur",()=>dialRelease()); setInterval(()=>{ dialDriftTick(); if(DIAL.open&&!DIAL.keyAt||DIAL.open&&performance.now()-DIAL.keyAt>1500){ DIAL.rt=(DIAL.rt||0)+1; if(DIAL.rt%4===0) dialRender(); } },500); }   /* 변동 · 열린 화면 예상값 갱신(2초) */
 /* 자재 타일 : 충전량 조절 (3인칭 — 작업자가 2층 데크 조절부로 이동한 뒤 미니게임) */
 TILE.mDial={e:"🔧",b:"충전량 조절 (함량조절다이얼)",s:()=>S&&S.f&&["add","main","sug"].every(dialOK)?"30노즐 기준 이내":"조절 필요",on:()=>!!(S&&S.f&&["add","main","sug"].every(dialOK)),
   click(){ const bad=["main","sug"].some(q=>!dialOK(q))&&dialOK("add"); bad?startWork("dialB",()=>dialOpen("B")):startWork("dialF",()=>dialOpen("F")); }};

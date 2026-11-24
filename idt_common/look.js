@@ -17,12 +17,16 @@
      조정 전 PTP 170 · 병 172 / 알루미늄 175 → 스테인리스 ×.58 · 알루미늄 ×.82 로 약 120~125 · 155
    · 바닥 거칠기 .14 → .32 : 천장 점광이 바닥에 흰 점으로 비치던 것 완화 (병은 bottle3/view3.js 바닥 재질도 같은 값) */
 const IDT_FLOOR_R=0.32;
-/* 재질 분류 조각 : met = 0~1 금속도 식(GLSL, 음수 = 발광 · 그대로), room = 방 형상(바닥 · 벽), tr = 투명 */
+const IDT_WALLE=new T3.Color().copy(M.wall.emissive).multiplyScalar(M.wall.emissiveIntensity);   /* PTP 방 형상 벽 간접광 (반사 촬영 때 0 · 11/24) */
+/* 재질 분류 조각 : met = 0~1 금속도 식(GLSL, 음수 = 발광 · 그대로), room = 방 형상(바닥 · 벽), tr = 투명
+   wallP = 방 형상 중 벽 패널 위치 (x = 뒷벽 앞면 z · y = 칸막이 중심 x · z = 칸막이 반두께, m) — 그 면만 M.wall 무광 패널 값 (11/24) */
 function idtLookFrag(sh,o){
   sh.uniforms.tHair={value:TX.hair}; sh.uniforms.tFloor={value:TX.floor};
+  sh.uniforms.uWallC={value:M.wall.color}; sh.uniforms.uWallE={value:IDT_WALLE}; sh.uniforms.uWallP={value:o.wallP||new T3.Vector4(1e6,1e6,0,0)};
   const room=o.room?`
     float IDT_FLOOR_R=${IDT_FLOOR_R.toFixed(2)};
     if(an.y>0.9&&vWP.y<0.006){ diffuseColor.rgb=vec3(.565,.610,.521)*texture2D(tFloor,vWP.xz/1.97).rgb; metalnessFactor=0.0; roughnessFactor=IDT_FLOOR_R; eMI=0.85; }
+    else if(an.y<0.2&&mIn<0.25&&Lo>0.4&&(abs(vWP.z-uWallP.x)<0.13||abs(vWP.x-uWallP.y)<uWallP.z)){ diffuseColor.rgb=uWallC; totalEmissiveRadiance+=uWallE; roughnessFactor=0.92; eMI=0.12; }   /* 벽 패널 = 무광 흰색~밝은 회색 (kit.js M.wall · 11/24) */
     else if(an.y<0.2&&mIn<0.25){ roughnessFactor=0.6; eMI=0.35; }`:"";
   const tr=o.tr?`
     roughnessFactor=0.04; metalnessFactor=0.0; eMI=1.0; if(Lo>0.25){ diffuseColor.rgb=vec3(.905,.939,1.0); diffuseColor.a=min(diffuseColor.a,0.16); eMI=0.4; }`:"";   /* 밝은 투명면(아크릴 · 유리 덮개) = 파우치 M.acryl (f4f8ff · 불투명도 .2) · 어두운 · 짙은 색 투명은 그대로 */
@@ -38,7 +42,7 @@ function idtLookFrag(sh,o){
   else if(mIn>=0.0){ metalnessFactor=Lo<0.012?0.1:(Lo<0.04?0.2:0.0); roughnessFactor=Lo<0.012?0.6:((Lo>0.04&&Lo<0.35&&abs(diffuseColor.r-diffuseColor.b)<0.04)?0.55:0.5); eMI=1.0; }${room}${tr}
   roughnessFactor=max(roughnessFactor,0.035);`;
   sh.fragmentShader=sh.fragmentShader
-    .replace("#include <common>","#include <common>\nuniform sampler2D tHair; uniform sampler2D tFloor; float eMI=1.0;")
+    .replace("#include <common>","#include <common>\nuniform sampler2D tHair; uniform sampler2D tFloor; uniform vec3 uWallC; uniform vec3 uWallE; uniform vec4 uWallP; float eMI=1.0;")
     .replace("#include <envmap_physical_pars_fragment>",T3.ShaderChunk.envmap_physical_pars_fragment.split("envMapIntensity").join("(envMapIntensity*eMI)"))
     .replace("#include <roughnessmap_fragment>",chunk)
     .replace("#include <metalnessmap_fragment>","");

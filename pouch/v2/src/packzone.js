@@ -6,7 +6,7 @@ function buildPackRoom(S){
   const fl=new T3.Mesh(new T3.PlaneGeometry(R.x1-R.x0,R.z1-R.z0),M.floor); fl.rotation.x=-Math.PI/2; fl.position.set((R.x0+R.x1)/2,0,(R.z0+R.z1)/2); fl.receiveShadow=true; g.add(fl);
   const ce=new T3.Mesh(new T3.PlaneGeometry(R.x1-R.x0,R.z1-R.z0),M.ceil); ce.rotation.x=Math.PI/2; ce.position.set((R.x0+R.x1)/2,H,(R.z0+R.z1)/2); g.add(ce);
   const wall=(x0,z0,x1,z1)=>{ const L=Math.hypot(x1-x0,z1-z0), n=Math.round(L/1.2), ry=-Math.atan2(z1-z0,x1-x0); const w=new T3.Mesh(new T3.BoxGeometry(L,H,.05),M.wall); w.position.set((x0+x1)/2,H/2,(z0+z1)/2); w.rotation.y=ry; w.receiveShadow=true; g.add(w);
-    for(let i=1;i<n;i++){ const t=i/n, m=new T3.Mesh(new T3.BoxGeometry(.012,H,.062),M.alu); m.position.set(x0+(x1-x0)*t,H/2,z0+(z1-z0)*t); m.rotation.y=ry; g.add(m); } };
+    for(let i=1;i<n;i++){ const t=i/n, m=new T3.Mesh(new T3.BoxGeometry(.012,H,.062),M.wallJ); m.position.set(x0+(x1-x0)*t,H/2,z0+(z1-z0)*t); m.rotation.y=ry; g.add(m); } };
   wall(R.x0,R.z0,R.x1,R.z0); wall(R.x0,R.z0,R.x0,R.z1); wall(R.x1,R.z0,R.x1,R.z1); wall(RM.fill.x1>R.x1?R.x1:R.x1,R.z1-.03,R.x1,R.z1-.03);
   for(const x of [1.3,3.6,6.2]) for(const z of [-1.5,-4.2,-7,-9.8,-12.6,-15.0]){ bx(g,x-.6,x+.6,H-.012,H-.004,z-.15,z+.15,M.led); bx(g,x-.63,x+.63,H-.01,H,z-.18,z+.18,M.alu); }
   for(const [x,z] of [[2.4,-3],[5,-6],[2.4,-9],[6,-10.5],[2.2,-13.2],[5.6,-14.6]]){ const d=new T3.Mesh(new T3.CylinderGeometry(.2,.26,.03,28),M.ssMir); d.position.set(x,H-.015,z); g.add(d); }

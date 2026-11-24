@@ -23,7 +23,7 @@ function v3Mat(kind,transparent){
       .replace("#include <normal_fragment_maps>","#include <normal_fragment_maps>\nif(dot(normal,vViewPosition)<0.0) normal=-normal;")
       .replace("#include <dithering_fragment>","#include <dithering_fragment>\nif(vFl>0.5) gl_FragColor=linearToOutputTexel(vec4(vColor.rgb,diffuseColor.a));");
     /* 재질 = 파우치 값 (idt_common/look.js · 11/20) — 금속도 : 충전기 · 방 = 정점 금속도(없으면 색으로) / 포장라인 = 색으로 */
-    idtLookFrag(sh,{met:kind==="l"?"lMet(vSrgb)":"(vMet!=vMet?0.1:(vMet<-0.5?lMet(vSrgb):clamp(vMet,0.0,1.0)))", room:kind==="r", tr:!!transparent});
+    idtLookFrag(sh,{met:kind==="l"?"lMet(vSrgb)":"(vMet!=vMet?0.1:(vMet<-0.5?lMet(vSrgb):clamp(vMet,0.0,1.0)))", room:kind==="r", tr:!!transparent, wallP:kind==="r"?new T3.Vector4(ROOMBUS.L.backZ*MM,ROOMBUS.L.wallX*MM,ROOMBUS.L.wallT/2*MM+.012,0):null});
   };
   m.customProgramCacheKey=()=>"ptp-"+kind+(transparent?"t":"o");                                  /* 충전기 · 방(정점 금속도 · 밝기) 과 포장라인(색으로 금속도) 셰이더를 따로 */
   return m;
@@ -85,11 +85,11 @@ function v3Init(){
   Object.assign(V3P,{R,sc,cam,key,POST:idtLookPost()});
   /* 1인칭에서만 : 천장(조명 판) · 앞벽 — 3인칭 전체 보기는 원본처럼 천장 없는 단면 */
   { const G=new T3.Group(), H=L.wallH*MM, x0=L.dMinX*MM, x1=L.gMaxX*MM, z0=L.backZ*MM, z1=L.frontZ*MM;
-    const cm=new T3.MeshStandardMaterial({color:0xe9ece9,roughness:.9,envMapIntensity:.2,side:T3.DoubleSide});
+    const cm=M.ceil.clone(); cm.side=T3.DoubleSide; V3P.ceilM=cm;   /* 천장 · 앞벽 = 공통 무광 패널 (kit.js M.ceil · M.wall · 11/24) */
     const c=new T3.Mesh(new T3.PlaneGeometry(x1-x0,z1-z0),cm); c.rotation.x=Math.PI/2; c.position.set((x0+x1)/2,H,(z0+z1)/2); G.add(c);
     const lm=new T3.MeshStandardMaterial({color:0xffffff,emissive:0xf4f7f4,emissiveIntensity:1.1,roughness:.8});
     for(let x=x0+1.2;x<x1-.6;x+=2.4) for(const z of [z0+1.6,(z0+z1)/2,z1-1.6]){ const l=new T3.Mesh(new T3.BoxGeometry(1.2,.03,.3),lm); l.position.set(x,H-.02,z); G.add(l); }
-    const wm=new T3.MeshStandardMaterial({color:0xdfe4df,roughness:.65,envMapIntensity:.35});
+    const wm=M.wall;
     const f=new T3.Mesh(new T3.BoxGeometry(x1-x0,H,.12),wm); f.position.set((x0+x1)/2,H/2,z1+.06); f.receiveShadow=true; G.add(f);
     G.visible=false; sc.add(G); V3P.inner=G; }
   v3Inter("room",[0,0,0],1); v3Inter("dyn",[0,0,0],1);
@@ -100,7 +100,8 @@ function v3Init(){
 function v3EnvCapture(){
   const pm=new T3.PMREMGenerator(V3P.R), sc=V3P.sc, c=[-1.2,1.7,1.2]; sc.position.set(-c[0],-c[1],-c[2]); sc.updateMatrixWorld(true);
   const keep=V3P.inner&&V3P.inner.visible; if(V3P.inner) V3P.inner.visible=true;
-  const rt=pm.fromScene(sc,.02,.05,40); sc.position.set(0,0,0); sc.updateMatrixWorld(true); if(V3P.inner) V3P.inner.visible=keep;
+  const ENV=[{m:M.wall,c:0xdfe4df,e:0},{m:V3P.ceilM,c:0xe9ece9,e:0}], we=IDT_WALLE.clone(); idtEnvTone(ENV,true); IDT_WALLE.setRGB(0,0,0);   /* 금속 반사 = 11/23 톤 유지 (11/24) */
+  const rt=pm.fromScene(sc,.02,.05,40); idtEnvTone(ENV,false); IDT_WALLE.copy(we); sc.position.set(0,0,0); sc.updateMatrixWorld(true); if(V3P.inner) V3P.inner.visible=keep;
   sc.environment=rt.texture;
 }
 const appWin=k=>UNI_HUB.win(k);

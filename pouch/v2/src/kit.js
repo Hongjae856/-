@@ -28,10 +28,17 @@ M.grey =new T3.MeshStandardMaterial({color:0x8d9297,metalness:.1,roughness:.55})
 M.dark =new T3.MeshStandardMaterial({color:0x1d2023,metalness:.2,roughness:.5});
 M.black=new T3.MeshStandardMaterial({color:0x0c0d0e,metalness:.1,roughness:.6});
 M.white=new T3.MeshStandardMaterial({color:0xf2f3f1,metalness:0,roughness:.5});
-M.wall =new T3.MeshStandardMaterial({color:0xd3dad5,metalness:0,roughness:.6,envMapIntensity:.35});
+/* 작업장 벽 · 천장 = 매트 흰색~밝은 회색 클린룸 도장 패널 (11/24 사용자 지시 · 현장 사진 「스텐 재질이 아닌 매트한 화이트~회색톤」) — 세 IDT 공통
+   emissive = 천장 조명이 흰 벽 · 바닥에서 되비쳐 들어오는 간접광 대용 (윗면 직사광만으로는 수직 벽 · 아래 향한 천장이 회색으로 어두워짐)
+   PTP 방 형상 벽(앱 정점색)은 idt_common/look.js 가 같은 값을 씀 */
+M.wall =new T3.MeshStandardMaterial({color:0xeceeec,metalness:0,roughness:.92,envMapIntensity:.12,emissive:0xeceeec,emissiveIntensity:.72});
+M.wallJ=new T3.MeshStandardMaterial({color:0xd8dbd9,metalness:0,roughness:.75,envMapIntensity:.2,emissive:0xd8dbd9,emissiveIntensity:.22});   /* 패널 이음 · 바닥 코브 (도장 · 무광) */
 M.alu  =new T3.MeshStandardMaterial({color:0xd8dbde,metalness:.9,roughness:.45,envMapIntensity:1.5});
 M.floor=new T3.MeshStandardMaterial({color:0xc6cdbf,map:TX.floor,metalness:0,roughness:.14,envMapIntensity:.85});
-M.ceil =new T3.MeshStandardMaterial({color:0xe4e7e4,roughness:.9,envMapIntensity:.2,emissive:0xeef2ee,emissiveIntensity:.5});
+M.ceil =new T3.MeshStandardMaterial({color:0xf2f3f2,metalness:0,roughness:.95,envMapIntensity:.1,emissive:0xf2f3f2,emissiveIntensity:1.35});
+/* 반사(환경 맵) 촬영 때만 벽 · 천장을 11/24 이전 톤으로 — 설비 금속이 흰 벽을 비춰 밝아지면 11/23 금속 톤 맞춤(파우치 실측)이 깨지므로 금속 모습은 그대로 유지
+   list = [{m:재질, c:이전 색, e:이전 간접광}] · on = true 촬영 전 / false 촬영 뒤 */
+function idtEnvTone(list,on){ for(const q of list){ if(on){ q.s=[q.m.color.getHex(),q.m.emissiveIntensity]; q.m.color.setHex(q.c); q.m.emissiveIntensity=q.e; } else if(q.s){ q.m.color.setHex(q.s[0]); q.m.emissiveIntensity=q.s[1]; } } }
 M.haz  =new T3.MeshStandardMaterial({map:TX.hazard,roughness:.6});
 M.yellow=new T3.MeshStandardMaterial({color:0xf2c400,roughness:.5});
 M.orange=new T3.MeshStandardMaterial({color:0xf07a1a,roughness:.5});

@@ -51,7 +51,7 @@ function v3Build(){
   buildFillRoom(scene); buildFiller(scene); buildConveyor(scene); if(typeof buildReject==="function") buildReject(scene); buildFillZone(scene); buildPackRoom(scene); if(typeof buildStaging==="function") buildStaging(scene); if(typeof buildKits==="function") buildKits(scene); initAnim(scene); initManual(scene); initPackAnim(scene);
   scene.traverse(o=>{ if(!o.material) return; for(const m of [].concat(o.material)) for(const k of ["map","emissiveMap"]) if(m[k]&&m[k].encoding!==T3.sRGBEncoding){ m[k].encoding=T3.sRGBEncoding; m[k].needsUpdate=true; } });
   /* 장면 자체를 찍어 스테인리스 반사에 사용 */
-  { const pm=new T3.PMREMGenerator(renderer), c=[4.6,1.7,5.4]; scene.position.set(-c[0],-c[1],-c[2]); scene.updateMatrixWorld(true); M.led.emissiveIntensity=28; const rt=pm.fromScene(scene,.015,.05,40); M.led.emissiveIntensity=1.6; scene.position.set(0,0,0); scene.updateMatrixWorld(true); scene.environment=rt.texture; pm.dispose(); }
+  { const pm=new T3.PMREMGenerator(renderer), c=[4.6,1.7,5.4]; scene.position.set(-c[0],-c[1],-c[2]); scene.updateMatrixWorld(true); M.led.emissiveIntensity=28; const ENV=[{m:M.wall,c:0xd3dad5,e:0},{m:M.wallJ,c:0xc8ccca,e:0},{m:M.ceil,c:0xe4e7e4,e:.5}]; idtEnvTone(ENV,true); const rt=pm.fromScene(scene,.015,.05,40); idtEnvTone(ENV,false); M.led.emissiveIntensity=1.6;   /* 금속 반사 = 11/23 톤 유지 (kit.js idtEnvTone · 11/24) */ scene.position.set(0,0,0); scene.updateMatrixWorld(true); scene.environment=rt.texture; pm.dispose(); }
   const camera=new T3.PerspectiveCamera(35.5,1,.05,80);
   V3={renderer,scene,camera,POST:v3Post(),cut:v3CutSets(scene),tAnim:0,k:0};
 }
