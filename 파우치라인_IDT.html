@@ -578,83 +578,113 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
 #freeBar button:first-child{background:#5b3fa0;color:#fff}
 /* 메인화면 모드 버튼 : 단어 중간에서 줄바꿈하지 않음 (11/17 · "OEE 관리 / 대시보드") */
 
-/* ═══ 메인화면 공통 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ 교육 시작 · 남색 1색 + 회색) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
-#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:flex-start;justify-content:center;background:#f4f6f9;color:#16202c;transition:opacity .35s;overflow:auto;
+/* ═══ 메인화면 공통 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ 교육 시작 · 남색 1색 + 회색) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js
+   · 화면 전체 사용 (11/24 사용자 지시 "메인 시작 화면이 화면의 일부만 씀 — 전체적으로 활용 · 모든 IDT 공통")
+     크기 단위 --u = 기준 화면(폭 1240) 대비 배율 : splash.js idtSpFit 이 화면 폭 · 높이에 맞춰 정함(글자 · 여백 · 버튼이 함께 커짐)
+     남는 높이는 과정 버튼 · 작업자 카드가 나눠 채움 ═══ */
+#splash{--u:1px;position:absolute;inset:0;z-index:120;display:block;background:#f4f6f9;color:#16202c;transition:opacity .35s;overflow:auto;
   font-family:var(--ff,"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif)}
 #splash.hide{opacity:0;pointer-events:none;visibility:hidden}
-#splash .box.msx{width:100%;max-width:1440px;margin:0 auto;padding:0 0 28px;text-align:left;box-sizing:border-box}
-#splash .msHead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 40px;background:#fff;border-bottom:1px solid #d6dfe9}
-#splash .msT{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;min-width:0}
-#splash h1{margin:0;font-weight:800;font-size:26px;line-height:1.3;letter-spacing:-.5px;color:#173a63}
-#splash .prodLine{font-weight:500;font-size:14px;color:#5d6b7a}
-#splash .msMeta{display:flex;align-items:center;gap:10px}
-#splash #oeeLamp{position:static;padding:6px 12px;border:1px solid #d6dfe9;border-radius:999px;background:#fff;font-size:13px}
-#splash .ver{position:static;border:1px solid #d6dfe9;background:#fff;cursor:pointer;font:700 13px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#173a63;border-radius:999px;padding:8px 14px}
+body:has(#splash:not(.hide)) #bar{display:none}body:has(#splash:not(.hide)) #stage{top:0}   /* PTP · 병 : 메인화면에서는 위쪽 막대 자리까지 (topbar.js 와 같은 규칙 — 앱 로딩 전부터) */
+#splash .box.msx{width:100%;max-width:none;height:100%;margin:0;padding:0;display:flex;flex-direction:column;text-align:left;box-sizing:border-box}
+#splash .msHead{flex:none;display:flex;align-items:center;justify-content:space-between;gap:calc(16*var(--u));flex-wrap:wrap;padding:calc(16*var(--u)) calc(40*var(--u));background:#fff;border-bottom:1px solid #d6dfe9}
+#splash .msT{display:flex;align-items:baseline;gap:calc(16*var(--u));flex-wrap:wrap;min-width:0}
+#splash h1{margin:0;font-weight:800;font-size:calc(28*var(--u));line-height:1.3;letter-spacing:-.5px;color:#173a63}
+#splash .prodLine{font-weight:500;font-size:calc(15*var(--u));color:#5d6b7a}
+#splash .msMeta{display:flex;align-items:center;gap:calc(10*var(--u))}
+#splash #oeeLamp{position:static;padding:calc(6*var(--u)) calc(13*var(--u));border:1px solid #d6dfe9;border-radius:999px;background:#fff;font-size:calc(14*var(--u))}
+#splash .ver{position:static;border:1px solid #d6dfe9;background:#fff;cursor:pointer;font-weight:700;font-size:calc(14*var(--u));line-height:1;font-family:inherit;color:#173a63;border-radius:999px;padding:calc(8*var(--u)) calc(15*var(--u))}
 #splash .ver:hover{border-color:#173a63}
-#splash .msBody{display:flex;flex-wrap:wrap;gap:24px;padding:24px 40px 0;align-items:flex-start}
-#splash .msCard{background:#fff;border:1px solid #d6dfe9;border-radius:14px;padding:22px 26px;box-sizing:border-box}
-#splash .msModes{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:16px}
-#splash .msSide{flex:1 1 380px;max-width:460px;display:flex;flex-direction:column;gap:18px}
-#splash .msH{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:800;font-size:18px;color:#16202c}
+#splash .msBody{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) calc(420*var(--u));gap:calc(24*var(--u));padding:calc(24*var(--u)) calc(40*var(--u)) calc(28*var(--u));align-items:stretch}
+#splash .msCard{background:#fff;border:1px solid #d6dfe9;border-radius:calc(14*var(--u));padding:calc(22*var(--u)) calc(26*var(--u));box-sizing:border-box}
+#splash .msModes{min-width:0;min-height:0;display:flex;flex-direction:column;gap:calc(16*var(--u))}
+#splash .msSide{min-width:0;min-height:0;display:flex;flex-direction:column;gap:calc(18*var(--u))}
+#splash .msSide>.msCard:first-child{flex:1 1 auto;display:flex;flex-direction:column}
+#splash .msH{display:flex;align-items:center;gap:calc(10*var(--u));margin:0 0 calc(14*var(--u));font-weight:800;font-size:calc(19*var(--u));color:#16202c}
 #splash .msModes .msH{margin:0}
-#splash .msH i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#173a63;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
-#splash .go{display:grid;gap:16px}
-#splash .msGrid{display:grid;grid-template-columns:118px minmax(0,1fr) minmax(0,1fr);gap:10px 12px}
-#splash .msCH{font-weight:700;font-size:13px;color:#5d6b7a;padding:0 4px}
-#splash .msRH{display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:15px;color:#173a63}
-#splash .msRH small{font-weight:700;font-size:12px;color:#5d6b7a;margin-top:2px}
+#splash .msH i{font-style:normal;width:calc(28*var(--u));height:calc(28*var(--u));border-radius:50%;background:#173a63;color:#fff;font-size:calc(14*var(--u));font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+/* 과정 버튼 : 남는 높이를 행 수에 비례해 나눔 (행 비율 --msRows = splash.py) — JS 가 display:grid 를 직접 넣으므로 격자로 둠 */
+#splash .go{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:var(--msRows,auto auto auto);gap:calc(16*var(--u))}
+#splash .msGrid{display:grid;grid-template-columns:calc(130*var(--u)) minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto;grid-auto-rows:minmax(calc(62*var(--u)),1fr);gap:calc(10*var(--u)) calc(12*var(--u))}
+#splash .msGrid.msGrid2{grid-template-rows:none}
+#splash .msCH{font-weight:700;font-size:calc(14*var(--u));color:#5d6b7a;padding:0 calc(4*var(--u))}
+#splash .msRH{display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:calc(16*var(--u));color:#173a63}
+#splash .msRH small{font-weight:700;font-size:calc(13*var(--u));color:#5d6b7a;margin-top:calc(2*var(--u))}
 #splash .msSep{height:1px;background:#e3e9f0}
-#splash .msB{position:relative;min-height:62px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:9px 16px;border:1.5px solid #c9d4e0;border-radius:10px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit}
-#splash .msB b{font-weight:800;font-size:16px;line-height:1.3}
-#splash .msB small{font-weight:500;font-size:13px;color:#5d6b7a}
+#splash .msB{position:relative;min-height:calc(62*var(--u));display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:calc(3*var(--u));padding:calc(10*var(--u)) calc(18*var(--u));border:1.5px solid #c9d4e0;border-radius:calc(10*var(--u));background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit}
+#splash .msB b{font-weight:800;font-size:calc(18*var(--u));line-height:1.3}
+#splash .msB small{font-weight:500;font-size:calc(14*var(--u));color:#5d6b7a}
 #splash .msB:hover{border-color:#173a63}
 #splash .msB.sel{background:#173a63;border-color:#173a63;color:#fff}#splash .msB.sel small{color:#d6e2f0}
 #splash .msB:disabled{opacity:.42;cursor:not-allowed}
-#splash .msNote{margin:0;font-size:12.5px;color:#5d6b7a}
-#coursePicker{display:flex;flex-direction:column;gap:10px}
-#coursePicker button.main{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;border:1.5px solid #c9d4e0;border-radius:12px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit;box-sizing:border-box}
+#splash .msNote{margin:0;font-size:calc(13.5*var(--u));color:#5d6b7a}
+/* 작업자 카드 : 남는 높이를 작업자 버튼이 나눔 (너무 길어지지 않게 위쪽부터) */
+#coursePicker{flex:1 1 auto;display:flex;flex-direction:column;gap:calc(10*var(--u));min-height:0}
+#coursePicker button.main{position:relative;flex:1 1 auto;max-height:calc(150*var(--u));min-height:calc(70*var(--u));display:flex;align-items:center;gap:calc(14*var(--u));width:100%;padding:calc(12*var(--u)) calc(18*var(--u));border:1.5px solid #c9d4e0;border-radius:calc(12*var(--u));background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit;box-sizing:border-box}
 #coursePicker button.main:hover{border-color:#173a63}
 #coursePicker button.main.sel{background:#173a63;border-color:#173a63;color:#fff}
 #coursePicker button:disabled{opacity:.45;cursor:not-allowed}
-#coursePicker .msP{flex:none;color:#173a63}#coursePicker button.sel .msP{color:#fff}
-#coursePicker .wT{display:flex;flex-direction:column;gap:1px;min-width:0}
-#coursePicker .wT small{font-weight:700;font-size:12px;letter-spacing:.06em;color:#5d6b7a}
-#coursePicker .wT strong{font-weight:800;font-size:17px}
-#coursePicker .wT span{font-size:13px;color:#5d6b7a}
+#coursePicker .msP{flex:none;width:calc(30*var(--u));height:calc(30*var(--u));color:#173a63}#coursePicker button.sel .msP{color:#fff}
+#coursePicker .wT{display:flex;flex-direction:column;gap:calc(2*var(--u));min-width:0}
+#coursePicker .wT small{font-weight:700;font-size:calc(12.5*var(--u));letter-spacing:.06em;color:#5d6b7a}
+#coursePicker .wT strong{font-weight:800;font-size:calc(19*var(--u))}
+#coursePicker .wT span{font-size:calc(14*var(--u));color:#5d6b7a}
 #coursePicker button.sel .wT small,#coursePicker button.sel .wT span{color:#d6e2f0}
-#splash .msSide .msNote{margin-top:10px}
+#splash .msSide .msNote{margin-top:calc(10*var(--u))}
 #crewHint:empty{display:none}
-#splash #rxSel{display:grid;grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0;margin:0 0 12px;font-weight:700;font-size:13px;color:#5d6b7a}
-#splash #rxSel button{position:relative;height:38px;border:1.5px solid #c9d4e0;border-radius:0;background:#fff;color:#16202c;font:700 14px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;padding:0 8px}
+#splash #rxSel{display:grid;grid-template-columns:calc(70*var(--u)) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0;margin:0 0 calc(12*var(--u));font-weight:700;font-size:calc(14*var(--u));color:#5d6b7a}
+#splash #rxSel button{position:relative;height:calc(40*var(--u));border:1.5px solid #c9d4e0;border-radius:0;background:#fff;color:#16202c;font-weight:700;font-size:calc(15*var(--u));font-family:inherit;cursor:pointer;padding:0 calc(8*var(--u))}
 #splash #rxSel button+button{border-left:0}
-#splash #rxSel button:first-of-type{border-radius:10px 0 0 10px}#splash #rxSel button:last-of-type{border-radius:0 10px 10px 0}
+#splash #rxSel button:first-of-type{border-radius:calc(10*var(--u)) 0 0 calc(10*var(--u))}#splash #rxSel button:last-of-type{border-radius:0 calc(10*var(--u)) calc(10*var(--u)) 0}
 #splash #rxSel button.on{background:#173a63;border-color:#173a63;color:#fff}
-#msSum{font-size:15px;line-height:1.6;color:#16202c;margin:0 0 12px;min-height:24px}
+#msSum{font-size:calc(16*var(--u));line-height:1.6;color:#16202c;margin:0 0 calc(12*var(--u));min-height:calc(26*var(--u))}
 #msSum b{color:#173a63}#msSum s{text-decoration:none;color:#5d6b7a}
-#msStart{width:100%;height:52px;border:0;border-radius:10px;background:#173a63;color:#fff;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer}
+#msStart{width:100%;height:calc(56*var(--u));border:0;border-radius:calc(10*var(--u));background:#173a63;color:#fff;font-weight:800;font-size:calc(19*var(--u));font-family:inherit;cursor:pointer}
 #msStart:disabled{background:#c9d4e0;color:#fff;cursor:not-allowed}
 #msStart:not(:disabled):hover{background:#0f2a4a}
 /* 말풍선 (마우스를 올리거나 길게 누르면) */
-#splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);width:max-content;max-width:260px;padding:9px 12px;border-radius:8px;background:#16202c;color:#fff;font-weight:500;font-size:13px;line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
+#splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9*var(--u));transform:translateX(-50%);width:max-content;max-width:calc(280*var(--u));padding:calc(9*var(--u)) calc(12*var(--u));border-radius:calc(8*var(--u));background:#16202c;color:#fff;font-weight:500;font-size:calc(14*var(--u));line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
 #splash .tipB::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#16202c}
 #splash button:hover>.tipB,#splash button:focus-visible>.tipB,#splash button.tipOn>.tipB{display:block}
-@media (max-width:640px){#splash .msHead,#splash .msBody{padding-left:16px;padding-right:16px}#splash .msGrid{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)}#splash .msSide{max-width:none}}
-#incPick{max-width:1180px;margin:0 auto;text-align:left}
-#courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer;font-family:inherit}
-/* 이상사례 대처 교육 목록 (idt_common/incpick.js) */
-#incPick h3{font:800 25px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47;margin:0 0 6px}
-#incPick .ipNote{font:600 14px/1.55 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;margin:4px 0 10px}
-#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
-#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
+/* 필요한 높이 재기 (splash.js idtSpFit) : 늘이지 않은 본래 크기 */
+#splash.msMeasure .box.msx{height:auto}
+#splash.msMeasure .msBody{flex:none}
+#splash.msMeasure .go{grid-template-rows:none}
+#splash.msMeasure .msGrid{grid-auto-rows:auto}
+#splash.msMeasure #coursePicker button.main{flex:none}
+/* 좁은 화면 (폭 900 미만) : 한 줄로 */
+#splash.msNarrow .msHead,#splash.msNarrow .msBody{padding-left:calc(16*var(--u));padding-right:calc(16*var(--u))}
+#splash.msNarrow .msBody{grid-template-columns:minmax(0,1fr)}
+#splash.msNarrow .msGrid{grid-template-columns:calc(80*var(--u)) minmax(0,1fr) minmax(0,1fr)}
+#splash.msNarrow .box.msx{height:auto;min-height:100%}
+/* 이상사례 대처 교육 목록 (idt_common/incpick.js) — 과정 카드 안을 채움 */
+#incPick{text-align:left;min-height:0}
+#courseBack{margin:calc(20*var(--u));padding:calc(12*var(--u)) calc(24*var(--u));border:1px solid #c4d0dc;border-radius:calc(10*var(--u));background:#fff;color:#142b47;font-size:calc(17*var(--u));cursor:pointer;font-family:inherit}
+#incPick h3{font-weight:800;font-size:calc(25*var(--u));line-height:1.3;font-family:inherit;color:#142b47;margin:0 0 calc(6*var(--u))}
+#incPick .ipNote{font-weight:600;font-size:calc(14*var(--u));line-height:1.55;font-family:inherit;color:#5d7086;margin:calc(4*var(--u)) 0 calc(10*var(--u))}
+#incPick .ipList{max-height:max(calc(var(--spH,800px) - 380*var(--u)),calc(220*var(--u)));overflow:auto;border:1px solid #d5dee8;border-radius:calc(14*var(--u))}
+#incPick .ipRow{display:flex;align-items:center;gap:calc(12*var(--u));padding:calc(10*var(--u)) calc(14*var(--u));border-top:1px solid #e8edf2}
 #incPick .ipRow:first-child{border-top:0}
-#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#8ba2bb}
-#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#fff;flex:none}
+#incPick .rk{width:calc(28*var(--u));text-align:center;font-weight:800;font-size:calc(17*var(--u));color:#8ba2bb}
+#incPick .gd{width:calc(34*var(--u));height:calc(34*var(--u));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(16*var(--u));color:#fff;flex:none}
 #incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
-#incPick b{flex:1;font:800 19px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47}
-#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#6a7f96;margin-top:2px}
-#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;border:1px solid #152c4b}
+#incPick b{flex:1;font-weight:800;font-size:calc(19*var(--u));line-height:1.3;color:#142b47}
+#incPick b s{display:block;text-decoration:none;font-weight:600;font-size:calc(13.5*var(--u));line-height:1.4;color:#6a7f96;margin-top:calc(2*var(--u))}
+#incPick .ipRow button{padding:calc(10*var(--u)) calc(20*var(--u));border-radius:calc(10*var(--u));font-weight:700;font-size:calc(16*var(--u));font-family:inherit;cursor:pointer;border:1px solid #152c4b}
 #incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
-#incBack{margin:14px 0 0;padding:10px 20px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer;font-family:inherit}
+#incBack{margin:calc(14*var(--u)) 0 0;padding:calc(10*var(--u)) calc(20*var(--u));border:1px solid #c4d0dc;border-radius:calc(10*var(--u));background:#fff;color:#142b47;font-size:calc(16*var(--u));cursor:pointer;font-family:inherit}
+/* 버전 이력 공통 창 (splash.js idtVerOpen · PTP · 병) */
+#idtVer{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(12,22,36,.45);font-family:var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif)}
+#idtVer.on{display:flex}
+#idtVer .ivBox{width:min(900px,94vw);max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:14px;padding:22px 26px;box-sizing:border-box;box-shadow:0 12px 40px rgba(12,22,36,.3);color:#16202c}
+#idtVer h2{margin:0 0 4px;font-size:21px;font-weight:800;color:#173a63}#idtVer h2 small{font-size:14px;font-weight:600;color:#5d6b7a;margin-left:8px}
+#idtVer p{margin:0 0 12px;font-size:14px;color:#5d6b7a}
+#idtVer .ivList{flex:1 1 auto;min-height:0;overflow:auto;border:1px solid #d6dfe9;border-radius:10px}
+#idtVer table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.55}
+#idtVer th{white-space:nowrap;position:sticky;top:0;background:#f4f6f9;text-align:left;padding:8px 10px;font-weight:700;color:#5d6b7a;border-bottom:1px solid #d6dfe9}
+#idtVer td{padding:8px 10px;border-top:1px solid #e8edf2;vertical-align:top}#idtVer td:nth-child(-n+2){white-space:nowrap;font-weight:700;color:#173a63}
+#idtVer .ivBtn{display:flex;justify-content:flex-end;margin-top:14px}
+#idtVer .ivBtn button{padding:10px 26px;border:0;border-radius:10px;background:#173a63;color:#fff;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer}
 
 /* OEE 연계 교육 (공통) */
 #oeeWrap{position:absolute;inset:0;z-index:300;background:rgba(12,20,30,.6);display:none;align-items:center;justify-content:center;font-family:"Malgun Gothic","Noto Sans KR",sans-serif;color:#1c2733}
@@ -821,7 +851,7 @@ input,textarea,select,[contenteditable]{-webkit-user-select:text;user-select:tex
   <div class="modal" id="mRub"><div class="mbox" id="rubBox" style="width:640px"></div></div>
   <div class="modal" id="mEnd"><div class="mbox" id="endBox"></div></div>
   <div class="modal" id="mVer"><div class="mbox" id="verBox"></div></div>
-  <div id="splash"><div class="box msx"><header class="msHead"><div class="msT"><h1>파우치 라인 IDT</h1><span class="prodLine">판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤</span></div><div class="msMeta"><div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div><button id="verBadge" class="ver" title="버전 이력">V</button></div></header><div class="msBody"><section class="msCard msModes"><h2 class="msH"><i>1</i>교육 과정 선택</h2><div class="go"><div class="msGrid"><div></div><div class="msCH">학습 · 안내 있음</div><div class="msCH">평가 · 안내 없음 · 채점</div><div class="msRH">기본</div><button class="msB" id="spEasy" data-nm="기본 · 학습"><b>학습</b><small>핵심 절차 안내</small><span class="tipB" role="tooltip">라인 가동 핵심 절차만 단계별로 안내합니다. 점수 없음.</span></button><button class="msB" id="spExamEasy" data-nm="기본 · 평가"><b>평가</b><small>핵심 절차 채점</small><span class="tipB" role="tooltip">안내 없이 핵심 절차를 수행하고 채점합니다. 합격 80점 · 힌트(F1) −5점.</span></button><div class="msRH">심화</div><button class="msB" id="spGuide" data-nm="심화 · 학습"><b>학습</b><small>전체 절차 안내</small><span class="tipB" role="tooltip">라인 가동 전체 절차(라인 클리어런스 · 문서 · 점검 포함)를 단계별로 안내합니다.</span></button><button class="msB" id="spExam" data-nm="심화 · 평가"><b>평가</b><small>전체 절차 채점</small><span class="tipB" role="tooltip">안내 없이 전체 절차를 수행하고 채점합니다. 합격 80점 · 힌트(F1) −5점.</span></button></div><div class="msSep"></div><div class="msGrid"><div class="msRH">체험</div><button class="msB" id="spDemo" data-nm="시연모드"><b>시연모드</b><small>자동 진행 관찰</small><span class="tipB" role="tooltip">단계마다 [시연 실행] 을 눌러 장비 ON → 가동 → 생산을 지켜봅니다. 평가 없음.</span></button><button class="msB" id="spFree" data-nm="자유모드"><b>자유모드</b><small>순서 · 채점 없음</small><span class="tipB" role="tooltip">순서 · 감점 없이 자유롭게 조작합니다. 전원 · 공압 · 안전문 · 비상정지는 실제처럼 동작하고, 문 · 덮개는 자유롭게 여닫습니다.</span></button><div class="msRH">관리 · 분석</div><button class="msB" id="spInc" data-nm="이상사례 대처 교육"><b>이상사례 대처 교육</b><small>알람 대응 연습</small><span class="tipB" role="tooltip">부동 빈도 · 중요도 순으로 정리한 실제 이상사례에 대응합니다. 작업자를 고르면 사례 목록이 나옵니다.</span></button><button class="msB" id="spOee" data-nm="OEE 관리 대시보드"><b>OEE 관리 대시보드</b><small>부동 · 교육 효과</small><span class="tipB" role="tooltip">OEE DB 연결 · 부동 트렌드 · 교육 효과를 봅니다. 작업자 선택 없이 엽니다.</span></button></div></div><div id="incPick" style="display:none"></div><button id="courseBack" style="display:none">← 과정 다시 선택</button><p class="msNote">버튼에 마우스를 올리거나 길게 누르면 자세한 설명이 나옵니다.</p></section><aside class="msSide"><section class="msCard"><h2 class="msH"><i>2</i>작업자 선택</h2><div id="coursePicker" class="n2"><button id="chooseF" class="main wait" data-r="F" data-nm="충전실 작업자"><svg class="msP" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="3"></circle><path d="M6 21v-5a6 6 0 0 1 12 0v5"></path></svg><span class="wT"><small>FILLING ROOM</small><strong>충전실 작업자</strong><span>충전기 · 2층 데크 · IPC</span></span><span class="tipB" role="tooltip">파우치 충전기 SP303 · 2층 데크 원료 투입 · IPC 검사</span></button><button id="chooseP" class="main wait" data-r="P" data-nm="포장실 작업자"><svg class="msP" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="3"></circle><path d="M6 21v-5a6 6 0 0 1 12 0v5"></path></svg><span class="wT"><small>PACKING ROOM</small><strong>포장실 작업자</strong><span>카토너 · 검사 설비</span></span><span class="tipB" role="tooltip">스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기 · 수동 포장</span></button></div><div id="crewHint"></div></section><section class="msCard msGoC"><h2 class="msH"><i>3</i>시작</h2><div id="msSum">교육 과정과 작업자를 고르세요</div><button id="msStart" disabled>교육 시작</button></section></aside></div></div></div>
+  <div id="splash"><div class="box msx"><header class="msHead"><div class="msT"><h1>파우치 라인 IDT</h1><span class="prodLine">판콜에이치건조시럽 · 1카톤 6포 · 목표 300카톤</span></div><div class="msMeta"><div id="oeeLamp" class="off" title="OEE 미연동"><i></i><span>OEE 미연동</span></div><button id="verBadge" class="ver" title="버전 이력">V</button></div></header><div class="msBody"><section class="msCard msModes"><h2 class="msH"><i>1</i>교육 과정 선택</h2><div class="go" style="--msRows:2.35fr auto 2fr"><div class="msGrid"><div></div><div class="msCH">학습 · 안내 있음</div><div class="msCH">평가 · 안내 없음 · 채점</div><div class="msRH">기본</div><button class="msB" id="spEasy" data-nm="기본 · 학습"><b>학습</b><small>핵심 절차 안내</small><span class="tipB" role="tooltip">라인 가동 핵심 절차만 단계별로 안내합니다. 점수 없음.</span></button><button class="msB" id="spExamEasy" data-nm="기본 · 평가"><b>평가</b><small>핵심 절차 채점</small><span class="tipB" role="tooltip">안내 없이 핵심 절차를 수행하고 채점합니다. 합격 80점 · 힌트(F1) −5점.</span></button><div class="msRH">심화</div><button class="msB" id="spGuide" data-nm="심화 · 학습"><b>학습</b><small>전체 절차 안내</small><span class="tipB" role="tooltip">라인 가동 전체 절차(라인 클리어런스 · 문서 · 점검 포함)를 단계별로 안내합니다.</span></button><button class="msB" id="spExam" data-nm="심화 · 평가"><b>평가</b><small>전체 절차 채점</small><span class="tipB" role="tooltip">안내 없이 전체 절차를 수행하고 채점합니다. 합격 80점 · 힌트(F1) −5점.</span></button></div><div class="msSep"></div><div class="msGrid msGrid2"><div class="msRH">체험</div><button class="msB" id="spDemo" data-nm="시연모드"><b>시연모드</b><small>자동 진행 관찰</small><span class="tipB" role="tooltip">단계마다 [시연 실행] 을 눌러 장비 ON → 가동 → 생산을 지켜봅니다. 평가 없음.</span></button><button class="msB" id="spFree" data-nm="자유모드"><b>자유모드</b><small>순서 · 채점 없음</small><span class="tipB" role="tooltip">순서 · 감점 없이 자유롭게 조작합니다. 전원 · 공압 · 안전문 · 비상정지는 실제처럼 동작하고, 문 · 덮개는 자유롭게 여닫습니다.</span></button><div class="msRH">관리 · 분석</div><button class="msB" id="spInc" data-nm="이상사례 대처 교육"><b>이상사례 대처 교육</b><small>알람 대응 연습</small><span class="tipB" role="tooltip">부동 빈도 · 중요도 순으로 정리한 실제 이상사례에 대응합니다. 작업자를 고르면 사례 목록이 나옵니다.</span></button><button class="msB" id="spOee" data-nm="OEE 관리 대시보드"><b>OEE 관리 대시보드</b><small>부동 · 교육 효과</small><span class="tipB" role="tooltip">OEE DB 연결 · 부동 트렌드 · 교육 효과를 봅니다. 작업자 선택 없이 엽니다.</span></button></div></div><div id="incPick" style="display:none"></div><button id="courseBack" style="display:none">← 과정 다시 선택</button><p class="msNote">버튼에 마우스를 올리거나 길게 누르면 자세한 설명이 나옵니다.</p></section><aside class="msSide"><section class="msCard"><h2 class="msH"><i>2</i>작업자 선택</h2><div id="coursePicker" class="n2"><button id="chooseF" class="main wait" data-r="F" data-nm="충전실 작업자"><svg class="msP" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="3"></circle><path d="M6 21v-5a6 6 0 0 1 12 0v5"></path></svg><span class="wT"><small>FILLING ROOM</small><strong>충전실 작업자</strong><span>충전기 · 2층 데크 · IPC</span></span><span class="tipB" role="tooltip">파우치 충전기 SP303 · 2층 데크 원료 투입 · IPC 검사</span></button><button id="chooseP" class="main wait" data-r="P" data-nm="포장실 작업자"><svg class="msP" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="3"></circle><path d="M6 21v-5a6 6 0 0 1 12 0v5"></path></svg><span class="wT"><small>PACKING ROOM</small><strong>포장실 작업자</strong><span>카토너 · 검사 설비</span></span><span class="tipB" role="tooltip">스틱공급장치 · 카토너 · 프린터 · 비전 · X-ray · 중량선별기 · 수동 포장</span></button></div><div id="crewHint"></div></section><section class="msCard msGoC"><h2 class="msH"><i>3</i>시작</h2><div id="msSum">교육 과정과 작업자를 고르세요</div><button id="msStart" disabled>교육 시작</button></section></aside></div></div></div>
   <div id="banner" role="alert" hidden></div>
   <div id="toast"></div>
 </div></div>
@@ -5628,6 +5658,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:44,d:'2026-11-24',t:'메인화면 화면 전체 사용 (11/24 사용자 지시 「메인 시작 화면에서 너무 화면의 일부만 씀 · 전체적으로 활용 · 모든 IDT 공통」) — 고정 폭(최대 1440) · 위쪽 정렬이라 큰 화면에서 아래 절반이 비던 것을 화면 폭 · 높이에 맞춰 글자 · 여백 · 버튼을 함께 키우고(기준 폭 1240 대비 배율), 남는 높이는 과정 버튼 · 작업자 카드가 나눠 채움(앱 화면 비율 안에서). 1280×720 ~ 1920×1080 에서 스크롤 없이 한 화면 · 폭 900 미만은 한 줄 배치. 이상사례 목록도 같은 배율. 세 IDT 공통 idt_common/splash.css · splash.js · splash.py'},
  {v:43,d:'2026-11-23',t:'최적화 · 정적 형상 묶어 그리기 (11/23 사용자 지시 「퀄리티 · 과정 손상 없이 최적화」) — 움직이지 않는 불투명 부품을 재질별로 합쳐 한 번에 그림(세 IDT 공통 idt_common/batch.js). 부품이 하나라도 움직이면 그 묶음을 그 프레임에 바로 풀어 원본으로 그림 · 작업자 손 목표 · 광선 판정은 원본 기준 그대로. 프레임당 그리기 호출 8,317 → 약 3,700 회 · 장면 그리기 CPU 시간 57.7 → 24.3 ms(중앙값). 같은 순간 묶음 켬/끔 화소 비교 차이 0.004% 이하(경계 반올림) · 화면 · 과정 변화 없음'},
  {v:42,d:'2026-11-23',t:'압축공기 밸브 높이 조정 (11/23 사용자 결정 「가슴 높이 1.25 m 로 맞춤」) — 볼 밸브 빨간 레버 높이를 1.15 m(추정)에서 1인칭 가슴 높이 기준(눈높이 1.55 m − 0.3 m) 1.25 m 로 세 IDT 공통 변경. 파우치 두 번째 밸브는 1.40 → 1.45 m. 3인칭 작업자 손 뻗는 위치 · 1인칭 조작 대상도 함께 이동'},
  {v:41,d:'2026-11-20',t:'1인칭 근간 점검 (11/20 사용자 지시 "모든 IDT 의 근간은 1인칭 · 작업자들이 실제로 끝까지 해 봄 — 어색하거나 흐름이 이상하면 안 됨") — 각 과정을 1인칭으로 자동 진행하며 누르는 조작이 모두 현장 3D 대상 · 현장 설비 화면으로 닿는지 시험. 안내 문구를 화면 아이콘(좌측 타일) 기준에서 현장 설비 · 위치 기준으로 바꿈(문서 · 기록 게시판, 카톤 매거진, 2층 데크 2번 호퍼 등). 그래픽 기본 = 최고 · 상단 그래픽 메뉴 확인'},
@@ -6328,10 +6359,41 @@ document.addEventListener("pointerdown",ev=>{
   IDT_SP.lpT=setTimeout(()=>{ b.classList.add("tipOn"); IDT_SP.swallow=true; },450);
 },true);
 for(const k of ["pointerup","pointercancel","pointerleave"]) document.addEventListener(k,()=>clearTimeout(IDT_SP.lpT),true);
+/* 화면 전체 사용 (11/24) : 기준 화면(폭 1240 · 내용 본래 높이)에 대한 배율 --u 를 화면 폭 · 높이 중 작은 쪽으로 정함 → 글자 · 버튼이 함께 커지고
+   남는 높이는 과정 버튼 · 작업자 카드가 채움. 파우치는 앱 전체 배율 안의 크기(clientWidth)로 계산되므로 따로 할 일 없음. */
+const IDT_SPFIT={W:1240, Wn:760, min:.72, max:2.4, raf:0, mo:null};
+function idtSpFit(){
+  IDT_SPFIT.raf=0; const sp=document.getElementById("splash"), box=sp&&sp.querySelector(".box.msx"); if(!box) return;
+  const W=sp.clientWidth, H=sp.clientHeight; if(W<50||H<50) return;
+  const narrow=W<900; sp.classList.toggle("msNarrow",narrow);
+  sp.style.setProperty("--u","1px"); sp.classList.add("msMeasure"); const need=Math.max(1,box.scrollHeight);
+  let u=narrow?W/IDT_SPFIT.Wn:Math.min(W/IDT_SPFIT.W,H/need);
+  if(!narrow){ sp.style.setProperty("--u",u.toFixed(4)+"px"); const n2=box.scrollHeight; if(n2>H) u*=H/n2*.995; }   /* 배율에 따라 변하지 않는 테두리 · 줄바꿈 보정 */
+  sp.classList.remove("msMeasure"); u=Math.max(IDT_SPFIT.min,Math.min(IDT_SPFIT.max,u));
+  sp.style.setProperty("--u",u.toFixed(4)+"px"); sp.style.setProperty("--spH",H+"px");
+  if(IDT_SPFIT.mo) IDT_SPFIT.mo.takeRecords();                    /* 재기 위해 바꾼 class 는 다시 부르지 않음 */
+}
+function idtSpFitSoon(){ if(!IDT_SPFIT.raf) IDT_SPFIT.raf=requestAnimationFrame(idtSpFit); }
 (function spBoot(){ const go=document.getElementById("msStart"); if(!go){ return setTimeout(spBoot,200); }
   go.onclick=idtSpStart; idtSpSync();
+  const sp=document.getElementById("splash"); idtSpFit(); addEventListener("resize",idtSpFitSoon);
+  if(typeof ResizeObserver!=="undefined") new ResizeObserver(idtSpFitSoon).observe(sp);
+  (IDT_SPFIT.mo=new MutationObserver(ms=>{ if(ms.some(m=>m.target!==sp||m.attributeName==="class")) idtSpFitSoon(); }))
+    .observe(sp,{subtree:true,childList:true,attributes:true,attributeFilter:["style","class"]});
   try{ if(typeof CHANGELOG!=="undefined"&&CHANGELOG[0]){ const b=document.getElementById("verBadge"); if(b&&/^V?$/.test(b.textContent.trim())) b.textContent="V"+CHANGELOG[0].v; } }catch(e){}
+  { const b=document.getElementById("verBadge"); if(b&&!b.onclick){ b.title="버전 이력"; b.onclick=()=>typeof openVersions==="function"?openVersions():idtVerOpen(); } }
 })();
+/* 버전 이력 창 (11/24) — 파우치는 자체 창(openVersions), 없는 IDT(PTP · 병)는 이 공통 창 : 수정 요청 1건마다 버전 +1 */
+function idtVerOpen(){
+  if(typeof CHANGELOG==="undefined"||!CHANGELOG.length) return; const e=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  let w=document.getElementById("idtVer"); if(!w){ w=document.createElement("div"); w.id="idtVer"; document.body.appendChild(w);
+    w.addEventListener("click",ev=>{ if(ev.target===w||ev.target.id==="idtVerX") w.classList.remove("on"); });
+    document.addEventListener("keydown",ev=>{ if(ev.key==="Escape"&&w.classList.contains("on")){ w.classList.remove("on"); ev.stopPropagation(); } },true); }
+  w.innerHTML='<div class="ivBox" role="dialog" aria-label="버전 이력"><h2>버전 이력 <small>현재 V'+e(CHANGELOG[0].v)+'</small></h2><p>수정 요청 1건마다 버전이 1씩 올라갑니다.</p>'+
+    '<div class="ivList"><table><tr><th>버전</th><th>날짜</th><th>수정 내용</th></tr>'+CHANGELOG.map(r=>'<tr><td>V'+e(r.v)+'</td><td>'+e(r.d)+'</td><td>'+e(r.t)+'</td></tr>').join("")+'</table></div>'+
+    '<div class="ivBtn"><button id="idtVerX">닫기</button></div></div>';
+  w.classList.add("on");
+}
 
 /* ── common/incpick.js ── */
 /* ═══ 이상사례 대처 교육 목록 공통 (세 IDT · 11/19 · 파우치 renderIncPick 을 옮김)

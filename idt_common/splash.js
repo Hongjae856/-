@@ -50,7 +50,38 @@ document.addEventListener("pointerdown",ev=>{
   IDT_SP.lpT=setTimeout(()=>{ b.classList.add("tipOn"); IDT_SP.swallow=true; },450);
 },true);
 for(const k of ["pointerup","pointercancel","pointerleave"]) document.addEventListener(k,()=>clearTimeout(IDT_SP.lpT),true);
+/* 화면 전체 사용 (11/24) : 기준 화면(폭 1240 · 내용 본래 높이)에 대한 배율 --u 를 화면 폭 · 높이 중 작은 쪽으로 정함 → 글자 · 버튼이 함께 커지고
+   남는 높이는 과정 버튼 · 작업자 카드가 채움. 파우치는 앱 전체 배율 안의 크기(clientWidth)로 계산되므로 따로 할 일 없음. */
+const IDT_SPFIT={W:1240, Wn:760, min:.72, max:2.4, raf:0, mo:null};
+function idtSpFit(){
+  IDT_SPFIT.raf=0; const sp=document.getElementById("splash"), box=sp&&sp.querySelector(".box.msx"); if(!box) return;
+  const W=sp.clientWidth, H=sp.clientHeight; if(W<50||H<50) return;
+  const narrow=W<900; sp.classList.toggle("msNarrow",narrow);
+  sp.style.setProperty("--u","1px"); sp.classList.add("msMeasure"); const need=Math.max(1,box.scrollHeight);
+  let u=narrow?W/IDT_SPFIT.Wn:Math.min(W/IDT_SPFIT.W,H/need);
+  if(!narrow){ sp.style.setProperty("--u",u.toFixed(4)+"px"); const n2=box.scrollHeight; if(n2>H) u*=H/n2*.995; }   /* 배율에 따라 변하지 않는 테두리 · 줄바꿈 보정 */
+  sp.classList.remove("msMeasure"); u=Math.max(IDT_SPFIT.min,Math.min(IDT_SPFIT.max,u));
+  sp.style.setProperty("--u",u.toFixed(4)+"px"); sp.style.setProperty("--spH",H+"px");
+  if(IDT_SPFIT.mo) IDT_SPFIT.mo.takeRecords();                    /* 재기 위해 바꾼 class 는 다시 부르지 않음 */
+}
+function idtSpFitSoon(){ if(!IDT_SPFIT.raf) IDT_SPFIT.raf=requestAnimationFrame(idtSpFit); }
 (function spBoot(){ const go=document.getElementById("msStart"); if(!go){ return setTimeout(spBoot,200); }
   go.onclick=idtSpStart; idtSpSync();
+  const sp=document.getElementById("splash"); idtSpFit(); addEventListener("resize",idtSpFitSoon);
+  if(typeof ResizeObserver!=="undefined") new ResizeObserver(idtSpFitSoon).observe(sp);
+  (IDT_SPFIT.mo=new MutationObserver(ms=>{ if(ms.some(m=>m.target!==sp||m.attributeName==="class")) idtSpFitSoon(); }))
+    .observe(sp,{subtree:true,childList:true,attributes:true,attributeFilter:["style","class"]});
   try{ if(typeof CHANGELOG!=="undefined"&&CHANGELOG[0]){ const b=document.getElementById("verBadge"); if(b&&/^V?$/.test(b.textContent.trim())) b.textContent="V"+CHANGELOG[0].v; } }catch(e){}
+  { const b=document.getElementById("verBadge"); if(b&&!b.onclick){ b.title="버전 이력"; b.onclick=()=>typeof openVersions==="function"?openVersions():idtVerOpen(); } }
 })();
+/* 버전 이력 창 (11/24) — 파우치는 자체 창(openVersions), 없는 IDT(PTP · 병)는 이 공통 창 : 수정 요청 1건마다 버전 +1 */
+function idtVerOpen(){
+  if(typeof CHANGELOG==="undefined"||!CHANGELOG.length) return; const e=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  let w=document.getElementById("idtVer"); if(!w){ w=document.createElement("div"); w.id="idtVer"; document.body.appendChild(w);
+    w.addEventListener("click",ev=>{ if(ev.target===w||ev.target.id==="idtVerX") w.classList.remove("on"); });
+    document.addEventListener("keydown",ev=>{ if(ev.key==="Escape"&&w.classList.contains("on")){ w.classList.remove("on"); ev.stopPropagation(); } },true); }
+  w.innerHTML='<div class="ivBox" role="dialog" aria-label="버전 이력"><h2>버전 이력 <small>현재 V'+e(CHANGELOG[0].v)+'</small></h2><p>수정 요청 1건마다 버전이 1씩 올라갑니다.</p>'+
+    '<div class="ivList"><table><tr><th>버전</th><th>날짜</th><th>수정 내용</th></tr>'+CHANGELOG.map(r=>'<tr><td>V'+e(r.v)+'</td><td>'+e(r.d)+'</td><td>'+e(r.t)+'</td></tr>').join("")+'</table></div>'+
+    '<div class="ivBtn"><button id="idtVerX">닫기</button></div></div>';
+  w.classList.add("on");
+}

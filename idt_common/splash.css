@@ -1,77 +1,107 @@
-/* ═══ 메인화면 공통 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ 교육 시작 · 남색 1색 + 회색) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js ═══ */
-#splash{position:absolute;inset:0;z-index:120;display:flex;align-items:flex-start;justify-content:center;background:#f4f6f9;color:#16202c;transition:opacity .35s;overflow:auto;
+/* ═══ 메인화면 공통 (세 IDT · 11/20 시안 확정 : ① 교육 과정 → ② 작업자 → ③ 교육 시작 · 남색 1색 + 회색) — 마크업 idt_common/splash.py · 동작 idt_common/splash.js
+   · 화면 전체 사용 (11/24 사용자 지시 "메인 시작 화면이 화면의 일부만 씀 — 전체적으로 활용 · 모든 IDT 공통")
+     크기 단위 --u = 기준 화면(폭 1240) 대비 배율 : splash.js idtSpFit 이 화면 폭 · 높이에 맞춰 정함(글자 · 여백 · 버튼이 함께 커짐)
+     남는 높이는 과정 버튼 · 작업자 카드가 나눠 채움 ═══ */
+#splash{--u:1px;position:absolute;inset:0;z-index:120;display:block;background:#f4f6f9;color:#16202c;transition:opacity .35s;overflow:auto;
   font-family:var(--ff,"Pretendard","Malgun Gothic","맑은 고딕","Apple SD Gothic Neo","Noto Sans KR",sans-serif)}
 #splash.hide{opacity:0;pointer-events:none;visibility:hidden}
-#splash .box.msx{width:100%;max-width:1440px;margin:0 auto;padding:0 0 28px;text-align:left;box-sizing:border-box}
-#splash .msHead{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:18px 40px;background:#fff;border-bottom:1px solid #d6dfe9}
-#splash .msT{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;min-width:0}
-#splash h1{margin:0;font-weight:800;font-size:26px;line-height:1.3;letter-spacing:-.5px;color:#173a63}
-#splash .prodLine{font-weight:500;font-size:14px;color:#5d6b7a}
-#splash .msMeta{display:flex;align-items:center;gap:10px}
-#splash #oeeLamp{position:static;padding:6px 12px;border:1px solid #d6dfe9;border-radius:999px;background:#fff;font-size:13px}
-#splash .ver{position:static;border:1px solid #d6dfe9;background:#fff;cursor:pointer;font:700 13px/1 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#173a63;border-radius:999px;padding:8px 14px}
+body:has(#splash:not(.hide)) #bar{display:none}body:has(#splash:not(.hide)) #stage{top:0}   /* PTP · 병 : 메인화면에서는 위쪽 막대 자리까지 (topbar.js 와 같은 규칙 — 앱 로딩 전부터) */
+#splash .box.msx{width:100%;max-width:none;height:100%;margin:0;padding:0;display:flex;flex-direction:column;text-align:left;box-sizing:border-box}
+#splash .msHead{flex:none;display:flex;align-items:center;justify-content:space-between;gap:calc(16*var(--u));flex-wrap:wrap;padding:calc(16*var(--u)) calc(40*var(--u));background:#fff;border-bottom:1px solid #d6dfe9}
+#splash .msT{display:flex;align-items:baseline;gap:calc(16*var(--u));flex-wrap:wrap;min-width:0}
+#splash h1{margin:0;font-weight:800;font-size:calc(28*var(--u));line-height:1.3;letter-spacing:-.5px;color:#173a63}
+#splash .prodLine{font-weight:500;font-size:calc(15*var(--u));color:#5d6b7a}
+#splash .msMeta{display:flex;align-items:center;gap:calc(10*var(--u))}
+#splash #oeeLamp{position:static;padding:calc(6*var(--u)) calc(13*var(--u));border:1px solid #d6dfe9;border-radius:999px;background:#fff;font-size:calc(14*var(--u))}
+#splash .ver{position:static;border:1px solid #d6dfe9;background:#fff;cursor:pointer;font-weight:700;font-size:calc(14*var(--u));line-height:1;font-family:inherit;color:#173a63;border-radius:999px;padding:calc(8*var(--u)) calc(15*var(--u))}
 #splash .ver:hover{border-color:#173a63}
-#splash .msBody{display:flex;flex-wrap:wrap;gap:24px;padding:24px 40px 0;align-items:flex-start}
-#splash .msCard{background:#fff;border:1px solid #d6dfe9;border-radius:14px;padding:22px 26px;box-sizing:border-box}
-#splash .msModes{flex:999 1 620px;min-width:0;display:flex;flex-direction:column;gap:16px}
-#splash .msSide{flex:1 1 380px;max-width:460px;display:flex;flex-direction:column;gap:18px}
-#splash .msH{display:flex;align-items:center;gap:10px;margin:0 0 14px;font-weight:800;font-size:18px;color:#16202c}
+#splash .msBody{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) calc(420*var(--u));gap:calc(24*var(--u));padding:calc(24*var(--u)) calc(40*var(--u)) calc(28*var(--u));align-items:stretch}
+#splash .msCard{background:#fff;border:1px solid #d6dfe9;border-radius:calc(14*var(--u));padding:calc(22*var(--u)) calc(26*var(--u));box-sizing:border-box}
+#splash .msModes{min-width:0;min-height:0;display:flex;flex-direction:column;gap:calc(16*var(--u))}
+#splash .msSide{min-width:0;min-height:0;display:flex;flex-direction:column;gap:calc(18*var(--u))}
+#splash .msSide>.msCard:first-child{flex:1 1 auto;display:flex;flex-direction:column}
+#splash .msH{display:flex;align-items:center;gap:calc(10*var(--u));margin:0 0 calc(14*var(--u));font-weight:800;font-size:calc(19*var(--u));color:#16202c}
 #splash .msModes .msH{margin:0}
-#splash .msH i{font-style:normal;width:26px;height:26px;border-radius:50%;background:#173a63;color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
-#splash .go{display:grid;gap:16px}
-#splash .msGrid{display:grid;grid-template-columns:118px minmax(0,1fr) minmax(0,1fr);gap:10px 12px}
-#splash .msCH{font-weight:700;font-size:13px;color:#5d6b7a;padding:0 4px}
-#splash .msRH{display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:15px;color:#173a63}
-#splash .msRH small{font-weight:700;font-size:12px;color:#5d6b7a;margin-top:2px}
+#splash .msH i{font-style:normal;width:calc(28*var(--u));height:calc(28*var(--u));border-radius:50%;background:#173a63;color:#fff;font-size:calc(14*var(--u));font-weight:800;display:flex;align-items:center;justify-content:center;flex:none}
+/* 과정 버튼 : 남는 높이를 행 수에 비례해 나눔 (행 비율 --msRows = splash.py) — JS 가 display:grid 를 직접 넣으므로 격자로 둠 */
+#splash .go{flex:1 1 auto;min-height:0;display:grid;grid-template-rows:var(--msRows,auto auto auto);gap:calc(16*var(--u))}
+#splash .msGrid{display:grid;grid-template-columns:calc(130*var(--u)) minmax(0,1fr) minmax(0,1fr);grid-template-rows:auto;grid-auto-rows:minmax(calc(62*var(--u)),1fr);gap:calc(10*var(--u)) calc(12*var(--u))}
+#splash .msGrid.msGrid2{grid-template-rows:none}
+#splash .msCH{font-weight:700;font-size:calc(14*var(--u));color:#5d6b7a;padding:0 calc(4*var(--u))}
+#splash .msRH{display:flex;flex-direction:column;justify-content:center;font-weight:800;font-size:calc(16*var(--u));color:#173a63}
+#splash .msRH small{font-weight:700;font-size:calc(13*var(--u));color:#5d6b7a;margin-top:calc(2*var(--u))}
 #splash .msSep{height:1px;background:#e3e9f0}
-#splash .msB{position:relative;min-height:62px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:2px;padding:9px 16px;border:1.5px solid #c9d4e0;border-radius:10px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit}
-#splash .msB b{font-weight:800;font-size:16px;line-height:1.3}
-#splash .msB small{font-weight:500;font-size:13px;color:#5d6b7a}
+#splash .msB{position:relative;min-height:calc(62*var(--u));display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:calc(3*var(--u));padding:calc(10*var(--u)) calc(18*var(--u));border:1.5px solid #c9d4e0;border-radius:calc(10*var(--u));background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit}
+#splash .msB b{font-weight:800;font-size:calc(18*var(--u));line-height:1.3}
+#splash .msB small{font-weight:500;font-size:calc(14*var(--u));color:#5d6b7a}
 #splash .msB:hover{border-color:#173a63}
 #splash .msB.sel{background:#173a63;border-color:#173a63;color:#fff}#splash .msB.sel small{color:#d6e2f0}
 #splash .msB:disabled{opacity:.42;cursor:not-allowed}
-#splash .msNote{margin:0;font-size:12.5px;color:#5d6b7a}
-#coursePicker{display:flex;flex-direction:column;gap:10px}
-#coursePicker button.main{position:relative;display:flex;align-items:center;gap:14px;width:100%;padding:12px 16px;border:1.5px solid #c9d4e0;border-radius:12px;background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit;box-sizing:border-box}
+#splash .msNote{margin:0;font-size:calc(13.5*var(--u));color:#5d6b7a}
+/* 작업자 카드 : 남는 높이를 작업자 버튼이 나눔 (너무 길어지지 않게 위쪽부터) */
+#coursePicker{flex:1 1 auto;display:flex;flex-direction:column;gap:calc(10*var(--u));min-height:0}
+#coursePicker button.main{position:relative;flex:1 1 auto;max-height:calc(150*var(--u));min-height:calc(70*var(--u));display:flex;align-items:center;gap:calc(14*var(--u));width:100%;padding:calc(12*var(--u)) calc(18*var(--u));border:1.5px solid #c9d4e0;border-radius:calc(12*var(--u));background:#fff;color:#16202c;text-align:left;cursor:pointer;font-family:inherit;box-sizing:border-box}
 #coursePicker button.main:hover{border-color:#173a63}
 #coursePicker button.main.sel{background:#173a63;border-color:#173a63;color:#fff}
 #coursePicker button:disabled{opacity:.45;cursor:not-allowed}
-#coursePicker .msP{flex:none;color:#173a63}#coursePicker button.sel .msP{color:#fff}
-#coursePicker .wT{display:flex;flex-direction:column;gap:1px;min-width:0}
-#coursePicker .wT small{font-weight:700;font-size:12px;letter-spacing:.06em;color:#5d6b7a}
-#coursePicker .wT strong{font-weight:800;font-size:17px}
-#coursePicker .wT span{font-size:13px;color:#5d6b7a}
+#coursePicker .msP{flex:none;width:calc(30*var(--u));height:calc(30*var(--u));color:#173a63}#coursePicker button.sel .msP{color:#fff}
+#coursePicker .wT{display:flex;flex-direction:column;gap:calc(2*var(--u));min-width:0}
+#coursePicker .wT small{font-weight:700;font-size:calc(12.5*var(--u));letter-spacing:.06em;color:#5d6b7a}
+#coursePicker .wT strong{font-weight:800;font-size:calc(19*var(--u))}
+#coursePicker .wT span{font-size:calc(14*var(--u));color:#5d6b7a}
 #coursePicker button.sel .wT small,#coursePicker button.sel .wT span{color:#d6e2f0}
-#splash .msSide .msNote{margin-top:10px}
+#splash .msSide .msNote{margin-top:calc(10*var(--u))}
 #crewHint:empty{display:none}
-#splash #rxSel{display:grid;grid-template-columns:64px minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0;margin:0 0 12px;font-weight:700;font-size:13px;color:#5d6b7a}
-#splash #rxSel button{position:relative;height:38px;border:1.5px solid #c9d4e0;border-radius:0;background:#fff;color:#16202c;font:700 14px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;padding:0 8px}
+#splash #rxSel{display:grid;grid-template-columns:calc(70*var(--u)) minmax(0,1fr) minmax(0,1fr);align-items:center;gap:0;margin:0 0 calc(12*var(--u));font-weight:700;font-size:calc(14*var(--u));color:#5d6b7a}
+#splash #rxSel button{position:relative;height:calc(40*var(--u));border:1.5px solid #c9d4e0;border-radius:0;background:#fff;color:#16202c;font-weight:700;font-size:calc(15*var(--u));font-family:inherit;cursor:pointer;padding:0 calc(8*var(--u))}
 #splash #rxSel button+button{border-left:0}
-#splash #rxSel button:first-of-type{border-radius:10px 0 0 10px}#splash #rxSel button:last-of-type{border-radius:0 10px 10px 0}
+#splash #rxSel button:first-of-type{border-radius:calc(10*var(--u)) 0 0 calc(10*var(--u))}#splash #rxSel button:last-of-type{border-radius:0 calc(10*var(--u)) calc(10*var(--u)) 0}
 #splash #rxSel button.on{background:#173a63;border-color:#173a63;color:#fff}
-#msSum{font-size:15px;line-height:1.6;color:#16202c;margin:0 0 12px;min-height:24px}
+#msSum{font-size:calc(16*var(--u));line-height:1.6;color:#16202c;margin:0 0 calc(12*var(--u));min-height:calc(26*var(--u))}
 #msSum b{color:#173a63}#msSum s{text-decoration:none;color:#5d6b7a}
-#msStart{width:100%;height:52px;border:0;border-radius:10px;background:#173a63;color:#fff;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer}
+#msStart{width:100%;height:calc(56*var(--u));border:0;border-radius:calc(10*var(--u));background:#173a63;color:#fff;font-weight:800;font-size:calc(19*var(--u));font-family:inherit;cursor:pointer}
 #msStart:disabled{background:#c9d4e0;color:#fff;cursor:not-allowed}
 #msStart:not(:disabled):hover{background:#0f2a4a}
 /* 말풍선 (마우스를 올리거나 길게 누르면) */
-#splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9px);transform:translateX(-50%);width:max-content;max-width:260px;padding:9px 12px;border-radius:8px;background:#16202c;color:#fff;font-weight:500;font-size:13px;line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
+#splash .tipB{display:none;position:absolute;left:50%;bottom:calc(100% + 9*var(--u));transform:translateX(-50%);width:max-content;max-width:calc(280*var(--u));padding:calc(9*var(--u)) calc(12*var(--u));border-radius:calc(8*var(--u));background:#16202c;color:#fff;font-weight:500;font-size:calc(14*var(--u));line-height:1.5;text-align:left;letter-spacing:0;white-space:normal;z-index:20;box-shadow:0 6px 18px rgba(12,22,36,.25);pointer-events:none}
 #splash .tipB::after{content:"";position:absolute;left:50%;top:100%;transform:translateX(-50%);border:6px solid transparent;border-top-color:#16202c}
 #splash button:hover>.tipB,#splash button:focus-visible>.tipB,#splash button.tipOn>.tipB{display:block}
-@media (max-width:640px){#splash .msHead,#splash .msBody{padding-left:16px;padding-right:16px}#splash .msGrid{grid-template-columns:72px minmax(0,1fr) minmax(0,1fr)}#splash .msSide{max-width:none}}
-#incPick{max-width:1180px;margin:0 auto;text-align:left}
-#courseBack{margin:20px;padding:12px 24px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:17px;cursor:pointer;font-family:inherit}
-/* 이상사례 대처 교육 목록 (idt_common/incpick.js) */
-#incPick h3{font:800 25px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47;margin:0 0 6px}
-#incPick .ipNote{font:600 14px/1.55 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#5d7086;margin:4px 0 10px}
-#incPick .ipList{max-height:52vh;overflow:auto;border:1px solid #d5dee8;border-radius:14px}
-#incPick .ipRow{display:flex;align-items:center;gap:12px;padding:10px 14px;border-top:1px solid #e8edf2}
+/* 필요한 높이 재기 (splash.js idtSpFit) : 늘이지 않은 본래 크기 */
+#splash.msMeasure .box.msx{height:auto}
+#splash.msMeasure .msBody{flex:none}
+#splash.msMeasure .go{grid-template-rows:none}
+#splash.msMeasure .msGrid{grid-auto-rows:auto}
+#splash.msMeasure #coursePicker button.main{flex:none}
+/* 좁은 화면 (폭 900 미만) : 한 줄로 */
+#splash.msNarrow .msHead,#splash.msNarrow .msBody{padding-left:calc(16*var(--u));padding-right:calc(16*var(--u))}
+#splash.msNarrow .msBody{grid-template-columns:minmax(0,1fr)}
+#splash.msNarrow .msGrid{grid-template-columns:calc(80*var(--u)) minmax(0,1fr) minmax(0,1fr)}
+#splash.msNarrow .box.msx{height:auto;min-height:100%}
+/* 이상사례 대처 교육 목록 (idt_common/incpick.js) — 과정 카드 안을 채움 */
+#incPick{text-align:left;min-height:0}
+#courseBack{margin:calc(20*var(--u));padding:calc(12*var(--u)) calc(24*var(--u));border:1px solid #c4d0dc;border-radius:calc(10*var(--u));background:#fff;color:#142b47;font-size:calc(17*var(--u));cursor:pointer;font-family:inherit}
+#incPick h3{font-weight:800;font-size:calc(25*var(--u));line-height:1.3;font-family:inherit;color:#142b47;margin:0 0 calc(6*var(--u))}
+#incPick .ipNote{font-weight:600;font-size:calc(14*var(--u));line-height:1.55;font-family:inherit;color:#5d7086;margin:calc(4*var(--u)) 0 calc(10*var(--u))}
+#incPick .ipList{max-height:max(calc(var(--spH,800px) - 380*var(--u)),calc(220*var(--u)));overflow:auto;border:1px solid #d5dee8;border-radius:calc(14*var(--u))}
+#incPick .ipRow{display:flex;align-items:center;gap:calc(12*var(--u));padding:calc(10*var(--u)) calc(14*var(--u));border-top:1px solid #e8edf2}
 #incPick .ipRow:first-child{border-top:0}
-#incPick .rk{width:28px;text-align:center;font:800 17px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#8ba2bb}
-#incPick .gd{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font:800 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#fff;flex:none}
+#incPick .rk{width:calc(28*var(--u));text-align:center;font-weight:800;font-size:calc(17*var(--u));color:#8ba2bb}
+#incPick .gd{width:calc(34*var(--u));height:calc(34*var(--u));border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:calc(16*var(--u));color:#fff;flex:none}
 #incPick .gH{background:#c8402f}#incPick .gM{background:#e09a2c}#incPick .gL{background:#7f97ad}
-#incPick b{flex:1;font:800 19px/1.3 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#142b47}
-#incPick b s{display:block;text-decoration:none;font:600 13.5px/1.4 var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);color:#6a7f96;margin-top:2px}
-#incPick .ipRow button{padding:10px 20px;border-radius:10px;font:700 16px var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif);cursor:pointer;border:1px solid #152c4b}
+#incPick b{flex:1;font-weight:800;font-size:calc(19*var(--u));line-height:1.3;color:#142b47}
+#incPick b s{display:block;text-decoration:none;font-weight:600;font-size:calc(13.5*var(--u));line-height:1.4;color:#6a7f96;margin-top:calc(2*var(--u))}
+#incPick .ipRow button{padding:calc(10*var(--u)) calc(20*var(--u));border-radius:calc(10*var(--u));font-weight:700;font-size:calc(16*var(--u));font-family:inherit;cursor:pointer;border:1px solid #152c4b}
 #incPick .ipRow .s{background:#142b47;color:#fff}#incPick .ipRow .e{background:#fff;color:#142b47}
-#incBack{margin:14px 0 0;padding:10px 20px;border:1px solid #c4d0dc;border-radius:10px;background:#fff;color:#142b47;font-size:16px;cursor:pointer;font-family:inherit}
+#incBack{margin:calc(14*var(--u)) 0 0;padding:calc(10*var(--u)) calc(20*var(--u));border:1px solid #c4d0dc;border-radius:calc(10*var(--u));background:#fff;color:#142b47;font-size:calc(16*var(--u));cursor:pointer;font-family:inherit}
+/* 버전 이력 공통 창 (splash.js idtVerOpen · PTP · 병) */
+#idtVer{position:fixed;inset:0;z-index:400;display:none;align-items:center;justify-content:center;background:rgba(12,22,36,.45);font-family:var(--ff,"Malgun Gothic","Noto Sans KR",sans-serif)}
+#idtVer.on{display:flex}
+#idtVer .ivBox{width:min(900px,94vw);max-height:88vh;display:flex;flex-direction:column;background:#fff;border-radius:14px;padding:22px 26px;box-sizing:border-box;box-shadow:0 12px 40px rgba(12,22,36,.3);color:#16202c}
+#idtVer h2{margin:0 0 4px;font-size:21px;font-weight:800;color:#173a63}#idtVer h2 small{font-size:14px;font-weight:600;color:#5d6b7a;margin-left:8px}
+#idtVer p{margin:0 0 12px;font-size:14px;color:#5d6b7a}
+#idtVer .ivList{flex:1 1 auto;min-height:0;overflow:auto;border:1px solid #d6dfe9;border-radius:10px}
+#idtVer table{width:100%;border-collapse:collapse;font-size:14px;line-height:1.55}
+#idtVer th{white-space:nowrap;position:sticky;top:0;background:#f4f6f9;text-align:left;padding:8px 10px;font-weight:700;color:#5d6b7a;border-bottom:1px solid #d6dfe9}
+#idtVer td{padding:8px 10px;border-top:1px solid #e8edf2;vertical-align:top}#idtVer td:nth-child(-n+2){white-space:nowrap;font-weight:700;color:#173a63}
+#idtVer .ivBtn{display:flex;justify-content:flex-end;margin-top:14px}
+#idtVer .ivBtn button{padding:10px 26px;border:0;border-radius:10px;background:#173a63;color:#fff;font-weight:800;font-size:15px;font-family:inherit;cursor:pointer}

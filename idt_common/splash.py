@@ -2,6 +2,7 @@
 
 각 IDT 의 build.py 가 render(cfg) 로 메인화면 HTML 을 만든다. 모양 idt_common/splash.css, 동작(선택 · 요약 · 시작 · 말풍선) idt_common/splash.js.
 설명 글 = 짧은 부제(10자 안팎) + 마우스를 올리거나 길게 누르면 말풍선 (11/20 사용자 선택 C).
+화면 전체 사용 (11/24) : 과정 버튼 두 묶음(운전 교육 행 · 체험/관리 2행)이 남는 높이를 행 수 비율(--msRows)로 나눔.
 IDT 마다 다른 것은 설정값으로만 둔다 : 제목 · 부제 · 작업자 카드 · (병) 포장 품목 선택 · (PTP) 체인지파트 행.
 
 cfg = {
@@ -81,8 +82,8 @@ def render(cfg):
             '<button id="verBadge" class="ver" title="버전 이력">V</button></div></header>'
             '<div class="msBody">'
             f'<section class="msCard msModes">{head(1, "교육 과정 선택")}'
-            '<div class="go"><div class="msGrid"><div></div><div class="msCH">학습 · 안내 있음</div><div class="msCH">평가 · 안내 없음 · 채점</div>'
-            f'{rows}</div><div class="msSep"></div><div class="msGrid">{other}</div></div>'
+            f'<div class="go" style="--msRows:{len(C["rows"]) + 0.35:g}fr auto 2fr"><div class="msGrid"><div></div><div class="msCH">학습 · 안내 있음</div><div class="msCH">평가 · 안내 없음 · 채점</div>'
+            f'{rows}</div><div class="msSep"></div><div class="msGrid msGrid2">{other}</div></div>'
             '<div id="incPick" style="display:none"></div><button id="courseBack" style="display:none">← 과정 다시 선택</button>'
             '<p class="msNote">버튼에 마우스를 올리거나 길게 누르면 자세한 설명이 나옵니다.</p></section>'
             '<aside class="msSide">'
