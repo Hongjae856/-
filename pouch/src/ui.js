@@ -24,7 +24,7 @@ const TILE={
     click(){ const f=S.f; if(!f.main){ toast("메인 파워를 먼저 켜세요.","bad"); return; } act("panel",()=>{ if(f.panel){ fillerStop(); f.panel=false; f.user=null; toast("컨트롤 판넬 OFF"); } else { f.panel=true; toast("컨트롤 판넬 ON — 터치스크린 켜짐","good"); } }); }},
   fDoor:{e:"🚪",b:"안전도어",s:()=>S.f.door==="closed"?"닫힘 · 인터락 정상":"열림",on:()=>S.f.door==="closed",warn:()=>S.f.door!=="closed",
     click(){ const f=S.f; act("door",()=>{ if(f.door==="closed"){ f.door="open"; if(f.run){ deduct("doorRun"); raise("DOOR"); } toast("안전도어 열림"); } else { f.door="closed"; toast("안전도어 닫힘"); } buildStatic(); }); }},
-  tAlign:{e:"🔀",b:"정렬컨베어 스위치",s:()=>"포장실 · "+(S.p.align?"ON":"OFF"),on:()=>S.p.align,
+  tAlign:{e:"🔀",b:"정렬컨베어 스위치",s:()=>(S.room==="F"?"충전실 쪽":"포장실 쪽")+" · "+(S.p.align?"ON":"OFF"),on:()=>S.p.align,
     click(){ act("align",()=>{ S.p.align=!S.p.align; toast("정렬컨베어 가동스위치 "+(S.p.align?"ON — 파우치가 포장실로 이송":"OFF — 공포배출 쪽으로 배출")); }); }},
   /* 충전실 · 자재 · 원료 */
   mLift:{e:"🛗",b:"주성분 STS 용기",s:()=>S.f.mainLift?"2층 데크 도착":"리프터로 올림",on:()=>S.f.mainLift,
