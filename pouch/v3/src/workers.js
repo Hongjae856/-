@@ -237,7 +237,7 @@ function helpReset(){ const H=HELP; H.x=H.home[0]; H.z=H.home[1]; H.face=H.yaw=M
 /* ═══ 2번 호퍼 주성분 투입 (11/17 사용자 확정 : 뚜껑을 들어냄) ═══
    남쪽 · 북쪽 토글 클램프 해제 → 뚜껑(필터 · 손잡이 포함)을 들어 남쪽 난간에 세워 둠 → 스쿱으로 투입 → 뚜껑을 다시 덮고 남 · 북 클램프 체결 */
 function seqScoop(){
-  const yt=FL.deckY+1.294, D=.42, zc=FL.zc, lx=XF+1.2, lean=[lx,FL.deckY+.5,4.0];
+  const yt=FL.deckY+FL.hopUp+1.294, D=.42, zc=FL.zc, lx=XF+1.2, lean=[lx,FL.deckY+.5,4.0];
   return [
     {stand:[XF,3.95], deck:true, reach:[XF,yt-.03,zc+D+.02], dur:1.0},
     {stand:[XF,1.62], deck:true, reach:[XF,yt-.03,zc-D-.02], dur:1.0},

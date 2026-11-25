@@ -18,8 +18,9 @@ const crewItem=(H,kind)=>idtItem(H,kind&&(CREW_KIND[kind]||kind),V3B.sc);
    순서 : 용기를 들고 리프터 앞으로 → 발판에 올림 → 상승(약 1.1 m) → 계단으로 작업 발판에 올라감 → 리프터에서 용기를 받아 호퍼에 붓기 → 내려오면 리프터 하강
    1인칭 : 투입을 누르면 리프터가 용기를 싣고 올라간 뒤 붓기 진행 */
 const BL={G:null, LP:null, drum:null, y:0, ph:null, t:0, i:-1, V:{x:0,z:0}, path:[], fp:false};
-const BL_POS=[1.75,-1.3], BL_LOAD=[1.28,-1.98], BL_UP=1.08, BL_CLIMB=[[.43,-2.05],[.43,-1.45],[.59,-1.25]];
-function blInit(){ const G=new T3.Group(); BL.LP=idtLifterBuild(G,2.2); G.position.set(BL_POS[0],0,BL_POS[1]); V3B.sc.add(G); BL.G=G;
+const BL_POS=[1.75,-1.3], BL_LOAD=[1.28,-1.98], BL_UP=1.08+(b3Y(1830)-1830)/1000,   /* 정제 호퍼가 낮아진 만큼 덜 올림 (11/25 설비 높이 맞춤 · 1.08 → 0.96 m) */
+   BL_CLIMB=[[.43,-2.05],[.43,-1.45],[.59,-1.25]];
+function blInit(){ const G=new T3.Group(); BL.LP=idtLifterBuild(G,2.2-B3LOW.d/1000);   /* 마스트 2.20 → 2.05 m (설비 높이 맞춤) */ G.position.set(BL_POS[0],0,BL_POS[1]); V3B.sc.add(G); BL.G=G;
   BL.drum=idtCarryMesh("drum"); BL.drum.position.set(-.47,.165+.17,0); BL.drum.visible=false; BL.LP.add(BL.drum); }
 const B3_FREE=(x,z)=>walkFree(x*1000,z*1000);
 window.B3_HOLD=J=>!!(J&&J.key==="tab"&&BL.ph&&BL.ph!=="pour");
@@ -73,17 +74,17 @@ function crewFill(dt,fp){
     const carrying=kind&&(q.walking||!J||J.phase!=="work"||J.t<hold);
     if(carrying){ let cp=[x+f[0]*.36,y0+1.02,z+f[1]*.36], tilt=0;
       if(J&&J.key==="tab"&&BL.i===i&&J.t<.45&&BL.G){ const lp=new T3.Vector3(); BL.drum.getWorldPosition(lp); const u=Math.min(1,J.t/.45); cp=[lp.x+(cp[0]-lp.x)*u,lp.y+(cp[1]-lp.y)*u,lp.z+(cp[2]-lp.z)*u]; }
-      if(work){ const r=crewReachAmt(J), R=J.j.reach, t=[R[0]*MM,R[1]*MM,R[2]*MM];
+      if(work){ const r=crewReachAmt(J), R=b3P(J.j.reach), t=[R[0]*MM,R[1]*MM,R[2]*MM];
         if(J.j.pour){ const dx=t[0]-x, dz=t[2]-z, d=Math.hypot(dx,dz)||1, k=Math.min(.55,.3/d); t[0]-=dx*k; t[2]-=dz*k; t[1]+=.12; tilt=Math.min(1,Math.max(0,(J.t-.9)/.5))*1.05; }
         cp=cp.map((v,k)=>v+(t[k]-v)*r*.85); }
       const m=crewHold(H,P,kind,cp,yaw); if(m&&tilt) m.rotateX(tilt);
       crewPour(H,J,tilt,cp); }
     else { crewItem(H,null); crewPour(H,null,0);
-      if(work&&J.t>.12&&J.t<J.j.dur-.35){ const R=J.j.reach, t=[R[0]*MM,R[1]*MM,R[2]*MM], lf=[Math.cos(yaw),-Math.sin(yaw)]; P.R=t; if(J.j.dur>2.2) P.L=[t[0]+lf[0]*.22,t[1],t[2]+lf[1]*.22]; } }
+      if(work&&J.t>.12&&J.t<J.j.dur-.35){ const R=b3P(J.j.reach), t=[R[0]*MM,R[1]*MM,R[2]*MM], lf=[Math.cos(yaw),-Math.sin(yaw)]; P.R=t; if(J.j.dur>2.2) P.L=[t[0]+lf[0]*.22,t[1],t[2]+lf[1]*.22]; } }
     poseHuman(H,P); });
 }
 /* 붓는 흐름 (병 · 정제 · 캡) : 용기 입구 → 투입구 — 공통 idtPour */
-function crewPour(H,J,tilt,cp){ const on=!!(J&&J.j&&J.j.pour&&tilt>.6&&J.t<J.j.dur*.78-.1); const R=J&&J.j&&J.j.reach; idtPour(H,V3B.sc,on,cp,R?[R[0]*MM,R[1]*MM-.04,R[2]*MM-.04]:cp,J?J.t:0); }
+function crewPour(H,J,tilt,cp){ const on=!!(J&&J.j&&J.j.pour&&tilt>.6&&J.t<J.j.dur*.78-.1); const R=J&&J.j&&J.j.reach&&b3P(J.j.reach); idtPour(H,V3B.sc,on,cp,R?[R[0]*MM,R[1]*MM-.04,R[2]*MM-.04]:cp,J?J.t:0); }
 
 /* ── 포장실 ── */
 const PKW={T:12};                                           /* 자동 봉함 ~ 적재 시간 (packsim 의 closing 과 같음) */

@@ -6,7 +6,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 const FF={T:[], aim:null, aimIn:false, goal:null, res:{}, hmi:false};
 const FF_OBS=[];                                   /* 셸이 추가한 충전실 설비 바닥 점유 (mm · walk.js gridHit) */
-const FFU={main:[-6400,1450,-2620], air:[-4900,1305,-1305], dust:[-5600,1400,-2620], pend:[-3200,1250,700], hmi:[-3200,1560,700]};
+const FFU={main:[-6400,1450,-2620], air:[-4900,1305,-1305], dust:[-5600,1400,-2620], pend:[-3200,b3Y(1250),700], hmi:[-3200,b3Y(1560),700]};   /* 판넬 · 설비 화면 높이 = 설비 높이 맞춤(low.js b3Y · 11/25) */
 /* 원본 3D 에 없는 유틸리티 · 조작 판넬 모형 */
 function ffBuild(sc){
   const g=new T3.Group(); sc.add(g); const P=v=>v*MM;
@@ -22,9 +22,9 @@ function ffBuild(sc){
   bx(g,P(-5700),P(-5500),P(1300),P(1500),P(-2690),P(-2620),M.white); add(g,new T3.Mesh(new T3.CylinderGeometry(.025,.025,.02,20),M.green)).position.set(P(-5600),P(1400),P(-2612)); g.children[g.children.length-1].rotation.x=Math.PI/2;
   plate(g,.24,.06,labelTex(["집진기"],{w:256,h:64}),[P(-5600),P(1560),P(-2618)],0);
   /* 라인 조작 판넬 (기둥 · 버튼 5개 · 설비 화면) */
-  const pz=FFU.pend[2]; rod(g,[P(-3200),0,P(pz)],[P(-3200),P(1150),P(pz)],.03,M.ss,14); bx(g,P(-3420),P(-2980),P(1150),P(1350),P(pz-60),P(pz),M.ss);
-  [["swStart",M.green],["swStop",M.white],["swReset",M.yellow],["swEmg",M.red],["swJog",M.blue]].forEach(([id,m],i)=>{ const b=add(g,new T3.Mesh(new T3.CylinderGeometry(.022,.022,.02,20),m)); b.rotation.x=Math.PI/2; b.position.set(P(-3380+i*90),P(1250),P(pz+5)); });
-  bx(g,P(-3420),P(-2980),P(1400),P(1720),P(pz-60),P(pz-20),M.black); FF.scr=screen(g,.4,.27,[P(-3200),P(1560),P(pz-18)],0,["설비 화면","HMI"]);
+  const pz=FFU.pend[2]; rod(g,[P(-3200),0,P(pz)],[P(-3200),P(1150),P(pz)],.03,M.ss,14); bx(g,P(-3420),P(-2980),P(b3Y(1150)),P(b3Y(1350)),P(pz-60),P(pz),M.ss);
+  [["swStart",M.green],["swStop",M.white],["swReset",M.yellow],["swEmg",M.red],["swJog",M.blue]].forEach(([id,m],i)=>{ const b=add(g,new T3.Mesh(new T3.CylinderGeometry(.022,.022,.02,20),m)); b.rotation.x=Math.PI/2; b.position.set(P(-3380+i*90),P(FFU.pend[1]),P(pz+5)); });
+  bx(g,P(-3420),P(-2980),P(b3Y(1400)),P(b3Y(1720)),P(pz-60),P(pz-20),M.black); FF.scr=screen(g,.4,.27*B3LOW.k,[P(-3200),P(FFU.hmi[1]),P(pz-18)],0,["설비 화면","HMI"]);
   FF.G=g;
 }
 /* 대상 (mm · 크기 m) — el : 앱 요소 id (누르면 그 요소를 그대로 누름) */
@@ -32,13 +32,13 @@ function ffTargets(){
   const w=appWin(); let J={}, Lw=null; try{ J=w.eval("JOBS"); Lw=w.B3.L; }catch(e){} const T=[], add=(id,nm,p,s,el)=>T.push({id,nm,p,s,el});
   add("uMain","메인 전원 스위치 (전기판넬)",FFU.main,[.12,.14,.06],"uMain"); add("uAir","압축공기 밸브",FFU.air,[.16,.1,.06],"uAir"); add("uDust","집진기 전원",FFU.dust,[.12,.12,.06],"uDust");
   add("uDoor","안전문 (UA-120 가드)",[-4300,1100,420],[.5,.6,.06],"uDoor");
-  const r=k=>J[k]&&J[k].reach; if(r("bottle")) add("mBottle","빈 병 투입 (벌크 호퍼)",r("bottle"),[.4,.3,.3],"mBottle"); if(r("gel")) add("mGel","실리카겔 롤",r("gel"),[.3,.3,.3],"mGel");
+  const r=k=>J[k]&&J[k].reach&&b3P(J[k].reach); if(r("bottle")) add("mBottle","빈 병 투입 (벌크 호퍼)",r("bottle"),[.4,.3,.3],"mBottle"); if(r("gel")) add("mGel","실리카겔 롤",r("gel"),[.3,.3,.3],"mGel");
   if(r("tab")) add("mTab","정제 투입 (정제 호퍼)",r("tab"),[.4,.3,.3],"mTab"); if(r("film")) add("mFilm","PE 필름 롤",r("film"),[.3,.3,.3],"mFilm"); if(r("cap")) add("mCap","캡 투입 (볼 피더)",r("cap"),[.4,.3,.3],"mCap");
   if(r("reject")) add("mReject","리젝트 트레이",r("reject"),[.3,.2,.3],"mReject"); if(r("table")) add("mTable","완제품 회수 (집적 테이블)",r("table"),[.5,.2,.5],"mTable");
-  [["swStart","START"],["swStop","STOP"],["swReset","RESET"],["swEmg","비상정지"],["swJog","1병 시험"]].forEach(([id,nm],i)=>add(id,"조작 판넬 · "+nm,[-3380+i*90,1250,FFU.pend[2]+10],[.06,.06,.04],id));
+  [["swStart","START"],["swStop","STOP"],["swReset","RESET"],["swEmg","비상정지"],["swJog","1병 시험"]].forEach(([id,nm],i)=>add(id,"조작 판넬 · "+nm,[-3380+i*90,FFU.pend[1],FFU.pend[2]+10],[.06,.06,.04],id));
   add("hmi","설비 화면 (터치)",FFU.hmi,[.4,.27,.04],"hmiWrap");
   /* 라인 클리어런스 점검 단계 : 원본 점검 항목의 확인 위치(look)에 점검 대상 */
-  try{ const st=w.eval("S&&STEPS()[S.tIdx]"), C=w.eval("CLEAR"); if(st&&st.lc!==undefined&&C[st.lc]) add("lcCheck","점검 : "+C[st.lc].t,C[st.lc].look,[.5,.5,.5],"lcCheck"); }catch(e){}
+  try{ const st=w.eval("S&&STEPS()[S.tIdx]"), C=w.eval("CLEAR"); if(st&&st.lc!==undefined&&C[st.lc]) add("lcCheck","점검 : "+C[st.lc].t,b3P(C[st.lc].look),[.5,.5,.5],"lcCheck"); }catch(e){}
   FF.T=T; return T;
 }
 const ffDoc=()=>{ try{ return appWin().document; }catch(e){ return null; } };

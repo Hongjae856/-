@@ -40,8 +40,8 @@ function buildFillZone(S){
   for(const [dx,dz] of [[0,0],[.16,0],[.08,.14],[.24,.14]]) rod(g,[7.5+dx,0,.25+dz],[7.5+dx,.13,.25+dz],.07,M.white,24);          /* 흰 수지 마개 4 (받침 호퍼 보관용) */
   /* 진공호스 : 받침 호퍼 → 바닥 → 2층 데크 → 호퍼 1(첨가제) · 3(백당) 진공이송기 (두 가닥 함께) */
   const hz=F.z0-.12;
-  tube(g,[[oA[0]-.12,.05,oA[2]],[6.0,.05,oA[2]+.2],[5.9,.05,1.38],[5.78,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[FM.xf+.3,F.top+.3,zc-.5],[FM.xf-.3,F.top+.22,zc-.2],[FM.xf-.37,F.top+.11,zc-.1]],.028,M.hose);
-  tube(g,[[oS[0]-.12,.05,oS[2]],[6.05,.05,oS[2]-.3],[5.97,.05,1.45],[5.84,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.6,F.top+.2,zc-.4],[FM.xf+.6,F.top+.16,zc-.2],[FM.xf+.49,F.top+.11,zc-.1]],.028,M.hose);
+  tube(g,[[oA[0]-.12,.05,oA[2]],[6.0,.05,oA[2]+.2],[5.9,.05,1.38],[5.78,.6,hz+.1],[5.6,2.3,hz],[4.6,3.1,hz+.2],[FM.xf+.3,F.top+F.hopUp+.3,zc-.5],[FM.xf-.3,F.top+F.hopUp+.22,zc-.2],[FM.xf-.37,F.top+F.hopUp+.11,zc-.1]],.028,M.hose);
+  tube(g,[[oS[0]-.12,.05,oS[2]],[6.05,.05,oS[2]-.3],[5.97,.05,1.45],[5.84,.6,hz+.16],[5.68,2.3,hz+.06],[5.4,3.2,hz+.3],[4.6,F.top+F.hopUp+.2,zc-.4],[FM.xf+.6,F.top+F.hopUp+.16,zc-.2],[FM.xf+.49,F.top+F.hopUp+.11,zc-.1]],.028,M.hose);
   /* 받침 호퍼 배출구 ↔ 진공호스 연결부 + 클램프 (심화 교육 : 연결 전에는 호스 끝이 배출구 옆 바닥에 분리된 채 놓임 · 11/16) */
   FILLPROP.hose=[oA,oS].map(o=>{ const H=new T3.Group(); g.add(H); tube(H,[o,[o[0]-.06,.068,o[2]],[o[0]-.12,.05,o[2]]],.028,M.hose);
     const c=new T3.Mesh(new T3.TorusGeometry(.042,.009,8,20),M.ssMir); c.rotation.y=Math.PI/2; c.position.set(o[0]-.012,o[1],o[2]); add(H,c); return H; });

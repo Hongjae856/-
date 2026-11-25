@@ -3,8 +3,8 @@
    아래로 : 도징박스(검은 한 뭉치 · 3칸, 칸마다 축 + 스크래퍼) → 함량판 · 셔터 틀(셔터 실린더 · 바이브레이터) → 열별 검은 유닛 · 주황 속도 조절 밸브 →
    흰 슬리브 10 → (데크 밑) 깔때기 노즐. 동쪽 데크 : 공압 밸브함 → 진공 생성기 2 → 집진 매니폴드 · 주름 호스 (통행을 막지 않게 작게) ═══ */
 function buildHoppers(g){
-  const F=FL, Y=F.deckY, zc=F.zc, xc=FM.xf, D=.42, yt=Y+1.28, n=FM.n, pz=FM.pz, SOUTH=0, hb=.215;
-  const ext=(pts,mat,d)=>{ const sh=new T3.Shape(); pts.forEach(([x,y],i)=>i?sh.lineTo(xc+x,Y+y):sh.moveTo(xc+x,Y+y)); const m=new T3.Mesh(new T3.ExtrudeGeometry(sh,{depth:(d||D)*2,bevelEnabled:false}),mat); m.position.z=zc-(d||D); return add(g,m); };
+  const F=FL, Y=F.deckY, HY=Y+F.hopUp, FT=F.top+F.hopUp, zc=F.zc, xc=FM.xf, D=.42, yt=HY+1.28, n=FM.n, pz=FM.pz, SOUTH=0, hb=.215;
+  const ext=(pts,mat,d)=>{ const sh=new T3.Shape(); pts.forEach(([x,y],i)=>i?sh.lineTo(xc+x,HY+y):sh.moveTo(xc+x,HY+y)); const m=new T3.Mesh(new T3.ExtrudeGeometry(sh,{depth:(d||D)*2,bevelEnabled:false}),mat); m.position.z=zc-(d||D); return add(g,m); };
   /* 호퍼 3기 (거울면) */
   ext([[-.645,1.28],[-hb,1.28],[-hb,.62],[-.078,.47],[-.2,.47],[-.645,1.0]],M.ssMir);
   ext([[-hb+.005,1.28],[hb-.005,1.28],[hb-.005,.62],[.068,.47],[-.068,.47],[-hb+.005,.62]],M.ssMir);
@@ -22,17 +22,17 @@ function buildHoppers(g){
   plate(g,.05,.05,labelTex([["3","#fff",150]],{w:192,h:192,bg:"#1f5fb8"}),[xc+.648,yt-.2,zc+D-.08],Math.PI/2);
   for(const x of [xc-hb-.075,xc+hb+.075]) for(const s of [-1,1]){ const zf=zc+s*D; bx(g,x-.045,x+.045,yt-.62,yt-.36,Math.min(zf,zf+s*.004),Math.max(zf,zf+s*.004),M.dark); bx(g,x-.055,x+.055,yt-.63,yt-.35,Math.min(zf-s*.001,zf+s*.002),Math.max(zf-s*.001,zf+s*.002),M.ss); }   /* 끝면 점검창 (1 · 3) */
   /* 진공이송기 (1 · 3 뚜껑 위) · 2번 뚜껑 필터 · 소음기 */
-  for(const x of [xc-.43,xc+.43]){ rod(g,[x,yt+.014,zc],[x,F.top-.04,zc],.165,M.ssMir,40); rod(g,[x,F.top-.04,zc],[x,F.top,zc],.175,M.ss,40);
-    for(const y of [yt+.05,F.top-.08]) rod(g,[x,y,zc],[x,y+.02,zc],.172,M.ss,40);
+  for(const x of [xc-.43,xc+.43]){ rod(g,[x,yt+.014,zc],[x,FT-.04,zc],.165,M.ssMir,40); rod(g,[x,FT-.04,zc],[x,FT,zc],.175,M.ss,40);
+    for(const y of [yt+.05,FT-.08]) rod(g,[x,y,zc],[x,y+.02,zc],.172,M.ss,40);
     for(const a of [.6,2.2,3.9,5.4]) bx(g,x+Math.cos(a)*.175-.011,x+Math.cos(a)*.175+.011,yt+.03,yt+.1,zc+Math.sin(a)*.175-.011,zc+Math.sin(a)*.175+.011,M.ssD);
-    rod(g,[x,F.top,zc],[x,F.top+.05,zc],.026,M.ssMir,16); tube(g,[[x,F.top+.05,zc],[x+.02,F.top+.1,zc-.03],[x+.06,F.top+.11,zc-.1]],.026,M.ssMir);
-    tube(g,[[x-.1,F.top-.15,zc+.15],[x-.14,yt+.2,zc+.3],[x-.1,yt-.3,zc+.46],[x-.02,Y+.45,zc+.48]],.006,M.hose); }
+    rod(g,[x,FT,zc],[x,FT+.05,zc],.026,M.ssMir,16); tube(g,[[x,FT+.05,zc],[x+.02,FT+.1,zc-.03],[x+.06,FT+.11,zc-.1]],.026,M.ssMir);
+    tube(g,[[x-.1,FT-.15,zc+.15],[x-.14,yt+.2,zc+.3],[x-.1,yt-.3,zc+.46],[x-.02,Y+.45,zc+.48]],.006,M.hose); }
   rod(L2,[xc-.05,yt+.014,zc-.1],[xc-.05,yt+.07,zc-.1],.026,M.ssMir,18); rod(L2,[xc-.05,yt+.07,zc-.1],[xc-.05,yt+.082,zc-.1],.04,M.ss,18); rod(L2,[xc-.05,yt+.082,zc-.1],[xc-.05,yt+.25,zc-.1],.034,M.white,20);
   for(let k=0;k<6;k++) rod(L2,[xc-.05,yt+.095+k*.026,zc-.1],[xc-.05,yt+.103+k*.026,zc-.1],.038,M.white,20);
   rod(L2,[xc+.08,yt+.014,zc+.12],[xc+.08,yt+.06,zc+.12],.022,M.ssMir,16); rod(L2,[xc+.08,yt+.06,zc+.12],[xc+.08,yt+.22,zc+.12],.032,M.ss,18); for(let k=0;k<5;k++) rod(L2,[xc+.08,yt+.075+k*.028,zc+.12],[xc+.08,yt+.083+k*.028,zc+.12],.035,M.ssD,18);
   for(const z of [zc-.3,zc+.3]){ rod(L2,[xc-.06,yt+.055,z],[xc+.06,yt+.055,z],.008,M.ssMir,8); for(const d of [-.06,.06]) rod(L2,[xc+d,yt+.014,z],[xc+d,yt+.055,z],.007,M.ssMir,8); }
   /* ── 스테인리스 틀 (11/16 사용자 설명) : 호퍼 · 도징박스 · 원료조절부가 모두 한 틀에 달림 · 아래는 막힌 함(데크 바닥에 부품 노출 없음) · 옆은 투명판(도징박스가 보임) ── */
-  const bw=.205, dy0=Y+.3, dy1=Y+.47, dl=.4, fw=.46, fl=.58, ft=Y+.66;
+  const bw=.205, dy0=HY+.3, dy1=HY+.47, dl=.4, fw=.46, fl=.58, ft=Y+.66;
   bx(g,xc-fw,xc+fw,Y,Y+.2,zc-fl,zc+fl,M.ss); bx(g,xc-fw-.006,xc+fw+.006,Y+.2,Y+.215,zc-fl-.006,zc+fl+.006,M.ssMir);   /* 아래 막힌 함 · 윗테 */
   for(const sx of [-1,1]) for(const sz of [-1,1]) bx(g,xc+sx*fw-.02,xc+sx*fw+.02,Y,ft,zc+sz*fl-.02,zc+sz*fl+.02,M.ss);       /* 기둥 4 */
   for(const s of [-1,1]){ bx(g,xc+s*fw-.016,xc+s*fw+.016,ft-.032,ft,zc-fl,zc+fl,M.ss); bx(g,xc-fw,xc+fw,ft-.032,ft,zc+s*fl-.016,zc+s*fl+.016,M.ss);
@@ -43,7 +43,7 @@ function buildHoppers(g){
   bx(g,xc-bw-.02,xc+bw+.02,Y+.215,dy0,zc-dl-.02,zc+dl+.02,M.ssD);                                                  /* 도징박스 받침 (함 위) */
   for(const s of [-1,1]) ribbon(g,[[xc+s*(fw-.02),dy1+.02],[xc+s*(bw+.01),dy1]],zc-dl,zc+dl,M.sheet);
   /* 함량조절다이얼 (현장 사진 · 11/16 사용자 확정) : 호퍼 끝 스테인리스 바에 열마다 주황 카운터(숫자 4자리 창) + 크롬 육각 소켓 — 육각 L 렌치로 돌림
-     서쪽(전면) = 첨가제 10 / 동쪽(후면) = 주성분 10(위) · 백당 10(아래). 도징박스(윗면)보다 높음 */
+     서쪽(전면) = 첨가제 10 / 동쪽(후면) = 주성분 10(위) · 백당 10(아래). 틀에 고정 — 11/25 호퍼 · 도징박스를 0.1 m 높인 뒤 도징박스 윗면과 같은 높이 */
   FM.dials={add:[],main:[],sug:[]};
   const orM=new T3.MeshStandardMaterial({color:0xf0701a,roughness:.45}), crM=M.ssMir;
   /* 한 노즐 = 주황 카운터 다이얼(숫자 창 + 가운데 큰 크롬 육각 소켓) 또는 은색 소켓(카운터 없음) — 현장 사진 (11/16 사용자 확정)

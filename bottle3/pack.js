@@ -88,8 +88,8 @@ function pkBuild(sc){
   { const [a,b]=PK.leaf; cabinet(g,a,b,-380,380,840);
     rod(g,[pm(13100),pm(840),pm(-330)],[pm(13100),pm(1900),pm(-330)],.025,M.ss,14); rod(g,[pm(14100),pm(840),pm(-330)],[pm(14100),pm(1900),pm(-330)],.025,M.ss,14);
     rod(g,[pm(13100),pm(1880),pm(-330)],[pm(14100),pm(1880),pm(-330)],.02,M.ss,12);
-    const reel=add(g,new T3.Mesh(new T3.CylinderGeometry(.27,.27,.07,48),new T3.MeshStandardMaterial({color:0xeceeef,roughness:.7}))); reel.rotation.x=Math.PI/2; reel.position.set(pm(13400),pm(1560),pm(-280)); PKG.leafReel=reel;
-    const cov=add(g,new T3.Mesh(new T3.CylinderGeometry(.33,.33,.004,48),M.acryl)); cov.rotation.x=Math.PI/2; cov.position.set(pm(13400),pm(1560),pm(-235)); cov.castShadow=false;
+    const reel=add(g,new T3.Mesh(new T3.CylinderGeometry(.27,.27,.07,48),new T3.MeshStandardMaterial({color:0xeceeef,roughness:.7}))); reel.rotation.x=Math.PI/2; reel.position.set(pm(13400),pm(1560),pm(-280)); PKG.leafReel=reel; reel.userData.b3Top=pm(1560)+.27;   /* 설비 높이 맞춤 : 릴 윗면 기준으로 옮김 (위 틀과 틈 유지) */
+    const cov=add(g,new T3.Mesh(new T3.CylinderGeometry(.33,.33,.004,48),M.acryl)); cov.rotation.x=Math.PI/2; cov.position.set(pm(13400),pm(1560),pm(-235)); cov.castShadow=false; cov.userData.b3Top=pm(1560)+.27;
     bx(g,pm(13250),pm(13700),pm(1000),pm(1450),pm(-330),pm(-300),M.alu);                       /* 공급 판 */
     rod(g,[pm(13300),pm(1300),pm(-300)],[pm(13300),pm(1300),pm(-220)],.04,M.white,24); rod(g,[pm(13600),pm(1120),pm(-300)],[pm(13600),pm(1120),pm(-220)],.035,M.white,24);
     rod(g,[pm(13500),pm(1100),pm(-300)],[pm(13500),pm(1100),pm(-230)],.055,new T3.MeshStandardMaterial({color:0x1f6f4a,roughness:.5}),24);   /* 스테핑 모터 */
@@ -142,6 +142,7 @@ function pkBuild(sc){
     PKG.palG=new T3.Group(); g.add(PKG.palG);
     /* 대차 */ { const cx=pm(19800), cz=pm(1500); bx(g,cx-.4,cx+.4,.42,.45,cz-.3,cz+.3,M.ss); bx(g,cx-.4,cx+.4,.12,.14,cz-.3,cz+.3,M.ss); for(const [dx,dz] of [[-.36,-.26],[.36,-.26],[-.36,.26],[.36,.26]]){ rod(g,[cx+dx,.06,cz+dz],[cx+dx,.45,cz+dz],.018,M.ss,10); add(g,new T3.Mesh(new T3.SphereGeometry(.04,10,8),M.dark)).position.set(cx+dx,.04,cz+dz); } }
     /* 의자 (판독 작업자 뒤로 밀어 둠 · 작업자는 서서 판독) */ for(const [x,z] of [[18750,1250],[16900,780]]){ const cx=pm(x), cz=pm(z); add(g,new T3.Mesh(new T3.CylinderGeometry(.17,.17,.06,24),M.black)).position.set(cx,.66,cz); rod(g,[cx,.1,cz],[cx,.63,cz],.025,M.ssMir,12); for(let k=0;k<5;k++){ const q=k/5*Math.PI*2; rod(g,[cx,.1,cz],[cx+Math.cos(q)*.25,.03,cz+Math.sin(q)*.25],.012,M.ssMir,8); } } }
+  b3LowGroup(g,[PKG.openBox,PKG.palG]);   /* 설비 높이 맞춤 (11/25 · low.js) : 병 경로 위 구조만 낮춤 · 움직이는 박스 · 파렛트 적재는 제외 */
   pkBottles(g);
 }
 /* ── 병 (인스턴스) : 몸통 · 캡 · 라벨 띠 · 설명서 탭 ── */

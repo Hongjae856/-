@@ -55,7 +55,7 @@ const FREE_DOOR={
 };
 const freeDoorOpen=k=>!!(S.flags.rdoor&&S.flags.rdoor[k]);
 function freeDoorTog(k){ if(!S.flags.rdoor) S.flags.rdoor={}; S.flags.rdoor[k]=!S.flags.rdoor[k]; }
-const HOPL=()=>({yt:FL.deckY+1.294, zc:FL.zc});
+const HOPL=()=>({yt:FL.deckY+FL.hopUp+1.294, zc:FL.zc});
 /* 작업자 동선 (3인칭) · 1인칭 조작 위치 */
 { const H=HOPL(), ct=k=>{ const D=typeof PK2!=="undefined"&&PK2.ctDoors&&PK2.ctDoors[k]; return D?[D.G.position.x+.03,(D.a+D.b)/2]:[3.93,-3.28-k*.85]; };
   Object.assign(JOBS,{

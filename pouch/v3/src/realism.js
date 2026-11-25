@@ -16,7 +16,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 Object.assign(ANC,{ stage:[5.12,.78,-3.0], prRej:[CVX+.38,.62,-6.42], cutBeam:[2.88,.80,ZC] });
 JOBS.front.reach=ANC.cutBeam;                                                         /* ⑦ */
-const HOPG=()=>({yt:FL.deckY+1.294, D:.42, zc:FL.zc, w1:[XF-.29,FL.deckY+.79,FL.zc+.43], w3:[XF+.29,FL.deckY+.79,FL.zc+.43]});
+const HOPG=()=>({yt:FL.deckY+FL.hopUp+1.294, D:.42, zc:FL.zc, w1:[XF-.29,FL.deckY+FL.hopUp+.79,FL.zc+.43], w3:[XF+.29,FL.deckY+FL.hopUp+.79,FL.zc+.43]});
 /* ① 호퍼 내부 확인 */
 function seqHopChk(){ const H=HOPG();
   return [{stand:[XF-.29,3.55], deck:true, reach:H.w1, dur:1.4},                                    /* 1번 끝면 점검창 */

@@ -25,6 +25,17 @@ spec.loader.exec_module(BOT)
 
 # 앱 문서 치환 (old, new, 기대 횟수)
 APP_PATCH = [
+    # 설비 높이 맞춤 (11/25 사용자 지시 「병은 0.15 m 정도 높음」 · 결정 「컨베이어 위 구조만」) : 정점 기록 한 곳에서 높이 변환 (low.js b3Y)
+    ("  const i=s.v++, i3=i*3, i4=i*4;\n  s.p[i3]=x;", "  if(gRigid!==null) y+=b3Y(gRigid)-gRigid; else if(y>B3LOW.y0){ if(y<B3LOW.y1){ y=B3LOW.y0+(y-B3LOW.y0)*B3LOW.k; ny/=B3LOW.k; } else y-=B3LOW.d; }\n  const i=s.v++, i3=i*3, i4=i*4;\n  s.p[i3]=x;", 1),
+    # 둥근 릴 · 롤은 통째로 옮김 (찌그러지지 않게) : 실리카겔 릴(정적 · 동적 · 앞 뚜껑 · 가운데 기준) · PE 필름 롤(가득 찬 롤 윗면 기준 — 위 받침판과 틈 유지)
+    ("  const Rr=I.R;\n  box(I.rx+Rr-20,hx0,", "  const Rr=I.R; gRigid=I.ry;\n  box(I.rx+Rr-20,hx0,", 1),
+    ("I.ry-Rr+14,-40,60,C.ssL);       /* 띠 출구 */", "I.ry-Rr+14,-40,60,C.ssL); gRigid=null;       /* 띠 출구 */", 1),
+    ("  mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));", "  gRigid=I.ry; mPush(); mT(I.rx,I.ry,rz); mRZ(-travel/Math.max(rr,40));", 1),
+    ("  /* 띠 경로 : 릴 → 커버 출구", "  gRigid=null;\n  /* 띠 경로 : 릴 → 커버 출구", 1),
+    ("const pts=[[I.rx+rr*0.6,I.ry-rr*0.8,rz],[I.rx+I.R*0.75,I.ry-I.R+6,rz],", "const pts=[[I.rx+rr*0.6,b3Yi(I.ry-rr*0.8+b3Y(I.ry)-I.ry),rz],[I.rx+I.R*0.75,b3Yi(I.ry-I.R+6+b3Y(I.ry)-I.ry),rz],", 1),
+    ("    cylX(xa,xb,1450,-590,I.r0-8,C.dark,16);", "    gRigid=1450+I.rF; cylX(xa,xb,1450,-590,I.r0-8,C.dark,16);", 1),
+    ("box(-2,2,-4,4,-I.r0+10,I.r0-10,C.ss,null,0); mPop(); }", "box(-2,2,-4,4,-I.r0+10,I.r0-10,C.ss,null,0); mPop(); } gRigid=null;", 1),
+    ("const pts=[[lx,1450-rr,-590],", "const pts=[[lx,b3Yi(1450-rr+b3Y(1450+I.rF)-1450-I.rF),-590],", 1),
     # 셸이 그림 : 앱은 형상 버퍼만 만들고 WebGL 을 쓰지 않음
     ("function boot(){\n", "function boot(){\n  window.B3_EXT=true; window.B3={GEO, L, CH, staticKey:()=>STATIC_KEY, WK:()=>WK};\n", 1),
     ('  if($("#splash").classList.contains("hide")){\n    if(!R3.ready)',
@@ -61,7 +72,7 @@ APP_PATCH = [
      '  const w=wkFor(JOBS[k].stand); if(w.job){ if(w.job.key!==k) toast("작업자가 다른 작업 중입니다."); return; }\n'
      '  startWork(k,fn); renderTiles(); }', 1),
 ]
-SHELL_SCRIPTS = ("changelog.js", "kit.js", "look.js", "batch.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
+SHELL_SCRIPTS = ("changelog.js", "kit.js", "low.js", "look.js", "batch.js", "human.js", "view3.js", "pack.js", "packsim.js", "pcourse.js", "crewkit.js", "crew.js", "aimmark.js", "fpctl.js", "topbar.js", "splash.js", "incpick.js", "modes.js", "pfp.js", "ffp.js", "oee.js", "oeeb.js", "demob.js", "walk.js", "shell.js")
 FROM_POUCH = {"kit.js", "human.js"}
 
 
@@ -98,6 +109,12 @@ def app() -> str:
         if c != n:
             sys.exit(f"app: '{old[:50]}' 가 {c} 번 (기대 {n})")
         text = text.replace(old, new)
+    # 설비 높이 맞춤 함수 (low.js) : 셸과 같은 파일을 앱 정점 기록 앞에 넣음
+    low = (HERE / "low.js").read_text(encoding="utf-8")
+    key = "function vtx(x,y,z,nx,ny,nz,col){"
+    if text.count(key) != 1:
+        sys.exit(f"app: '{key}' 가 {text.count(key)} 번 (기대 1)")
+    text = text.replace(key, low + "\nlet gRigid=null;   /* 둥근 롤 · 릴 : 가운데 높이(mm) — 통째로 옮김 */\n" + key)
     # 자유모드 중간안 (11/18) : "운전 중에는 …" 차단 해제 (안전문 제외)
     n = 0
     def sub(m):
