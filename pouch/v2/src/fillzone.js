@@ -10,6 +10,16 @@ function buildFillZone(S){
   for(const x0 of [CVX-1.25,CVX+.3]){ bx(g,x0,x0+.95,1.05,2.15,.026,.034,glass); for(const [a,b,c,d] of [[x0-.04,x0+.99,1.01,1.05],[x0-.04,x0+.99,2.15,2.19],[x0-.04,x0,1.01,2.19],[x0+.95,x0+.99,1.01,2.19]]) bx(g,a,b,c,d,.02,.045,M.alu); }
   for(const [a,b,c,d] of [[CVX-.2,CVX+.2,.94,.98],[CVX-.2,CVX+.2,1.62,1.66],[CVX-.2,CVX-.16,.94,1.66],[CVX+.16,CVX+.2,.94,1.66]]) bx(g,a,b,c,d,.0,.09,M.ss);
   bx(g,CVX-.5,CVX-.4,1.3,1.56,.026,.06,M.white); bx(g,CVX-.485,CVX-.455,1.32,1.54,.06,.085,M.white); tube(g,[[CVX-.47,1.32,.07],[CVX-.46,1.2,.09],[CVX-.48,1.1,.07],[CVX-.47,1.02,.08]],.006,M.white);   /* 인터폰 (개구부 서쪽) */
+  /* 정렬컨베어 가동스위치 (충전실 쪽 · 11/25 사용자 결정 A안) : 배출 컨베이어 서쪽 틀에 받침으로 단 회색 함 · 서쪽(작업자 쪽)을 보는 선택 스위치 · 녹색 표시등 — 누르는 면 높이 1.10 m */
+  { const A=ALIGN_SW, x0=CVX-.24, x1=CVX-.13, y=A.y, z=A.z;
+    bx(g,x0,x1,y-.1,y+.1,z-.07,z+.07,M.grey); bx(g,x0-.003,x0,y-.09,y+.09,z-.06,z+.06,M.ssD);
+    for(const dy of [-.05,.05]) rod(g,[x1,y+dy,z],[CVX-.1,y+dy,z],.01,M.ss,8);
+    const KN=new T3.Group(); KN.position.set(x0-.003,y-.012,z); g.add(KN);
+    const kn=new T3.Mesh(new T3.CylinderGeometry(.024,.026,.018,24),M.dark); kn.rotation.z=Math.PI/2; kn.position.x=-.009; KN.add(kn);
+    const pt=new T3.Mesh(new T3.BoxGeometry(.008,.04,.01),M.white); pt.position.set(-.02,0,0); KN.add(pt);
+    const lm=new T3.Mesh(new T3.CylinderGeometry(.011,.011,.012,16),new T3.MeshStandardMaterial({color:0x1d8f3a,emissive:0x22ff55,emissiveIntensity:0,roughness:.3})); lm.rotation.z=Math.PI/2; lm.position.set(x0-.009,y+.062,z); g.add(lm);
+    plate(g,.13,.05,labelTex([["정렬컨베어 가동","#111",44],["OFF  ·  ON","#111",40]],{w:420,h:160,border:"#666"}),[x0-.004,y+.135,z],-Math.PI/2);
+    FILLPROP.alignSw={knob:KN, lamp:lm, on:null}; }
   /* ── 프린터 컨트롤러 · 비전 PC 거치대 : 알루미늄 프로파일 함 (위 칸 파란 컨트롤러 2 · 아래 회색 문) · 위 모니터 · 앞 키보드 받침 ── */
   { const x0=CVX+.4,x1=CVX+1.05,z0=.4,z1=.92; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-.02,x+.02,.06,1.5,z-.02,z+.02,M.alu);
     for(const y of [.1,1.0,1.5]) bx(g,x0,x1,y-.02,y,z0,z1,M.alu); bx(g,x0,x1,.1,1.5,z0-.004,z0,M.white); for(const x of [x0,x1]) bx(g,x-.003,x+.003,.1,1.5,z0,z1,M.white);

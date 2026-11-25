@@ -17,6 +17,7 @@ function fpObstacles(){
   b(F.bx0-.05,F.bx1+.05,F.bz0,F.bz1+.12);                       /* 본체 · 제어함 */
   b(F.x0-.05,F.bx0,F.bz0+.1,F.bz1-.1);                           /* 성형 · 슈트 (서쪽 정면) */
   b(CVX-.16,CVX+.16,0,F.zc+.55);                                 /* 배출 컨베이어 */
+  b(CVX-.26,CVX-.16,ALIGN_SW.z-.08,ALIGN_SW.z+.08);              /* 정렬컨베어 가동스위치 함 (충전실 쪽) */
   b(F.bx1,F.bx1+.78,F.zc-.62,F.zc+.62);                          /* 언와인더 */
   b(F.bx1,F.bx1+.33,F.zc-.7,F.zc-.6);                            /* 인쇄 · 비전 제어 박스 (북쪽 면) */
   b(10.68,11.72,2.98,4.02);                                      /* 주성분 STS 파렛트 대기 (맨 동쪽 중앙) */
@@ -107,6 +108,7 @@ function fpTargetDefs(){
     { const mg=typeof htxMon==="function"?htxMon("fp"):FP_MON.fp; add("fpCtl","인쇄기 컨트롤러 (제조번호 · 사용기한 입력)",[CVX+.725,1.2,.93],.65,.4,.08,()=>{},[],{mon:"fp",hmiPose:monPose(mg)}); }   /* 누르면 위 모니터 화면으로 (11/17) */
     if(TILE.fRib) add("fRib","은박 프린터 리본 교체",[A.prn[0],A.prn[1]-.22,A.prn[2]],.3,.16,.4,tileRun("fRib"),["#fRib"]);   /* 리본 교체 (11/17) */
     add("tLeak","기밀도 시험대",A.leak,.6,.3,.9,tileRun("tLeak"),["#tLeak"]);
+    add("tAlign","정렬컨베어 가동스위치 (충전실 쪽)",A.alignF,.1,.12,.14,tileRun("tAlign"),["#tAlign"]);   /* 11/25 사용자 결정 A안 */
     add("ipc","IPC 저울 (채취 · 계량)",A.ipc,.6,.3,.9,()=>{ const h=S.ipc.open&&ipcStep(); if(!h){ toast("지금은 공정검사 시점이 아닙니다."); return; }
       if(h.k==="take") ipcTake(); else if(h.k==="next") ipcNext(); else if(h.k==="done") ipcDone(); else toast(h.t); },["#ipcTake","#ipcNext","#ipcDone"],{visible:S.ipc.open});
     add("tDoc","문서 · 기록 게시판",A.docF,.06,.7,.9,tileRun("tDoc"),["#tDoc",'#listBox [data-doc']);

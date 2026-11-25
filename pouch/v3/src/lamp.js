@@ -19,6 +19,8 @@ function lampState(L,al,blink){
   return (LAMP_RUN[L.k]||LAMP_RUN.ct)()?"g":"y";
 }
 function lampTick(dt){
+  { const A=typeof FILLPROP!=="undefined"&&FILLPROP.alignSw, on=!!(typeof S!=="undefined"&&S&&S.p&&S.p.align);   /* 정렬컨베어 가동스위치 (충전실 쪽) : 손잡이 · 표시등 */
+    if(A&&A.on!==on){ A.on=on; A.knob.rotation.x=on?-.8:0; A.lamp.material.emissiveIntensity=on?2.2:0; } }
   if(typeof LAMPS==="undefined"||!LAMPS.length) return;
   LAMP.t+=dt; const al=lampAlarm(), blink=Math.sin(LAMP.t*Math.PI*3)>0;
   for(const L of LAMPS){ const s=lampState(L,al,blink); if(L.s===s) continue; L.s=s;

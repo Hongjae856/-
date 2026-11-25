@@ -1012,6 +1012,7 @@ const COL={ x0:6.4, x1:7.1, z0:STR.z0-.62, z1:STR.z0-.02 };                 /* �
 const FM={ n:10, P:.07, xf:FL.x0+.15, yCut:.7, beltY:.36, gateY:.445, stickL:.11, stickW:.034, press:.022 };   /* 슈트 구간 0.455~0.69 (도면 · 사용자 지적 11/11 : 슈트 높이 2/3) */
 FM.pz=i=>FL.zc-FM.n*FM.P/2+FM.P*(i+.5);
 const CVX=FM.xf-.27;                                                           /* 배출 컨베이어 · 포장 라인 중심선 (프레임 서쪽 기둥 바깥) */
+const ALIGN_SW={x:CVX-.252, y:1.10, z:.28};                                 /* 정렬컨베어 가동스위치 (충전실 쪽 · 11/25 사용자 결정 A안 : 배출 컨베이어 서쪽 · 벽 앞) — 누르는 점 (손잡이 앞면) */
 
 /* ── v2/room.js ── */
 /* ═══ 충전실 : 에폭시 바닥 · 클린룸 패널 벽 · 천장 조명 · 디퓨저 · 리턴 그릴 ═══ */
@@ -1484,6 +1485,16 @@ function buildFillZone(S){
   for(const x0 of [CVX-1.25,CVX+.3]){ bx(g,x0,x0+.95,1.05,2.15,.026,.034,glass); for(const [a,b,c,d] of [[x0-.04,x0+.99,1.01,1.05],[x0-.04,x0+.99,2.15,2.19],[x0-.04,x0,1.01,2.19],[x0+.95,x0+.99,1.01,2.19]]) bx(g,a,b,c,d,.02,.045,M.alu); }
   for(const [a,b,c,d] of [[CVX-.2,CVX+.2,.94,.98],[CVX-.2,CVX+.2,1.62,1.66],[CVX-.2,CVX-.16,.94,1.66],[CVX+.16,CVX+.2,.94,1.66]]) bx(g,a,b,c,d,.0,.09,M.ss);
   bx(g,CVX-.5,CVX-.4,1.3,1.56,.026,.06,M.white); bx(g,CVX-.485,CVX-.455,1.32,1.54,.06,.085,M.white); tube(g,[[CVX-.47,1.32,.07],[CVX-.46,1.2,.09],[CVX-.48,1.1,.07],[CVX-.47,1.02,.08]],.006,M.white);   /* 인터폰 (개구부 서쪽) */
+  /* 정렬컨베어 가동스위치 (충전실 쪽 · 11/25 사용자 결정 A안) : 배출 컨베이어 서쪽 틀에 받침으로 단 회색 함 · 서쪽(작업자 쪽)을 보는 선택 스위치 · 녹색 표시등 — 누르는 면 높이 1.10 m */
+  { const A=ALIGN_SW, x0=CVX-.24, x1=CVX-.13, y=A.y, z=A.z;
+    bx(g,x0,x1,y-.1,y+.1,z-.07,z+.07,M.grey); bx(g,x0-.003,x0,y-.09,y+.09,z-.06,z+.06,M.ssD);
+    for(const dy of [-.05,.05]) rod(g,[x1,y+dy,z],[CVX-.1,y+dy,z],.01,M.ss,8);
+    const KN=new T3.Group(); KN.position.set(x0-.003,y-.012,z); g.add(KN);
+    const kn=new T3.Mesh(new T3.CylinderGeometry(.024,.026,.018,24),M.dark); kn.rotation.z=Math.PI/2; kn.position.x=-.009; KN.add(kn);
+    const pt=new T3.Mesh(new T3.BoxGeometry(.008,.04,.01),M.white); pt.position.set(-.02,0,0); KN.add(pt);
+    const lm=new T3.Mesh(new T3.CylinderGeometry(.011,.011,.012,16),new T3.MeshStandardMaterial({color:0x1d8f3a,emissive:0x22ff55,emissiveIntensity:0,roughness:.3})); lm.rotation.z=Math.PI/2; lm.position.set(x0-.009,y+.062,z); g.add(lm);
+    plate(g,.13,.05,labelTex([["정렬컨베어 가동","#111",44],["OFF  ·  ON","#111",40]],{w:420,h:160,border:"#666"}),[x0-.004,y+.135,z],-Math.PI/2);
+    FILLPROP.alignSw={knob:KN, lamp:lm, on:null}; }
   /* ── 프린터 컨트롤러 · 비전 PC 거치대 : 알루미늄 프로파일 함 (위 칸 파란 컨트롤러 2 · 아래 회색 문) · 위 모니터 · 앞 키보드 받침 ── */
   { const x0=CVX+.4,x1=CVX+1.05,z0=.4,z1=.92; for(const x of [x0,x1]) for(const z of [z0,z1]) bx(g,x-.02,x+.02,.06,1.5,z-.02,z+.02,M.alu);
     for(const y of [.1,1.0,1.5]) bx(g,x0,x1,y-.02,y,z0,z1,M.alu); bx(g,x0,x1,.1,1.5,z0-.004,z0,M.white); for(const x of [x0,x1]) bx(g,x-.003,x+.003,.1,1.5,z0,z1,M.white);
@@ -2879,7 +2890,8 @@ const ANC={
   leak:[0.42,0.90,1.90],                /* 기밀도 시험 [확인 필요 : 저울 작업대 2 로 가정] */
   docF:[0.03,1.45,4.9],                 /* 문서 · 기록 게시판 [확인 필요] */
   /* 포장실 */
-  align:[3.66,1.13,-0.42],              /* 정렬컨베어 가동스위치 [확인 필요] */
+  align:[3.66,1.13,-0.42],              /* 정렬컨베어 가동스위치 · 포장실 쪽 (스틱공급장치 판넬 옆) [확인 필요] */
+  alignF:[ALIGN_SW.x,ALIGN_SW.y,ALIGN_SW.z],   /* 정렬컨베어 가동스위치 · 충전실 쪽 (배출 컨베이어 서쪽 · 벽 앞 · 11/25 사용자 결정 A안) */
   sfPanel:[3.585,1.395,-0.13],
   ctMain:[3.40,1.10,-2.20], sfSw:[3.40,1.10,-2.35], ctAir:[3.40,1.10,-2.50],   /* 카토너 뒤편 스위치 [확인 필요] */
   mag:[3.25,1.35,-3.17], leaf:[3.20,1.10,-2.40], magOut:[3.30,0.95,-3.60],
@@ -2920,6 +2932,7 @@ const WORKVIEW={
   chute: VW([1.3,1.25,3.7],[2.85,0.6,2.73]),
   door:  VW([1.15,1.6,2.73],[2.95,1.4,2.73]),
   sw:    VW([5.2,1.5,-1.0],[3.6,1.2,-0.4]),
+  swF:   VW([1.2,1.55,1.5],[2.5,1.1,0.3]),
   ct:    VW([5.6,1.8,-3.8],[3.1,1.2,-3.8]),
   ctBack:VW([5.3,1.6,-1.6],[3.4,1.1,-2.6]),
   hm:    VW([5.1,1.6,-4.8],[3.3,1.1,-4.8]),
@@ -2974,6 +2987,10 @@ const JOBS={
   docP:   {stand:[7.4,-14.6], reach:ANC.docP, dur:1.4},
   bin:    {stand:[3.45,-8.85], reach:ANC.bin, dur:1.6, view:"bin"}
 };
+/* 정렬컨베어 가동스위치 : 충전실 과정은 충전실 쪽 스위치(배출 컨베이어 서쪽 · 벽 앞), 포장실 과정은 포장실 쪽 스위치 (11/25 사용자 결정 A안 — 충전실 작업자가 벽 너머 스위치에 닿지 못하던 문제) */
+const JOB_ALIGN={P:JOBS.align, F:{stand:[2.05,.55], reach:ANC.alignF, dur:1.0, view:"swF"}};
+Object.defineProperty(JOBS,"align",{get:()=>(typeof S!=="undefined"&&S&&S.room==="F")?JOB_ALIGN.F:JOB_ALIGN.P, enumerable:true, configurable:true});
+
 
 /* ── 1인칭 설비 화면 (c : 화면 중심 · n : 화면이 바라보는 방향 · w : 표시 폭 m) ── */
 /* 1인칭 설비 화면 : h = 3D 모델의 실제 화면 높이(m) · 폭은 화면 비율(460:700)로 정함 (11/16 V7 : 실제 크기 — 멀면 작게, 누르면 다가가서 크게) */
@@ -3395,7 +3412,7 @@ function stepsFill(easy){
     A.push(T_("pre","인쇄 · 비전 · 가동 전 확인","인쇄 · 비전 값은 미리 설정되어 있습니다. JOG 로 한 스텝 작동해 은박 인쇄를 확인하고, 온도 설정 화면에서 PV · SV 일치를 확인합니다.",
       ()=>firstOf([[()=>f().jogDone,"#swJog"],[()=>f().printOk,"#lcCheck"],[()=>f().tempChk,()=>hmiRoute("fl","temp",HB("fl_temp"))]]),()=>f().printOk&&f().tempChk,
       {pts:6,hmi:true,chk:()=>f().jogDone&&!f().printOk?{job:"prn",t:"은박 인쇄 확인",set(){ f().printOk=true; }}:null}));
-    A.push(T_("cond","기동 조건 확인 (후 공정 연동 ON · 정렬컨베어 OFF)","조작스위치 2 의 후 공정 연동 ON 을 확인하고, 포장실 쪽 정렬컨베어 가동스위치가 OFF 인지 확인합니다.",
+    A.push(T_("cond","기동 조건 확인 (후 공정 연동 ON · 정렬컨베어 OFF)","조작스위치 2 의 후 공정 연동 ON 을 확인하고, 배출 컨베이어 벽 앞의 정렬컨베어 가동스위치가 OFF 인지 확인합니다.",
       ()=>firstOf([[()=>f().linkChk,()=>hmiRoute("fl","sw2",HB("fl_linkChk"))],[()=>S.flags.alignOffChk,"#lcCheck"]]),()=>f().linkChk&&S.flags.alignOffChk,
       {pts:5,hmi:true,chk:()=>f().linkChk&&!S.flags.alignOffChk?{job:"align",t:"정렬컨베어 가동스위치 OFF 확인",set(){ if(S.p.align){ toast("정렬컨베어가 ON 입니다. OFF 로 두어야 합니다.","bad"); return; } S.flags.alignOffChk=true; }}:null}));
     A.push(T_("run","판넬 RESET → RUN","[RESET] 을 누른 뒤 [RUN] 을 누릅니다.",()=>f().resetOnce?"#swRun":"#swReset",()=>f().resetOnce&&f().started,{pts:6}));
@@ -3417,7 +3434,7 @@ function stepsFill(easy){
     A.push(T_("hop","호퍼 내용물 · 필름 적재 상태 확인","2층 데크 호퍼 3기의 내용물과 후면 은박 롤 적재 상태를 확인합니다.",()=>"#lcCheck",()=>f().hopChk,
       {pts:2,chk:()=>({job:"scoop",t:"호퍼 · 필름 상태 확인",set(){ f().hopChk=true; }})}));
     A.push(T_("link","조작스위치 2 '후 공정 연동' ON 확인","조작스위치 2 화면에서 후 공정 연동이 ON 인지 확인합니다.",()=>hmiRoute("fl","sw2",HB("fl_linkChk")),()=>f().linkChk,{pts:2,hmi:true}));
-    A.push(T_("alignOff","정렬컨베어 가동스위치 OFF 확인 (포장실 쪽)","정상 제품이 나오기 전까지 카토너로 들어가지 않도록 정렬컨베어 가동스위치가 OFF 인지 확인합니다.",()=>"#lcCheck",()=>S.flags.alignOffChk,
+    A.push(T_("alignOff","정렬컨베어 가동스위치 OFF 확인 (배출 컨베이어 벽 앞)","정상 제품이 나오기 전까지 카토너로 들어가지 않도록 정렬컨베어 가동스위치가 OFF 인지 확인합니다.",()=>"#lcCheck",()=>S.flags.alignOffChk,
       {pts:2,chk:()=>({job:"align",t:"정렬컨베어 OFF 확인",set(){ if(S.p.align){ toast("정렬컨베어가 ON 입니다. OFF 로 두어야 합니다.","bad"); return; } S.flags.alignOffChk=true; }})}));
     A.push(T_("reset","판넬 RESET","판넬 [RESET] 을 누릅니다.",()=>"#swReset",()=>f().resetOnce,{pts:2}));
     A.push(T_("run","판넬 RUN","판넬 [RUN] 을 누릅니다. 조건이 맞지 않으면 기동되지 않고 감점됩니다.",()=>"#swRun",()=>f().started,{pts:2}));
@@ -3431,7 +3448,7 @@ function stepsFill(easy){
   }else{
     A.push(T_("leak1","기밀도(누수) 시험 샘플 채취 · 의뢰","기밀도 시험대에서 샘플을 채취해 의뢰합니다.",leakSel,()=>f().leak.sampled,{pts:2}));
     A.push(T_("leak2","기밀도 시험 결과 적합 확인","[기밀도 시험] 을 다시 눌러 결과를 확인합니다.",leakSel,()=>f().leak.ok,{pts:3}));
-    A.push(T_("alignOn","정렬컨베어 가동스위치 ON","정상 제품 배출을 확인한 뒤 [정렬컨베어 스위치] 를 켭니다. 파우치가 포장실로 넘어갑니다.",()=>"#tAlign",()=>S.p.align,{pts:2}));
+    A.push(T_("alignOn","정렬컨베어 가동스위치 ON","정상 제품 배출을 확인한 뒤 배출 컨베이어 벽 앞의 정렬컨베어 가동스위치를 켭니다. 파우치가 포장실로 넘어갑니다.",()=>"#tAlign",()=>S.p.align,{pts:2}));
   }
   A.push(T_("watch","운전 감시 · 연속 생산 ("+PROD.target+"카톤)","목표 "+PROD.target+"카톤(1,800포)을 생산합니다. 성형 · 접착, 인쇄 선명도, R컷팅, 아이마크, 불량 리젝트, 화면 오류를 감시하고, 정기 공정검사(IPC)를 수행합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target&&!S.ipc.open&&!ipcDue(),{pts:easy?15:14,watch:true}));
@@ -3485,7 +3502,7 @@ function stepsPack(easy){
     A.push(T_("cw","중량선별기 품종 확인 · START","품종(002 판콜H)과 기준 105.5 g · −2.0 / +2.0 g 을 확인하고 START 합니다.",()=>firstOf(cwSel),()=>all(cwSel),{pts:7,hmi:true}));
     const both=[...ctStart,...sfStart];
     A.push(T_("ctsf","카토너 · 스틱공급장치 START","카토너 자동 화면의 아이콘 3개를 켜고 리셋 → START, 스틱공급장치는 서보 전원 · 제품 공급 → 리셋 → START 합니다.",()=>firstOf(both),()=>all(both),{pts:7,hmi:true}));
-    A.push(T_("align","정렬컨베어 가동스위치 ON","충전기 정상 제품 배출을 확인한 뒤 [정렬컨베어 스위치] 를 켭니다.",()=>"#tAlign",()=>p().align,{pts:5}));
+    A.push(T_("align","정렬컨베어 가동스위치 ON","충전기 정상 제품 배출을 확인한 뒤 스틱공급장치 판넬 옆 정렬컨베어 가동스위치를 켭니다.",()=>"#tAlign",()=>p().align,{pts:5}));
   }else{
     A.push(T_("pIn","이전 청소표시서 회수 · 공정표시서 작성 · 부착","문서 · 기록 게시판에서 이전 청소표시서를 회수하고 공정표시서를 부착합니다.",()=>docSel("pIn"),()=>S.doc.pIn,{pts:1}));
     A.push(T_("matOut","카톤 · 설명서 출고 · 카톤 인쇄 대조","자재실에서 카톤 · 설명서를 출고하고 카톤 인쇄 내용(제조번호 · 사용기한)을 포장지시기록서와 대조합니다.",()=>docSel("matOut"),()=>S.doc.matOut,{pts:2}));
@@ -3517,7 +3534,7 @@ function stepsPack(easy){
     A.push(T_("ctIcon","카토너 자동 화면 : 카톤 · 설명지 · 제품투입 아이콘 활성","카토너 자동 조작 화면에서 아이콘 3개를 켭니다.",ctIconSel,()=>p().ctIcon,{pts:2,hmi:true}));
     A.push(T_("ctStart","카토너 리셋 → START","카토너 [RESET] 후 [START] 를 누릅니다. 후단 설비가 가동 중이어야 합니다.",()=>firstOf(ctStart.slice(1)),()=>p().ctRun,{pts:2}));
     A.push(T_("sfStart","스틱공급장치 서보 전원 · 제품 공급 → 리셋 → START","자동 화면의 서보 전원 공급 · 제품 공급을 켜고 리셋 → START 합니다.",()=>firstOf(sfStart),()=>p().sfRun,{pts:2,hmi:true}));
-    A.push(T_("align","정렬컨베어 가동스위치 ON","충전기 정상 제품 배출을 확인한 뒤 [정렬컨베어 스위치] 를 켭니다.",()=>"#tAlign",()=>p().align,{pts:2}));
+    A.push(T_("align","정렬컨베어 가동스위치 ON","충전기 정상 제품 배출을 확인한 뒤 스틱공급장치 판넬 옆 정렬컨베어 가동스위치를 켭니다.",()=>"#tAlign",()=>p().align,{pts:2}));
   }
   A.push(T_("watch","운전 감시 · 연속 생산 ("+PROD.target+"카톤)","목표 "+PROD.target+"카톤을 생산합니다. 카톤 성형 · 접착, 인쇄 선명도, 불량 리젝트, 화면 오류를 감시합니다.",
     ()=>null,()=>S.cnt.good>=S.cnt.target,{pts:easy?18:14,watch:true}));
@@ -5385,6 +5402,7 @@ function fpObstacles(){
   b(F.bx0-.05,F.bx1+.05,F.bz0,F.bz1+.12);                       /* 본체 · 제어함 */
   b(F.x0-.05,F.bx0,F.bz0+.1,F.bz1-.1);                           /* 성형 · 슈트 (서쪽 정면) */
   b(CVX-.16,CVX+.16,0,F.zc+.55);                                 /* 배출 컨베이어 */
+  b(CVX-.26,CVX-.16,ALIGN_SW.z-.08,ALIGN_SW.z+.08);              /* 정렬컨베어 가동스위치 함 (충전실 쪽) */
   b(F.bx1,F.bx1+.78,F.zc-.62,F.zc+.62);                          /* 언와인더 */
   b(F.bx1,F.bx1+.33,F.zc-.7,F.zc-.6);                            /* 인쇄 · 비전 제어 박스 (북쪽 면) */
   b(10.68,11.72,2.98,4.02);                                      /* 주성분 STS 파렛트 대기 (맨 동쪽 중앙) */
@@ -5475,6 +5493,7 @@ function fpTargetDefs(){
     { const mg=typeof htxMon==="function"?htxMon("fp"):FP_MON.fp; add("fpCtl","인쇄기 컨트롤러 (제조번호 · 사용기한 입력)",[CVX+.725,1.2,.93],.65,.4,.08,()=>{},[],{mon:"fp",hmiPose:monPose(mg)}); }   /* 누르면 위 모니터 화면으로 (11/17) */
     if(TILE.fRib) add("fRib","은박 프린터 리본 교체",[A.prn[0],A.prn[1]-.22,A.prn[2]],.3,.16,.4,tileRun("fRib"),["#fRib"]);   /* 리본 교체 (11/17) */
     add("tLeak","기밀도 시험대",A.leak,.6,.3,.9,tileRun("tLeak"),["#tLeak"]);
+    add("tAlign","정렬컨베어 가동스위치 (충전실 쪽)",A.alignF,.1,.12,.14,tileRun("tAlign"),["#tAlign"]);   /* 11/25 사용자 결정 A안 */
     add("ipc","IPC 저울 (채취 · 계량)",A.ipc,.6,.3,.9,()=>{ const h=S.ipc.open&&ipcStep(); if(!h){ toast("지금은 공정검사 시점이 아닙니다."); return; }
       if(h.k==="take") ipcTake(); else if(h.k==="next") ipcNext(); else if(h.k==="done") ipcDone(); else toast(h.t); },["#ipcTake","#ipcNext","#ipcDone"],{visible:S.ipc.open});
     add("tDoc","문서 · 기록 게시판",A.docF,.06,.7,.9,tileRun("tDoc"),["#tDoc",'#listBox [data-doc']);
@@ -5687,6 +5706,7 @@ function apTick(now){
    버전 이력 — 수정 요청 1건마다 버전 +1 (맨 위가 최신 · 날짜는 한국 시간)
    ═══════════════════════════════════════════════════════════════════ */
 const CHANGELOG=[
+ {v:49,d:'2026-11-25',t:'정렬컨베어 가동스위치 충전실 쪽 추가 (11/25 사용자 결정 A안 · 파우치만 — 설비 하드웨어 위치) — 충전실 과정 「정렬컨베어 가동스위치 ON · OFF 확인」을 충전실 작업자가 1인칭으로 할 수 없던 문제(스위치가 벽 너머 포장실 쪽에만 있음) 해결 : 배출 컨베이어 서쪽 · 벽 앞에 스위치 함(선택 스위치 · 녹색 표시등 · 누르는 면 1.10 m) 추가, 충전실 과정의 1인칭 대상 · 3인칭 작업 위치 · 안내 문구를 이 스위치로. 포장실 과정은 기존 스틱공급장치 판넬 옆 스위치 그대로'},
  {v:48,d:'2026-11-25',t:'2층 데크 호퍼 · 도징박스 높이 +0.1 m (11/25 사용자 지시 「파우치 충전라인 2층에서 호퍼랑 도징박스 높이만 0.1 m 높이기」 · 파우치만 — 충전기 하드웨어 형상) — 호퍼 3기(뚜껑 · 클램프 · 점검창 · 진공이송기 포함)와 도징박스를 0.1 m 올림 : 호퍼 윗면 데크 위 1.28 → 1.38 m, 도징박스 0.30~0.47 → 0.40~0.57 m. 스테인리스 틀 · 함량조절다이얼(데크 위 0.57 m) · 데크 밸브는 그대로. 진공호스 끝 · 2번 호퍼 스쿱 · 뚜껑 들어냄 · 점검창 확인 위치도 같이 올림'},
  {v:47,d:'2026-11-24',t:'메인화면 처음 사용자 안내 (11/24 사용자 지시 · 스케치 승인 「처음 해보는 경우 자유롭게 둘러보세요 · 자유모드 · 충전실 작업자 추천 · 시작 방법 가이드」 · 항상 표시) — 자유모드 · 충전실 작업자에 ★ 추천 표시, 노란 말풍선이 지금 고를 단계로 옮겨 감(「처음이라면 자유롭게 둘러보세요」 → 작업자 카드 「충전실부터 둘러보세요」 → [교육 시작] 버튼 강조), ③ 시작 카드에 3단계 안내(✓ 진행 표시) · 1인칭 조작(WASD 걷기 · 마우스 둘러보기 · E 조작). 세 IDT 공통 idt_common/splash.css · splash.js · 1280×720 ~ 1920×1080 한 화면 · 말풍선이 다른 버튼을 가리지 않음'},
  {v:46,d:'2026-11-24',t:'함량조절다이얼 L 렌치 360° 회전 (11/24 사용자 지시 「A/D 를 누르면 L렌치가 부드럽게 360도 회전하며 돌아가야 함 · 지금은 20~30도만 깔짝깔짝」) — 렌치 손잡이를 60° 마다 다시 끼우던 방식(손잡이가 한 자리에서 왔다 갔다)을 없애고 소켓과 함께 그대로 돌게 함. 짧게 누르면 한 눈금(24°)을 부드럽게, 누르고 있으면 키 자동 반복 대신 일정 속도(약 300°/초 · 0.22 초 뒤 시작)로 끊김 없이 계속 돌며 24° 마다 한 눈금(0.1 %%) 확정 · 손을 떼면 반 눈금 넘게 돈 것은 한 눈금으로. 파우치만 해당(함량조절다이얼은 파우치 충전기 고유 설비)'},
@@ -6630,6 +6650,8 @@ function lampState(L,al,blink){
   return (LAMP_RUN[L.k]||LAMP_RUN.ct)()?"g":"y";
 }
 function lampTick(dt){
+  { const A=typeof FILLPROP!=="undefined"&&FILLPROP.alignSw, on=!!(typeof S!=="undefined"&&S&&S.p&&S.p.align);   /* 정렬컨베어 가동스위치 (충전실 쪽) : 손잡이 · 표시등 */
+    if(A&&A.on!==on){ A.on=on; A.knob.rotation.x=on?-.8:0; A.lamp.material.emissiveIntensity=on?2.2:0; } }
   if(typeof LAMPS==="undefined"||!LAMPS.length) return;
   LAMP.t+=dt; const al=lampAlarm(), blink=Math.sin(LAMP.t*Math.PI*3)>0;
   for(const L of LAMPS){ const s=lampState(L,al,blink); if(L.s===s) continue; L.s=s;
